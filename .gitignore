@@ -1,0 +1,8 @@
+build
+.pio
+.vscode
+qtcsettings.cmake
+CMakeCache*
+qt_build_script.sh
+CMakeLists.txt.user.afd2482
+CMakeLists.txt.user CMakeLists.txt.user.afd2482
