@@ -267,17 +267,7 @@ static void connect_handler(void* arg, esp_event_base_t event_base,
     }
 }
 
-static esp_event_loop_args_t http_server_loop_args = {
-    .queue_size = 300,
-    .task_name = "HTTP dev",
-    .task_priority = 1,
-    .task_stack_size = 200,
-    .task_core_id = 0
-};
-static esp_event_loop_handle_t http_server_loop_handle;
-
-
-void instantiate_demo_http(void)
+void httpStart(void)
 {
 #ifdef CONFIG_DEVTEST_HTTP_ENABLE /* Enable demos on dev. HTTP server */
     static httpd_handle_t server = NULL;

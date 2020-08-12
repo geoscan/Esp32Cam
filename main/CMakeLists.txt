@@ -7,4 +7,4 @@ idf_component_register(
 		../components/wifi
 	REQUIRES
 		wifi
-		test_http)
+		http)
