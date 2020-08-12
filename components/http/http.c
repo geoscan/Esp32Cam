@@ -20,6 +20,7 @@
 #include "protocol_examples_common.h"
 
 #include <esp_http_server.h>
+#include "pages/pages.h"
 
 /* A simple example that demonstrates how to create GET and POST
  * handlers for the web server.

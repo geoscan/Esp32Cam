@@ -1,6 +1,15 @@
+file(GLOB
+	SOURCE_FILES
+		"*.c"
+		"*.cpp"
+		"pages/*.c"
+		"pages/*.cpp")
+
 idf_component_register(
-    SRCS "http.c"
-    INCLUDE_DIRS "."
+	SRCS
+		${SOURCE_FILES}
+    INCLUDE_DIRS
+		"."
     REQUIRES
         wifi
         OV2640

@@ -1,19 +1,18 @@
-/*  WiFi softAP Example
+//
+// wifi.c
+//
+// Created on: Aug 12, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
 
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
-#include <string.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
+#include "esp_system.h"
+#include "esp_wifi.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "nvs_flash.h"
+#include <string.h>
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -26,7 +25,7 @@
 #define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
 #define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
 #define EXAMPLE_ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
-#define EXAMPLE_MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
+#define EXAMPLE_MAX_STA_CONN CONFIG_ESP_MAX_STA_CONN
 
 static const char *TAG = "wifi softAP";
 

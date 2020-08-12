@@ -152,11 +152,6 @@ CONFIG_CAMERA_CORE0=y
 # end of Camera OVxxxx
 
 #
-# Camera OVxxxx
-#
-# end of Camera OVxxxx
-
-#
 # Dev. test HTTP
 #
 CONFIG_DEVTEST_HTTP_ENABLE=y
