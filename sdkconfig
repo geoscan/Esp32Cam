@@ -152,6 +152,13 @@ CONFIG_CAMERA_CORE0=y
 # end of Camera OVxxxx
 
 #
+# Dev. test HTTP
+#
+CONFIG_DEVTEST_HTTP_ENABLE=y
+CONFIG_DEVTEST_HTTP_ENABLE_CAM=y
+# end of Dev. test HTTP
+
+#
 # WiFi
 #
 CONFIG_ESP_WIFI_SSID="PioneerMini"

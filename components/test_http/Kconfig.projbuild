@@ -1,0 +1,19 @@
+menu "Dev. test HTTP"
+
+	config DEVTEST_HTTP_ENABLE
+		bool "Enable dev. test HTTP server"
+		default y
+		help
+			Enable test HTTP server for dev. purposes
+
+	if DEVTEST_HTTP_ENABLE
+
+		config DEVTEST_HTTP_ENABLE_CAM
+			bool "Enable camera demo"
+			default y
+			depends on OV2640_SUPPORT
+			help
+				Enable camera demonstration on dev. HTTP server
+	endif
+
+endmenu

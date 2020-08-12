@@ -5,4 +5,6 @@ idf_component_register(
 	SRCS "main.cpp"
 	INCLUDE_DIRS
 		../components/wifi
-	REQUIRES wifi)
+	REQUIRES
+		wifi
+		test_http)
