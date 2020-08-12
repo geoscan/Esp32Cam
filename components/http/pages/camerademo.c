@@ -1,7 +1,9 @@
 #include <esp_err.h>
 #include <esp_http_server.h>
 
-static esp_err_t cameraHandler()
+#include "pages.h"
+
+static esp_err_t cameraHandler(httpd_req_t *req)
 {
 	return ESP_OK;
 }

@@ -3,15 +3,14 @@
 
 #include <esp_http_server.h>
 
-#ifdef __cplusplus
-extern "C" {
+#if !defined __cplusplus
+# define __ext extern
+#else
+# define __ext
 #endif
 
-const httpd_uri_t cameraDemo;
+__ext const httpd_uri_t cameraDemo;
 
-#ifdef __cplusplus
-}
-#endif
-
+#undef __ext
 
 #endif // COMPONENTS_HTTP_CAMERADEMO_CAMERADEMO_H
