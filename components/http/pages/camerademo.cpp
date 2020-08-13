@@ -4,7 +4,7 @@
 #include "pages.h"
 #include "Ov2640.hpp"
 
-esp_err_t cameraDemoHandler(httpd_req_t *req)
+extern "C" esp_err_t cameraDemoHandler(httpd_req_t *req)
 {
 	httpd_resp_set_type(req, "image/jpeg");
 	httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");

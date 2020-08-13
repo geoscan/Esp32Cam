@@ -6,13 +6,13 @@
 #include <cstdint>
 #include "Image.hpp"
 
-enum class JpegQuality : uint8_t {
-	Lowest  =   1,
-	Low     =  25,
-	Medium  =  50,
-	High    =  75,
-	Highest = 100,
-};
+//enum class JpegQuality : uint8_t {
+//	Lowest  =   1,
+//	Low     =  25,
+//	Medium  =  50,
+//	High    =  75,
+//	Highest = 100,
+//};
 
 class Ov2640 {
 public:
@@ -24,12 +24,21 @@ public:
 	Ov2640 &operator=(Ov2640 &&) = delete;
 	~Ov2640();
 
-	Image jpeg(JpegQuality = JpegQuality::Medium);
+	Image jpeg(/*JpegQuality = JpegQuality::Medium*/);
+
+//	template <typename _ClRet, typename... _ClArgs>
+//	bool jpegStream(_ClRet(*callable)(Image::Data, _ClArgs&...));
 private:
 	static void init();
+	static bool isInit;
 	Ov2640();
 };
 
+//template <typename _ClRet, typename ... _ClArgs>
+//inline bool jpegStream(_ClRet(*callable)(Image::Data, _ClArgs&...args))
+//{
+
+//}
 
 
 #endif // COMPONENTS_OV2640_OV2640_H

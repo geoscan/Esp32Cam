@@ -15,16 +15,15 @@
 
 #include <esp_http_server.h>
 
-
-#if !defined __cplusplus
-# define __ext extern
-#else
-# define __ext
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-__ext esp_err_t cameraDemoHandler(httpd_req_t *);
+esp_err_t cameraDemoHandler(httpd_req_t *);
 
-#undef __ext
+#ifdef __cplusplus
+}
+#endif
 
 const httpd_uri_t cameraDemo = {
 	.uri      = "/camera",

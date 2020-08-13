@@ -1,5 +1,10 @@
 #include "Ov2640.hpp"
 #include "esp_camera.h"
+#include <algorithm>
+
+using namespace std;
+
+bool Ov2640::isInit{false};
 
 Ov2640::Ov2640()
 {
@@ -65,7 +70,7 @@ void Ov2640::init()
 	};
 
 	//
-	esp_camera_init(&cameraConfig);
+	isInit = esp_camera_init(&cameraConfig) == ESP_OK ? true : false;
 }
 
 Ov2640 &Ov2640::instance()
@@ -74,9 +79,13 @@ Ov2640 &Ov2640::instance()
 	return inst;
 }
 
-Image Ov2640::jpeg(JpegQuality quality)
+Image Ov2640::jpeg(/*JpegQuality quality*/)
 {
 	Image img;
+
+	if (!isInit) {
+		return img;
+	}
 
 	img.frameBuffer = esp_camera_fb_get();
 	img.valid = false;
@@ -90,9 +99,9 @@ Image Ov2640::jpeg(JpegQuality quality)
 		img.rawLen = img.frameBuffer->len;
 		img.valid = true;
 	} else {
-		img.valid = frame2jpg(img.frameBuffer, static_cast<uint8_t>(quality),
+		img.valid = frame2jpg(img.frameBuffer, 50 /*static_cast<uint8_t>(quality)*/,
 			reinterpret_cast<uint8_t **>(&img.raw), &img.rawLen);
 	}
 
-	return img;
+	return move(img);
 }

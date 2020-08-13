@@ -7,11 +7,16 @@ Image::Image(Image &&i)
 {
 	swap(i.frameBuffer, frameBuffer);
 	swap(i.raw, raw);
+	swap(i.rawLen, rawLen);
+	swap(i.valid, valid);
 }
 
 Image::Data Image::data() const
 {
-    return {raw, rawLen};
+	if (isValid()) {
+		return {raw, rawLen};
+	}
+	return {nullptr, 0};
 }
 
 bool Image::isValid() const
@@ -23,6 +28,8 @@ Image &Image::operator=(Image &&i)
 {
 	swap(i.frameBuffer, frameBuffer);
 	swap(i.raw, raw);
+	swap(i.rawLen, rawLen);
+	swap(i.valid, valid);
 
 	return *this;
 }
