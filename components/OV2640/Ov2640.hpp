@@ -24,7 +24,6 @@ public:
 	Ov2640 &operator=(Ov2640 &&) = delete;
 	~Ov2640();
 
-
 	Image jpeg(JpegQuality = JpegQuality::Medium);
 private:
 	static void init();

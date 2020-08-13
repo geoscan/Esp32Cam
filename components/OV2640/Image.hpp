@@ -5,14 +5,17 @@
 #include "esp_camera.h"
 #include "img_converters.h"
 
-using ImgData = std::pair<const void *, size_t>; // ptr to mem. and its length
+ // ptr to mem. and its length
 
 class Image {
 	friend class Ov2640;
 public:
+	struct Data;
+
 	~Image();
 
-	ImgData data() const;
+	Data data() const;
+	bool isValid() const;
 
 	Image(const Image &)            = delete;
 	Image &operator=(const Image &) = delete;
@@ -26,6 +29,11 @@ private:
 	void*       raw          {nullptr};
 	camera_fb_t *frameBuffer {nullptr};
 	bool        valid        {false};
+};
+
+struct Image::Data {
+	const void*  data;
+	const size_t len;
 };
 
 #endif // IMAGE_HPP

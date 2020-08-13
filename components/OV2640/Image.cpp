@@ -9,9 +9,14 @@ Image::Image(Image &&i)
 	swap(i.raw, raw);
 }
 
-ImgData Image::data() const
+Image::Data Image::data() const
 {
     return {raw, rawLen};
+}
+
+bool Image::isValid() const
+{
+	return valid;
 }
 
 Image &Image::operator=(Image &&i)
