@@ -12,7 +12,7 @@ class Image {
 public:
 	~Image();
 
-	ImgData data();
+	ImgData data() const;
 
 	Image(const Image &)            = delete;
 	Image &operator=(const Image &) = delete;

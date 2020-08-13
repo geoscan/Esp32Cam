@@ -9,6 +9,11 @@ Image::Image(Image &&i)
 	swap(i.raw, raw);
 }
 
+ImgData Image::data() const
+{
+    return {raw, rawLen};
+}
+
 Image &Image::operator=(Image &&i)
 {
 	swap(i.frameBuffer, frameBuffer);
@@ -21,6 +26,6 @@ Image::~Image()
 {
 	esp_camera_fb_return(frameBuffer);
 	// TODO: WARNING: make a proper inquiry about whether we should free 'raw',
-	// or esp_camera_fb_return will do that for us.
+	// or 'esp_camera_fb_return' will do that for us.
 }
 
