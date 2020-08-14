@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 esp_err_t cameraDemoHandler(httpd_req_t *);
+esp_err_t indexPageHandler(httpd_req_t *);
 
 #ifdef __cplusplus
 }
@@ -27,9 +28,18 @@ esp_err_t cameraDemoHandler(httpd_req_t *);
 
 const httpd_uri_t cameraDemo = {
 	.uri      = "/camera",
+//	.method   = HTTP_POST,
 	.method   = HTTP_GET,
 	.handler  = cameraDemoHandler,
 	.user_ctx = 0
+};
+
+const httpd_uri_t indexPage = {
+	.uri      = "/hello",
+//	.method   = HTTP_POST,
+	.method   = HTTP_GET,
+	.handler  = indexPageHandler,
+	.user_ctx = (void*)"Hello World!"
 };
 
 

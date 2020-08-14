@@ -24,21 +24,13 @@ public:
 	Ov2640 &operator=(Ov2640 &&) = delete;
 	~Ov2640();
 
-	Image jpeg(/*JpegQuality = JpegQuality::Medium*/);
+	Image jpeg();
 
-//	template <typename _ClRet, typename... _ClArgs>
-//	bool jpegStream(_ClRet(*callable)(Image::Data, _ClArgs&...));
 private:
 	static void init();
 	static bool isInit;
 	Ov2640();
 };
-
-//template <typename _ClRet, typename ... _ClArgs>
-//inline bool jpegStream(_ClRet(*callable)(Image::Data, _ClArgs&...args))
-//{
-
-//}
 
 
 #endif // COMPONENTS_OV2640_OV2640_H

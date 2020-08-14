@@ -103,5 +103,5 @@ Image Ov2640::jpeg(/*JpegQuality quality*/)
 			reinterpret_cast<uint8_t **>(&img.raw), &img.rawLen);
 	}
 
-	return move(img);
+	return img;
 }
