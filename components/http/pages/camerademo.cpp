@@ -6,15 +6,22 @@
 
 extern "C" esp_err_t cameraDemoHandler(httpd_req_t *req)
 {
-	httpd_resp_set_type(req, "image/jpeg");
-	httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
+	esp_err_t res;
 
-	Image jpg = Ov2640::instance().jpeg();
-
-	if (jpg.isValid()) {
-		Image::Data jpgData = jpg.data();
-		return httpd_resp_send(req, reinterpret_cast<const char *>(jpgData.data), jpgData.len);
+	res = httpd_resp_set_type(req, "image/jpeg");
+	if (res == ESP_OK) {
+		httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
 	}
 
-	return httpd_resp_send(req, nullptr, 0);
+	Image img = Ov2640::instance().jpeg();
+
+	if (res == ESP_OK && img.isValid()) {
+		res = httpd_resp_send(req, static_cast<const char *>(img.getData().data), img.getData().len);
+	}
+
+	return res;
+
 }
+
+
+

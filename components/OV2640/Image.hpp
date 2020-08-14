@@ -7,14 +7,24 @@
 
  // ptr to mem. and its length
 
+class Image;
+
+namespace std {
+	void swap(Image&, Image&);
+}
+
 class Image {
 	friend class Ov2640;
+	friend void std::swap(Image&, Image&);
 public:
-	struct Data;
+	struct Data {
+		void*  data {nullptr};
+		size_t len  {0};
+	};
 
 	~Image();
 
-	Data data() const;
+	const Data &getData() const;
 	bool isValid() const;
 
 	Image(const Image &)            = delete;
@@ -25,15 +35,11 @@ public:
 private:
 	Image() = default;
 
-	size_t      rawLen;
-	void*       raw          {nullptr};
+//	size_t      rawLen;
+//	void*       raw          {nullptr};
+	Data        data;
 	camera_fb_t *frameBuffer {nullptr};
 	bool        valid        {false};
-};
-
-struct Image::Data {
-	const void*  data;
-	const size_t len;
 };
 
 #endif // IMAGE_HPP

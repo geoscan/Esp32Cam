@@ -81,6 +81,7 @@ Ov2640 &Ov2640::instance()
 
 Image Ov2640::jpeg(/*JpegQuality quality*/)
 {
+	static constexpr uint8_t kJpegQuality = 80;
 	Image img;
 
 	if (!isInit) {
@@ -88,19 +89,19 @@ Image Ov2640::jpeg(/*JpegQuality quality*/)
 	}
 
 	img.frameBuffer = esp_camera_fb_get();
-	img.valid = false;
 
 	if (!img.frameBuffer) {
+		img.valid = false;
 		return img;
 	}
 
 	if (img.frameBuffer->format == PIXFORMAT_JPEG) {
-		img.raw = img.frameBuffer;
-		img.rawLen = img.frameBuffer->len;
-		img.valid = true;
+		img.data.data = img.frameBuffer->buf;
+		img.data.len  = img.frameBuffer->len;
+		img.valid     = true;
 	} else {
-		img.valid = frame2jpg(img.frameBuffer, 50 /*static_cast<uint8_t>(quality)*/,
-			reinterpret_cast<uint8_t **>(&img.raw), &img.rawLen);
+		img.valid = frame2jpg(img.frameBuffer, kJpegQuality,
+			reinterpret_cast<uint8_t **>(&img.data.data), &img.data.len);
 	}
 
 	return img;

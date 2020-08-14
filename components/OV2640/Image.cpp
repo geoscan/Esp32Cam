@@ -3,20 +3,24 @@
 
 using namespace std;
 
-Image::Image(Image &&i)
-{
-	swap(i.frameBuffer, frameBuffer);
-	swap(i.raw, raw);
-	swap(i.rawLen, rawLen);
-	swap(i.valid, valid);
+namespace std {
+	void swap(Image& l, Image& r)
+	{
+		swap(l.frameBuffer, r.frameBuffer);
+		swap(l.data.data,   r.data.data);
+		swap(l.data.len,    r.data.len);
+		swap(l.valid,       r.valid);
+	}
 }
 
-Image::Data Image::data() const
+Image::Image(Image &&i)
 {
-	if (isValid()) {
-		return {raw, rawLen};
-	}
-	return {nullptr, 0};
+	swap(*this, i);
+}
+
+const Image::Data &Image::getData() const
+{
+	return data;
 }
 
 bool Image::isValid() const
@@ -26,10 +30,7 @@ bool Image::isValid() const
 
 Image &Image::operator=(Image &&i)
 {
-	swap(i.frameBuffer, frameBuffer);
-	swap(i.raw, raw);
-	swap(i.rawLen, rawLen);
-	swap(i.valid, valid);
+	swap(*this, i);
 
 	return *this;
 }
