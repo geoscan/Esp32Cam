@@ -7,7 +7,6 @@ using namespace asio::ip;
 RtspConnection::RtspConnection(tcp::socket socket)
 	: tcpSocket(move(socket))
 {
-	start();
 }
 
 void RtspConnection::start()
@@ -21,12 +20,14 @@ void RtspConnection::receive()
 	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
 		[this, self](std::error_code err, size_t length) {
 			if (!err) {
-				// TODO process message
+				send(length);
 			}
 		});
 }
 
-void RtspConnection::send()
+void RtspConnection::send(size_t len)
 {
-	// TODO
+	auto self(shared_from_this());
+	asio::write(tcpSocket, asio::buffer(buf, len));
+	receive();
 }

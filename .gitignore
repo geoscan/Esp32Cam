@@ -6,3 +6,5 @@ CMakeCache*
 qt_build_script.sh
 CMakeLists.txt.user*
 *.autosave
+CMakeLists.txt.user
+.txt.user

@@ -6,10 +6,8 @@ file(GLOB
 		"pages/*.cpp")
 
 idf_component_register(
-	SRCS
-		${SOURCE_FILES}
-    INCLUDE_DIRS
-		"."
+	SRCS         ${SOURCE_FILES}
+    INCLUDE_DIRS "."
     REQUIRES
         wifi
         OV2640

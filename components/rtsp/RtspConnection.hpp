@@ -12,9 +12,9 @@ private:
 		kBufSize = 255,
 	};
 	void receive();
-	void send();
+	void send(size_t len);
 
-	asio::ip::tcp::socket tcpSocket;
+	asio::ip::tcp::tcp::socket tcpSocket;
 	char buf[kBufSize];
 };
 

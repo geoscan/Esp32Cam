@@ -1,4 +1,9 @@
+#include "asio.hpp"
+#include "RtspServer.hpp"
+
 void rtspStart()
 {
-	// TODO
+    asio::io_context context;
+    RtspServer server(context);
+    context.run();
 }
