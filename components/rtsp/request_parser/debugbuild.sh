@@ -1,5 +1,5 @@
 ./clean.sh
 ./generate.sh
 cd generated
-g++ lex.yy.c  rtsp.tab.c
+g++ *.c *.cpp
 a.out

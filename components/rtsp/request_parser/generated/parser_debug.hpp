@@ -2,7 +2,7 @@
 #define COMPONENTS_RTSP_REQUEST_PARSER_GENERATED_PARSER_DEBUG_HPP
 
 #define PARSER_DEBUG 1
-#define DEBUG_FLEX 1
+#define DEBUG_FLEX 0
 
 #if PARSER_DEBUG != 1
 # define debug(...)

@@ -20,59 +20,14 @@
 %token <fval> FLOAT
 %token <sval> STRING
 
-%token SLASH
 %token NL
-%token OPT_SPACES
-%token COL
-%token EQ
 
 
 %%
 
 
-lines:
-	  lines single_line
-	| single_line
-	;
-
-
-single_line:
-	single_line_content NL
-	;
-
-
-// Please use nonterminal prefixes regarding user request they describe.
-// If the rule is an ad-hoc, or related to 2 or more requests use
-// prefix "common".
-single_line_content:
-	| common_session
-	| common_cseq
-	| any_strings
-	;
-
-
-common_session:
-	"Session:" INT
-	{
-		req->session = $2;
-	}
-	;
-
-
-common_cseq:
-	"CSeq:" INT
-	{
-		req->cseq = $2;
-	}
-	;
-
-
-// This parser is not intended to verify user request,
-// but to extract information from it. So we just
-// neglect any line we don't need.
-any_strings:
-	any_strings STRING
-	|
+main:
+	STRING
 	;
 
 
@@ -84,8 +39,11 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 {
 	debug("Parse started");
 	req = &request;
-	yy_scan_buffer(reinterpret_cast<char *>(data.data), data.len);
+	yyin = nullptr;
+	// yy_scan_buffer(reinterpret_cast<char *>(data.data), data.len);
+	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(data.data), data.len);
 	yyparse();
+	yy_delete_buffer(bufState);
 }
 
 #if DEBUG_FLEX != 1

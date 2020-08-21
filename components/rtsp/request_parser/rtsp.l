@@ -39,7 +39,7 @@
 [ \t]    ;
 %%
 
-
+// see parser_debug.hpp
 #if DEBUG_FLEX == 1 && PARSER_DEBUG == 1
 
 int main(int, char**) {

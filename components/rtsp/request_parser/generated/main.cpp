@@ -1,6 +1,9 @@
+#include "parser_debug.hpp"
+
+#if DEBUG_FLEX != 1
+
 #include <iostream>
 #include "Types.hpp"
-#include "parser_debug.hpp"
 
 using namespace std;
 
@@ -35,3 +38,5 @@ int main(void)
 
     return 0;
 }
+
+#endif //DEBUG_FLEX != 1

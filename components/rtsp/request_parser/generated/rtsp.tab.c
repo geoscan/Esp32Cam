@@ -112,11 +112,7 @@ extern int yydebug;
     INT = 258,
     FLOAT = 259,
     STRING = 260,
-    SLASH = 261,
-    NL = 262,
-    OPT_SPACES = 263,
-    COL = 264,
-    EQ = 265
+    NL = 261
   };
 #endif
 
@@ -131,7 +127,7 @@ union YYSTYPE
 	float fval;
 	char  *sval;
 
-#line 135 "rtsp.tab.c" /* yacc.c:355  */
+#line 131 "rtsp.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -148,7 +144,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 152 "rtsp.tab.c" /* yacc.c:358  */
+#line 148 "rtsp.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -388,23 +384,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  11
+#define YYFINAL  3
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   12
+#define YYLAST   1
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  13
+#define YYNTOKENS  7
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  2
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  12
+#define YYNRULES  2
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  15
+#define YYNSTATES  4
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   267
+#define YYMAXUTOK   261
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -439,15 +435,14 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12
+       5,     6
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    34,    34,    35,    40,    47,    48,    49,    50,    55,
-      63,    74,    75
+       0,    30,    30
 };
 #endif
 
@@ -456,10 +451,8 @@ static const yytype_uint8 yyrline[] =
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
 {
-  "$end", "error", "$undefined", "INT", "FLOAT", "STRING", "SLASH", "NL",
-  "OPT_SPACES", "COL", "EQ", "\"Session:\"", "\"CSeq:\"", "$accept",
-  "lines", "single_line", "single_line_content", "common_session",
-  "common_cseq", "any_strings", YY_NULLPTR
+  "$end", "error", "$undefined", "INT", "FLOAT", "STRING", "NL",
+  "$accept", "main", YY_NULLPTR
 };
 #endif
 
@@ -468,17 +461,16 @@ static const char *const yytname[] =
    (internal) symbol number NUM (which must be that of a token).  */
 static const yytype_uint16 yytoknum[] =
 {
-       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267
+       0,   256,   257,   258,   259,   260,   261
 };
 # endif
 
-#define YYPACT_NINF -5
+#define YYPACT_NINF -6
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-5)))
+  (!!((Yystate) == (-6)))
 
-#define YYTABLE_NINF -13
+#define YYTABLE_NINF -1
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -487,8 +479,7 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -4,    -1,     1,     0,    -5,     2,    -5,    -5,    -2,    -5,
-      -5,    -5,    -5,    -5,    -5
+      -5,    -6,     1,    -6
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -496,57 +487,51 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       5,     0,     0,     5,     3,     0,     6,     7,     8,     9,
-      10,     1,     2,     4,    11
+       0,     2,     0,     1
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -5,    -5,     3,    -5,    -5,    -5,    -5
+      -6,    -6
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,     5,     6,     7,     8
+      -1,     2
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_int8 yytable[] =
+static const yytype_uint8 yytable[] =
 {
-      11,   -12,     9,    14,    10,   -12,    12,     1,     2,    13,
-       0,     1,     2
+       1,     3
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-       0,     5,     3,     5,     3,     5,     3,    11,    12,     7,
-      -1,    11,    12
+       5,     0
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,    11,    12,    14,    15,    16,    17,    18,    19,     3,
-       3,     0,    15,     7,     5
+       0,     5,     8,     0
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    13,    14,    14,    15,    16,    16,    16,    16,    17,
-      18,    19,    19
+       0,     7,     8
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     2,     1,     2,     0,     1,     1,     1,     2,
-       2,     2,     0
+       0,     2,     1
 };
 
 
@@ -1222,24 +1207,8 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 9:
-#line 56 "rtsp.y" /* yacc.c:1646  */
-    {
-		req->session = (yyvsp[0].ival);
-	}
-#line 1231 "rtsp.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 10:
-#line 64 "rtsp.y" /* yacc.c:1646  */
-    {
-		req->cseq = (yyvsp[0].ival);
-	}
-#line 1239 "rtsp.tab.c" /* yacc.c:1646  */
-    break;
-
-
-#line 1243 "rtsp.tab.c" /* yacc.c:1646  */
+      
+#line 1212 "rtsp.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1467,7 +1436,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 79 "rtsp.y" /* yacc.c:1906  */
+#line 34 "rtsp.y" /* yacc.c:1906  */
 
 
 
@@ -1476,8 +1445,11 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 {
 	debug("Parse started");
 	req = &request;
-	yy_scan_buffer(reinterpret_cast<char *>(data.data), data.len);
+	yyin = nullptr;
+	// yy_scan_buffer(reinterpret_cast<char *>(data.data), data.len);
+	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(data.data), data.len);
 	yyparse();
+	yy_delete_buffer(bufState);
 }
 
 #if DEBUG_FLEX != 1
