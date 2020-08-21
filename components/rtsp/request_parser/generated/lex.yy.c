@@ -454,10 +454,12 @@ char *yytext;
 	#if DEBUG_FLEX == 1
 	#include <iostream>
 	extern FILE *yyin;
+	#else
+	# define debug(...) /* Suppress output */
 	#endif
 
-#line 460 "lex.yy.c"
-#line 461 "lex.yy.c"
+#line 462 "lex.yy.c"
+#line 463 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -674,11 +676,11 @@ YY_DECL
 		}
 
 	{
-#line 17 "rtsp.l"
+#line 19 "rtsp.l"
 
 
 
-#line 682 "lex.yy.c"
+#line 684 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -738,14 +740,14 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 20 "rtsp.l"
+#line 22 "rtsp.l"
 {debug("------------NL------------"); 
                  return NL;
 				}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "rtsp.l"
+#line 25 "rtsp.l"
 {debug("------------FLOAT------------"); 
                  debug(yytext); 
 				 yylval.fval = atof(yytext); 
@@ -754,7 +756,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 28 "rtsp.l"
+#line 30 "rtsp.l"
 {debug("-----------INT------------"); 
                  debug(yytext); 
 				 yylval.ival = atoi(yytext); 
@@ -763,7 +765,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 33 "rtsp.l"
+#line 35 "rtsp.l"
 {debug("------------STRING------------"); 
                  debug(yytext); 
 				 yylval.sval = strdup(yytext); 
@@ -772,20 +774,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 38 "rtsp.l"
+#line 40 "rtsp.l"
 ;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 39 "rtsp.l"
+#line 41 "rtsp.l"
 ;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 40 "rtsp.l"
+#line 42 "rtsp.l"
 ECHO;
 	YY_BREAK
-#line 789 "lex.yy.c"
+#line 791 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1790,7 +1792,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 40 "rtsp.l"
+#line 42 "rtsp.l"
 
 
 // see parser_debug.hpp

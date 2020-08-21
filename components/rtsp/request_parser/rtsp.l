@@ -7,6 +7,8 @@
 	#if DEBUG_FLEX == 1
 	#include <iostream>
 	extern FILE *yyin;
+	#else
+	# define debug(...) /* Suppress output */
 	#endif
 
 %}

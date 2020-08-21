@@ -32,13 +32,22 @@ lines:
 
 
 line:
-	  strings NL
+	strings NL
 	| strings
 	;
 
 
+common_cseq:
+	"CSeq" INT NL
+	{
+		debug("-----GOT CSeq-----");
+	}
+	;
+
+
 strings:
-	  strings string
+	  strings common_cseq strings
+	| strings string
 	| string
 	;
 
