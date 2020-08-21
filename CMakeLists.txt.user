@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.12.4, 2020-08-19T19:33:16. -->
+<!-- Written by QtCreator 4.12.4, 2020-08-21T11:57:40. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -128,6 +128,15 @@
      <value type="QString">IDF_PATH=/home/dmurashov/Documents/ESP32/esp-idf</value>
      <value type="QString">PATH=/home/dmurashov/Documents/ESP32/esp32-firmware/build/config:/home/dmurashov/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/8.2.0:/home/dmurashov/.local/bin:/home/dmurashov/bin:/opt/ros/melodic/bin:/home/dmurashov/Documents/ESP32/esp-idf/components/esptool_py/esptool:/home/dmurashov/Documents/ESP32/esp-idf/components/espcoredump:/home/dmurashov/Documents/ESP32/esp-idf/components/partition_table:/home/dmurashov/Documents/ESP32/esp-idf/components/app_update:/home/dmurashov/.espressif/tools/xtensa-esp32s2-elf/esp-2020r2-8.2.0/xtensa-esp32s2-elf/bin:/home/dmurashov/.espressif/tools/esp32ulp-elf/2.28.51-esp-20191205/esp32ulp-elf-binutils/bin:/home/dmurashov/.espressif/tools/esp32s2ulp-elf/2.28.51-esp-20191205/esp32s2ulp-elf-binutils/bin:/home/dmurashov/.espressif/python_env/idf4.3_py2.7_env/bin:/home/dmurashov/Documents/ESP32/esp-idf/tools:/home/dmurashov/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/bin/:/home/dmurashov/.local/bin/openocd-esp32/bin:/home/dmurashov/.local/bin/jlink-v683:/home/dmurashov/Documents/ESP32/esp-idf:/snap/cmake/513/bin:/home/dmurashov/bin/gcc-arm-none-eabi-7/bin:/home/dmurashov/bin/scripts:/home/dmurashov/scripts:/home/dmurashov/bin/kconfig/bin:/home/dmurashov/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</value>
      <value type="QString">CPATH=/home/dmurashov/Documents/ESP32/esp32-firmware/build/config:/home/dmurashov/Documents/ESP32/esp32-firmware/build/bootloader/config</value>
+     <value type="QString">LC_IDENTIFICATION=en_GB.UTF-8</value>
+     <value type="QString">LC_NAME=en_GB.UTF-8</value>
+     <value type="QString">LC_NUMERIC=en_GB.UTF-8</value>
+     <value type="QString">LC_TIME=en_GB.UTF-8</value>
+     <value type="QString">LC_TELEPHONE=en_GB.UTF-8</value>
+     <value type="QString">LC_PAPER=en_GB.UTF-8</value>
+     <value type="QString">LC_MEASUREMENT=en_GB.UTF-8</value>
+     <value type="QString">LC_MONETARY=en_GB.UTF-8</value>
+     <value type="QString">LC_ADDRESS=en_GB.UTF-8</value>
     </valuelist>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Debug</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">CMakeProjectManager.CMakeBuildConfiguration</value>

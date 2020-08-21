@@ -12,6 +12,9 @@ RtspServer::RtspServer(asio::io_context &context) :
 
 void RtspServer::acceptConnection()
 {
+	// FIXME: the fact that we only communicate over one network
+	// interface eliminates the need to have an asynchronous user
+	// request processing. Make it single-threaded/
 	tcpAcceptor.async_accept(
 		[this](error_code err, tcp::socket socket) {
 			if (!err) {

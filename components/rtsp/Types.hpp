@@ -16,6 +16,7 @@
 
 namespace Rtsp {
 
+
 // Const data buffer
 struct Data {
 	const void   *data {nullptr};
@@ -23,23 +24,15 @@ struct Data {
 };
 
 
-// -------- Parsed user requests -------- //
+// -------------------- Parser-related types -------------------- //
 
-
-struct Describe {
-};
 
 struct Request {
-	enum {
-		Describe,
-		Setup,
-		Teardown,
-		Play,
-		Pause
-	} const reqType;
-	union {
-		const Describe describe;
-	};
+	unsigned cseq;    // RTCP: CSeq
+	unsigned session; // RTCP: Session
+};
+
+struct Describe : Request {
 };
 
 } // Rtsp

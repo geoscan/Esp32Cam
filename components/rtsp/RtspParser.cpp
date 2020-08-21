@@ -1,3 +1,10 @@
+//
+// RtspParser.cpp
+//
+// Created on:  Aug. 20, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #include "RtspParser.hpp"
 
 bool RtspParser::parse(Rtsp::Data data, Rtsp::Request &request)
