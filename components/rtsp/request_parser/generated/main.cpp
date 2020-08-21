@@ -23,7 +23,7 @@ int main(void)
         "CSeq: 1\r\n"
         "Session:2\r\n"
         "Require: implicit-play\r\n"
-        "Proxy-Require: gzipped-messages\r\n";
+        "Proxy-Require: gzipped-messages";
 
     debug(requestBody);
     debug(sizeof(requestBody));

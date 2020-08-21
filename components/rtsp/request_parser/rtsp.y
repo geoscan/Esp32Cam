@@ -22,14 +22,32 @@
 
 %token NL
 
-
 %%
 
 
-main:
-	STRING
+lines:
+	  lines line
+	| line
 	;
 
+
+line:
+	  strings NL
+	| strings
+	;
+
+
+strings:
+	  strings string
+	| string
+	;
+
+
+string: 
+	  FLOAT 
+	| INT 
+	| STRING
+	;
 
 %%
 

@@ -35,8 +35,8 @@
 				 yylval.sval = strdup(yytext); 
 				 return STRING;
 				}
-\;              ;
-[ \t]    ;
+[\;\:]          ;
+[ \t]           ;
 %%
 
 // see parser_debug.hpp
