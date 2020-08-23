@@ -10,6 +10,7 @@
 	#else
 	# define debug(...) /* Suppress output */
 	#endif
+	#define newtoken(__TOKEN__) debug("==========> @TOKEN@:"); debug(#__TOKEN__); return __TOKEN__
 
 %}
 
@@ -17,49 +18,38 @@
 
 
 %%
+CSeq        {newtoken(CSEQ); }
+client_port {newtoken(CLIENT_PORT); }
+Transport   {newtoken(TRANSPORT);}
 
 
-[\n\r]+         {debug("------------NL------------"); 
-                 return NL;
-				}
-[0-9]+\.[0-9]+  {debug("------------FLOAT------------"); 
+[\n\r]+         ;
+[0-9]+\.[0-9]+  {debug("==========> FLOAT"); 
                  debug(yytext); 
 				 yylval.fval = atof(yytext); 
 				 return FLOAT;
 				}
-[0-9]+          {debug("-----------INT------------"); 
+[0-9]+          {debug("==========> INT"); 
                  debug(yytext); 
 				 yylval.ival = atoi(yytext); 
 				 return INT; 
 				}
-CSeq            {return CSEQ; }
-[^ \t\n\r;:]+   {debug("------------STRING------------"); 
-                 debug(yytext); 
-				 yylval.sval = strdup(yytext); 
-				 return STRING;
-				}
-[\;\:]          ;
 [ \t]           ;
+.               ;
 %%
 
 // see parser_debug.hpp
 #if DEBUG_FLEX == 1 && PARSER_DEBUG == 1
 
 int main(int, char**) {
-	using namespace std;
-	debug("flex debug");
-	// Open a file handle to a particular file:
-	FILE *myfile = fopen("inputfile", "r");
-	// Make sure it is valid:
-	if (!myfile) {
-		cout << "I can't open a.snazzle.file!" << endl;
-		return -1;
-	}
-	// Set Flex to read from it instead of defaulting to STDIN:
-	yyin = myfile;
-	
+	char buf[] = DEBUG_TEXT;
+
+	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(buf), sizeof(buf));
+
 	// Parse through the input:
 	while(yylex());
+
+	yy_delete_buffer(bufState);
 	
 }
 

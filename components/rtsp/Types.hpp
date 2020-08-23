@@ -25,19 +25,19 @@ struct Data {
 
 // -------------------- Parser-related types -------------------- //
 
-
-enum class Method {
-	NotStated
-};
-
+template <typename T>
+struct Optval {
+	T    val;
+	bool isInit {false}; // true, if initialized
+}
 
 // Represents common request fields
 struct Request {
-	unsigned cseq;    // RTCP: CSeq
-	unsigned session; // RTCP: Session
-};
-
-struct Describe : Request {
+	enum {
+		NotStated;
+	} RequestType {NotStated};
+	Optional<unsigned> cseq;
+	Optional<unsigned> session;
 };
 
 } // Rtsp

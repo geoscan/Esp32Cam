@@ -18,12 +18,7 @@ extern void parse(Rtsp::Request &, Rtsp::Data);
 
 int main(void)
 {
-    char requestBody[] = 
-        "rtsp://example.com/media.mp4 RTSP/1.0\r\n"
-        "CSeq: 1\r\n"
-        "Session:2\r\n"
-        "Require: implicit-play\r\n"
-        "Proxy-Require: gzipped-messages";
+    char requestBody[] = DEBUG_TEXT;
 
     debug(requestBody);
     debug(sizeof(requestBody));

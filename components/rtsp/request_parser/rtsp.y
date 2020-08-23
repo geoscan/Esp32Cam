@@ -13,41 +13,51 @@
 %union {
 	int   ival;
 	float fval;
-	char  *sval;
 }
 
 %token <ival> INT
 %token <fval> FLOAT
-%token <sval> STRING
 
-%token NL
 %token CSEQ
+%token CLIENT_PORT
+%token TRANSPORT
 
 %%
 
 
-strings:
-	strings string
-|	string
+text:
+	word
+|	text word	
+|	text cseq
+|	text client_port
 ;
 
  
-string:
-	common_cseq
-|	INT
+word:
+	INT
 |	FLOAT
-|	STRING
-|	NL
+;
+
+words:
+	words word
+|
 ;
 
 
-common_cseq: 
+cseq: 
 	CSEQ INT
 	{
 		debug("CSeq");
 		debug($2);
 	}
 ;
+
+
+client_port:
+	TRANSPORT words CLIENT_PORT INT INT
+	{
+		debug("got client port info");
+	}
 
 
 %%
