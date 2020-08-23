@@ -48,7 +48,8 @@ extern int yydebug;
     INT = 258,
     FLOAT = 259,
     STRING = 260,
-    NL = 261
+    NL = 261,
+    CSEQ = 262
   };
 #endif
 
@@ -63,7 +64,7 @@ union YYSTYPE
 	float fval;
 	char  *sval;
 
-#line 67 "rtsp.tab.h" /* yacc.c:1909  */
+#line 68 "rtsp.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

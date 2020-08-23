@@ -21,42 +21,34 @@
 %token <sval> STRING
 
 %token NL
+%token CSEQ
 
 %%
 
 
-lines:
-	  lines line
-	| line
-	;
-
-
-line:
-	strings NL
-	| strings
-	;
-
-
-common_cseq:
-	"CSeq" INT NL
-	{
-		debug("-----GOT CSeq-----");
-	}
-	;
-
-
 strings:
-	  strings common_cseq strings
-	| strings string
-	| string
-	;
+	strings string
+|	string
+;
+
+ 
+string:
+	common_cseq
+|	INT
+|	FLOAT
+|	STRING
+|	NL
+;
 
 
-string: 
-	  FLOAT 
-	| INT 
-	| STRING
-	;
+common_cseq: 
+	CSEQ INT
+	{
+		debug("CSeq");
+		debug($2);
+	}
+;
+
 
 %%
 

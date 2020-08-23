@@ -32,6 +32,7 @@
 				 yylval.ival = atoi(yytext); 
 				 return INT; 
 				}
+CSeq            {return CSEQ; }
 [^ \t\n\r;:]+   {debug("------------STRING------------"); 
                  debug(yytext); 
 				 yylval.sval = strdup(yytext); 
