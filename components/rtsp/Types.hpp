@@ -5,14 +5,14 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#ifndef COMPONENTS_RTSP_TYPES_HPP
+#define COMPONENTS_RTSP_TYPES_HPP
+
+
 
 // --------- Types used across multiple project's parts --------- //
 
 
-#ifndef TYPES_HPP
-#define TYPES_HPP
-
-#include <cstddef>
 
 namespace Rtsp {
 
@@ -23,7 +23,10 @@ struct Data {
 };
 
 
+
 // -------------------- Parser-related types -------------------- //
+
+
 
 template <typename T>
 struct Optval {
@@ -49,16 +52,24 @@ public:
 	}
 };
 
+enum class RequestType {
+	Describe,
+	Setup,
+	Teardown,
+	Play,
+	Pause,
+	NotStated
+};
+
 // Represents common request fields
 struct Request {
-	enum {
-		NotStated
-	} requestType {NotStated};
-	Optval<unsigned> cseq;
-	Optval<unsigned> session;
-	Optval<unsigned> clientPort;
+	Optval<RequestType> requestType;
+	Optval<unsigned>    cseq;
+	Optval<unsigned>    session;
+	Optval<unsigned>    clientPort;
+	Optval<bool>        udp; // Transport: client requests using UDP
 };
 
 } // Rtsp
 
-#endif // TYPES_HPP
+#endif // COMPONENTS_RTSP_TYPES_HPP

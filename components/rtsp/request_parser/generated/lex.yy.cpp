@@ -1,5 +1,6 @@
+#line 2 "lex.yy.cpp"
 
-#line 3 "lex.yy.c"
+#line 4 "lex.yy.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -489,7 +490,7 @@ char *yytext;
 #line 1 "rtsp.l"
 #line 2 "rtsp.l"
 	#include <cstdio>
-	#include "rtsp.tab.h"
+	#include "rtsp.tab.hpp"
 	#include "parser_debug.hpp"
 	#include "Types.hpp"
 
@@ -501,8 +502,8 @@ char *yytext;
 	#endif
 	#define newtoken(__TOKEN__) debug("==========> @TOKEN@:"); debug(#__TOKEN__); return __TOKEN__
 
-#line 505 "lex.yy.c"
-#line 506 "lex.yy.c"
+#line 506 "lex.yy.cpp"
+#line 507 "lex.yy.cpp"
 
 #define INITIAL 0
 
@@ -721,7 +722,7 @@ YY_DECL
 	{
 #line 20 "rtsp.l"
 
-#line 725 "lex.yy.c"
+#line 726 "lex.yy.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -862,7 +863,7 @@ YY_RULE_SETUP
 #line 45 "rtsp.l"
 ECHO;
 	YY_BREAK
-#line 866 "lex.yy.c"
+#line 867 "lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

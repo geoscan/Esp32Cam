@@ -1,6 +1,6 @@
 %{
 	#include <cstdio>
-	#include "rtsp.tab.h"
+	#include "rtsp.tab.hpp"
 	#include "parser_debug.hpp"
 	#include "Types.hpp"
 
