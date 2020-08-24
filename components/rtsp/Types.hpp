@@ -10,6 +10,7 @@
 
 #include <cstddef>
 #include <algorithm>
+#include <memory>
 
 
 
@@ -62,6 +63,14 @@ public:
 	}
 	const T &val() const {
 		return value;
+	}
+	operator bool() const
+	{
+		return isVal();
+	}
+	const T &operator*() const
+	{
+		return val();
 	}
 };
 

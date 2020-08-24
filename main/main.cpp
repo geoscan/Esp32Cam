@@ -15,6 +15,5 @@ extern "C" int app_main(void)
 	wifiStart();
 	httpStart();
 	rtspStart();
-//	startEchoTcp();
 	return 0;
 }

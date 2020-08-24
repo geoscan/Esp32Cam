@@ -17,12 +17,7 @@ RtspConnection::RtspConnection(tcp::socket socket)
 {
 }
 
-void RtspConnection::start()
-{
-	receive();
-}
-
-void RtspConnection::receive()
+void RtspConnection::serve()
 {
 //	auto self(shared_from_this());
 //	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
@@ -47,10 +42,4 @@ void RtspConnection::receive()
 			tcpSocket.send(asio::buffer(data.data, data.len));
 		}
 	}
-}
-
-void RtspConnection::send(size_t len)
-{
-	asio::write(tcpSocket, asio::buffer(buf, len));
-	receive();
 }

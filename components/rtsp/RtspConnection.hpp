@@ -14,13 +14,11 @@
 class RtspConnection final : public std::enable_shared_from_this<RtspConnection> {
 public:
 	RtspConnection(asio::ip::tcp::socket socket);
-	void start();
+	void serve();
 private:
 	enum {
 		kBufSize = 255,
 	};
-	void receive();
-	void send(size_t len);
 
 	asio::ip::tcp::tcp::socket tcpSocket;
 	char buf[kBufSize];
