@@ -50,7 +50,12 @@ extern int yydebug;
     CSEQ = 260,
     CLIENT_PORT = 261,
     SESSION = 262,
-    UDP = 263
+    UDP = 263,
+    DESCRIBE = 264,
+    SETUP = 265,
+    TEARDOWN = 266,
+    PLAY = 267,
+    PAUSE = 268
   };
 #endif
 
@@ -59,12 +64,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 13 "rtsp.y" /* yacc.c:1909  */
+#line 17 "rtsp.y" /* yacc.c:1909  */
 
 	int   uival;
 	float fval;
 
-#line 68 "rtsp.tab.h" /* yacc.c:1909  */
+#line 73 "rtsp.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -8,6 +8,10 @@
 	void yyerror(const char *);
 
 	static Rtsp::Request *req; // Not null, guaranteed
+
+	#if PARSER_DEBUG == 1
+	// TODO: include boost asio mutex
+	#endif // PARSER_DEBUG == 1
 %}
 
 %union {
@@ -23,7 +27,28 @@
 %token SESSION
 %token UDP
 
+%token DESCRIBE    
+%token SETUP       
+%token TEARDOWN    
+%token PLAY        
+%token PAUSE       
+
 %%
+
+
+head:
+	request_type text
+;
+
+
+request_type:
+	DESCRIBE {req->requestType = Rtsp::RequestType::Describe;  }
+|	SETUP    {req->requestType = Rtsp::RequestType::Setup;     }
+|	TEARDOWN {req->requestType = Rtsp::RequestType::Teardown;  }
+|	PLAY     {req->requestType = Rtsp::RequestType::Play;      }
+|	PAUSE    {req->requestType = Rtsp::RequestType::Pause;     }
+|	         {req->requestType = Rtsp::RequestType::NotStated; }
+;
 
 
 text:
@@ -79,16 +104,27 @@ session:
 %%
 
 
-// WARN: it must be single-threaded
+
+// --------------------------- Public --------------------------- //
+
+
+
 void parse(Rtsp::Request &request, Rtsp::Data data)
 {
+	#if PARSER_DEBUG != 1
+	// TODO: lock mutex
+	#endif // PARSER_DEBUG != 1
+
 	debug("Parse started");
 	req = &request;
 	yyin = nullptr;
-	// yy_scan_buffer(reinterpret_cast<char *>(data.data), data.len);
 	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(data.data), data.len);
 	yyparse();
 	yy_delete_buffer(bufState);
+
+	#if PARSER_DEBUG != 1
+	// TODO: unlock mutex
+	#endif // PARSER_DEBUG != 1
 }
 
 #if DEBUG_FLEX != 1

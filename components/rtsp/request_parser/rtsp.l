@@ -22,6 +22,11 @@ CSeq        {newtoken(CSEQ); }
 client_port {newtoken(CLIENT_PORT); }
 Session     {newtoken(SESSION); }
 UDP         {newtoken(UDP); }
+DESCRIBE    {newtoken(DESCRIBE);}
+SETUP       {newtoken(SETUP);}
+TEARDOWN    {newtoken(TEARDOWN);}
+PLAY        {newtoken(PLAY);}
+PAUSE       {newtoken(PAUSE);}
 
 
 [\n\r]+           ;

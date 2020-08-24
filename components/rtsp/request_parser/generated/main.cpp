@@ -27,11 +27,12 @@ int main(void)
     cout << request.cseq.val() << endl;
     cout << request.session.val() << endl;
     cout << request.clientPort.val() << endl;
-    cout << request.udp.val() << endl;
+    cout << boolalpha << request.udp.val() << endl;
+    cout << boolalpha << (request.requestType.val() == Rtsp::RequestType::Setup);
 
     return 0;
 }
 
 #endif // PARSER_DEBUG == 1
 
-#endif //DEBUG_FLEX != 1
+#endif // DEBUG_FLEX != 1
