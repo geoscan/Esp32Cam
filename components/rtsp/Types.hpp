@@ -9,6 +9,7 @@
 #define COMPONENTS_RTSP_TYPES_HPP
 
 #include <cstddef>
+#include <algorithm>
 
 
 // --------- Types used across multiple project's parts --------- //
@@ -30,11 +31,21 @@ struct Data {
 
 
 template <typename T>
-struct Optval {
+struct Optval final {
 private:
 	T    value;
 	bool isInit {false}; // true, if initialized
 public:
+	Optval()
+	{
+	}
+	Optval(const Optval &o) : value(o.value), isInit(o.isInit)
+	{
+	}
+	Optval(Optval &&o) : value(std::move(o.value)), isInit(o.isInit)
+	{
+		o.isInit = false;
+	}
 	T &operator=(const T &v) {
 		value = v;
 		isInit = true;
@@ -54,12 +65,12 @@ public:
 };
 
 enum class RequestType {
+	NotStated,
 	Describe,
 	Setup,
 	Teardown,
 	Play,
-	Pause,
-	NotStated
+	Pause
 };
 
 // Represents common request fields
