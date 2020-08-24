@@ -28,8 +28,8 @@ int main(void)
 
     parse(request, data);
     
-    cout << request.cseq << endl;
-    cout << request.session << endl;
+    // cout << request.cseq << endl;
+    // cout << request.session << endl;
 
     return 0;
 }
