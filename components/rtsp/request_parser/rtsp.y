@@ -9,8 +9,9 @@
 
 	static Rtsp::Request *req; // Not null, guaranteed
 
-	#if PARSER_DEBUG == 1
-	// TODO: include boost asio mutex
+	#if PARSER_DEBUG != 1
+	#include "asio/detail/mutex.hpp"
+	static asio::detail::mutex mutex;
 	#endif // PARSER_DEBUG == 1
 %}
 
@@ -67,7 +68,6 @@ word:
 ;
 
 
-
 cseq: 
 	CSEQ UINT
 	{
@@ -113,7 +113,7 @@ session:
 void parse(Rtsp::Request &request, Rtsp::Data data)
 {
 	#if PARSER_DEBUG != 1
-	// TODO: lock mutex
+	mutex.lock();
 	#endif // PARSER_DEBUG != 1
 
 	debug("Parse started");
@@ -124,7 +124,7 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 	yy_delete_buffer(bufState);
 
 	#if PARSER_DEBUG != 1
-	// TODO: unlock mutex
+	mutex.unlock();
 	#endif // PARSER_DEBUG != 1
 }
 

@@ -74,11 +74,12 @@
 
 	static Rtsp::Request *req; // Not null, guaranteed
 
-	#if PARSER_DEBUG == 1
-	// TODO: include boost asio mutex
+	#if PARSER_DEBUG != 1
+	#include "asio/detail/mutex.hpp"
+	static asio::detail::mutex mutex;
 	#endif // PARSER_DEBUG == 1
 
-#line 82 "rtsp.tab.cpp" /* yacc.c:339  */
+#line 83 "rtsp.tab.cpp" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -132,12 +133,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 17 "rtsp.y" /* yacc.c:355  */
+#line 18 "rtsp.y" /* yacc.c:355  */
 
 	int   uival;
 	float fval;
 
-#line 141 "rtsp.tab.cpp" /* yacc.c:355  */
+#line 142 "rtsp.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -154,7 +155,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 158 "rtsp.tab.cpp" /* yacc.c:358  */
+#line 159 "rtsp.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -452,8 +453,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    41,    41,    46,    47,    48,    49,    50,    51,    56,
-      57,    58,    59,    60,    65,    66,    72,    82,    88,    97
+       0,    42,    42,    47,    48,    49,    50,    51,    52,    57,
+      58,    59,    60,    61,    66,    67,    73,    83,    89,    98
 };
 #endif
 
@@ -1232,82 +1233,82 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 46 "rtsp.y" /* yacc.c:1646  */
+#line 47 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Describe;  }
-#line 1238 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1239 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 47 "rtsp.y" /* yacc.c:1646  */
+#line 48 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Setup;     }
-#line 1244 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1245 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 48 "rtsp.y" /* yacc.c:1646  */
+#line 49 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Teardown;  }
-#line 1250 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1251 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 49 "rtsp.y" /* yacc.c:1646  */
+#line 50 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Play;      }
-#line 1256 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1257 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 50 "rtsp.y" /* yacc.c:1646  */
+#line 51 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Pause;     }
-#line 1262 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1263 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 51 "rtsp.y" /* yacc.c:1646  */
+#line 52 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::NotStated; }
-#line 1268 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1269 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 73 "rtsp.y" /* yacc.c:1646  */
+#line 74 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: CSeq");
 		debug((yyvsp[0].uival));
 		req->cseq = (yyvsp[0].uival);
 	}
-#line 1278 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1279 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 83 "rtsp.y" /* yacc.c:1646  */
+#line 84 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: client_port");
 		debug((yyvsp[0].uival));
 		req->clientPort = (yyvsp[0].uival);
 	}
-#line 1288 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1289 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 89 "rtsp.y" /* yacc.c:1646  */
+#line 90 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Transport: ... UDP");
 		req->udp = true;
 	}
-#line 1297 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1298 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 98 "rtsp.y" /* yacc.c:1646  */
+#line 99 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Session");
 		debug((yyvsp[0].uival));
 		req->session = (yyvsp[0].uival);
 	}
-#line 1307 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1308 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1311 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1312 "rtsp.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1535,7 +1536,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 105 "rtsp.y" /* yacc.c:1906  */
+#line 106 "rtsp.y" /* yacc.c:1906  */
 
 
 
@@ -1547,7 +1548,7 @@ yyreturn:
 void parse(Rtsp::Request &request, Rtsp::Data data)
 {
 	#if PARSER_DEBUG != 1
-	// TODO: lock mutex
+	mutex.lock();
 	#endif // PARSER_DEBUG != 1
 
 	debug("Parse started");
@@ -1558,7 +1559,7 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 	yy_delete_buffer(bufState);
 
 	#if PARSER_DEBUG != 1
-	// TODO: unlock mutex
+	mutex.unlock();
 	#endif // PARSER_DEBUG != 1
 }
 
