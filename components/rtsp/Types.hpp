@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_RTSP_TYPES_HPP
 #define COMPONENTS_RTSP_TYPES_HPP
 
+#include <cstddef>
 
 
 // --------- Types used across multiple project's parts --------- //
