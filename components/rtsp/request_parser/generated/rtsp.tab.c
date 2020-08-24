@@ -113,8 +113,8 @@ extern int yydebug;
     FLOAT = 259,
     CSEQ = 260,
     CLIENT_PORT = 261,
-    TRANSPORT = 262,
-    SESSION = 263
+    SESSION = 262,
+    UDP = 263
   };
 #endif
 
@@ -387,16 +387,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  5
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   15
+#define YYLAST   12
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  9
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  7
+#define YYNNTS  6
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  13
+#define YYNRULES  12
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  19
+#define YYNSTATES  17
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -443,8 +443,8 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    30,    30,    31,    32,    33,    34,    39,    40,    44,
-      45,    50,    60,    70
+       0,    30,    30,    31,    32,    33,    34,    39,    40,    46,
+      56,    62,    71
 };
 #endif
 
@@ -454,8 +454,8 @@ static const yytype_uint8 yyrline[] =
 static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "UINT", "FLOAT", "CSEQ", "CLIENT_PORT",
-  "TRANSPORT", "SESSION", "$accept", "text", "word", "words", "cseq",
-  "client_port", "session", YY_NULLPTR
+  "SESSION", "UDP", "$accept", "text", "word", "cseq", "transport",
+  "session", YY_NULLPTR
 };
 #endif
 
@@ -468,10 +468,10 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -4
+#define YYPACT_NINF -3
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-4)))
+  (!!((Yystate) == (-3)))
 
 #define YYTABLE_NINF -1
 
@@ -482,8 +482,8 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      -1,    -4,    -4,     1,    -4,    -4,     4,    -4,     7,    -4,
-      -4,    -4,    -4,    -4,     9,    -4,    11,    -4,    -4
+      -2,    -3,    -3,     0,    -3,    -3,     6,     7,     8,    -3,
+      -3,    -3,    -3,    -3,    -3,    -3,    -3
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -491,20 +491,20 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     7,     8,     0,     2,     1,     0,    10,     0,     3,
-       4,     5,     6,    11,     0,    13,     0,     9,    12
+       0,     7,     8,     0,     2,     1,     0,     0,     0,    11,
+       3,     4,     5,     6,     9,    10,    12
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -4,    -4,    -3,    -4,    -4,    -4,    -4
+      -3,    -3,     9,    -3,    -3,    -3
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     4,    14,    10,    11,    12
+      -1,     3,     4,    11,    12,    13
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -512,36 +512,36 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       9,     5,     1,     2,     1,     2,     6,    13,     7,     8,
-      15,    17,     1,     2,    18,    16
+       5,     1,     2,     1,     2,     6,     7,     8,     9,    14,
+      15,    16,    10
 };
 
 static const yytype_uint8 yycheck[] =
 {
-       3,     0,     3,     4,     3,     4,     5,     3,     7,     8,
-       3,    14,     3,     4,     3,     6
+       0,     3,     4,     3,     4,     5,     6,     7,     8,     3,
+       3,     3,     3
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     3,     4,    10,    11,     0,     5,     7,     8,    11,
-      13,    14,    15,     3,    12,     3,     6,    11,     3
+       0,     3,     4,    10,    11,     0,     5,     6,     7,     8,
+      11,    12,    13,    14,     3,     3,     3
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
        0,     9,    10,    10,    10,    10,    10,    11,    11,    12,
-      12,    13,    14,    15
+      13,    13,    14
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     1,     2,     2,     2,     2,     1,     1,     2,
-       0,     2,     4,     2
+       2,     1,     2
 };
 
 
@@ -1217,8 +1217,8 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-        case 11:
-#line 51 "rtsp.y" /* yacc.c:1646  */
+        case 9:
+#line 47 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: CSeq");
 		debug((yyvsp[0].uival));
@@ -1227,8 +1227,8 @@ yyreduce:
 #line 1228 "rtsp.tab.c" /* yacc.c:1646  */
     break;
 
-  case 12:
-#line 61 "rtsp.y" /* yacc.c:1646  */
+  case 10:
+#line 57 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: client_port");
 		debug((yyvsp[0].uival));
@@ -1237,18 +1237,27 @@ yyreduce:
 #line 1238 "rtsp.tab.c" /* yacc.c:1646  */
     break;
 
-  case 13:
-#line 71 "rtsp.y" /* yacc.c:1646  */
+  case 11:
+#line 63 "rtsp.y" /* yacc.c:1646  */
+    {
+		debug("GOT: Transport: ... UDP");
+		req->udp = true;
+	}
+#line 1247 "rtsp.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 12:
+#line 72 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Session");
 		debug((yyvsp[0].uival));
 		req->session = (yyvsp[0].uival);
 	}
-#line 1248 "rtsp.tab.c" /* yacc.c:1646  */
+#line 1257 "rtsp.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1252 "rtsp.tab.c" /* yacc.c:1646  */
+#line 1261 "rtsp.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1476,7 +1485,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 78 "rtsp.y" /* yacc.c:1906  */
+#line 79 "rtsp.y" /* yacc.c:1906  */
 
 
 

@@ -49,8 +49,8 @@ extern int yydebug;
     FLOAT = 259,
     CSEQ = 260,
     CLIENT_PORT = 261,
-    TRANSPORT = 262,
-    SESSION = 263
+    SESSION = 262,
+    UDP = 263
   };
 #endif
 

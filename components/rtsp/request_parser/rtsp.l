@@ -20,8 +20,8 @@
 %%
 CSeq        {newtoken(CSEQ); }
 client_port {newtoken(CLIENT_PORT); }
-Transport   {newtoken(TRANSPORT);}
 Session     {newtoken(SESSION); }
+UDP         {newtoken(UDP); }
 
 
 [\n\r]+           ;

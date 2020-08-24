@@ -21,8 +21,7 @@ void debug(Arg arg)
     "Session:2\r\n"\
     "Require: implicit-play\r\n"\
     "Proxy-Require: gzipped-messages"\
-    "Transport: RTP/AVP/UDP;unicast;client_port=3058-3059"\
-	"Transport: RTP/AVP/UDP;unicast;client_port=3059"
+    "Transport: RTP/AVP/UDP;unicast;client_port=3058-3059"
 
 
 #endif // PARSER_DEBUG

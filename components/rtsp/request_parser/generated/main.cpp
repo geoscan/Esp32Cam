@@ -9,12 +9,8 @@ using namespace std;
 
 extern void parse(Rtsp::Request &, Rtsp::Data);
 
-// char *requestBody = 
-//     "rtsp://example.com/media.mp4 RTSP/1.0"
-//     "CSeq: 1"
-//     "Session:2"
-//     "Require: implicit-play"
-//     "Proxy-Require: gzipped-messages";
+
+#if PARSER_DEBUG == 1
 
 int main(void)
 {
@@ -31,8 +27,11 @@ int main(void)
     cout << request.cseq.val() << endl;
     cout << request.session.val() << endl;
     cout << request.clientPort.val() << endl;
+    cout << request.udp.val() << endl;
 
     return 0;
 }
+
+#endif // PARSER_DEBUG == 1
 
 #endif //DEBUG_FLEX != 1

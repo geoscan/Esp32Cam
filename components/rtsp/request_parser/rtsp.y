@@ -20,8 +20,8 @@
 
 %token CSEQ
 %token CLIENT_PORT
-%token TRANSPORT
 %token SESSION
+%token UDP
 
 %%
 
@@ -30,7 +30,7 @@ text:
 	word
 |	text word	
 |	text cseq
-|	text client_port
+|	text transport
 |	text session
 ;
 
@@ -40,10 +40,6 @@ word:
 |	FLOAT
 ;
 
-words:
-	words word
-|
-;
 
 
 cseq: 
@@ -56,12 +52,17 @@ cseq:
 ;
 
 
-client_port:
-	TRANSPORT words CLIENT_PORT UINT
+transport:
+	CLIENT_PORT UINT
 	{
 		debug("GOT: client_port");
-		debug($4);
-		req->clientPort = $4;
+		debug($2);
+		req->clientPort = $2;
+	}
+|	UDP
+	{
+		debug("GOT: Transport: ... UDP");
+		req->udp = true;
 	}
 ;
 
