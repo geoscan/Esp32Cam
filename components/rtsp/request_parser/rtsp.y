@@ -11,16 +11,17 @@
 %}
 
 %union {
-	int   ival;
+	int   uival;
 	float fval;
 }
 
-%token <ival> INT
+%token <uival> UINT
 %token <fval> FLOAT
 
 %token CSEQ
 %token CLIENT_PORT
 %token TRANSPORT
+%token SESSION
 
 %%
 
@@ -30,11 +31,12 @@ text:
 |	text word	
 |	text cseq
 |	text client_port
+|	text session
 ;
 
  
 word:
-	INT
+	UINT
 |	FLOAT
 ;
 
@@ -45,18 +47,31 @@ words:
 
 
 cseq: 
-	CSEQ INT
+	CSEQ UINT
 	{
-		debug("CSeq");
+		debug("GOT: CSeq");
 		debug($2);
+		req->cseq = $2;
 	}
 ;
 
 
 client_port:
-	TRANSPORT words CLIENT_PORT INT INT
+	TRANSPORT words CLIENT_PORT UINT
 	{
-		debug("got client port info");
+		debug("GOT: client_port");
+		debug($4);
+		req->clientPort = $4;
+	}
+;
+
+
+session:
+	SESSION UINT
+	{
+		debug("GOT: Session");
+		debug($2);
+		req->session = $2;
 	}
 
 

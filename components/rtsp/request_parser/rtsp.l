@@ -21,21 +21,22 @@
 CSeq        {newtoken(CSEQ); }
 client_port {newtoken(CLIENT_PORT); }
 Transport   {newtoken(TRANSPORT);}
+Session     {newtoken(SESSION); }
 
 
-[\n\r]+         ;
-[0-9]+\.[0-9]+  {debug("==========> FLOAT"); 
-                 debug(yytext); 
-				 yylval.fval = atof(yytext); 
-				 return FLOAT;
-				}
-[0-9]+          {debug("==========> INT"); 
-                 debug(yytext); 
-				 yylval.ival = atoi(yytext); 
-				 return INT; 
-				}
-[ \t]           ;
-.               ;
+[\n\r]+           ;
+\-?[0-9]+\.[0-9]+ {debug("==========> FLOAT"); 
+                   debug(yytext); 
+				   yylval.fval = atof(yytext); 
+				   return FLOAT;
+				  }
+[0-9]+            {debug("==========> UINT"); 
+                   debug(yytext); 
+				   yylval.uival = atoi(yytext); 
+				   return UINT; 
+				  }
+[ \t]             ;
+.                 ;
 %%
 
 // see parser_debug.hpp

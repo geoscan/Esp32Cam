@@ -45,11 +45,12 @@ extern int yydebug;
 # define YYTOKENTYPE
   enum yytokentype
   {
-    INT = 258,
+    UINT = 258,
     FLOAT = 259,
     CSEQ = 260,
     CLIENT_PORT = 261,
-    TRANSPORT = 262
+    TRANSPORT = 262,
+    SESSION = 263
   };
 #endif
 
@@ -60,10 +61,10 @@ union YYSTYPE
 {
 #line 13 "rtsp.y" /* yacc.c:1909  */
 
-	int   ival;
+	int   uival;
 	float fval;
 
-#line 67 "rtsp.tab.h" /* yacc.c:1909  */
+#line 68 "rtsp.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

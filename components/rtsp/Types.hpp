@@ -27,17 +27,36 @@ struct Data {
 
 template <typename T>
 struct Optval {
-	T    val;
+private:
+	T    value;
 	bool isInit {false}; // true, if initialized
-}
+public:
+	T &operator=(const T &v) {
+		value = v;
+		isInit = true;
+		return value;
+	}
+	T &operator=(T &&v) {
+		value = v;
+		isInit = true;
+		return value;
+	}
+	bool isVal() const {
+		return isInit;
+	}
+	const T &val() const {
+		return value;
+	}
+};
 
 // Represents common request fields
 struct Request {
 	enum {
-		NotStated;
-	} RequestType {NotStated};
-	Optional<unsigned> cseq;
-	Optional<unsigned> session;
+		NotStated
+	} requestType {NotStated};
+	Optval<unsigned> cseq;
+	Optval<unsigned> session;
+	Optval<unsigned> clientPort;
 };
 
 } // Rtsp

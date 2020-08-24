@@ -28,8 +28,9 @@ int main(void)
 
     parse(request, data);
     
-    // cout << request.cseq << endl;
-    // cout << request.session << endl;
+    cout << request.cseq.val() << endl;
+    cout << request.session.val() << endl;
+    cout << request.clientPort.val() << endl;
 
     return 0;
 }

@@ -8,3 +8,4 @@ CMakeLists.txt.user*
 *.autosave
 CMakeLists.txt.user
 .txt.user
+*.out
