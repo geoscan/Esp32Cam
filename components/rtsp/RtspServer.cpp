@@ -1,3 +1,10 @@
+//
+// RtspServer.cpp
+//
+// Created on:  Aug 24, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #include "RtspServer.hpp"
 #include <memory>
 

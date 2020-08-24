@@ -12,16 +12,17 @@
 #include <algorithm>
 
 
+
 // --------- Types used across multiple project's parts --------- //
 
 
 
 namespace Rtsp {
 
-// Const data buffer
+// Const data buffer view
 struct Data {
-	void  *data      {nullptr};
-	const size_t len {0};
+	const void *data;
+	size_t len;
 };
 
 
@@ -64,6 +65,7 @@ public:
 	}
 };
 
+
 enum class RequestType {
 	NotStated,
 	Describe,
@@ -72,6 +74,7 @@ enum class RequestType {
 	Play,
 	Pause
 };
+
 
 // Represents common request fields
 struct Request {

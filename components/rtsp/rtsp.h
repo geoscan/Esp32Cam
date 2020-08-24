@@ -1,3 +1,10 @@
+//
+// rtsp.h
+//
+// Created on:  Aug 24, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #ifndef RTSP_H
 #define RTSP_H
 
