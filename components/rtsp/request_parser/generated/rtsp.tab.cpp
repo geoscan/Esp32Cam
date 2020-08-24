@@ -454,7 +454,7 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    42,    42,    47,    48,    49,    50,    51,    52,    57,
-      58,    59,    60,    61,    66,    67,    73,    83,    89,    98
+      58,    59,    60,    61,    66,    67,    72,    82,    88,    97
 };
 #endif
 
@@ -1269,7 +1269,7 @@ yyreduce:
     break;
 
   case 16:
-#line 74 "rtsp.y" /* yacc.c:1646  */
+#line 73 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: CSeq");
 		debug((yyvsp[0].uival));
@@ -1279,7 +1279,7 @@ yyreduce:
     break;
 
   case 17:
-#line 84 "rtsp.y" /* yacc.c:1646  */
+#line 83 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: client_port");
 		debug((yyvsp[0].uival));
@@ -1289,7 +1289,7 @@ yyreduce:
     break;
 
   case 18:
-#line 90 "rtsp.y" /* yacc.c:1646  */
+#line 89 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Transport: ... UDP");
 		req->udp = true;
@@ -1298,7 +1298,7 @@ yyreduce:
     break;
 
   case 19:
-#line 99 "rtsp.y" /* yacc.c:1646  */
+#line 98 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Session");
 		debug((yyvsp[0].uival));
@@ -1536,7 +1536,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 106 "rtsp.y" /* yacc.c:1906  */
+#line 105 "rtsp.y" /* yacc.c:1906  */
 
 
 
@@ -1545,7 +1545,7 @@ yyreturn:
 
 
 
-void parse(Rtsp::Request &request, Rtsp::Data data)
+void parse(Rtsp::Request &request, const Rtsp::Data data)
 {
 	#if PARSER_DEBUG != 1
 	mutex.lock();
@@ -1554,7 +1554,7 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 	debug("Parse started");
 	req = &request;
 	yyin = nullptr;
-	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(data.data), data.len);
+	auto bufState = yy_scan_bytes(reinterpret_cast<const char *>(data.data), data.len);
 	yyparse();
 	yy_delete_buffer(bufState);
 

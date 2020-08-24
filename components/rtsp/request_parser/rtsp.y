@@ -110,7 +110,7 @@ session:
 
 
 
-void parse(Rtsp::Request &request, Rtsp::Data data)
+void parse(Rtsp::Request &request, const Rtsp::Data data)
 {
 	#if PARSER_DEBUG != 1
 	mutex.lock();
@@ -119,7 +119,7 @@ void parse(Rtsp::Request &request, Rtsp::Data data)
 	debug("Parse started");
 	req = &request;
 	yyin = nullptr;
-	auto bufState = yy_scan_bytes(reinterpret_cast<char *>(data.data), data.len);
+	auto bufState = yy_scan_bytes(reinterpret_cast<const char *>(data.data), data.len);
 	yyparse();
 	yy_delete_buffer(bufState);
 
