@@ -10,7 +10,6 @@
 
 #include "asio.hpp"
 #include <map>
-#include <list>
 #include <utility>
 #include <memory>
 #include <set>
@@ -29,6 +28,19 @@ public:
 private:
 	void stream();
 	void syncQueue();
+
+	struct Streamee : public Rtsp::Identifiable<Streamee>{
+		asio::ip::udp::endpoint address;
+		bool isReceiving;
+	};
+
+	// -------------------- Info. about streams --------------------  //
+
+	std::set<std::unique_ptr<RtpPacketSource>> streamSources;
+
+	// Indexes
+	std::map<unsigned /*id of RtpPacketSource*/, std::vector<Streamee>> packetSourceIdToStreamee;
+	std::map<Rtsp::SessionId, unsigned /*id of RtpPacketSource*/> sessionIdToPacketSourceId;
 
 	asio::detail::mutex queueMutex;
 };

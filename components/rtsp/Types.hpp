@@ -19,6 +19,38 @@
 
 namespace Rtsp {
 
+/// Mix-in class, decorates its offspings
+/// with static identification facilities.
+template <typename T>
+struct Identifiable {
+	unsigned id() const
+	{
+		return this->mId;
+	}
+	Identifiable() : mId(boundId++)
+	{
+	}
+	Identifiable(const Identifiable &) : Identifiable()
+	{
+	}
+	Identifiable(Identifiable &&i)
+	{
+
+	}
+	Identifiable &operator=(const Identifiable &)
+	{
+	}
+	Identifiable &operator=(Identifiable &&i)
+	{
+		mId = i.mId;
+	}
+private:
+	static unsigned boundId;
+	unsigned mId;
+};
+template <typename T>
+unsigned Identifiable<T>::boundId = 1;
+
 // Const data buffer view
 struct Data {
 	const void *data;
