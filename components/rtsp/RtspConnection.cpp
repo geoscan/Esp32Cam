@@ -19,27 +19,12 @@ RtspConnection::RtspConnection(tcp::socket socket)
 
 void RtspConnection::serve()
 {
-//	auto self(shared_from_this());
-//	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
-//		[this, self](std::error_code err, size_t length) {
-//			if (!err) {
-//				send(length);
-//			}
-//		});
-
-	while (true) {
-		asio::error_code err;
-		size_t len = tcpSocket.receive(asio::buffer(buf, kBufSize), 0 /*no flags*/, err);
-		Rtsp::Data data;
-
-		if (!err) {
-			data = requestHandler.handle(Rtsp::Data{static_cast<void *>(buf), len});
-		} else {
-			return;
-		}
-
-		if (data.len) {
-			tcpSocket.send(asio::buffer(data.data, data.len));
-		}
-	}
+	auto self(shared_from_this());
+	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
+		[this, self](std::error_code err, size_t length) {
+			if (!err) {
+				// TODO: perform handling of a user request
+			}
+			serve();
+		});
 }
