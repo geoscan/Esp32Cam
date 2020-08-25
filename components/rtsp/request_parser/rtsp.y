@@ -61,12 +61,17 @@ text:
 
  
 word:
-	UINT
-|	FLOAT
+	token_word
 |	format
 |	cseq
 |	transport
 |	session
+;
+
+
+token_word:
+	UINT
+|	FLOAT
 ;
 
 
