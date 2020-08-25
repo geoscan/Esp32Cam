@@ -7,7 +7,7 @@
 
 using namespace std;
 
-extern void parse(Rtsp::Request &, Rtsp::Data);
+extern void parse(Rtsp::Request &, const void *, size_t);
 
 
 #if PARSER_DEBUG == 1
@@ -20,9 +20,9 @@ int main(void)
     debug(sizeof(requestBody));
 
     Rtsp::Request request;
-    Rtsp::Data    data{requestBody, sizeof(requestBody)};
+    // Rtsp::Data    data{requestBody, sizeof(requestBody)};
 
-    parse(request, data);
+    parse(request, requestBody, sizeof(requestBody));
     
     cout << request.cseq.val() << endl;
     cout << request.session.val() << endl;

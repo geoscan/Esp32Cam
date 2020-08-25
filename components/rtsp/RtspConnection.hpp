@@ -10,10 +10,11 @@
 
 #include "asio.hpp"
 #include "RtspRequestHandler.hpp"
+#include "RtpServer.hpp"
 
 class RtspConnection final : public std::enable_shared_from_this<RtspConnection> {
 public:
-	RtspConnection(asio::ip::tcp::socket socket);
+	RtspConnection(asio::ip::tcp::socket socket, RtpServer &rtp);
 	void serve();
 private:
 	enum {

@@ -9,21 +9,19 @@
 #define COMPONENTS_RTSP_RTSPSERVER_HPP
 
 #include "RtspConnection.hpp"
+#include "RtpServer.hpp"
 
 // RTSP server implementation
 // Invokes a creation of RTP streams over UDP
 
 class RtspServer final {
 public:
-	RtspServer(asio::io_context &);
+	RtspServer(asio::io_context &, unsigned port, RtpServer &);
 	void acceptConnection();
 
 private:
-	enum {
-		kPort = 554, // Standard RTSP port
-	};
-
 	asio::ip::tcp::tcp::acceptor tcpAcceptor;
+	RtpServer &rtpServer;
 };
 
 #endif // COMPONENTS_RTSP_RTSPSERVER_HPP

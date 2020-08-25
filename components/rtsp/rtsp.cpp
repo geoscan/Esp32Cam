@@ -11,6 +11,7 @@
 void rtspStart()
 {
     asio::io_context context;
-    RtspServer server(context);
+    RtpServer rtpServer(context, 1234);
+    RtspServer rtspServer(context, 554, rtpServer);
     context.run();
 }

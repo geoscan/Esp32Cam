@@ -12,8 +12,9 @@
 using namespace std;
 using namespace asio::ip;
 
-RtspConnection::RtspConnection(tcp::socket socket)
-	: tcpSocket(move(socket))
+RtspConnection::RtspConnection(tcp::socket socket, RtpServer &rtp) :
+	tcpSocket(move(socket)),
+	rtpServer(rtp)
 {
 }
 
@@ -23,7 +24,8 @@ void RtspConnection::serve()
 	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
 		[this, self](std::error_code err, size_t length) {
 			if (!err) {
-				// TODO: perform handling of a user request
+				asio::const_buffer buf = requestHandler.handle({buf, length});
+				tcpSocket.send(buf, 0);
 			}
 			serve();
 		});

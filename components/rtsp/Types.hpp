@@ -9,14 +9,13 @@
 #define COMPONENTS_RTSP_TYPES_HPP
 
 #include <cstddef>
+#include <cstdint>
 #include <algorithm>
 #include <memory>
 
 
 
 // --------- Types used across multiple project's parts --------- //
-
-
 
 namespace Rtsp {
 
@@ -26,10 +25,17 @@ struct Data {
 	size_t len;
 };
 
+using SessionId = unsigned;
 
+enum class StatusCode {
+	Ok = 200,
+	MethodNotAllowed = 405,
+	SessionNotFound = 454,
+	MethodNotValidInThisState = 455,
+	UnsupportedTransport = 461
+};
 
 // -------------------- Parser-related types -------------------- //
-
 
 
 template <typename T>
@@ -86,7 +92,7 @@ enum class RequestType {
 
 
 // Represents common request fields
-struct Request {
+struct Request final {
 	Optval<RequestType> requestType;
 	Optval<unsigned>    cseq;
 	Optval<unsigned>    session;
