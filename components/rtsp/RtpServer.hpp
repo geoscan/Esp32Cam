@@ -13,21 +13,34 @@
 #include <utility>
 #include <memory>
 #include <set>
+#include <list>
 #include "Types.hpp"
 #include "RtpPacketSource.hpp"
 
-// RtpServer, sends RTP packages over UDP
 class RtpServer final {
 public:
 	RtpServer(asio::io_context &, unsigned port);
-	bool addStreamee(Rtsp::SessionId, std::unique_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
+	bool addSession(Rtsp::SessionId, std::unique_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
 	/// Attach streamee to an existing 'RtpPacketSource'
-	bool attachStreamee(unsigned packetSourceId, asio::ip::udp::endpoint recipient);
-	bool removeStreamee(Rtsp::SessionId);
-	bool setStreameeState(Rtsp::SessionId, bool isReceiving);
+	bool addSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
+	bool removeSession(Rtsp::SessionId);
+	bool setSessionStreaming(Rtsp::SessionId, bool isStreaming);
+
 private:
 	void stream();
-	void syncQueue();
+	void sync();
+
+	// Streams storage and relevant operations
+
+	using Sinks    = std::set<asio::ip::udp::endpoint>;
+	using Sessions = std::map<Rtsp::SessionId, std::pair<unsigned /*source id*/, asio::ip::udp::endpoint>,
+		RtpPacketSource::Less>; // Registered sessions
+	using Streams  = std::map<std::unique_ptr<RtpPacketSource>, Sinks>; // Ongoing streams
+
+	Streams streams;
+	Sessions sessions;
+
+	bool registerSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
 
 	struct Streamee : public Rtsp::Identifiable<Streamee>{
 		asio::ip::udp::endpoint address;

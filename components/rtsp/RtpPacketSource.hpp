@@ -22,14 +22,13 @@ public:
 };
 
 
-// WARN: The class is not thread safe,
-// custom thread-safety facilities are required
 class RtpPacketSource : public Rtsp::Identifiable<RtpPacketSource> {
 public:
 	virtual std::vector<std::unique_ptr<RtpPacket>> packets() = 0;
 	virtual ~RtpPacketSource()
 	{
 	}
+//	RtpPacketSource(RtpPacketSource &&s) : Rtsp::Identifiable<RtpPacketSource>(s) {};
 };
 
 #endif // COMPONENTS_RTSP_RTPPACKETESOURCE_HPP

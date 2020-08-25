@@ -12,30 +12,57 @@
 #include <cstdint>
 #include <algorithm>
 #include <memory>
+#include <type_traits>
 
+#include "parser_debug_flag.hpp"
 
-
-// --------- Types used across multiple project's parts --------- //
+#if PARSER_DEBUG != 1
+#include "asio.hpp"
+#endif
 
 namespace Rtsp {
 
-/// Mix-in class, decorates its offspings
-/// with static identification facilities.
+// ------------------------ Identifiable ------------------------ //
+
 template <typename T>
-struct Identifiable {
+class Identifiable {
+	static unsigned boundId;
+	#if PARSER_DEBUG != 1
+	static asio::detail::mutex mutex;
+	#endif
+	unsigned mId;
+
+	Identifiable(unsigned cid)
+	{
+		mId = cid;
+	}
+public:
 	unsigned id() const
 	{
 		return this->mId;
 	}
-	Identifiable() : mId(boundId++)
+	static std::unique_ptr<T> key(unsigned cid)
 	{
+		Identifiable<T> *dummy = new Identifiable<T>(cid);
+		return std::unique_ptr<T>(reinterpret_cast<T *>(dummy));
+	}
+	Identifiable() /*: mId(boundId++)*/
+	{
+		#if PARSER_DEBUG != 1
+		this->mutex.lock();
+		#endif
+
+		mId = boundId++;
+
+		#if PARSER_DEBUG != 1
+		this->mutex.unlock();
+		#endif
 	}
 	Identifiable(const Identifiable &) : Identifiable()
 	{
 	}
 	Identifiable(Identifiable &&i)
 	{
-
 	}
 	Identifiable &operator=(const Identifiable &)
 	{
@@ -44,18 +71,72 @@ struct Identifiable {
 	{
 		mId = i.mId;
 	}
-private:
-	static unsigned boundId;
-	unsigned mId;
+	virtual ~Identifiable()
+	{
+	}
+
+	struct Less {
+	private:
+		using Type = Identifiable<T>;
+		unsigned val(const Type &v) const
+		{
+			return v.id();
+		}
+		unsigned val(unsigned v) const
+		{
+			return v;
+		}
+		template <typename ... Args>
+		unsigned val(const std::unique_ptr<Args...> &v) const
+		{
+			return v->id();
+		}
+		template <typename ... Args>
+		unsigned val(const std::shared_ptr<Args...> &v) const
+		{
+			return v->id();
+		}
+	public:
+		template <typename Ltype, typename Rtype>
+		bool operator()(const Ltype &l, const Rtype &r) const
+		{
+			return val(l) < val(r);
+		}
+	};
 };
+
 template <typename T>
 unsigned Identifiable<T>::boundId = 1;
 
-// Const data buffer view
+
+// ------------------------- Lock guard ------------------------- //
+
+#if PARSER_DEBUG != 1
+struct LockGuard {
+private:
+	asio::detail::mutex &mut;
+public:
+	LockGuard(asio::detail::mutex &mutex) : mut(mutex)
+	{
+		mutex.lock();
+	}
+	~LockGuard()
+	{
+		mut.unlock();
+	}
+};
+#endif // PARSER_DEBUG != 1
+
+
+// ---------------------- Data buffer view ---------------------- //
+
 struct Data {
 	const void *data;
 	size_t len;
 };
+
+
+// -------------------- Parser-related types -------------------- //
 
 using SessionId = unsigned;
 
@@ -66,8 +147,6 @@ enum class StatusCode {
 	MethodNotValidInThisState = 455,
 	UnsupportedTransport = 461
 };
-
-// -------------------- Parser-related types -------------------- //
 
 
 template <typename T>
