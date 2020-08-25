@@ -27,7 +27,7 @@ SETUP       {newtoken(SETUP);}
 TEARDOWN    {newtoken(TEARDOWN);}
 PLAY        {newtoken(PLAY);}
 PAUSE       {newtoken(PAUSE);}
-
+mjpeg       {newtoken(MJPEG);}
 
 [\n\r]+           ;
 \-?[0-9]+\.[0-9]+ {debug("==========> FLOAT"); 

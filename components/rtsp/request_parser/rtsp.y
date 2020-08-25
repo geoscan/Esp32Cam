@@ -34,6 +34,7 @@
 %token PLAY        
 %token PAUSE       
 
+%token MJPEG
 
 %%
 
@@ -55,16 +56,22 @@ request_type:
 
 text:
 	word
-|	text word	
-|	text cseq
-|	text transport
-|	text session
+|	text word
 ;
 
  
 word:
 	UINT
 |	FLOAT
+|	format
+|	cseq
+|	transport
+|	session
+;
+
+
+format:
+	MJPEG {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}
 ;
 
 

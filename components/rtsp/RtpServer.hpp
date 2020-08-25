@@ -21,9 +21,11 @@
 class RtpServer final {
 public:
 	RtpServer(asio::io_context &, unsigned port);
-	bool addStreamee(std::shared_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
-	bool removeStreamee(std::weak_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
-	bool setStreameeState(std::weak_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient, bool isReceiving);
+	bool addStreamee(Rtsp::SessionId, std::unique_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
+	/// Attach streamee to an existing 'RtpPacketSource'
+	bool attachStreamee(unsigned packetSourceId, asio::ip::udp::endpoint recipient);
+	bool removeStreamee(Rtsp::SessionId);
+	bool setStreameeState(Rtsp::SessionId, bool isReceiving);
 private:
 	void stream();
 	void syncQueue();

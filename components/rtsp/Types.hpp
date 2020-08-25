@@ -91,6 +91,12 @@ enum class RequestType {
 };
 
 
+enum class Format {
+	NotStated, // unsupported
+	Mjpeg
+};
+
+
 // Represents common request fields
 struct Request final {
 	Optval<RequestType> requestType;
@@ -98,6 +104,7 @@ struct Request final {
 	Optval<unsigned>    session;
 	Optval<unsigned>    clientPort;
 	Optval<bool>        udp; // Transport: client requests using UDP
+	Optval<Format>      format;
 };
 
 } // Rtsp
