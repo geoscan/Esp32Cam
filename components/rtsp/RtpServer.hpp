@@ -27,21 +27,27 @@ public:
 	bool setSessionStreaming(Rtsp::SessionId, bool enableStreaming);
 
 private:
+
 	void stream();
 	void sync();
 
 	// Streams storage and relevant operations
-
+	using Endpoint = asio::ip::udp::endpoint;
 	using Sinks    = std::set<asio::ip::udp::endpoint>;
-	using Sessions = std::map<Rtsp::SessionId, std::pair<unsigned /*source id*/, asio::ip::udp::endpoint>,
+	using Sessions = std::map<Rtsp::SessionId, std::pair<unsigned /*source id*/, Endpoint>,
 		RtpPacketSource::Less>; // Registered sessions
 	using Streams  = std::map<std::unique_ptr<RtpPacketSource>, Sinks>; // Ongoing streams
 
 	Streams streams;
 	Sessions sessions;
 
-	bool registerSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
-//	bool removeSink(unsigned sourceId, asio::ip::udp::endpoint);
+	/// @return <END, 0,  DEFAULT>, if session doesn't exist
+	///         <POS, ID, ADDRESS> otherwise
+	std::pair<unsigned, Endpoint> session(Rtsp::SessionId);
+
+	bool registerSession(Rtsp::SessionId, unsigned packetSourceId, Endpoint recipient);
+	void attachSink(unsigned sourceId, Endpoint);
+	void detachSink(unsigned sourceId, Endpoint);
 
 	struct Streamee : public Rtsp::Identifiable<Streamee>{
 		asio::ip::udp::endpoint address;

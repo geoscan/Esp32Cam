@@ -37,6 +37,7 @@ class Identifiable {
 		mId = cid;
 	}
 public:
+	static constexpr unsigned NoId = 0;
 	unsigned id() const
 	{
 		return this->mId;
@@ -106,7 +107,7 @@ public:
 };
 
 template <typename T>
-unsigned Identifiable<T>::boundId = 1;
+unsigned Identifiable<T>::boundId = Identifiable<T>::NoId + 1;
 
 
 // ------------------------- Lock guard ------------------------- //

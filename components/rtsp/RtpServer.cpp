@@ -1,3 +1,4 @@
+#include <tuple>
 #include <utility>
 #include "RtpServer.hpp"
 
@@ -35,25 +36,17 @@ bool RtpServer::addSession(Rtsp::SessionId sid, unsigned sourceId, asio::ip::udp
 bool RtpServer::removeSession(Rtsp::SessionId sid)
 {
 	Rtsp::LockGuard lockGuard{queueMutex};
+	unsigned        sourceId;
+	Endpoint        ep;
 
-	auto itSess = sessions.find(sid);
+	tie(sourceId, ep) = session(sid);
 
-	if (itSess == sessions.end()) {
-		return false; // Sessions does not exist
+	if (sourceId == 0) {
+		return false;
 	}
+	detachSink(sourceId, ep);
 
-	auto sourceId = itSess->second.first;
-	auto sink = itSess->second.second;
-	auto sourceKey(RtpPacketSource::key(sourceId));
-
-	auto itStream = streams.find(sourceKey); // Source is guaranteed to be there
-	auto itSink = itStream->second.find(sink);
-
-	if (itSink != itStream->second.end()) { // Remove a sink from the queue
-		itStream->second.erase(itSink);
-	}
-
-	sessions.erase(itSess);
+	sessions.erase(sid);
 
 	return true;
 }
@@ -61,27 +54,21 @@ bool RtpServer::removeSession(Rtsp::SessionId sid)
 bool RtpServer::setSessionStreaming(Rtsp::SessionId sid, bool enableStreaming)
 {
 	Rtsp::LockGuard lockGuard{queueMutex};
-	auto itSess = sessions.find(sid);
+	unsigned        sourceId;
+	Endpoint        ep;
 
-	if (itSess == sessions.end()) {
-		return false; // Sessions does not exist
+	tie(sourceId, ep) = session(sid);
+
+	if (sourceId == 0) {
+		return false;
 	}
-
-	unsigned sourceId = itSess->second.first;
-	asio::ip::udp::endpoint ep = itSess->second.second;
-	auto key(RtpPacketSource::key(sourceId));
-	auto itStream = streams.find(key); // Source is guaranteed to be there
-
-	Sinks &sinks = itStream->second;
 
 	if (enableStreaming) {
-		sinks.insert(ep);
+		attachSink(sourceId, ep);
 	} else {
-		auto itSink = sinks.find(ep);
-		if (itSink != sinks.end()) {
-			sinks.erase(itSink);
-		}
+		detachSink(sourceId, ep);
 	}
+
 	return true;
 }
 
@@ -89,7 +76,7 @@ bool RtpServer::setSessionStreaming(Rtsp::SessionId sid, bool enableStreaming)
 // -------------------------- Private --------------------------- //
 
 
-bool RtpServer::registerSession(Rtsp::SessionId sid, unsigned sourceId, asio::ip::udp::endpoint recipient)
+bool RtpServer::registerSession(Rtsp::SessionId sid, unsigned sourceId, Endpoint recipient)
 {
 	if (sessions.find(sid) != sessions.end()) {
 		return false; // Session already exists
@@ -102,4 +89,39 @@ bool RtpServer::registerSession(Rtsp::SessionId sid, unsigned sourceId, asio::ip
 
 	sessions.emplace(make_pair(sid, make_pair(sourceId, recipient)));
 	return true;
+}
+
+pair<unsigned, RtpServer::Endpoint> RtpServer::session(Rtsp::SessionId sid)
+{
+	auto itSess = sessions.find(sid);
+
+	if (itSess == sessions.end()) {
+		return {RtpPacketSource::NoId, {}};
+	}
+
+	return itSess->second;
+}
+
+void RtpServer::detachSink(unsigned sourceId, Endpoint ep)
+{
+	auto key(RtpPacketSource::key(sourceId));
+	auto itStream = streams.find(key);
+
+	if (itStream == streams.end()) {
+		return;
+	}
+
+	itStream->second.erase(ep);
+}
+
+void RtpServer::attachSink(unsigned sourceId, Endpoint ep)
+{
+	auto key(RtpPacketSource::key(sourceId));
+	auto itStream = streams.find(key);
+
+	if (itStream == streams.end()) {
+		return;
+	}
+
+	itStream->second.emplace(ep);
 }
