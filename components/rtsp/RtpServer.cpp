@@ -58,6 +58,33 @@ bool RtpServer::removeSession(Rtsp::SessionId sid)
 	return true;
 }
 
+bool RtpServer::setSessionStreaming(Rtsp::SessionId sid, bool enableStreaming)
+{
+	Rtsp::LockGuard lockGuard{queueMutex};
+	auto itSess = sessions.find(sid);
+
+	if (itSess == sessions.end()) {
+		return false; // Sessions does not exist
+	}
+
+	unsigned sourceId = itSess->second.first;
+	asio::ip::udp::endpoint ep = itSess->second.second;
+	auto key(RtpPacketSource::key(sourceId));
+	auto itStream = streams.find(key); // Source is guaranteed to be there
+
+	Sinks &sinks = itStream->second;
+
+	if (enableStreaming) {
+		sinks.insert(ep);
+	} else {
+		auto itSink = sinks.find(ep);
+		if (itSink != sinks.end()) {
+			sinks.erase(itSink);
+		}
+	}
+	return true;
+}
+
 
 // -------------------------- Private --------------------------- //
 

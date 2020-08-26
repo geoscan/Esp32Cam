@@ -112,6 +112,9 @@ unsigned Identifiable<T>::boundId = 1;
 // ------------------------- Lock guard ------------------------- //
 
 #if PARSER_DEBUG != 1
+
+/// Poor man's lock guard. More on this topic:
+/// https://en.cppreference.com/w/cpp/thread/lock_guard
 struct LockGuard {
 private:
 	asio::detail::mutex &mut;

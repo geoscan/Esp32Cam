@@ -24,7 +24,7 @@ public:
 	/// Attach streamee to an existing 'RtpPacketSource'
 	bool addSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
 	bool removeSession(Rtsp::SessionId);
-	bool setSessionStreaming(Rtsp::SessionId, bool isStreaming);
+	bool setSessionStreaming(Rtsp::SessionId, bool enableStreaming);
 
 private:
 	void stream();
@@ -41,6 +41,7 @@ private:
 	Sessions sessions;
 
 	bool registerSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
+//	bool removeSink(unsigned sourceId, asio::ip::udp::endpoint);
 
 	struct Streamee : public Rtsp::Identifiable<Streamee>{
 		asio::ip::udp::endpoint address;
