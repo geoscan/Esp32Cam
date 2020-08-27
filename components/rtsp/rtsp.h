@@ -8,8 +8,10 @@
 #ifndef RTSP_H
 #define RTSP_H
 
-constexpr unsigned kRtpPort = 1234;
-constexpr unsigned kRtspPort = 554;
+#include "sdkconfig.h"
+
+constexpr unsigned kRtpPort = CONFIG_RTP_UDP_PORT;
+constexpr unsigned kRtspPort = CONFIG_RTSP_TCP_PORT;
 
 void rtspStart();
 

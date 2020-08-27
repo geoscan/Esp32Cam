@@ -143,6 +143,13 @@ CONFIG_DEVTEST_HTTP_ENABLE_CAM=y
 # end of Dev. test HTTP
 
 #
+# RTSP, RTP server
+#
+CONFIG_RTSP_TCP_PORT=554
+CONFIG_RTP_UDP_PORT=4321
+# end of RTSP, RTP server
+
+#
 # WiFi
 #
 CONFIG_ESP_WIFI_SSID="HaveSomeCoffee"
