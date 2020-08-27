@@ -4,18 +4,15 @@
 #include <utility>
 #include "img_converters.h"
 #include <cstdint>
-#include "Image.hpp"
+#include <memory>
+#include "asio.hpp"
 
-//enum class JpegQuality : uint8_t {
-//	Lowest  =   1,
-//	Low     =  25,
-//	Medium  =  50,
-//	High    =  75,
-//	Highest = 100,
-//};
+// --------------------------- Ov2640 --------------------------- //
 
 class Ov2640 {
 public:
+	struct Image;
+
 	static Ov2640 &instance();
 
 	Ov2640(const Ov2640 &) = delete;
@@ -24,12 +21,33 @@ public:
 	Ov2640 &operator=(Ov2640 &&) = delete;
 	~Ov2640();
 
-	Image jpeg();
+	std::unique_ptr<Ov2640::Image> jpeg();
 
 private:
 	static void init();
 	static bool isInit;
 	Ov2640();
+};
+
+
+// ---------------------------  Image --------------------------- //
+
+
+struct Ov2640::Image final {
+	friend class Ov2640;
+
+	asio::const_buffer data();
+	bool valid() const;
+	Image(const Image &) = delete;
+	Image(Image &&) = delete;
+	Image &operator=(const Image &) = delete;
+	Image &operator=(Image &) = delete;
+	~Image();
+private:
+	Image() = default;
+	void        *mData     {nullptr};
+	size_t      len      {0};
+	camera_fb_t *frameBuffer {nullptr};
 };
 
 

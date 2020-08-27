@@ -82,31 +82,29 @@ Ov2640 &Ov2640::instance()
 	return inst;
 }
 
-Image Ov2640::jpeg(/*JpegQuality quality*/)
+std::unique_ptr<Ov2640::Image> Ov2640::jpeg(/*JpegQuality quality*/)
 {
 	static constexpr uint8_t kJpegQuality = 80;
-	Image img;
-	CamOv2640::CameraLock lock;
+	CamOv2640::CameraLock    lock;
+	unique_ptr<Image>        imgPtr(new Image());
+	Image                    &img = *imgPtr;
 
 	if (!isInit) {
-		return img;
+		return {};
 	}
 
 	img.frameBuffer = esp_camera_fb_get();
 
 	if (!img.frameBuffer) {
-		img.valid = false;
-		return img;
+		return {};
 	}
 
 	if (img.frameBuffer->format == PIXFORMAT_JPEG) {
-		img.data.data = img.frameBuffer->buf;
-		img.data.len  = img.frameBuffer->len;
-		img.valid     = true;
+		img.mData = img.frameBuffer->buf;
+		img.len  = img.frameBuffer->len;
 	} else {
-		img.valid = frame2jpg(img.frameBuffer, kJpegQuality,
-			reinterpret_cast<uint8_t **>(&img.data.data), &img.data.len);
+		frame2jpg(img.frameBuffer, kJpegQuality, reinterpret_cast<uint8_t **>(&img.mData), &img.len);
 	}
 
-	return img;
+	return imgPtr;
 }
