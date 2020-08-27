@@ -5,8 +5,8 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#ifndef COMPONENTS_RTSP_RTPSERVER_HPP
-#define COMPONENTS_RTSP_RTPSERVER_HPP
+#ifndef COMPONENTS_RTSP_RTP_RTPSERVER_HPP
+#define COMPONENTS_RTSP_RTP_RTPSERVER_HPP
 
 #include "asio.hpp"
 #include <map>
@@ -53,4 +53,4 @@ private:
 	asio::ip::udp::socket udpSocket;
 };
 
-#endif // COMPONENTS_RTSP_RTPSERVER_HPP
+#endif // COMPONENTS_RTSP_RTP_RTPSERVER_HPP

@@ -8,4 +8,8 @@ config RTP_UDP_PORT
 	int "RTP server's UDP port"
 	default 4321
 
+config CAMERA_FPS
+	int "Camera's FPS used in real-time video streaming"
+	default 10
+
 endmenu

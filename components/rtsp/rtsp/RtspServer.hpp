@@ -5,8 +5,8 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#ifndef COMPONENTS_RTSP_RTSPSERVER_HPP
-#define COMPONENTS_RTSP_RTSPSERVER_HPP
+#ifndef COMPONENTS_RTSP_RTSP_RTSPSERVER_HPP
+#define COMPONENTS_RTSP_RTSP_RTSPSERVER_HPP
 
 #include "RtspConnection.hpp"
 #include "RtpServer.hpp"
@@ -26,4 +26,4 @@ private:
 	RtpServer &rtpServer;
 };
 
-#endif // COMPONENTS_RTSP_RTSPSERVER_HPP
+#endif // COMPONENTS_RTSP_RTSP_RTSPSERVER_HPP

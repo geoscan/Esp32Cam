@@ -5,8 +5,8 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#ifndef COMPONENTS_RTSP_RTSPREQUESTHANDLER_HPP
-#define COMPONENTS_RTSP_RTSPREQUESTHANDLER_HPP
+#ifndef COMPONENTS_RTSP_RTSP_RTSPREQUESTHANDLER_HPP
+#define COMPONENTS_RTSP_RTSP_RTSPREQUESTHANDLER_HPP
 
 #include <cstddef>
 #include "asio.hpp"
@@ -41,4 +41,4 @@ private:
 	RtpServer &rtpServer;
 };
 
-#endif // COMPONENTS_RTSP_RTSPREQUESTHANDLER_HPP
+#endif // COMPONENTS_RTSP_RTSP_RTSPREQUESTHANDLER_HPP
