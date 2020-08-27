@@ -1,7 +1,13 @@
 file(GLOB
 	SOURCE_FILES
 		"*.c"
-		"*.cpp")
+		"*.cpp"
+		"rtp/*.c"
+		"rtp/*.cpp"
+		"rtp_packet/*.c"
+		"rtp_packet/*.cpp"
+		"rtsp/*.c"
+		"rtsp/*.cpp")
 
 idf_component_register(
 	SRCS
@@ -10,6 +16,9 @@ idf_component_register(
 		request_parser/generated/rtsp.tab.cpp
     INCLUDE_DIRS
 		"."
+		"rtp"
+		"rtsp"
+		"rtp_packet"
 #	PRIV_INCLUDE_DIRS
 		"./request_parser/generated"
     REQUIRES
