@@ -10,7 +10,7 @@
 
 #include "asio.hpp"
 #include <memory>
-#include <vector>
+#include <queue>
 #include "Types.hpp"
 
 class RtpPacket {
@@ -21,11 +21,12 @@ public:
 	}
 };
 
+using Packets = std::queue<std::shared_ptr<RtpPacket>>;
 
 class RtpPacketSource : public Rtsp::Identifiable<RtpPacketSource> {
 public:
 //	virtual std::vector<RtpPacket> packets() = 0;
-	virtual std::shared_ptr<RtpPacket> packet() = 0;
+	virtual std::queue<std::shared_ptr<RtpPacket>> packets() = 0;
 	virtual ~RtpPacketSource()
 	{
 	}

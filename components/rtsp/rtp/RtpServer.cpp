@@ -16,10 +16,20 @@ void RtpServer::run()
 	while (true) {
 		Rtsp::LockGuard lockGuard(queueMutex);
 
+//		for (auto &stream : streams) {
+//			auto packet = stream.first->packet();
+//			for (auto &sink : stream.second) {
+//				udpSocket.send_to(packet->data(), sink);
+//			}
+//		}
 		for (auto &stream : streams) {
-			auto packet = stream.first->packet();
-			for (auto &sink : stream.second) {
-				udpSocket.send_to(packet->data(), sink);
+			Packets packets = stream.first->packets();
+			while (!packets.empty()) {
+				auto packet = packets.front();
+				for (auto &sink : stream.second) {
+					udpSocket.send_to(packet->data(), sink);
+				}
+				packets.pop();
 			}
 		}
 	}
