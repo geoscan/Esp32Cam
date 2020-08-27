@@ -16,4 +16,5 @@ idf_component_register(
         asio
 		pthread
 		esp_common
-		freertos)
+		freertos
+		OV2640)

@@ -12,7 +12,7 @@
 #include "pthread.h"
 #include "Server.hpp"
 
-/// Expects 'Runnable' having method 'run()'
+/// Expects 'Runnable' has method 'run()'
 template <typename Runnable>
 static void *run(void *instance)
 {
