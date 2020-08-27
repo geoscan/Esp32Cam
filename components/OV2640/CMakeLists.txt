@@ -65,4 +65,5 @@ idf_component_register(
 		wifi
 		OV2640
 		protocol_examples_common
-		esp_http_server)
+		esp_http_server
+		asio)

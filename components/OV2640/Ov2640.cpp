@@ -1,6 +1,7 @@
 #include "Ov2640.hpp"
 #include "esp_camera.h"
 #include <algorithm>
+#include "CameraLock.hpp"
 
 using namespace std;
 
@@ -8,11 +9,13 @@ bool Ov2640::isInit{false};
 
 Ov2640::Ov2640()
 {
+	CamOv2640::CameraLock lock;
 	init();
 }
 
 Ov2640::~Ov2640()
 {
+	CamOv2640::CameraLock lock;
 	esp_camera_deinit();
 }
 
@@ -83,6 +86,7 @@ Image Ov2640::jpeg(/*JpegQuality quality*/)
 {
 	static constexpr uint8_t kJpegQuality = 80;
 	Image img;
+	CamOv2640::CameraLock lock;
 
 	if (!isInit) {
 		return img;

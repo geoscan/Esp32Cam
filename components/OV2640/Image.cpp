@@ -1,5 +1,6 @@
 #include "Image.hpp"
 #include <algorithm>
+#include "CameraLock.hpp"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ Image &Image::operator=(Image &&i)
 
 Image::~Image()
 {
+	CamOv2640::CameraLock lock;
 	esp_camera_fb_return(frameBuffer);
 	// TODO: WARNING: make a proper inquiry about whether we should free 'raw',
 	// or 'esp_camera_fb_return' will do that for us.
