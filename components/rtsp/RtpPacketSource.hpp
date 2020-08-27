@@ -24,7 +24,8 @@ public:
 
 class RtpPacketSource : public Rtsp::Identifiable<RtpPacketSource> {
 public:
-	virtual std::vector<std::unique_ptr<RtpPacket>> packets() = 0;
+//	virtual std::vector<RtpPacket> packets() = 0;
+	virtual std::unique_ptr<RtpPacket> packet() = 0;
 	virtual ~RtpPacketSource()
 	{
 	}

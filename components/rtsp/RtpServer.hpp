@@ -50,6 +50,7 @@ private:
 	void detachSink(unsigned sourceId, Endpoint);
 
 	asio::detail::mutex queueMutex;
+	asio::ip::udp::socket udpSocket;
 };
 
 #endif // COMPONENTS_RTSP_RTPSERVER_HPP

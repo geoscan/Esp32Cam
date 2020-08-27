@@ -34,8 +34,8 @@ void rtspStart()
 	esp_pthread_set_cfg(&cfg);
 
 	pthread_t stub;
-//	pthread_create(&stub, NULL, run<RtpServer>, reinterpret_cast<void *>(&rtpServer));
+	pthread_create(&stub, NULL, run<RtpServer>, reinterpret_cast<void *>(&rtpServer));
 	pthread_create(&stub, NULL, run<RtspServer>, reinterpret_cast<void *>(&rtspServer));
-//	pthread_create(&stub, NULL, run<asio::io_context>, reinterpret_cast<void *>(&rtpContext));
+	pthread_create(&stub, NULL, run<asio::io_context>, reinterpret_cast<void *>(&rtpContext));
 	pthread_create(&stub, NULL, run<asio::io_context>, reinterpret_cast<void *>(&rtspContext));
 }

@@ -4,13 +4,25 @@
 
 using namespace std;
 
-RtpServer::RtpServer(asio::io_context &, unsigned /*port*/)
+using asio::ip::udp;
+
+RtpServer::RtpServer(asio::io_context &context, unsigned port):
+	udpSocket(context, udp::endpoint(udp::v4(), port))
 {
 }
 
 void RtpServer::run()
 {
-	while (true); // WARN:
+	while (true) {
+		Rtsp::LockGuard lockGuard(queueMutex);
+
+		for (auto &stream : streams) {
+			auto packet = stream.first->packet();
+			for (auto &sink : stream.second) {
+				udpSocket.send_to(packet->data(), sink);
+			}
+		}
+	}
 }
 
 bool RtpServer::addSession(Rtsp::SessionId sid, std::unique_ptr<RtpPacketSource> source,
