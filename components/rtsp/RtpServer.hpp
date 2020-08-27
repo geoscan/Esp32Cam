@@ -16,8 +16,9 @@
 #include <list>
 #include "Types.hpp"
 #include "RtpPacketSource.hpp"
+#include "Server.hpp"
 
-class RtpServer final {
+class RtpServer final : public Server {
 public:
 	RtpServer(asio::io_context &, unsigned port);
 	bool addSession(Rtsp::SessionId, std::unique_ptr<RtpPacketSource>, asio::ip::udp::endpoint recipient);
@@ -25,11 +26,10 @@ public:
 	bool addSession(Rtsp::SessionId, unsigned packetSourceId, asio::ip::udp::endpoint recipient);
 	bool removeSession(Rtsp::SessionId);
 	bool setSessionStreaming(Rtsp::SessionId, bool enableStreaming);
+	void run() override;
 
 private:
 
-	void stream();
-	void sync();
 
 	// Streams storage and relevant operations
 	using Endpoint = asio::ip::udp::endpoint;

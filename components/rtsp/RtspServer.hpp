@@ -10,16 +10,18 @@
 
 #include "RtspConnection.hpp"
 #include "RtpServer.hpp"
+#include "Server.hpp"
 
 // RTSP server implementation
 // Invokes a creation of RTP streams over UDP
 
-class RtspServer final {
+class RtspServer final : public Server {
 public:
 	RtspServer(asio::io_context &, unsigned port, RtpServer &);
-	void acceptConnection();
+	void run() override;
 
 private:
+	void acceptConnection();
 	asio::ip::tcp::tcp::acceptor tcpAcceptor;
 	RtpServer &rtpServer;
 };

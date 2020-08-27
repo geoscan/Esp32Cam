@@ -8,6 +8,11 @@ RtpServer::RtpServer(asio::io_context &, unsigned /*port*/)
 {
 }
 
+void RtpServer::run()
+{
+	while (true); // WARN:
+}
+
 bool RtpServer::addSession(Rtsp::SessionId sid, std::unique_ptr<RtpPacketSource> source,
 	asio::ip::udp::endpoint recipient)
 {

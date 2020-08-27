@@ -13,4 +13,7 @@ idf_component_register(
 #	PRIV_INCLUDE_DIRS
 		"./request_parser/generated"
     REQUIRES
-        asio)
+        asio
+		pthread
+		esp_common
+		freertos)

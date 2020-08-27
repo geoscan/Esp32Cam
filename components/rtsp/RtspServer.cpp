@@ -15,6 +15,10 @@ RtspServer::RtspServer(asio::io_context &context, unsigned port, RtpServer &rtp)
 	tcpAcceptor(context, tcp::endpoint(tcp::v4(), port)),
 	rtpServer(rtp)
 {
+}
+
+void RtspServer::run()
+{
 	acceptConnection();
 }
 
