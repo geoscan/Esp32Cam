@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <string>
 
 #include "request_parser/generated/parser_debug_flag.hpp"
 
@@ -145,8 +146,9 @@ struct Data {
 using SessionId = unsigned;
 
 // https://tools.ietf.org/html/rfc2326#page-41
-enum class StatusCode {
+enum class StatusCode : unsigned {
 	Ok = 200,
+	StreamNotFound = 404,
 	MethodNotAllowed = 405,
 	SessionNotFound = 454,
 	MethodNotValidInThisState = 455,
@@ -222,6 +224,8 @@ struct Request final {
 	Optval<unsigned>    clientPort;
 	Optval<bool>        udp; // Transport: client requests using UDP
 	Optval<Format>      format;
+	Optval<std::string> hostaddr;
+	Optval<std::string> hostport;
 };
 
 } // Rtsp

@@ -16,19 +16,27 @@
 
 %option noyywrap
 
+%x rtsphost
+%x rtspport
 
 %%
-CSeq:       {newtoken(CSEQ); }
-client_port {newtoken(CLIENT_PORT); }
-Session:    {newtoken(SESSION); }
-\/UDP       {newtoken(UDP); }
-DESCRIBE    {newtoken(DESCRIBE);}
-SETUP       {newtoken(SETUP);}
-TEARDOWN    {newtoken(TEARDOWN);}
-PLAY        {newtoken(PLAY);}
-PAUSE       {newtoken(PAUSE);}
-OPTION      {newtoken(OPTION);}
-mjpeg       {newtoken(MJPEG);}
+rtsp:\/\/             {BEGIN(rtsphost);}
+<rtsphost>[^\/\:]+    {yylval.sval = strdup(yytext); newtoken(RTSP_HOST_ADDR);}
+<rtspport>[^\/\:]+    {yylval.sval = strdup(yytext); newtoken(RTSP_HOST_PORT);}
+<rtsphost>\:          {BEGIN(rtspport);}
+<rtsphost,rtspport>\/ {BEGIN(INITIAL);}
+
+CSeq:          {newtoken(CSEQ); }
+client_port    {newtoken(CLIENT_PORT); }
+Session:       {newtoken(SESSION); }
+\/UDP          {newtoken(UDP); }
+DESCRIBE       {newtoken(DESCRIBE);}
+SETUP          {newtoken(SETUP);}
+TEARDOWN       {newtoken(TEARDOWN);}
+PLAY           {newtoken(PLAY);}
+PAUSE          {newtoken(PAUSE);}
+OPTION         {newtoken(OPTION);}
+mjpeg          {newtoken(MJPEG);}
 
 [\n\r]+           ;
 \-?[0-9]+\.[0-9]+ {debug("==========> FLOAT"); 

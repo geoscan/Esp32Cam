@@ -18,10 +18,13 @@
 %union {
 	int   uival;
 	float fval;
+	char  *sval;
 }
 
 %token <uival> UINT
 %token <fval> FLOAT
+%token <sval> RTSP_HOST_ADDR
+%token <sval> RTSP_HOST_PORT
 
 %token CSEQ
 %token CLIENT_PORT
@@ -68,6 +71,8 @@ word:
 |	cseq
 |	transport
 |	session
+|	RTSP_HOST_ADDR {req->hostaddr = $1;}
+|	RTSP_HOST_PORT {req->hostport = $1;}
 ;
 
 

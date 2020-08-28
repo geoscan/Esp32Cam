@@ -16,7 +16,7 @@ void debug(Arg arg)
 }
 
 # define DEBUG_TEXT \
-	"OPTION rtsp://example.com/media.mjpeg RTSP/1.0\r\n"\
+	"OPTION rtsp://example.com:554/media.mjpeg RTSP/1.0\r\n"\
     "CSeq: 1\r\n"\
     "Session:2\r\n"\
     "Require: implicit-play\r\n"\
