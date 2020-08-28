@@ -25,12 +25,10 @@ using Packets = std::queue<std::shared_ptr<RtpPacket>>;
 
 class RtpPacketSource : public Rtsp::Identifiable<RtpPacketSource> {
 public:
-//	virtual std::vector<RtpPacket> packets() = 0;
 	virtual std::queue<std::shared_ptr<RtpPacket>> packets() = 0;
 	virtual ~RtpPacketSource()
 	{
 	}
-//	RtpPacketSource(RtpPacketSource &&s) : Rtsp::Identifiable<RtpPacketSource>(s) {};
 };
 
 #endif // COMPONENTS_RTSP_RTPPACKETESOURCE_HPP

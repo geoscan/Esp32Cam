@@ -5,12 +5,6 @@
 #include "Ov2640.hpp"
 
 
-class RtpPacketOv2640;
-
-
-// -------------------- RtpPacketSourceOv2640 ------------------- //
-
-
 /// Transmits mjpeg frames acquired using OV2640
 class RtpPacketSourceOv2640 final : public RtpPacketSource {
 public:
