@@ -28,6 +28,7 @@ public:
 private:
 	asio::const_buffer handlePlay(const Rtsp::Request &);
 	asio::const_buffer handleDescribe(const Rtsp::Request &);
+	asio::const_buffer handleOption(const Rtsp::Request &);
 	asio::const_buffer handleSetup(const Rtsp::Request &);
 	asio::const_buffer handleTeardown(const Rtsp::Request &);
 	asio::const_buffer handlePause(const Rtsp::Request &);

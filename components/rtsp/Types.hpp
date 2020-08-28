@@ -14,7 +14,7 @@
 #include <memory>
 #include <type_traits>
 
-#include "parser_debug_flag.hpp"
+#include "request_parser/generated/parser_debug_flag.hpp"
 
 #if PARSER_DEBUG != 1
 #include "asio.hpp"
@@ -144,6 +144,7 @@ struct Data {
 
 using SessionId = unsigned;
 
+// https://tools.ietf.org/html/rfc2326#page-41
 enum class StatusCode {
 	Ok = 200,
 	MethodNotAllowed = 405,
@@ -202,7 +203,8 @@ enum class RequestType {
 	Setup,
 	Teardown,
 	Play,
-	Pause
+	Pause,
+	Option,
 };
 
 

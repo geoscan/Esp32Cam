@@ -32,7 +32,8 @@
 %token SETUP       
 %token TEARDOWN    
 %token PLAY        
-%token PAUSE       
+%token PAUSE
+%token OPTION
 
 %token MJPEG
 
@@ -50,6 +51,7 @@ request_type:
 |	TEARDOWN {req->requestType = Rtsp::RequestType::Teardown;  }
 |	PLAY     {req->requestType = Rtsp::RequestType::Play;      }
 |	PAUSE    {req->requestType = Rtsp::RequestType::Pause;     }
+|	OPTION   {req->requestType = Rtsp::RequestType::Option;    }
 |	         {req->requestType = Rtsp::RequestType::NotStated; }
 ;
 

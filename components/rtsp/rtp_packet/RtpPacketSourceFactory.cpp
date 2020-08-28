@@ -1,8 +1,16 @@
 #include "RtpPacketSourceFactory.hpp"
 #include "RtpPacketSourceOv2640.hpp"
 
+RtpPacketSourceFactory &RtpPacketSourceFactory::instance()
+{
+	static RtpPacketSourceFactory instance;
+	return instance;
+}
+
 std::unique_ptr<RtpPacketSource> RtpPacketSourceFactory::create(const Rtsp::Request &req, unsigned &idCreated)
 {
+	Rtsp::LockGuard lockGuard(mutex);
+
 	size_t type = detectType(req);
 	std::unique_ptr<RtpPacketSource> ptr;
 	idCreated = 0;

@@ -14,7 +14,16 @@ public:
 	/// @return <nullptr>, AND 'idCreated=0', on error.
 	///         <ptr-to-created-instance> or 'idCreated' OTHERWISE
 	std::unique_ptr<RtpPacketSource> create(const Rtsp::Request &, unsigned &idCreated);
+
+	static RtpPacketSourceFactory &instance();
+
+	RtpPacketSourceFactory(const RtpPacketSourceFactory &) = delete;
+	RtpPacketSourceFactory(RtpPacketSourceFactory &&) = delete;
+	RtpPacketSourceFactory &operator=(const RtpPacketSourceFactory &) = delete;
+	RtpPacketSourceFactory &operator=(RtpPacketSourceFactory &&) = delete;
 private:
+	RtpPacketSourceFactory() = default;
+
 	enum SourceType : size_t {
 		Ov2640 = 0,
 
@@ -29,9 +38,10 @@ private:
 	static bool isTypeOv2640(const Rtsp::Request &);
 	static void constructOv2640(const Rtsp::Request &, std::unique_ptr<RtpPacketSource> &ptr, unsigned &id);
 
-	// Arrays of callbacks
+	// Arrays of callbacks of size eq. SourceType::Undefined
 	static constexpr TypeArray<IsType>    isType   {{isTypeOv2640}};
 	static constexpr TypeArray<Construct> construct{{constructOv2640}};
+	static asio::detail::mutex            mutex;
 
 	size_t detectType(const Rtsp::Request &);
 //	std::unique_ptr<RtpPacketSource> create(SourceType, const Rtsp::Request &);

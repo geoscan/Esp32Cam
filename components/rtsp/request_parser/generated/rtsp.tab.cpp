@@ -125,7 +125,8 @@ extern int yydebug;
     TEARDOWN = 266,
     PLAY = 267,
     PAUSE = 268,
-    MJPEG = 269
+    OPTION = 269,
+    MJPEG = 270
   };
 #endif
 
@@ -139,7 +140,7 @@ union YYSTYPE
 	int   uival;
 	float fval;
 
-#line 143 "rtsp.tab.cpp" /* yacc.c:355  */
+#line 144 "rtsp.tab.cpp" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -156,7 +157,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 160 "rtsp.tab.cpp" /* yacc.c:358  */
+#line 161 "rtsp.tab.cpp" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -396,23 +397,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  8
+#define YYFINAL  9
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   16
+#define YYLAST   18
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  15
+#define YYNTOKENS  16
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  10
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  22
+#define YYNRULES  23
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  27
+#define YYNSTATES  28
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   269
+#define YYMAXUTOK   270
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -447,16 +448,17 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    43,    43,    48,    49,    50,    51,    52,    53,    58,
-      59,    64,    65,    66,    67,    68,    73,    74,    79,    84,
-      94,   100,   109
+       0,    44,    44,    49,    50,    51,    52,    53,    54,    55,
+      60,    61,    66,    67,    68,    69,    70,    75,    76,    81,
+      86,    96,   102,   111
 };
 #endif
 
@@ -467,8 +469,8 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "UINT", "FLOAT", "CSEQ", "CLIENT_PORT",
   "SESSION", "UDP", "DESCRIBE", "SETUP", "TEARDOWN", "PLAY", "PAUSE",
-  "MJPEG", "$accept", "head", "request_type", "text", "word", "token_word",
-  "format", "cseq", "transport", "session", YY_NULLPTR
+  "OPTION", "MJPEG", "$accept", "head", "request_type", "text", "word",
+  "token_word", "format", "cseq", "transport", "session", YY_NULLPTR
 };
 #endif
 
@@ -478,14 +480,14 @@ static const char *const yytname[] =
 static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
-     265,   266,   267,   268,   269
+     265,   266,   267,   268,   269,   270
 };
 # endif
 
-#define YYPACT_NINF -8
+#define YYPACT_NINF -11
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-8)))
+  (!!((Yystate) == (-11)))
 
 #define YYTABLE_NINF -1
 
@@ -496,9 +498,9 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       3,    -8,    -8,    -8,    -8,    -8,     6,    -3,    -8,    -8,
-      -8,     4,     5,     7,    -8,    -8,    -3,    -8,    -8,    -8,
-      -8,    -8,    -8,    -8,    -8,    -8,    -8
+       4,   -11,   -11,   -11,   -11,   -11,   -11,     6,    -3,   -11,
+     -11,   -11,     5,     7,     8,   -11,   -11,    -3,   -11,   -11,
+     -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -506,21 +508,21 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       8,     3,     4,     5,     6,     7,     0,     0,     1,    16,
-      17,     0,     0,     0,    21,    18,     2,     9,    11,    12,
-      13,    14,    15,    19,    20,    22,    10
+       9,     3,     4,     5,     6,     7,     8,     0,     0,     1,
+      17,    18,     0,     0,     0,    22,    19,     2,    10,    12,
+      13,    14,    15,    16,    20,    21,    23,    11
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-      -8,    -8,    -8,    -8,    -7,    -8,    -8,    -8,    -8,    -8
+     -11,   -11,   -11,   -11,   -10,   -11,   -11,   -11,   -11,   -11
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     6,     7,    16,    17,    18,    19,    20,    21,    22
+      -1,     7,     8,    17,    18,    19,    20,    21,    22,    23
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -528,39 +530,39 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-       9,    10,    11,    12,    13,    14,     8,    23,    24,    26,
-      25,    15,     1,     2,     3,     4,     5
+      10,    11,    12,    13,    14,    15,     9,    27,    24,     0,
+      25,    26,    16,     1,     2,     3,     4,     5,     6
 };
 
-static const yytype_uint8 yycheck[] =
+static const yytype_int8 yycheck[] =
 {
-       3,     4,     5,     6,     7,     8,     0,     3,     3,    16,
-       3,    14,     9,    10,    11,    12,    13
+       3,     4,     5,     6,     7,     8,     0,    17,     3,    -1,
+       3,     3,    15,     9,    10,    11,    12,    13,    14
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     9,    10,    11,    12,    13,    16,    17,     0,     3,
-       4,     5,     6,     7,     8,    14,    18,    19,    20,    21,
-      22,    23,    24,     3,     3,     3,    19
+       0,     9,    10,    11,    12,    13,    14,    17,    18,     0,
+       3,     4,     5,     6,     7,     8,    15,    19,    20,    21,
+      22,    23,    24,    25,     3,     3,     3,    20
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    15,    16,    17,    17,    17,    17,    17,    17,    18,
-      18,    19,    19,    19,    19,    19,    20,    20,    21,    22,
-      23,    23,    24
+       0,    16,    17,    18,    18,    18,    18,    18,    18,    18,
+      19,    19,    20,    20,    20,    20,    20,    21,    21,    22,
+      23,    24,    24,    25
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     2,     1,     1,     1,     1,     1,     0,     1,
-       2,     1,     1,     1,     1,     1,     1,     1,     1,     2,
-       2,     1,     2
+       0,     2,     2,     1,     1,     1,     1,     1,     1,     0,
+       1,     2,     1,     1,     1,     1,     1,     1,     1,     1,
+       2,     2,     1,     2
 };
 
 
@@ -1237,88 +1239,94 @@ yyreduce:
   switch (yyn)
     {
         case 3:
-#line 48 "rtsp.y" /* yacc.c:1646  */
+#line 49 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Describe;  }
-#line 1243 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1245 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 49 "rtsp.y" /* yacc.c:1646  */
+#line 50 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Setup;     }
-#line 1249 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1251 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 50 "rtsp.y" /* yacc.c:1646  */
+#line 51 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Teardown;  }
-#line 1255 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1257 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 51 "rtsp.y" /* yacc.c:1646  */
+#line 52 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Play;      }
-#line 1261 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1263 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 52 "rtsp.y" /* yacc.c:1646  */
+#line 53 "rtsp.y" /* yacc.c:1646  */
     {req->requestType = Rtsp::RequestType::Pause;     }
-#line 1267 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1269 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 53 "rtsp.y" /* yacc.c:1646  */
-    {req->requestType = Rtsp::RequestType::NotStated; }
-#line 1273 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 54 "rtsp.y" /* yacc.c:1646  */
+    {req->requestType = Rtsp::RequestType::Option;    }
+#line 1275 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
-  case 18:
-#line 79 "rtsp.y" /* yacc.c:1646  */
-    {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}
-#line 1279 "rtsp.tab.cpp" /* yacc.c:1646  */
+  case 9:
+#line 55 "rtsp.y" /* yacc.c:1646  */
+    {req->requestType = Rtsp::RequestType::NotStated; }
+#line 1281 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 85 "rtsp.y" /* yacc.c:1646  */
+#line 81 "rtsp.y" /* yacc.c:1646  */
+    {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}
+#line 1287 "rtsp.tab.cpp" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 87 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: CSeq");
 		debug((yyvsp[0].uival));
 		req->cseq = (yyvsp[0].uival);
 	}
-#line 1289 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1297 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
-  case 20:
-#line 95 "rtsp.y" /* yacc.c:1646  */
+  case 21:
+#line 97 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: client_port");
 		debug((yyvsp[0].uival));
 		req->clientPort = (yyvsp[0].uival);
 	}
-#line 1299 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1307 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
-  case 21:
-#line 101 "rtsp.y" /* yacc.c:1646  */
+  case 22:
+#line 103 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Transport: ... UDP");
 		req->udp = true;
 	}
-#line 1308 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1316 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 110 "rtsp.y" /* yacc.c:1646  */
+  case 23:
+#line 112 "rtsp.y" /* yacc.c:1646  */
     {
 		debug("GOT: Session");
 		debug((yyvsp[0].uival));
 		req->session = (yyvsp[0].uival);
 	}
-#line 1318 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1326 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 
 
-#line 1322 "rtsp.tab.cpp" /* yacc.c:1646  */
+#line 1330 "rtsp.tab.cpp" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1546,7 +1554,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 117 "rtsp.y" /* yacc.c:1906  */
+#line 119 "rtsp.y" /* yacc.c:1906  */
 
 
 
