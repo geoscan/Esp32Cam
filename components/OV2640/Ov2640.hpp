@@ -38,6 +38,7 @@ private:
 
 struct Ov2640::Image final {
 	friend class Ov2640;
+	const camera_fb_t *frameBuffer() const;
 
 	asio::const_buffer data();
 	bool valid() const;
@@ -48,9 +49,9 @@ struct Ov2640::Image final {
 	~Image();
 private:
 	Image() = default;
-	void        *mData     {nullptr};
-	size_t      len      {0};
-	camera_fb_t *frameBuffer {nullptr};
+	void        *mData        {nullptr};
+	size_t      len           {0};
+	camera_fb_t *mFrameBuffer {nullptr};
 };
 
 

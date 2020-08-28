@@ -93,17 +93,17 @@ std::unique_ptr<Ov2640::Image> Ov2640::jpeg(/*JpegQuality quality*/)
 		return {};
 	}
 
-	img.frameBuffer = esp_camera_fb_get();
+	img.mFrameBuffer = esp_camera_fb_get();
 
-	if (!img.frameBuffer) {
+	if (!img.mFrameBuffer) {
 		return {};
 	}
 
-	if (img.frameBuffer->format == PIXFORMAT_JPEG) {
-		img.mData = img.frameBuffer->buf;
-		img.len  = img.frameBuffer->len;
+	if (img.mFrameBuffer->format == PIXFORMAT_JPEG) {
+		img.mData = img.mFrameBuffer->buf;
+		img.len  = img.mFrameBuffer->len;
 	} else {
-		frame2jpg(img.frameBuffer, kJpegQuality, reinterpret_cast<uint8_t **>(&img.mData), &img.len);
+		frame2jpg(img.mFrameBuffer, kJpegQuality, reinterpret_cast<uint8_t **>(&img.mData), &img.len);
 	}
 
 	return imgPtr;
