@@ -73,6 +73,7 @@ text:
  
 word:
 	token_word
+|	rtsp_url
 |	format
 |	cseq
 |	transport
@@ -84,6 +85,28 @@ token_word:
 	UINT
 |	FLOAT
 ;
+
+
+rtsp_url:
+	RTSP_HOST RTSP_PORT RTSP_RESOURCE {
+		debug("RTSP <host> <port> <resource>");
+		debug($1);
+		debug($2);
+		debug($3);
+		req->hostaddr = std::string($1);
+		req->hostport = $2;
+		req->hostResource = std::string($3);
+	}
+
+|	RTSP_HOST RTSP_RESOURCE {
+		debug("RTSP <host> <resource>");
+		debug($1);
+		debug($2);
+		req->hostaddr = std::string($1);
+		req->hostResource = std::string($2);
+	}
+;
+
 
 format:
 	MJPEG {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}

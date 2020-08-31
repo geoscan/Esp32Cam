@@ -835,7 +835,7 @@ YY_LINENO_REWIND_TO(yy_cp - 1);
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
 #line 29 "rtsp.l"
-debug(yytext); BEGIN(rtspport); stoken(RTSP_HOST);
+debug(yytext); BEGIN(rtspport);     stoken(RTSP_HOST);
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
@@ -858,7 +858,7 @@ debug(yytext); BEGIN(rtspresource); uitoken(RTSP_PORT);
 case 5:
 YY_RULE_SETUP
 #line 32 "rtsp.l"
-debug(yytext); BEGIN(INITIAL); stoken(RTSP_RESOURCE);
+debug(yytext); BEGIN(INITIAL);      stoken(RTSP_RESOURCE);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP

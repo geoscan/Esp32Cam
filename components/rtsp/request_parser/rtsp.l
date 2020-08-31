@@ -26,10 +26,10 @@ URL [a-zA-Z0-9\.]
 
 %%
 rtsp\:\/\/                         BEGIN(rtsphost);
-<rtsphost>[^\/:]+/\:               debug(yytext); BEGIN(rtspport); stoken(RTSP_HOST);
+<rtsphost>[^\/:]+/\:               debug(yytext); BEGIN(rtspport);     stoken(RTSP_HOST);
 <rtsphost>[^\/:]+/\/               debug(yytext); BEGIN(rtspresource); stoken(RTSP_HOST);
 <rtspport>[0-9]+/\/                debug(yytext); BEGIN(rtspresource); uitoken(RTSP_PORT);
-<rtspresource>[^[:space:]]+        debug(yytext); BEGIN(INITIAL); stoken(RTSP_RESOURCE);
+<rtspresource>[^[:space:]]+        debug(yytext); BEGIN(INITIAL);      stoken(RTSP_RESOURCE);
 <rtsphost,rtspport,rtspresource>\s BEGIN(INITIAL);
 <rtsphost,rtspport,rtspresource>.  ;
 
