@@ -44,8 +44,6 @@
 %token PAUSE
 %token OPTION
 
-%token MJPEG
-
 %%
 
 
@@ -70,11 +68,10 @@ text:
 |	text word
 ;
 
- 
+
 word:
 	token_word
 |	rtsp_url
-|	format
 |	cseq
 |	transport
 |	session
@@ -88,28 +85,25 @@ token_word:
 
 
 rtsp_url:
-	RTSP_HOST RTSP_PORT RTSP_RESOURCE {
-		debug("RTSP <host> <port> <resource>");
+	RTSP_HOST rtsp_port RTSP_RESOURCE {
+		debug("RTSP <host> [port] <resource>");
 		debug($1);
-		debug($2);
 		debug($3);
-		req->hostaddr = std::string($1);
-		req->hostport = $2;
-		req->hostResource = std::string($3);
-	}
 
-|	RTSP_HOST RTSP_RESOURCE {
-		debug("RTSP <host> <resource>");
-		debug($1);
-		debug($2);
 		req->hostaddr = std::string($1);
-		req->hostResource = std::string($2);
+		req->hostResource = std::string($3);
+		
+		free($1);
+		free($3);
 	}
 ;
-
-
-format:
-	MJPEG {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}
+rtsp_port:
+|	RTSP_PORT
+	{
+		debug("RTSP port");
+		debug($1);
+		req->hostport = $1;
+	}
 ;
 
 

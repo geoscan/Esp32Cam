@@ -60,8 +60,7 @@ extern int yydebug;
     TEARDOWN = 270,
     PLAY = 271,
     PAUSE = 272,
-    OPTION = 273,
-    MJPEG = 274
+    OPTION = 273
   };
 #endif
 
@@ -76,7 +75,7 @@ union YYSTYPE
 	float fval;
 	char  *sval;
 
-#line 80 "rtsp.tab.hpp" /* yacc.c:1909  */
+#line 79 "rtsp.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

@@ -27,8 +27,9 @@ int main(void)
     cout << request.cseq.val() << endl;
     cout << request.session.val() << endl;
     cout << request.clientPort.val() << endl;
-    cout << boolalpha << request.udp.val() << endl;
-    cout << boolalpha << (request.requestType.val() == Rtsp::RequestType::Setup) << endl;
+    cout << "Use UDP: " << boolalpha << request.udp.val() << endl;
+    cout << "Request type: SETUP: " << boolalpha << (request.requestType.val() == Rtsp::RequestType::Setup) << endl;
+    // cout << "Equals MJPEG: " << boolalpha << (request.format.isVal() && request.format.val() == Rtsp::Format::Mjpeg) << endl;
     cout << request.hostaddr.val() << endl;
     cout << request.hostport.val() << endl;
     cout << request.hostResource.val() << endl;
