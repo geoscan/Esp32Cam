@@ -47,19 +47,21 @@ extern int yydebug;
   {
     UINT = 258,
     FLOAT = 259,
-    RTSP_HOST_ADDR = 260,
-    RTSP_HOST_PORT = 261,
-    CSEQ = 262,
-    CLIENT_PORT = 263,
-    SESSION = 264,
-    UDP = 265,
-    DESCRIBE = 266,
-    SETUP = 267,
-    TEARDOWN = 268,
-    PLAY = 269,
-    PAUSE = 270,
-    OPTION = 271,
-    MJPEG = 272
+    RTSP = 260,
+    RTSP_HOST = 261,
+    RTSP_RESOURCE = 262,
+    RTSP_PORT = 263,
+    CSEQ = 264,
+    CLIENT_PORT = 265,
+    SESSION = 266,
+    UDP = 267,
+    DESCRIBE = 268,
+    SETUP = 269,
+    TEARDOWN = 270,
+    PLAY = 271,
+    PAUSE = 272,
+    OPTION = 273,
+    MJPEG = 274
   };
 #endif
 
@@ -68,13 +70,13 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 18 "rtsp.y" /* yacc.c:1909  */
+#line 21 "rtsp.y" /* yacc.c:1909  */
 
 	int   uival;
 	float fval;
 	char  *sval;
 
-#line 78 "rtsp.tab.hpp" /* yacc.c:1909  */
+#line 80 "rtsp.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

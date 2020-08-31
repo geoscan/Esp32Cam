@@ -218,6 +218,7 @@ extern char *yytext;
 #define INITIAL 0
 #define rtsphost 1
 #define rtspport 2
+#define rtspresource 3
 
 #endif
 
@@ -471,9 +472,9 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 54 "rtsp.l"
+#line 62 "rtsp.l"
 
 
-#line 478 "lex.yy.h"
+#line 479 "lex.yy.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

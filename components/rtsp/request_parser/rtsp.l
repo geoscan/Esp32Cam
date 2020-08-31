@@ -10,33 +10,41 @@
 	#else
 	# define debug(...) /* Suppress output */
 	#endif
-	#define newtoken(__TOKEN__) debug("==========> @TOKEN@:"); debug(#__TOKEN__); return __TOKEN__
+	
+	#define token(__TOKEN__) debug("==========> @TOKEN@:"); debug(#__TOKEN__); return __TOKEN__
+	#define stoken(__TOKEN__) yylval.sval = strdup(yytext); token(__TOKEN__)
+	#define uitoken(__TOKEN__) yylval.uival = atoi(yytext); token(__TOKEN__)
 
 %}
 
 %option noyywrap
 
-%x rtsphost
-%x rtspport
+%x rtsphost rtspport rtspresource
+
+URL [a-zA-Z0-9\.]
+
 
 %%
-rtsp:\/\/             {BEGIN(rtsphost);}
-<rtsphost>[^\/\:]+    {yylval.sval = strdup(yytext); newtoken(RTSP_HOST_ADDR);}
-<rtspport>[^\/\:]+    {yylval.sval = strdup(yytext); newtoken(RTSP_HOST_PORT);}
-<rtsphost>\:          {BEGIN(rtspport);}
-<rtsphost,rtspport>\/ {BEGIN(INITIAL);}
+rtsp\:\/\/                         BEGIN(rtsphost);
+<rtsphost>[^\/:]+/\:               debug(yytext); BEGIN(rtspport); stoken(RTSP_HOST);
+<rtsphost>[^\/:]+/\/               debug(yytext); BEGIN(rtspresource); stoken(RTSP_HOST);
+<rtspport>[0-9]+/\/                debug(yytext); BEGIN(rtspresource); uitoken(RTSP_PORT);
+<rtspresource>[^[:space:]]+        debug(yytext); BEGIN(INITIAL); stoken(RTSP_RESOURCE);
+<rtsphost,rtspport,rtspresource>\s BEGIN(INITIAL);
+<rtsphost,rtspport,rtspresource>.  ;
 
-CSeq:          {newtoken(CSEQ); }
-client_port    {newtoken(CLIENT_PORT); }
-Session:       {newtoken(SESSION); }
-\/UDP          {newtoken(UDP); }
-DESCRIBE       {newtoken(DESCRIBE);}
-SETUP          {newtoken(SETUP);}
-TEARDOWN       {newtoken(TEARDOWN);}
-PLAY           {newtoken(PLAY);}
-PAUSE          {newtoken(PAUSE);}
-OPTION         {newtoken(OPTION);}
-mjpeg          {newtoken(MJPEG);}
+
+CSeq:          token(CSEQ); 
+client_port    token(CLIENT_PORT); 
+Session:       token(SESSION); 
+\/UDP          token(UDP); 
+DESCRIBE       token(DESCRIBE);
+SETUP          token(SETUP);
+TEARDOWN       token(TEARDOWN);
+PLAY           token(PLAY);
+PAUSE          token(PAUSE);
+OPTION         token(OPTION);
+mjpeg          token(MJPEG);
 
 [\n\r]+           ;
 \-?[0-9]+\.[0-9]+ {debug("==========> FLOAT"); 

@@ -13,6 +13,9 @@
 	#include "asio/detail/mutex.hpp"
 	static asio::detail::mutex mutex;
 	#endif // PARSER_DEBUG == 1
+
+	#include <string>
+	#include <map>
 %}
 
 %union {
@@ -23,8 +26,11 @@
 
 %token <uival> UINT
 %token <fval> FLOAT
-%token <sval> RTSP_HOST_ADDR
-%token <sval> RTSP_HOST_PORT
+%token <sval> RTSP
+
+%token <sval> RTSP_HOST
+%token <sval> RTSP_RESOURCE 
+%token <uival> RTSP_PORT
 
 %token CSEQ
 %token CLIENT_PORT
@@ -44,7 +50,7 @@
 
 
 head:
-	request_type text
+	request_type {debug("req. type");} text
 ;
 
 
@@ -71,8 +77,6 @@ word:
 |	cseq
 |	transport
 |	session
-|	RTSP_HOST_ADDR {req->hostaddr = $1;}
-|	RTSP_HOST_PORT {req->hostport = $1;}
 ;
 
 
@@ -80,7 +84,6 @@ token_word:
 	UINT
 |	FLOAT
 ;
-
 
 format:
 	MJPEG {req->format = Rtsp::Format::Mjpeg; debug("GOT: MJPEG");}
@@ -123,9 +126,6 @@ session:
 
 %%
 
-
-
-// --------------------------- Public --------------------------- //
 
 
 

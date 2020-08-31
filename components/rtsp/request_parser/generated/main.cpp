@@ -29,8 +29,8 @@ int main(void)
     cout << request.clientPort.val() << endl;
     cout << boolalpha << request.udp.val() << endl;
     cout << boolalpha << (request.requestType.val() == Rtsp::RequestType::Setup) << endl;
-    cout << request.hostaddr.val() << endl;
-    cout << (request.hostport.isVal() ? request.hostport.val() : "") << endl;
+    // cout << request.hostaddr.val() << endl;
+    // cout << (request.hostport.isVal() ? request.hostport.val() : "") << endl;
 
     return 0;
 }
