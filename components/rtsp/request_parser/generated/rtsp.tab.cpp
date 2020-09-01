@@ -132,7 +132,7 @@ extern int yydebug;
     TEARDOWN = 270,
     PLAY = 271,
     PAUSE = 272,
-    OPTION = 273
+    OPTIONS = 273
   };
 #endif
 
@@ -476,7 +476,7 @@ static const char *const yytname[] =
 {
   "$end", "error", "$undefined", "UINT", "FLOAT", "RTSP", "RTSP_HOST",
   "RTSP_RESOURCE", "RTSP_PORT", "CSEQ", "CLIENT_PORT", "SESSION", "UDP",
-  "DESCRIBE", "SETUP", "TEARDOWN", "PLAY", "PAUSE", "OPTION", "$accept",
+  "DESCRIBE", "SETUP", "TEARDOWN", "PLAY", "PAUSE", "OPTIONS", "$accept",
   "head", "$@1", "request_type", "text", "word", "token_word", "rtsp_url",
   "rtsp_port", "cseq", "transport", "session", YY_NULLPTR
 };
@@ -1289,7 +1289,7 @@ yyreduce:
 
   case 9:
 #line 61 "rtsp.y" /* yacc.c:1646  */
-    {req->requestType = Rtsp::RequestType::Option;    }
+    {req->requestType = Rtsp::RequestType::Options;    }
 #line 1294 "rtsp.tab.cpp" /* yacc.c:1646  */
     break;
 

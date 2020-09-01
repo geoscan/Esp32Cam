@@ -220,7 +220,7 @@ enum class RequestType {
 	Teardown,
 	Play,
 	Pause,
-	Option,
+	Options,
 };
 
 
@@ -234,7 +234,9 @@ struct Request final {
 	Optval<std::string>       hostaddr; // Host IP or domain
 	Optval<unsigned>          hostport;
 	Optval<std::string>       hostResource;
+	#if PARSER_DEBUG != 1
 	Optval<asio::ip::address> clientAddress; // WARN: should be filled "manually", not by request parser
+	#endif
 };
 
 } // Rtsp

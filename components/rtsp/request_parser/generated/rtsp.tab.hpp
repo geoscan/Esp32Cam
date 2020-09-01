@@ -60,7 +60,7 @@ extern int yydebug;
     TEARDOWN = 270,
     PLAY = 271,
     PAUSE = 272,
-    OPTION = 273
+    OPTIONS = 273
   };
 #endif
 

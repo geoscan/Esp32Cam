@@ -44,7 +44,7 @@ SETUP          token(SETUP);
 TEARDOWN       token(TEARDOWN);
 PLAY           token(PLAY);
 PAUSE          token(PAUSE);
-OPTION         token(OPTION);
+OPTIONS        token(OPTIONS);
 
 [\n\r]+           ;
 \-?[0-9]+\.[0-9]+ {debug("==========> FLOAT"); 
@@ -76,11 +76,13 @@ int main(int, char**) {
 	
 }
 
+#endif // DEBUG_FLEX == 1 && ...
+
+#if DEBUG_FLEX == 1
 void yyerror(const char *s) {
 	using namespace std;
 	cout << "FLEX, parse error!  Message: " << s << endl;
 	// might as well halt now:
 	exit(-1);
 }
-
-#endif // DEBUG_FLEX == 1 && ...
+#endif

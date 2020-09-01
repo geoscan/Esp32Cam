@@ -42,7 +42,7 @@
 %token TEARDOWN    
 %token PLAY        
 %token PAUSE
-%token OPTION
+%token OPTIONS
 
 %%
 
@@ -58,7 +58,7 @@ request_type:
 |	TEARDOWN {req->requestType = Rtsp::RequestType::Teardown;  }
 |	PLAY     {req->requestType = Rtsp::RequestType::Play;      }
 |	PAUSE    {req->requestType = Rtsp::RequestType::Pause;     }
-|	OPTION   {req->requestType = Rtsp::RequestType::Option;    }
+|	OPTIONS  {req->requestType = Rtsp::RequestType::Options;    }
 |	         {req->requestType = Rtsp::RequestType::NotStated; }
 ;
 
