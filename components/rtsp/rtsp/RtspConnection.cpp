@@ -26,8 +26,9 @@ void RtspConnection::serve()
 			if (!err) {
 				std::string respBuffer = requestHandler.handle({reinterpret_cast<void *>(buf), length},
 					tcpSocket.remote_endpoint().address());
-//				tcpSocket.send(respBuffer, 0);
-
+				if (!respBuffer.empty()) {
+					tcpSocket.send(asio::buffer(respBuffer.c_str(), respBuffer.length()));
+				}
 			}
 			serve();
 		});

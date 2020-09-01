@@ -228,7 +228,7 @@ enum class RequestType {
 struct Request final {
 	Optval<RequestType>       requestType;
 	Optval<unsigned>          cseq;
-	Optval<unsigned>          session;
+	Optval<unsigned>          session; // Session ID
 	Optval<unsigned>          clientPort;
 	Optval<bool>              udp;      // Transport: client requests UDP
 	Optval<std::string>       hostaddr; // Host IP or domain

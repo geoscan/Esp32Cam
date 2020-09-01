@@ -10,24 +10,30 @@
 namespace Rtsp {
 
 struct ResponseComposer final {
-	static constexpr const char *kCseq           = "CSeq:";
+	static constexpr const char *kCseq          = "CSeq:";
+	static constexpr const char *kSession       = "Session:";
+	static constexpr const char *kTransport     = "Transport:";
+	static constexpr const char *kRange         = "Range:";
+	static constexpr const char *kRtpInfo       = "RTP-Info:";
+	static constexpr const char *kContentBase   = "Content-Base:";
+	static constexpr const char *kContentType   = "Content-Type:";
+	static constexpr const char *kContentLength = "Content-Length:";
+
 	static constexpr const char *kRtspVer        = "RTSP/1.0";
-	static constexpr const char *kSession        = "Session:";
-	static constexpr const char *kTransport      = "Transport:";
+	static constexpr const char *kRtsp           = "rtsp://";
 	static constexpr const char *kUdp            = "RTP/AVP/UDP";
 	static constexpr const char *kUnicast        = "unicast";
 	static constexpr const char *kClientPort     = "client_port";
 	static constexpr const char *kApplicationSdp = "application/sdp";
 
-	static constexpr const char *kContentBase   = "Content-Base:";
-	static constexpr const char *kContentType   = "Content-Type:";
-	static constexpr const char *kContentLength = "Content-Length:";
+	static constexpr const char *kNptEq = "npt=";
+	static constexpr const char *kUrlEq = "url=";
 
-
-	static constexpr const char *kCrlf       = "\r\n";
-	static constexpr const char *kS          = " ";
-	static constexpr const char *kSemicolon  = ";";
-	static constexpr const char *kEq         = "=";
+	static constexpr const char *kCrlf      = "\r\n";
+	static constexpr const char *kS         = " ";
+	static constexpr const char *kSemicolon = ";";
+	static constexpr const char *kColon     = ":";
+	static constexpr const char *kEq        = "=";
 
 	static const std::map<StatusCode, const char *> statusCodeString;
 

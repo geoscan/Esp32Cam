@@ -23,10 +23,6 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 	parse(request, buffer.data(), buffer.size());
 	request.clientAddress = addr;
 
-	if (!request.cseq.isVal()) {
-		return "";
-	}
-
 	switch (request.requestType.val()) {
 
 		case Rtsp::RequestType::Play:
@@ -50,9 +46,30 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 }
 
 
-std::string RtspRequestHandler::handlePlay(const Rtsp::Request &)
+std::string RtspRequestHandler::handlePlay(const Rtsp::Request &req)
 {
-	return {nullptr, 0};
+	using Rc = ResponseComposer;
+
+	if (!req.hostaddr.isVal() || !req.hostResource.isVal()) {  // Client did't provide us with a URL
+		return Rc::responseCode(req, StatusCode::StreamNotFound);
+	}
+
+	if (!(req.session.isVal() && rtpServer.setSessionStreaming(req.session.val(), true))) {
+		// Client didn't specify Session header, or RTP server is unable to fullfill the request
+		return Rc::responseCode(req, StatusCode::SessionNotFound);
+	} else {
+		// Went smooth, prepare 200 OK.
+		string port((req.hostport.isVal()) ? Rc::compose(Rc::kColon, req.hostport.val()) : "");
+		auto url(Rc::compose(Rc::kRtsp, req.hostaddr.val(), port, req.hostResource.val()));
+
+		return Rc::composeDel(Rc::kCrlf,
+			Rc::responseCode(req, StatusCode::Ok),
+			Rc::compose(Rc::kRange,   Rc::kS, Rc::kNptEq, "0.000-"),
+			Rc::compose(Rc::kSession, Rc::kS, req.session.val()),
+			Rc::compose(Rc::kRtpInfo, Rc::kS, Rc::kUrlEq, url),
+			Rc::kCrlf);
+	}
+
 }
 
 std::string RtspRequestHandler::handleDescribe(const Rtsp::Request &req)

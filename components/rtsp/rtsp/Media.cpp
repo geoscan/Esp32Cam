@@ -115,10 +115,11 @@ std::string Media::getSdpOv2640(const Request &req)
 	using Rc = ResponseComposer;
 	std::stringstream ss;
 
-	return Rc::compose("v=0", Rc::kCrlf,
-		"o=- ", esp_timer_get_time(), " 1 IN IP4 ", req.hostaddr.val(), ':', req.hostport.val(), Rc::kCrlf,
-		"s=", Rc::kCrlf,
-		"t=0 0", Rc::kCrlf,
-		"m=video ", kRtpPort, " RTP/AVP/UDP", Rc::kCrlf,
-		"c=IN IP 0.0.0.0", Rc::kCrlf);
+	return Rc::composeDel(Rc::kCrlf,
+		"v=0",
+		Rc::composeDel(Rc::kS, "o=-", esp_timer_get_time(), 1, "IN", "IP4", req.hostaddr.val(), Rc::kColon, req.hostport.val()),
+		"s=",
+		"t=0 0",
+		Rc::composeDel(Rc::kS, "m=video", kRtpPort, Rc::kUdp),
+		Rc::composeDel(Rc::kS, "c=IN", "IP", "0.0.0.0"));
 }
