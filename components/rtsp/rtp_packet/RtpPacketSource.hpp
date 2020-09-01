@@ -23,6 +23,7 @@ public:
 
 using Packets = std::queue<std::shared_ptr<RtpPacket>>;
 
+// Media stream
 class RtpPacketSource : public Rtsp::Identifiable<RtpPacketSource> {
 public:
 	virtual std::queue<std::shared_ptr<RtpPacket>> packets() = 0;

@@ -77,6 +77,7 @@ public:
 	{
 	}
 
+	/// To be able to be stored inside STL containers.
 	struct Less {
 	private:
 		using Type = Identifiable<T>;
@@ -155,7 +156,6 @@ enum class StatusCode : unsigned {
 	UnsupportedTransport = 461
 };
 
-
 template <typename T>
 struct Optval final {
 private:
@@ -192,6 +192,13 @@ public:
 	{
 		return isVal();
 	}
+	bool isValEq(const T &v) /// Shortcut, for convenience
+	{
+		if (isVal()) {
+			return (value == v);
+		}
+		return false;
+	}
 	const T &operator*() const
 	{
 		return val();
@@ -210,22 +217,17 @@ enum class RequestType {
 };
 
 
-enum class Format {
-	NotStated, // unsupported
-	Mjpeg
-};
-
-
 // Represents common request fields
 struct Request final {
-	Optval<RequestType> requestType;
-	Optval<unsigned>    cseq;
-	Optval<unsigned>    session;
-	Optval<unsigned>    clientPort;
-	Optval<bool>        udp; // Transport: client requests using UDP
-	Optval<Format>      format;
-	Optval<std::string> hostaddr;
-	Optval<std::string> hostport;
+	Optval<RequestType>       requestType;
+	Optval<unsigned>          cseq;
+	Optval<unsigned>          session;
+	Optval<unsigned>          clientPort;
+	Optval<bool>              udp;      // Transport: client requests UDP
+	Optval<std::string>       hostaddr; // Host IP or domain
+	Optval<unsigned>          hostport;
+	Optval<std::string>       hostResource;
+	Optval<asio::ip::address> clientAddress; // WARN: should be filled "manually", not by request parser
 };
 
 } // Rtsp

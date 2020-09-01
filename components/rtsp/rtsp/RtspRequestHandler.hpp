@@ -9,11 +9,13 @@
 #define COMPONENTS_RTSP_RTSP_RTSPREQUESTHANDLER_HPP
 
 #include <cstddef>
+#include <string>
+#include <map>
 #include "asio.hpp"
 #include "Types.hpp"
 #include "RtpServer.hpp"
-#include <string>
-
+#include "Media.hpp"
+#include "ResponseComposer.hpp"
 
 class RtspRequestHandler {
 public:
@@ -24,7 +26,7 @@ public:
 	/// @brief  Handles user's RTSP requests
 	///         Prepares response
 	/// @return Data to be sent to user
-	std::string handle(asio::const_buffer buffer);
+	std::string handle(asio::const_buffer buffer, asio::ip::address from);
 private:
 	std::string handlePlay(const Rtsp::Request &);
 	std::string handleDescribe(const Rtsp::Request &);
@@ -34,17 +36,8 @@ private:
 	std::string handlePause(const Rtsp::Request &);
 	std::string handleNotStated(const Rtsp::Request &);
 
-	static constexpr const char *kRtspVer = "RTSP/1.0";
-	static constexpr const char *kCrlf = "\r\n";
-	static constexpr const char *kCseq = "CSeq:";
-	static std::string          dateHeader();
-
-	enum : unsigned {
-		kBufSize = 255,
-	};
-
-	char returnBuf[kBufSize] = {0};
 	RtpServer &rtpServer;
+	Rtsp::Media media;
 };
 
 #endif // COMPONENTS_RTSP_RTSP_RTSPREQUESTHANDLER_HPP

@@ -6,10 +6,11 @@
 
 
 /// Transmits mjpeg frames acquired using OV2640
-class RtpPacketSourceOv2640 final : public RtpPacketSource {
+class RtpPacketSourceOv2640 : public RtpPacketSource {
 public:
 	RtpPacketSourceOv2640(bool packForTcp, unsigned fps = RtpPacketSourceOv2640::kDefaultFps);
 	Packets packets() override;
+
 private:
 	using BufPtr    = const unsigned char *;
 	using Timestamp = uint32_t;
