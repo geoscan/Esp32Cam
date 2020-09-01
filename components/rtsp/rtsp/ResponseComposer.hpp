@@ -10,18 +10,35 @@
 namespace Rtsp {
 
 struct ResponseComposer final {
-	static constexpr const char *kCrlf    {"\r\n"};
-	static constexpr const char *kCseq    {"CSeq:"};
-	static constexpr const char *kRtspVer {"RTSP/1.0"};
-	static constexpr const char *kSession {"Session:"};
+	static constexpr const char *kCseq           = "CSeq:";
+	static constexpr const char *kRtspVer        = "RTSP/1.0";
+	static constexpr const char *kSession        = "Session:";
+	static constexpr const char *kTransport      = "Transport:";
+	static constexpr const char *kUdp            = "RTP/AVP/UDP";
+	static constexpr const char *kUnicast        = "unicast";
+	static constexpr const char *kClientPort     = "client_port";
+	static constexpr const char *kApplicationSdp = "application/sdp";
+
+	static constexpr const char *kContentBase   = "Content-Base:";
+	static constexpr const char *kContentType   = "Content-Type:";
+	static constexpr const char *kContentLength = "Content-Length:";
+
+
+	static constexpr const char *kCrlf       = "\r\n";
+	static constexpr const char *kS          = " ";
+	static constexpr const char *kSemicolon  = ";";
+	static constexpr const char *kEq         = "=";
 
 	static const std::map<StatusCode, const char *> statusCodeString;
 
-	static std::string dateHeader();
+//	static std::string dateHeader();
 	static std::string responseCode(const Request &, StatusCode);
 
 	template <typename ... Args>
 	static std::string compose(const Args&...);
+
+	template <typename Arg, typename ... Args>
+	static std::string composeDel(const char *, const Arg &arg, const Args&...); ///< Compose with delimeter
 private:
 	template <typename Numeric>
 	static std::string toString(const Numeric &val, size_t &len);
@@ -47,6 +64,12 @@ inline std::string ResponseComposer::compose(const Args&... args)
 		});
 
 	return ret;
+}
+
+template <typename Arg, typename ... Args>
+inline std::string ResponseComposer::composeDel(const char *delimeter, const Arg &arg, const Args&...args)
+{
+	return compose(arg, compose(delimeter, args)...);
 }
 
 template <typename Numeric>

@@ -28,9 +28,9 @@ namespace Rtsp {
 template <typename T>
 class Identifiable {
 	static unsigned boundId;
-	#if PARSER_DEBUG != 1
-	static asio::detail::mutex mutex;
-	#endif
+//	#if PARSER_DEBUG != 1
+//	static asio::detail::mutex mutex;
+//	#endif
 	unsigned mId;
 
 	Identifiable(unsigned cid)
@@ -50,15 +50,15 @@ public:
 	}
 	Identifiable() /*: mId(boundId++)*/
 	{
-		#if PARSER_DEBUG != 1
-		this->mutex.lock();
-		#endif
+//		#if PARSER_DEBUG != 1
+//		this->mutex.lock();
+//		#endif
 
 		mId = boundId++;
 
-		#if PARSER_DEBUG != 1
-		this->mutex.unlock();
-		#endif
+//		#if PARSER_DEBUG != 1
+//		this->mutex.unlock();
+//		#endif
 	}
 	Identifiable(const Identifiable &) : Identifiable()
 	{
@@ -108,6 +108,11 @@ public:
 	};
 };
 
+//#if PARSER_DEBUG != 1
+//template <typename T>
+//asio::detail::mutex Identifiable<T>::mutex;
+//#endif
+
 template <typename T>
 unsigned Identifiable<T>::boundId = Identifiable<T>::NoId + 1;
 
@@ -149,11 +154,13 @@ using SessionId = unsigned;
 // https://tools.ietf.org/html/rfc2326#page-41
 enum class StatusCode : unsigned {
 	Ok = 200,
+	BadRequest = 400,
 	StreamNotFound = 404,
 	MethodNotAllowed = 405,
 	SessionNotFound = 454,
 	MethodNotValidInThisState = 455,
-	UnsupportedTransport = 461
+	UnsupportedTransport = 461,
+	NotImplemented = 501,
 };
 
 template <typename T>
@@ -192,7 +199,7 @@ public:
 	{
 		return isVal();
 	}
-	bool isValEq(const T &v) /// Shortcut, for convenience
+	bool isValEq(const T &v) const /// Shortcut, for convenience
 	{
 		if (isVal()) {
 			return (value == v);

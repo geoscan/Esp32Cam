@@ -14,7 +14,7 @@ const Media::GetSdpCb Media::sdp[]    = {Media::getSdpOv2640};
 
 const size_t Media::kNtypes = sizeof(Media::isType);
 
-bool Media::Stream::valid()
+bool Media::Stream::valid() const
 {
 	return (static_cast<bool>(source) || sourceId != RtpPacketSource::NoId);
 }
@@ -25,10 +25,7 @@ std::vector<Media::Stream> Media::createStreams(const Request &req)
 	size_t type;
 
 	if (getType(req, type)) {
-		std::vector<Stream> streams = create[type](req);
-		auto sid = esp_timer_get_time(); // Good enough to distinguish sessions from e.o.
-		std::for_each(streams.begin(), streams.end(), [&sid](Stream &s){s.sessionId = sid;});
-		return streams;
+		return create[type](req);
 	}
 
 	return {};

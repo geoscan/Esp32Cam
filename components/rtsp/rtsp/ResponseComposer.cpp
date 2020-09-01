@@ -6,14 +6,21 @@ using namespace std;
 
 const map<StatusCode, const char *> ResponseComposer::statusCodeString = {
 	{StatusCode::Ok, "OK"},
-	{StatusCode::StreamNotFound, "Stream not found"} };
+	{StatusCode::StreamNotFound, "Stream Not Found"},
+	{StatusCode::UnsupportedTransport, "Unsupported Transport"},
+	{StatusCode::NotImplemented, "Not Implemented"},
+	{StatusCode::MethodNotAllowed, "Method Not Allowed"},
+	{StatusCode::BadRequest, "Bad Request"} };
 
 string ResponseComposer::responseCode(const Request &req, StatusCode code)
 {
-	return "";
-//	return compose(kRtspVer, ' ', (size_t)code, ' ', statusCodeString[code], kCrlf,
-//		kCseq, req.cseq.val(), kCrlf,
-//		dateHeader(), kCrlf);
+	std::string responseString;
+	if (statusCodeString.find(code) != statusCodeString.end()) {
+		responseString = std::string(statusCodeString.at(code));
+	}
+	return composeDel(kCrlf,
+		composeDel(kS, kRtspVer, (size_t)code, responseString),
+		composeDel(kS, kCseq, req.cseq.val()));
 }
 
 string ResponseComposer::toString(char c, size_t &len)

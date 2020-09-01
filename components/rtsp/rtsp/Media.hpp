@@ -17,11 +17,10 @@ namespace Rtsp {
 class Media {
 public:
 	struct Stream {
-		Rtsp::SessionId sessionId;
 		std::unique_ptr<RtpPacketSource> source;
 		unsigned sourceId;
 		asio::ip::udp::endpoint sink;
-		bool valid();
+		bool valid() const;
 	};
 
 	// https://tools.ietf.org/html/rfc2326#page-31 -- RTSP: rescribe resource

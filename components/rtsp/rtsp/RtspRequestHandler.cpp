@@ -5,6 +5,7 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <algorithm>
 #include "RtspRequestHandler.hpp"
 #include "ResponseComposer.hpp"
 #include <sstream>
@@ -21,6 +22,10 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 	Rtsp::Request request;
 	parse(request, buffer.data(), buffer.size());
 	request.clientAddress = addr;
+
+	if (!request.cseq.isVal()) {
+		return "";
+	}
 
 	switch (request.requestType.val()) {
 
@@ -55,7 +60,6 @@ std::string RtspRequestHandler::handleDescribe(const Rtsp::Request &req)
 	using Rc = ResponseComposer;
 
 	if (!media.canCreateStreams(req)) {
-		stringstream ss;
 		return ResponseComposer::responseCode(req, StatusCode::StreamNotFound);
 	}
 
@@ -63,17 +67,57 @@ std::string RtspRequestHandler::handleDescribe(const Rtsp::Request &req)
 
 	auto url(Rc::compose("rtsp://", req.hostaddr.val(), ':', req.hostport.val(), '/', req.hostResource.val()));
 
-	return Rc::compose(Rc::responseCode(req, StatusCode::Ok) , Rc::kCrlf,
-		"CSeq: " , req.cseq.val() , Rc::kCrlf,
-		"Content-Base: ", url , Rc::kCrlf,
-		"Content-Type: " , "application/sdp" , Rc::kCrlf,
-		"Content-Length: " , mediaDescription.length() , Rc::kCrlf,
+	return Rc::composeDel(Rc::kCrlf,
+		Rc::responseCode(req, StatusCode::Ok),
+		Rc::composeDel(Rc::kS, Rc::kCseq, req.cseq.val()),
+		Rc::composeDel(Rc::kS, Rc::kContentBase, url),
+		Rc::composeDel(Rc::kS, Rc::kContentType, Rc::kApplicationSdp),
+		Rc::composeDel(Rc::kS, Rc::kContentLength, mediaDescription.length()),
 		mediaDescription);
 }
 
-std::string RtspRequestHandler::handleSetup(const Rtsp::Request &)
+std::string RtspRequestHandler::handleSetup(const Rtsp::Request &req)
 {
-	return "";
+	using Rc = ResponseComposer;
+
+	if (!req.clientPort.isVal()) {  // Client hasn't specified its port
+		return Rc::responseCode(req, StatusCode::BadRequest);
+	}
+
+	if (!media.canCreateStreams(req)) {  // Server couldn't find an appropriate stream source
+		return Rc::responseCode(req, StatusCode::StreamNotFound);
+	}
+
+	if (!req.udp.isValEq(true)) {  // Server only supports RTP over UDP
+		return Rc::responseCode(req, StatusCode::UnsupportedTransport);
+	}
+
+	auto transportInfo(Rc::composeDel(Rc::kSemicolon,
+		Rc::kUdp,
+		Rc::kUnicast,
+		Rc::compose(Rc::kClientPort, Rc::kEq, req.clientPort.val())));
+
+	auto streams = media.createStreams(req);
+
+	if (all_of(streams.begin(), streams.end(), [](const Media::Stream &s) {return s.valid();})) { // All streams are valid
+		Rtsp::SessionId sid = esp_timer_get_time();
+
+		auto response = Rc::composeDel(Rc::kCrlf,
+			Rc::responseCode(req, StatusCode::Ok),
+			Rc::compose(Rc::kTransport, Rc::kS, transportInfo),
+			Rc::compose(Rc::kSession, Rc::kS, sid));
+
+		for (auto &stream : streams) {
+			if (stream.source) {
+				rtpServer.addSession(sid, move(stream.source), stream.sink);
+			}
+			rtpServer.addSession(sid, stream.sourceId, stream.sink);
+		}
+
+		return response;
+	} else {
+		return Rc::responseCode(req, StatusCode::StreamNotFound);
+	}
 }
 
 std::string RtspRequestHandler::handlePause(const Rtsp::Request &)
@@ -86,7 +130,7 @@ std::string RtspRequestHandler::handleTeardown(const Rtsp::Request &)
 	return "";
 }
 
-std::string RtspRequestHandler::handleNotStated(const Rtsp::Request &)
+std::string RtspRequestHandler::handleNotStated(const Rtsp::Request &req)
 {
-	return "";
+	return ResponseComposer::responseCode(req, StatusCode::MethodNotAllowed);
 }
