@@ -169,9 +169,12 @@ std::string RtspRequestHandler::handleSetup(const Rtsp::Request &req)
 	}
 }
 
-std::string RtspRequestHandler::handleTeardown(const Rtsp::Request &)
+std::string RtspRequestHandler::handleTeardown(const Rtsp::Request &req)
 {
-	return "";
+	if (!req.session.isVal() || !rtpServer.removeSession(req.session.val())) {
+		return Rc::responseCode(req, StatusCode::SessionNotFound);
+	}
+	return Rc::responseCode(req, StatusCode::Ok);
 }
 
 std::string RtspRequestHandler::handleNotStated(const Rtsp::Request &req)
