@@ -33,8 +33,11 @@ public:
 private:
 	bool getType(const Request &, size_t &type);
 
-	// callbacks
+	// Concept: the following is the callback-based mechanism of
+	// creation of a suitable media streamer based on the request
+	// it is provided with.
 
+	// callbacks
 	// Ov2640
 	static bool isOv2640(const Request &);
 	static std::vector<Stream> createOv2640(const Request &);
@@ -44,6 +47,7 @@ private:
 	using CreateCb = std::vector<Stream>(*)(const Request &);
 	using GetSdpCb = std::string(*)(const Request &);
 
+	// callback arrays
 	static const IsTypeCb isType[];
 	static const CreateCb create[];
 	static const GetSdpCb sdp[];

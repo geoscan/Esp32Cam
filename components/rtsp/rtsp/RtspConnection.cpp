@@ -21,15 +21,26 @@ RtspConnection::RtspConnection(tcp::socket socket, RtpServer &rtp) :
 void RtspConnection::serve()
 {
 	auto self(shared_from_this());
-	tcpSocket.async_read_some(asio::buffer(buf, kBufSize),
+	tcpSocket.async_read_some(asio::buffer(buf, kBufferSize),
 		[this, self](std::error_code err, size_t length) {
-			if (!err) {
-				std::string respBuffer = requestHandler.handle({reinterpret_cast<void *>(buf), length},
-					tcpSocket.remote_endpoint().address());
-				if (!respBuffer.empty()) {
-					tcpSocket.send(asio::buffer(respBuffer.c_str(), respBuffer.length()));
+			if (!err && length >= kMinRtspRequestLength) {
+				std::string respBuffer;
+				respBuffer = requestHandler.handle(asio::buffer(buf, length), tcpSocket.remote_endpoint().address());
+				if (respBuffer.empty()) {
+					std::vector<asio::const_buffer> vec = {{respBuffer.c_str(), respBuffer.length()}};
+					tcpSocket.send(vec);
 				}
 			}
 			serve();
 		});
+//	asio::error_code err;
+//	size_t length = tcpSocket.read_some(asio::buffer(buf, kBufferSize), err);
+//	if (!err && length >= kMinRtspRequestLength) {
+//		std::string respBuffer ;
+//		respBuffer = requestHandler.handle(asio::buffer(asio::buffer(buf, length)), tcpSocket.remote_endpoint().address());
+//		if (!respBuffer.empty()) {
+//			std::vector<asio::const_buffer> vec = {{respBuffer.c_str(), respBuffer.length()}};
+//			tcpSocket.send(vec);
+//		}
+//	}
 }

@@ -25,7 +25,9 @@ public:
 
 	/// @brief  Handles user's RTSP requests
 	///         Prepares response
-	/// @return Data to be sent to user
+	/// @return Data to be sent to user,
+	/// empty string if the request wasn't
+	/// recognized as an RTSP request.
 	std::string handle(asio::const_buffer buffer, asio::ip::address from);
 private:
 	std::string handlePlay(const Rtsp::Request &);

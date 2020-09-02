@@ -17,12 +17,13 @@ public:
 	RtspConnection(asio::ip::tcp::socket socket, RtpServer &rtp);
 	void serve();
 private:
-	enum {
-		kBufSize = 255,
+	enum : size_t {
+		kBufferSize = 255,
+		kMinRtspRequestLength = sizeof("RTSP/1.0")
 	};
 
 	asio::ip::tcp::tcp::socket tcpSocket;
-	char buf[kBufSize];
+	char buf[kBufferSize] {0};
 	RtspRequestHandler requestHandler;
 };
 

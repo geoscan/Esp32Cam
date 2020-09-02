@@ -8,6 +8,8 @@
 using namespace Rtsp;
 using namespace std;
 
+// WARN: position-sensitive. Keep each media type at its
+// respective position.
 const Media::IsTypeCb Media::isType[] = {Media::isOv2640};
 const Media::CreateCb Media::create[] = {Media::createOv2640};
 const Media::GetSdpCb Media::sdp[]    = {Media::getSdpOv2640};
@@ -33,7 +35,6 @@ std::vector<Media::Stream> Media::createStreams(const Request &req)
 
 std::string Media::getSdp(const Request &req)
 {
-
 	size_t type;
 
 	if (getType(req, type)) {
@@ -113,7 +114,6 @@ std::vector<Media::Stream> Media::createOv2640(const Request &req)
 std::string Media::getSdpOv2640(const Request &req)
 {
 	using Rc = ResponseComposer;
-	std::stringstream ss;
 
 	return Rc::composeDel(Rc::kCrlf,
 		"v=0",

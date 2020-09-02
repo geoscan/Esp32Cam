@@ -53,6 +53,7 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 		default:
 			return handleNotStated(request);
 	}
+	return {""};
 }
 
 
@@ -109,6 +110,7 @@ std::string RtspRequestHandler::handleDescribe(const Rtsp::Request &req)
 	}
 
 	string mediaDescription(media.getSdp(req));
+//	string mediaDescription("");
 
 	auto url(Rc::compose("rtsp://", req.hostaddr.val(), ':', req.hostport.val(), '/', req.hostResource.val()));
 
@@ -131,8 +133,6 @@ std::string RtspRequestHandler::handleOptions(const Request &)
 
 std::string RtspRequestHandler::handleSetup(const Rtsp::Request &req)
 {
-	// using Rc = ResponseComposer;
-
 	if (!req.clientPort.isVal()) {  // Client hasn't specified its port
 		return Rc::responseCode(req, StatusCode::BadRequest);
 	}
@@ -168,9 +168,8 @@ std::string RtspRequestHandler::handleSetup(const Rtsp::Request &req)
 		}
 
 		return response;
-	} else {
-		return Rc::responseCode(req, StatusCode::StreamNotFound);
 	}
+	return Rc::responseCode(req, StatusCode::StreamNotFound);
 }
 
 std::string RtspRequestHandler::handleTeardown(const Rtsp::Request &req)
