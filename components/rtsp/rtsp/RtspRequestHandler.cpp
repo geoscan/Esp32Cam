@@ -31,6 +31,9 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 		case Rtsp::RequestType::Play:
 			return handlePlay(request);
 
+		case Rtsp::RequestType::Options:
+			return handleOptions(request);
+
 		case Rtsp::RequestType::Pause:
 			return handlePause(request);
 
@@ -112,6 +115,14 @@ std::string RtspRequestHandler::handleDescribe(const Rtsp::Request &req)
 		Rc::composeDel(Rc::kS, Rc::kContentType, Rc::kApplicationSdp),
 		Rc::composeDel(Rc::kS, Rc::kContentLength, mediaDescription.length()),
 		mediaDescription);
+}
+
+std::string RtspRequestHandler::handleOptions(const Request &)
+{
+	auto optionsList(Rc::composeDel(", ", Rc::kDescribe, Rc::kSetup, Rc::kTeardown, Rc::kPlay, Rc::kPause));
+	return Rc::composeDel(Rc::kCrlf,
+		Rc::compose(Rc::kPublic, Rc::kS, optionsList),
+		Rc::kCrlf);
 }
 
 std::string RtspRequestHandler::handleSetup(const Rtsp::Request &req)

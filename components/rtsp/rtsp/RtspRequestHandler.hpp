@@ -30,7 +30,7 @@ public:
 private:
 	std::string handlePlay(const Rtsp::Request &);
 	std::string handleDescribe(const Rtsp::Request &);
-	std::string handleOption(const Rtsp::Request &);
+	std::string handleOptions(const Rtsp::Request &);
 	std::string handleSetup(const Rtsp::Request &);
 	std::string handleTeardown(const Rtsp::Request &);
 	std::string handlePause(const Rtsp::Request &);

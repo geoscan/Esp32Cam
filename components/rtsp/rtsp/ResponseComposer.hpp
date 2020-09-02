@@ -18,6 +18,7 @@ struct ResponseComposer final {
 	static constexpr const char *kContentBase   = "Content-Base:";
 	static constexpr const char *kContentType   = "Content-Type:";
 	static constexpr const char *kContentLength = "Content-Length:";
+	static constexpr const char *kPublic        = "Public:";
 
 	static constexpr const char *kRtspVer        = "RTSP/1.0";
 	static constexpr const char *kRtsp           = "rtsp://";
@@ -25,6 +26,11 @@ struct ResponseComposer final {
 	static constexpr const char *kUnicast        = "unicast";
 	static constexpr const char *kClientPort     = "client_port";
 	static constexpr const char *kApplicationSdp = "application/sdp";
+	static constexpr const char *kDescribe       = "DESCRIBE";
+	static constexpr const char *kPlay           = "PLAY";
+	static constexpr const char *kPause          = "PAUSE";
+	static constexpr const char *kTeardown       = "TEARDOWN";
+	static constexpr const char *kSetup          = "SETUP";
 
 	static constexpr const char *kNptEq = "npt=";
 	static constexpr const char *kUrlEq = "url=";
