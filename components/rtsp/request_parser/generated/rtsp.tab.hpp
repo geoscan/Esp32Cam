@@ -55,12 +55,13 @@ extern int yydebug;
     CLIENT_PORT = 265,
     SESSION = 266,
     UDP = 267,
-    DESCRIBE = 268,
-    SETUP = 269,
-    TEARDOWN = 270,
-    PLAY = 271,
-    PAUSE = 272,
-    OPTIONS = 273
+    RTSP1V0 = 268,
+    DESCRIBE = 269,
+    SETUP = 270,
+    TEARDOWN = 271,
+    PLAY = 272,
+    PAUSE = 273,
+    OPTIONS = 274
   };
 #endif
 
@@ -75,7 +76,7 @@ union YYSTYPE
 	float fval;
 	char  *sval;
 
-#line 79 "rtsp.tab.hpp" /* yacc.c:1909  */
+#line 80 "rtsp.tab.hpp" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

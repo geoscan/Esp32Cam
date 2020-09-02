@@ -37,6 +37,7 @@
 %token SESSION
 %token UDP
 
+%token RTSP1V0
 %token DESCRIBE    
 %token SETUP       
 %token TEARDOWN    
@@ -58,7 +59,7 @@ request_type:
 |	TEARDOWN {req->requestType = Rtsp::RequestType::Teardown;  }
 |	PLAY     {req->requestType = Rtsp::RequestType::Play;      }
 |	PAUSE    {req->requestType = Rtsp::RequestType::Pause;     }
-|	OPTIONS  {req->requestType = Rtsp::RequestType::Options;    }
+|	OPTIONS  {req->requestType = Rtsp::RequestType::Options;   }
 |	         {req->requestType = Rtsp::RequestType::NotStated; }
 ;
 
@@ -71,6 +72,11 @@ text:
 
 word:
 	token_word
+|	RTSP1V0
+	{
+		req->isRtsp = true;
+		debug("Request of type RTSP/1.0");
+	}
 |	rtsp_url
 |	cseq
 |	transport

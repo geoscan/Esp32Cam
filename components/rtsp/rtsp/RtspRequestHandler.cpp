@@ -26,6 +26,10 @@ std::string RtspRequestHandler::handle(asio::const_buffer buffer, asio::ip::addr
 	parse(request, buffer.data(), buffer.size());
 	request.clientAddress = addr;
 
+	if (!request.isRtsp.isValEq(true)) {
+		return {""};  // Not an RTSP request
+	}
+
 	switch (request.requestType.val()) {
 
 		case Rtsp::RequestType::Play:

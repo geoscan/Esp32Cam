@@ -226,6 +226,7 @@ enum class RequestType {
 
 // Represents common request fields
 struct Request final {
+	Optval<bool>              isRtsp;   // Semaphores whether the request is of type RTSP/1.0
 	Optval<RequestType>       requestType;
 	Optval<unsigned>          cseq;
 	Optval<unsigned>          session; // Session ID

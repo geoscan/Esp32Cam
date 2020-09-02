@@ -34,7 +34,7 @@ rtsp\:\/\/                         BEGIN(rtsphost);
 <rtsphost,rtspport,rtspresource>\s BEGIN(INITIAL);
 <rtsphost,rtspport,rtspresource>.  ;
 
-
+RTSP\/1\.0     token(RTSP1V0);
 CSeq:          token(CSEQ); 
 client_port    token(CLIENT_PORT); 
 Session:       token(SESSION); 
