@@ -7,4 +7,5 @@ idf_component_register(
 		wifi
 		http
 		rtsp
-		echo_tcp)
+		echo_tcp
+		wifi_uart_bridge)

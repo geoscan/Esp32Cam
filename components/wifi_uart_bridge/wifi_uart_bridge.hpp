@@ -1,0 +1,6 @@
+#ifndef COMPONENTS_WIFI_UART_BRIDGE_HPP
+#define COMPONENTS_WIFI_UART_BRIDGE_HPP
+
+void wifiUartBridgeStart();
+
+#endif // WIFI_UART_BRIDGE_HPP

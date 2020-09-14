@@ -10,11 +10,14 @@
 #include "http.h"
 #include "rtsp.h"
 #include "echo_tcp.hpp"
+#include "wifi_uart_bridge.hpp"
 
 extern "C" int app_main(void)
 {
 	wifiStart();
 	httpStart();
-	rtspStart();
+//	rtspStart();
+	wifiUartBridgeStart();
+
 	return 0;
 }
