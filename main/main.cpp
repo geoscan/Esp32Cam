@@ -5,6 +5,7 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <freertos/FreeRTOS.h>
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
