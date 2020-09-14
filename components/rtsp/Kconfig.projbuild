@@ -1,15 +1,11 @@
 menu "RTSP, RTP server"
 
-config RTSP_TCP_PORT
-	int "RTSP server's TCP port"
-	default 554
+	config RTSP_TCP_PORT
+		int "RTSP server's TCP port"
+		default 554
 
-config RTP_UDP_PORT
-	int "RTP server's UDP port"
-	default 4321
-
-config CAMERA_FPS
-	int "Camera's FPS used in real-time video streaming"
-	default 10
+	config RTP_UDP_PORT
+		int "RTP server's UDP port"
+		default 4321
 
 endmenu

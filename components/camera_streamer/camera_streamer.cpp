@@ -1,15 +1,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
+#include "camera_streamer.h"
 #include "CameraStreamer.hpp"
 
 void cameraStreamerTask(void *)
 {
-	static const uint16_t kSinkPort   = 10001;
-	static const uint16_t kSourcePort = 10000;
-
 	asio::io_context context;
-	CameraStreamer   cameraStreamer(context, kSourcePort, kSinkPort);
+	CameraStreamer   cameraStreamer(context, kSourcePort, kSinkPort, kFps);
 
 	cameraStreamer.run();
 }

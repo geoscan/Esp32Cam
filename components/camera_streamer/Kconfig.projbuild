@@ -1,0 +1,26 @@
+menu "JPEG camera streamer"
+
+	config CAMSTREAM_SOURCE_UDP_PORT
+		int "Default port device uses for sending frames"
+		default 10000
+
+	config CAMSTREAM_SINK_UDP_PORT
+		int "Default port device sends frames to"
+		default 10001
+
+	config CAMSTREAM_USE_FPS
+		bool "Specify FPS"
+		default false
+		help
+			If disabled, the device sends frames as soon as it acquires them,
+			the performance is only determined by camera's latencies
+
+	if CAMSTREAM_USE_FPS
+
+		config CAMSTREAM_FPS
+			int "FPS"
+			default 15
+
+	endif
+
+endmenu
