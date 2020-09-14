@@ -8,7 +8,9 @@
 #register_component()
 
 idf_component_register(
-	SRCS "wifi.c"
+	SRCS
+		"wifi.c"
+		"get_ap_name_suffix.cpp"
 	INCLUDE_DIRS "."
 	REQUIRES
 		esp_wifi
@@ -16,4 +18,5 @@ idf_component_register(
 		esp_event
 		freertos
 		esp_common
-		log)
+		log
+		wifi_uart_bridge)

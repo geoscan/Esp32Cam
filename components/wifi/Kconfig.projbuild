@@ -23,4 +23,5 @@ menu "WiFi"
         default 4
         help
             Max number of the STA connects to AP.
+
 endmenu

@@ -1,3 +1,10 @@
+//
+// CameraStreamer.hpp
+//
+// Created on:  Sep 14, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #ifndef CAMERASTREAMER_HPP
 #define CAMERASTREAMER_HPP
 

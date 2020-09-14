@@ -1,4 +1,11 @@
 #include <freertos/FreeRTOS.h>
+//
+// CameraStreamer.cpp
+//
+// Created on:  Sep 14, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #include <esp_timer.h>
 
 #include <memory>

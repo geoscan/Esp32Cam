@@ -1,3 +1,10 @@
+//
+// camera_streamer.cpp
+//
+// Created on:  Sep 14, 2020
+// Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 

@@ -15,8 +15,8 @@
 extern "C" int app_main(void)
 {
 	wifiStart();
-	httpStart();
 //	rtspStart();
+	httpStart();
 	wifiUartBridgeStart();
 
 	return 0;

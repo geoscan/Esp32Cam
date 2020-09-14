@@ -1,10 +1,3 @@
-//
-// wifi.c
-//
-// Created on: Aug 12, 2020
-// Author: Dmitry Murashov (d.murashov@geoscan.aero)
-//
-
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
@@ -12,7 +5,9 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
+
 #include <string.h>
+#include <stdlib.h>
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
@@ -20,14 +15,16 @@
 /* The examples use WiFi configuration that you can set via project configuration menu.
 
    If you'd rather not, just change the below entries to strings with
-   the config you want - ie #define EXAMPLE_WIFI_SSID "mywifissid"
+   the config you want - ie #define WIFI_SSID "mywifissid"
 */
-#define EXAMPLE_ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
-#define EXAMPLE_ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
-#define EXAMPLE_ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
-#define EXAMPLE_MAX_STA_CONN CONFIG_ESP_MAX_STA_CONN
+#define ESP_WIFI_SSID      CONFIG_ESP_WIFI_SSID
+#define ESP_WIFI_PASS      CONFIG_ESP_WIFI_PASSWORD
+#define ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
+#define MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
 
 static const char *TAG = "wifi softAP";
+
+extern void getApNameSuffix(uint8_t **data, unsigned *len);
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                     int32_t event_id, void* event_data)
@@ -58,17 +55,33 @@ static void wifi_init_softap(void)
                                                         NULL,
                                                         NULL));
 
+    // Form WIFI AP name (SSID)
+    const unsigned SSID_MAX_LENGTH = 32; // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
+	uint8_t        *data;
+	unsigned       data_len;
+	char           ap_ssid[SSID_MAX_LENGTH];
+
+	getApNameSuffix(&data, &data_len);
+	memcpy(ap_ssid, ESP_WIFI_SSID, sizeof(ESP_WIFI_SSID) - 1);
+
+	if (data && data_len) {
+		memcpy(ap_ssid + sizeof(ESP_WIFI_SSID), data, data_len);
+	}
+
     wifi_config_t wifi_config = {
         .ap = {
-            .ssid = EXAMPLE_ESP_WIFI_SSID,
-            .ssid_len = strlen(EXAMPLE_ESP_WIFI_SSID),
-            .channel = EXAMPLE_ESP_WIFI_CHANNEL,
-            .password = EXAMPLE_ESP_WIFI_PASS,
-            .max_connection = EXAMPLE_MAX_STA_CONN,
+//            .ssid = ESP_WIFI_SSID,
+//            .ssid_len = strlen(ESP_WIFI_SSID),
+			.ssid_len = strlen(ap_ssid),
+            .channel = ESP_WIFI_CHANNEL,
+            .password = ESP_WIFI_PASS,
+            .max_connection = MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
-    if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0) {
+    strcpy((char *)wifi_config.ap.ssid, ap_ssid);
+
+    if (strlen(ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
@@ -77,7 +90,7 @@ static void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "wifi_init_softap finished. SSID:%s password:%s channel:%d",
-             EXAMPLE_ESP_WIFI_SSID, EXAMPLE_ESP_WIFI_PASS, EXAMPLE_ESP_WIFI_CHANNEL);
+             ESP_WIFI_SSID, ESP_WIFI_PASS, ESP_WIFI_CHANNEL);
 }
 
 void wifiStart(void)
