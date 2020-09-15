@@ -62,15 +62,15 @@ extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 	const unsigned kWaitTimeoutMs = 8000;
 	UartDevice     uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 	char           buf[256];
-	auto           timeEndMs = esp_timer_get_time() * 1000 + kWaitTimeoutMs;
-	bool           parsed;
+	auto           timeEndUs = esp_timer_get_time() + kWaitTimeoutMs * 1000;
+	bool           parsed = false;
 
 	*data = NULL;
 	*len  = 0;
 
 	uart.write(prefix, sizeof(prefix));
-	while (esp_timer_get_time() < timeEndMs
-		|| !(parsed = parseResponse(buf, uart.read(buf, sizeof(buf))))); // No loop body
+	while (esp_timer_get_time() < timeEndUs
+		&& !(parsed = parseResponse(buf, uart.read(buf, sizeof(buf))))); // No loop body
 
 	if (parsed) {
 		*data = (uint8_t *)id;

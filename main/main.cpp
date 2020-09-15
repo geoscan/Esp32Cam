@@ -6,6 +6,7 @@
 //
 
 #include <freertos/FreeRTOS.h>
+#include <esp_timer.h>
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
@@ -14,6 +15,7 @@
 
 extern "C" int app_main(void)
 {
+//	esp_timer_init();
 	wifiStart();
 //	rtspStart();
 	httpStart();
