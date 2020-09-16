@@ -24,10 +24,31 @@
 
 // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
 #define SSID_MAX_LENGTH    32
+#define MAC_LENGTH         6
+
+#define min(a,b) (a<b?a:b)
 
 static const char *TAG = "wifi softAP";
 
 extern void getApNameSuffix(uint8_t **data, unsigned *len);
+
+static void get_ssid(uint8_t **data, unsigned *len)
+{
+	static uint8_t ssid[SSID_MAX_LENGTH] = {'\0'};
+	static uint8_t mac[MAC_LENGTH]       = {0};
+	unsigned       ssidlen               = min(SSID_MAX_LENGTH - MAC_LENGTH, strlen(ESP_WIFI_SSID));
+
+	memcpy(ssid, ESP_WIFI_SSID, ssidlen);
+
+	// Copy MAC
+	esp_efuse_mac_get_custom(ssid + ssidlen);
+	for (int i = 0; i < MAC_LENGTH; ++i) {
+		sprintf((char *)ssid + ssidlen + i, "%X", mac[i]);
+	}
+
+	*data = ssid;
+	*len  = ssidlen + MAC_LENGTH;
+}
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                     int32_t event_id, void* event_data)
@@ -60,31 +81,23 @@ static void wifi_init_softap(void)
 
     // Form WIFI AP name (SSID)
 //    const unsigned SSID_MAX_LENGTH = 32;
-	uint8_t        *data;
-	unsigned       data_len;
-	char           ap_ssid[SSID_MAX_LENGTH] = {'\0'};
+	uint8_t  *ssid;
+	unsigned ssid_len;
 
-	memcpy(ap_ssid, ESP_WIFI_SSID, strlen(ESP_WIFI_SSID));
-
-	getApNameSuffix(&data, &data_len);
-	if (data && data_len) {
-		memcpy(ap_ssid + strlen(ESP_WIFI_SSID), data, data_len);
-	}
-
-	sprintf(ap_ssid + strlen(ESP_WIFI_SSID), "%llu", *((uint64_t *)data));
+	get_ssid(&ssid, &ssid_len);
 
     wifi_config_t wifi_config = {
         .ap = {
 //            .ssid = ESP_WIFI_SSID,
 //            .ssid_len = strlen(ESP_WIFI_SSID),
-			.ssid_len = strlen(ap_ssid),
+			.ssid_len = ssid_len,
             .channel = ESP_WIFI_CHANNEL,
             .password = ESP_WIFI_PASS,
             .max_connection = MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
-    strcpy((char *)wifi_config.ap.ssid, ap_ssid);
+    strcpy((char *)wifi_config.ap.ssid, (char *)ssid);
 
     if (strlen(ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;

@@ -15,14 +15,20 @@
 // 5. Deinitializes UART
 
 #include <esp_timer.h>
+#include <esp_system.h>
 
 #include <algorithm>
 #include <numeric>
 #include <utility>
 #include <array>
 #include <cstring>
+#include "sdkconfig.h"
 
 #include "UartDevice.hpp"
+
+#define ESP_WIFI_SSID    CONFIG_ESP_WIFI_SSID
+#define SSID_MAX_LENGTH  32
+#define MAC_LENGTH       6
 
 using namespace std;
 
@@ -66,6 +72,7 @@ static bool parseResponse(const char *data, const unsigned len)
 
 	return res;
 }
+
 
 extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 {

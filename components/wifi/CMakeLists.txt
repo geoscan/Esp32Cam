@@ -10,7 +10,7 @@
 idf_component_register(
 	SRCS
 		"wifi.c"
-		"get_ap_name_suffix.cpp"
+#		"get_ap_name_suffix.cpp"
 	INCLUDE_DIRS "."
 	REQUIRES
 		esp_wifi
