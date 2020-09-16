@@ -22,6 +22,9 @@
 #define ESP_WIFI_CHANNEL   CONFIG_ESP_WIFI_CHANNEL
 #define MAX_STA_CONN       CONFIG_ESP_MAX_STA_CONN
 
+// https://en.wikipedia.org/wiki/Service_set_(802.11_network)
+#define SSID_MAX_LENGTH    32
+
 static const char *TAG = "wifi softAP";
 
 extern void getApNameSuffix(uint8_t **data, unsigned *len);
@@ -56,17 +59,19 @@ static void wifi_init_softap(void)
                                                         NULL));
 
     // Form WIFI AP name (SSID)
-    const unsigned SSID_MAX_LENGTH = 32; // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
+//    const unsigned SSID_MAX_LENGTH = 32;
 	uint8_t        *data;
 	unsigned       data_len;
-	char           ap_ssid[SSID_MAX_LENGTH];
+	char           ap_ssid[SSID_MAX_LENGTH] = {'\0'};
+
+	memcpy(ap_ssid, ESP_WIFI_SSID, strlen(ESP_WIFI_SSID));
 
 	getApNameSuffix(&data, &data_len);
-	memcpy(ap_ssid, ESP_WIFI_SSID, sizeof(ESP_WIFI_SSID) - 1);
-
 	if (data && data_len) {
-		memcpy(ap_ssid + sizeof(ESP_WIFI_SSID), data, data_len);
+		memcpy(ap_ssid + strlen(ESP_WIFI_SSID), data, data_len);
 	}
+
+	sprintf(ap_ssid + strlen(ESP_WIFI_SSID), "%llu", *((uint64_t *)data));
 
     wifi_config_t wifi_config = {
         .ap = {

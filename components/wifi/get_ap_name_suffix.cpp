@@ -26,9 +26,9 @@
 
 using namespace std;
 
-static const unsigned kIdLen = 4;
+static const unsigned kIdLen = 8;
 static char id[kIdLen] = {0};
-static const char * const prefix = "abcfed123654"; // '\0' is NOT considered as a part
+static const char *prefix = "abcfed123654"; // '\0' is NOT considered as a part
 
 static bool parseResponse(const char *data, const unsigned len)
 {
@@ -44,7 +44,16 @@ static bool parseResponse(const char *data, const unsigned len)
 	if (data && len) {
 		// Match prefix
 		for(; prefixPos != prefixEnd && dataPos != dataEnd; dataPos++) {
-			prefixPos = (*prefixPos == *dataPos) ? prefixPos + 1 : prefix;
+			if (*dataPos == 0) {
+				continue;
+			}
+			if (*dataPos == *prefixPos) {
+				prefixPos++;
+			} else if (*dataPos == *prefix) {
+				prefixPos = prefix + 1;
+			} else {
+				prefixPos = prefix;
+			}
 		}
 
 		// Copy Id, if input mathes prefix
@@ -60,7 +69,7 @@ static bool parseResponse(const char *data, const unsigned len)
 
 extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 {
-	const unsigned kWaitTimeoutMs = 8000;
+	const unsigned kWaitTimeoutMs = 10000;
 	UartDevice     uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 	char           buf[256] = {0};
 	auto           timeEndUs = esp_timer_get_time() + kWaitTimeoutMs * 1000;
@@ -70,8 +79,10 @@ extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 	*len  = 0;
 
 //	uart.write(prefix, sizeof(prefix));
-	while (esp_timer_get_time() < timeEndUs
-		&& !(parsed = parseResponse(buf, uart.read(buf, sizeof(buf))))); // No loop body
+	size_t nRead = uart.read(buf, sizeof(buf));
+	while (esp_timer_get_time() < timeEndUs && !(parsed = parseResponse(buf, nRead))) {
+		nRead = uart.read(buf, sizeof(buf));
+	}
 
 	if (parsed) {
 		*data = (uint8_t *)id;
