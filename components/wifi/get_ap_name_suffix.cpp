@@ -20,6 +20,7 @@
 #include <numeric>
 #include <utility>
 #include <array>
+#include <cstring>
 
 #include "UartDevice.hpp"
 
@@ -27,12 +28,12 @@ using namespace std;
 
 static const unsigned kIdLen = 4;
 static char id[kIdLen] = {0};
-static const char * const prefix = "abcfed123654"; // '\0' is also considered as a part
+static const char * const prefix = "abcfed123654"; // '\0' is NOT considered as a part
 
 static bool parseResponse(const char *data, const unsigned len)
 {
 	static const char  *prefixPos = prefix;
-	const char * const prefixEnd  = prefix + sizeof(prefix);
+	const char * const prefixEnd  = prefix + strlen(prefix);
 	static char        *idPos     = id;
 	const char * const idEnd      = id + kIdLen;
 	const char         *dataPos   = data;
@@ -61,14 +62,14 @@ extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 {
 	const unsigned kWaitTimeoutMs = 8000;
 	UartDevice     uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
-	char           buf[256];
+	char           buf[256] = {0};
 	auto           timeEndUs = esp_timer_get_time() + kWaitTimeoutMs * 1000;
 	bool           parsed = false;
 
 	*data = NULL;
 	*len  = 0;
 
-	uart.write(prefix, sizeof(prefix));
+//	uart.write(prefix, sizeof(prefix));
 	while (esp_timer_get_time() < timeEndUs
 		&& !(parsed = parseResponse(buf, uart.read(buf, sizeof(buf))))); // No loop body
 
