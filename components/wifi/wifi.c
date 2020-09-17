@@ -35,19 +35,19 @@ extern void getApNameSuffix(uint8_t **data, unsigned *len);
 static void get_ssid(uint8_t **data, unsigned *len)
 {
 	static uint8_t ssid[SSID_MAX_LENGTH] = {'\0'};
-	static uint8_t mac[MAC_LENGTH]       = {0};
-	unsigned       ssidlen               = min(SSID_MAX_LENGTH - MAC_LENGTH, strlen(ESP_WIFI_SSID));
+	static uint8_t mac[MAC_LENGTH]       = {'\0'};
+	unsigned       ssidlen               = min(SSID_MAX_LENGTH - MAC_LENGTH * 2, strlen(ESP_WIFI_SSID));
 
 	memcpy(ssid, ESP_WIFI_SSID, ssidlen);
 
 	// Copy MAC
-	esp_efuse_mac_get_custom(ssid + ssidlen);
+	esp_efuse_mac_get_default(mac);
 	for (int i = 0; i < MAC_LENGTH; ++i) {
-		sprintf((char *)ssid + ssidlen + i, "%X", mac[i]);
+		sprintf((char *)ssid + ssidlen + i * 2, "%0x", mac[i]);
 	}
 
 	*data = ssid;
-	*len  = ssidlen + MAC_LENGTH;
+	*len  = ssidlen + MAC_LENGTH * 2;
 }
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
