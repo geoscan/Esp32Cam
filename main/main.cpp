@@ -6,6 +6,7 @@
 //
 
 #include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <esp_timer.h>
 #include "wifi.h"
 #include "http.h"
@@ -16,6 +17,7 @@
 
 extern "C" int app_main(void)
 {
+//	esp_log_level_set("gpio", ESP_LOG_WARN);
 	wifiStart();
 //	rtspStart();
 	httpStart();
@@ -23,5 +25,6 @@ extern "C" int app_main(void)
 
 	wifiUartBridgeStart();
 
+	vTaskSuspend(NULL);
 	return 0;
 }

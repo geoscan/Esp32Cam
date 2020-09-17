@@ -16,29 +16,34 @@
 #include "CameraStreamControl.hpp"
 
 template <typename Runnable>
-static void *run(void *instance)
+void *run(void *instance)
 {
 	Runnable *runnable = reinterpret_cast<Runnable *>(instance);
 	runnable->run();
 	return nullptr;
 }
 
-static void cameraStreamerTask(void *)
+#include "Ov2640.hpp"
+extern "C" void cameraStreamerTask(void *)
 {
-	static asio::io_context    context;
-	static CameraStream        cameraStream(context, kSourceUdpPort);
-	static CameraStreamControl cameraStreamControl(context, kSourceTcpPort, cameraStream);
+	asio::io_context    context;
+	CameraStream        cameraStream(context, kSourceUdpPort);
+//	CameraStreamControl cameraStreamControl(context, kSourceTcpPort, cameraStream);
+	auto cameraStreamControl(std::make_shared<CameraStreamControl>(context, kSourceTcpPort, cameraStream));
 
 	pthread_t stub;
 	pthread_create(&stub, NULL, run<asio::io_context>, reinterpret_cast<void *>(&context));
 	pthread_create(&stub, NULL, run<CameraStream>,     reinterpret_cast<void *>(&cameraStream));
 
-	cameraStreamControl.asyncRun();
+//	cameraStreamControl.asyncRun();
+	cameraStreamControl->asyncRun();
+
+	while(1) {}
 }
 
 void cameraStreamerStart()
 {
-	// Create a process
-	static const BaseType_t coreId = 0;
-	xTaskCreatePinnedToCore(cameraStreamerTask, "CamStream", 4096, NULL, 1, NULL, coreId);
+//	xTaskCreatePinnedToCore(cameraStreamerTask, "task_camera_stream", 1024, 0, tskIDLE_PRIORITY, NULL, 0);
+	xTaskCreatePinnedToCore(cameraStreamerTask, "camst", 4096, 0, 5, 0, 1);
+	vTaskSuspend(NULL);
 }

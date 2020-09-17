@@ -136,11 +136,26 @@ CONFIG_CAMERA_CORE0=y
 # end of Camera OVxxxx
 
 #
+# JPEG camera streamer
+#
+CONFIG_CAMSTREAM_SOURCE_UDP_PORT=8888
+CONFIG_CAMSTREAM_SOURCE_TCP_PORT=8888
+# CONFIG_CAMSTREAM_USE_FPS is not set
+# end of JPEG camera streamer
+
+#
 # Dev. test HTTP
 #
 CONFIG_DEVTEST_HTTP_ENABLE=y
 CONFIG_DEVTEST_HTTP_ENABLE_CAM=y
 # end of Dev. test HTTP
+
+#
+# RTSP, RTP server
+#
+CONFIG_RTSP_TCP_PORT=554
+CONFIG_RTP_UDP_PORT=4321
+# end of RTSP, RTP server
 
 #
 # WiFi
@@ -150,6 +165,14 @@ CONFIG_ESP_WIFI_PASSWORD="mypassword"
 CONFIG_ESP_WIFI_CHANNEL=1
 CONFIG_ESP_MAX_STA_CONN=4
 # end of WiFi
+
+#
+# Example Configuration
+#
+CONFIG_EXAMPLE_IPV4=y
+# CONFIG_EXAMPLE_IPV6 is not set
+CONFIG_EXAMPLE_PORT=3333
+# end of Example Configuration
 
 #
 # Example Connection Configuration
