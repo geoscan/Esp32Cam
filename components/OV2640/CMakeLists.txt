@@ -66,4 +66,5 @@ idf_component_register(
 		OV2640
 		protocol_examples_common
 		esp_http_server
-		asio)
+		asio
+		freertos)
