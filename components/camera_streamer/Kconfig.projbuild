@@ -2,11 +2,11 @@ menu "JPEG camera streamer"
 
 	config CAMSTREAM_SOURCE_UDP_PORT
 		int "Default port device uses for sending frames"
-		default 10000
+		default 8888
 
-	config CAMSTREAM_SINK_UDP_PORT
-		int "Default port device sends frames to"
-		default 10001
+	config CAMSTREAM_SOURCE_TCP_PORT
+		int "Default port device uses to accept TCP connection"
+		default 8888
 
 	config CAMSTREAM_USE_FPS
 		bool "Specify FPS"

@@ -10,8 +10,9 @@
 
 #include "sdkconfig.h"
 
-constexpr const unsigned kSourcePort = CONFIG_CAMSTREAM_SOURCE_UDP_PORT;
-constexpr const unsigned kSinkPort   = CONFIG_CAMSTREAM_SINK_UDP_PORT;
+constexpr const unsigned kSourceUdpPort = CONFIG_CAMSTREAM_SOURCE_UDP_PORT;
+constexpr const unsigned kSourceTcpPort = CONFIG_CAMSTREAM_SOURCE_TCP_PORT;
+
 
 #if CONFIG_CAMSTREAM_USE_FPS
 constexpr const short kFps = CONFIG_CAMSTREAM_FPS;
