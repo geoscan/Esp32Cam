@@ -20,5 +20,6 @@ constexpr const short kFps = CONFIG_CAMSTREAM_FPS;
 constexpr const short kFps = -1;
 #endif // CONFIG_CAMSTREAM_USE_FPS
 
+void cameraStreamerStart();
 
 #endif // COMPONENTS_CAMERA_STREAMER_H

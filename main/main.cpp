@@ -12,13 +12,15 @@
 #include "rtsp.h"
 #include "echo_tcp.hpp"
 #include "wifi_uart_bridge.hpp"
+#include "camera_streamer.h"
 
 extern "C" int app_main(void)
 {
-//	esp_timer_init();
 	wifiStart();
 //	rtspStart();
 	httpStart();
+	cameraStreamerStart();
+
 	wifiUartBridgeStart();
 
 	return 0;
