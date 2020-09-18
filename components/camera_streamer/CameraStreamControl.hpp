@@ -16,9 +16,11 @@ public:
 	CameraStreamControl(asio::io_context &context, unsigned port, CameraStream &);
 	// async run
 	void asyncRun();
+	void run();
 	~CameraStreamControl();
 private:
 	CameraStream            &cameraStream;
+	asio::io_context        &context;
 	asio::ip::tcp::acceptor acceptor;
 };
 

@@ -30,7 +30,7 @@ CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f
 void CameraStream::run()
 {
 	using Time = decltype(currentTimeMs());
-	static const auto kWaitMs = 1000 / fps;
+	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
 	auto img = Ov2640::instance().jpeg();
 	Time timeLast;
@@ -60,6 +60,7 @@ void CameraStream::run()
 				vTaskDelay((kWaitMs - timedelta) / portTICK_PERIOD_MS);
 			}
 		}
+		mutex.unlock();
 	}
 }
 

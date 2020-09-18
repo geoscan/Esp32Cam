@@ -23,27 +23,26 @@ void *run(void *instance)
 	return nullptr;
 }
 
-#include "Ov2640.hpp"
-extern "C" void cameraStreamerTask(void *)
-{
-	asio::io_context    context;
-	CameraStream        cameraStream(context, kSourceUdpPort);
-//	CameraStreamControl cameraStreamControl(context, kSourceTcpPort, cameraStream);
-	auto cameraStreamControl(std::make_shared<CameraStreamControl>(context, kSourceTcpPort, cameraStream));
-
-	pthread_t stub;
-	pthread_create(&stub, NULL, run<asio::io_context>, reinterpret_cast<void *>(&context));
-	pthread_create(&stub, NULL, run<CameraStream>,     reinterpret_cast<void *>(&cameraStream));
-
-//	cameraStreamControl.asyncRun();
-	cameraStreamControl->asyncRun();
-
-	while(1) {}
-}
-
 void cameraStreamerStart()
 {
-//	xTaskCreatePinnedToCore(cameraStreamerTask, "task_camera_stream", 1024, 0, tskIDLE_PRIORITY, NULL, 0);
-	xTaskCreatePinnedToCore(cameraStreamerTask, "camst", 4096, 0, 5, 0, 1);
-	vTaskSuspend(NULL);
+	asio::io_context    controlContext;
+	asio::io_context    streamContext;
+	CameraStream        cameraStream(streamContext, 8887);
+	CameraStreamControl cameraStreamControl(controlContext, 8888, cameraStream);
+//	auto cameraStreamControl(std::make_shared<CameraStreamControl>(controlContext, 8888, cameraStream));
+
+	pthread_t stub;
+	pthread_create(&stub, NULL, run<asio::io_context>,   reinterpret_cast<void *>(&streamContext));
+	pthread_create(&stub, NULL, run<asio::io_context>,   reinterpret_cast<void *>(&controlContext));
+	pthread_create(&stub, NULL, run<CameraStream>,       reinterpret_cast<void *>(&cameraStream));
+//	pthread_create(&stub, NULL, run<CameraStreamControl, reinterpret_cast<void *>(&cameraStreamControl));
+
+	cameraStreamControl.run();
 }
+
+//void cameraStreamerStart()
+//{
+////	xTaskCreatePinnedToCore(cameraStreamerTask, "task_camera_stream", 1024, 0, tskIDLE_PRIORITY, NULL, 0);
+//	xTaskCreatePinnedToCore(cameraStreamerTask, "camst", 4096, 0, 5, 0, 1);
+//	vTaskSuspend(NULL);
+//}
