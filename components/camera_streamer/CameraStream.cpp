@@ -37,11 +37,13 @@ void CameraStream::run()
 
 	while(true) {
 		mutex.lock();
-		if (!sinks.empty()) {
+		if (sinks.empty()) {
+			mutex.unlock();
+		} else {
 			mutex.unlock();
 
 			// Send JPEG
-			if (fps) {
+			if (fps > 0) {
 				timeLast = currentTimeMs();
 			}
 
@@ -53,14 +55,13 @@ void CameraStream::run()
 
 			img = Ov2640::instance().jpeg();
 
-			if (fps) {
+			if (fps > 0) {
 				// Wait until we are eligible for sending the next frame
 				auto timeNow = currentTimeMs();
 				auto timedelta = (timeNow < timeLast /*overflow*/) ? kWaitMs / 2 : timeNow - timeLast;
 				vTaskDelay((kWaitMs - timedelta) / portTICK_PERIOD_MS);
 			}
 		}
-		mutex.unlock();
 	}
 }
 

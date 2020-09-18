@@ -41,6 +41,7 @@ void CameraStreamControl::run()
 			client.receive(asio::buffer(stubBuffer, 1), 0, err);
 //			client.send(asio::buffer("hello", 5));
 		}
+		cameraStream.removeSink(clientEndpoint);
 	}
 }
 
