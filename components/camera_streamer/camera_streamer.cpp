@@ -23,7 +23,7 @@ void *run(void *instance)
 	return nullptr;
 }
 
-void cameraStreamerStart()
+void cameraStreamerTask(void *)
 {
 	asio::io_context    controlContext;
 	asio::io_context    streamContext;
@@ -40,9 +40,9 @@ void cameraStreamerStart()
 	cameraStreamControl.run();
 }
 
-//void cameraStreamerStart()
-//{
-////	xTaskCreatePinnedToCore(cameraStreamerTask, "task_camera_stream", 1024, 0, tskIDLE_PRIORITY, NULL, 0);
-//	xTaskCreatePinnedToCore(cameraStreamerTask, "camst", 4096, 0, 5, 0, 1);
-//	vTaskSuspend(NULL);
-//}
+void cameraStreamerStart()
+{
+//	xTaskCreatePinnedToCore(cameraStreamerTask, "task_camera_stream", 1024, 0, tskIDLE_PRIORITY, NULL, 0);
+	xTaskCreatePinnedToCore(cameraStreamerTask, "camst", 4096, 0, 5, 0, 1);
+	vTaskSuspend(NULL);
+}
