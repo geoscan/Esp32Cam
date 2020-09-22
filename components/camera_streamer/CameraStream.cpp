@@ -16,9 +16,9 @@
 using asio::ip::udp;
 using namespace std;
 
-uint32_t CameraStream::currentTimeMs()
+int64_t CameraStream::currentTimeMs()
 {
-	return static_cast<uint32_t>(esp_timer_get_time() * 1000);
+	return esp_timer_get_time() / 1000;
 }
 
 CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f) :
@@ -29,37 +29,28 @@ CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f
 
 void CameraStream::run()
 {
-	using Time = decltype(currentTimeMs());
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
-	auto img = Ov2640::instance().jpeg();
-	Time timeLast;
+	auto img = Ov2640::instance().jpeg(); // Trigger HW-initialization
 
 	while(true) {
-		mutex.lock();
+		lock();
 		if (sinks.empty()) {
-			mutex.unlock();
+			unlock();
 		} else {
-			mutex.unlock();
-
-			// Send JPEG
-			if (fps > 0) {
-				timeLast = currentTimeMs();
-			}
-
-			mutex.lock();
+			auto lastSend = currentTimeMs();
 			for (auto &sink : sinks) {
 				socket.send_to(img->data(), sink);
 			}
-			mutex.unlock();
+			unlock();
 
 			img = Ov2640::instance().jpeg();
 
 			if (fps > 0) {
-				// Wait until we are eligible for sending the next frame
-				auto timeNow = currentTimeMs();
-				auto timedelta = (timeNow < timeLast /*overflow*/) ? kWaitMs / 2 : timeNow - timeLast;
-				vTaskDelay((kWaitMs - timedelta) / portTICK_PERIOD_MS);
+				auto timeDelta = currentTimeMs() - lastSend;
+				// Timer counter overflow and high latency are taken into accout
+				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
+				vTaskDelay((timeWait) / portTICK_PERIOD_MS);
 			}
 		}
 	}
@@ -83,5 +74,15 @@ void CameraStream::removeSinks()
 {
 	mutex.lock();
 	sinks.clear();
+	mutex.unlock();
+}
+
+void CameraStream::lock()
+{
+	mutex.lock();
+}
+
+void CameraStream::unlock()
+{
 	mutex.unlock();
 }

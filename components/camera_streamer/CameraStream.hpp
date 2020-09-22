@@ -28,8 +28,10 @@ public:
 	void addSink(asio::ip::udp::endpoint);
 	void removeSink(asio::ip::udp::endpoint);
 	void removeSinks();
+	void lock();
+	void unlock();
 private:
-	static uint32_t currentTimeMs();
+	static int64_t currentTimeMs();
 
 	asio::ip::udp::socket             socket;
 	std::set<asio::ip::udp::endpoint> sinks; // Client endpoints

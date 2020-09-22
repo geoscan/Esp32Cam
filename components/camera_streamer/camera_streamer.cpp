@@ -27,8 +27,8 @@ void cameraStreamerStart()
 {
 	static asio::io_context    controlContext;
 	static asio::io_context    streamContext;
-	static CameraStream        cameraStream(streamContext, 8887);
-	static CameraStreamControl cameraStreamControl(controlContext, 8888, cameraStream);
+	static CameraStream        cameraStream(streamContext, CONFIG_CAMSTREAM_SOURCE_UDP_PORT);
+	static CameraStreamControl cameraStreamControl(controlContext, CONFIG_CAMSTREAM_SOURCE_TCP_PORT, cameraStream);
 //	auto cameraStreamControl(std::make_shared<CameraStreamControl>(controlContext, 8888, cameraStream));
 
 	static pthread_t stub;

@@ -26,6 +26,6 @@ extern "C" int app_main(void)
 //	wifiUartBridgeStart();
 
 //	vTaskSuspend(NULL);
-	while (true);
+//	while (true);
 	return 0;
 }
