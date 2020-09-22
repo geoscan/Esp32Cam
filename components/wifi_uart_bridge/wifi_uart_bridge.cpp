@@ -12,5 +12,6 @@ void wifiUartBridgeStart()
 {
 	static Wifi2UartBridge bridge;
 	bridge.start();
-	vTaskSuspend(NULL);
+//	vTaskSuspend(NULL);
+
 }

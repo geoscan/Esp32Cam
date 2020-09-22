@@ -13,13 +13,6 @@
 constexpr const unsigned kSourceUdpPort = CONFIG_CAMSTREAM_SOURCE_UDP_PORT;
 constexpr const unsigned kSourceTcpPort = CONFIG_CAMSTREAM_SOURCE_TCP_PORT;
 
-
-#if CONFIG_CAMSTREAM_USE_FPS
-constexpr const short kFps = CONFIG_CAMSTREAM_FPS;
-#else
-constexpr const short kFps = -1;
-#endif // CONFIG_CAMSTREAM_USE_FPS
-
 void cameraStreamerStart();
 
 #endif // COMPONENTS_CAMERA_STREAMER_H

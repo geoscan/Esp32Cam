@@ -19,6 +19,7 @@ menu "JPEG camera streamer"
 
 		config CAMSTREAM_FPS
 			int "FPS"
+			range 1 30
 			default 15
 
 	endif
