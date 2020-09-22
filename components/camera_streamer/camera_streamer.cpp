@@ -15,6 +15,10 @@
 #include "CameraStream.hpp"
 #include "CameraStreamControl.hpp"
 
+#ifndef CONFIG_CAMSTREAM_FPS
+# define CONFIG_CAMSTREAM_FPS -1
+#endif  // CONFIG_CAMSTREAM_FPS
+
 template <typename Runnable>
 static void *run(void *instance)
 {
@@ -27,7 +31,7 @@ void cameraStreamerStart()
 {
 	static asio::io_context    controlContext;
 	static asio::io_context    streamContext;
-	static CameraStream        cameraStream(streamContext, CONFIG_CAMSTREAM_SOURCE_UDP_PORT);
+	static CameraStream        cameraStream(streamContext, CONFIG_CAMSTREAM_SOURCE_UDP_PORT, CONFIG_CAMSTREAM_FPS);
 	static CameraStreamControl cameraStreamControl(controlContext, CONFIG_CAMSTREAM_SOURCE_TCP_PORT, cameraStream);
 //	auto cameraStreamControl(std::make_shared<CameraStreamControl>(controlContext, 8888, cameraStream));
 

@@ -9,12 +9,7 @@
 #define COMPONENTS_OV2640_CAMERASTREAM_HPP
 
 #include "asio.hpp"
-#include <sdkconfig.h>
 #include <set>
-
-#ifndef CONFIG_CAMSTREAM_FPS
-# define CONFIG_CAMSTREAM_FPS -1
-#endif  // CONFIG_CAMSTREAM_FPS
 
 // Wrapper around UDP socket that
 // sends JPEG frames to its sinks
@@ -23,7 +18,7 @@ public:
 	using Fps = short;
 	/// @param fps <= 0 -- Instant frame sending
 	///            >  0 -- Use provided value as max FPS
-	CameraStream(asio::io_context &context, uint16_t sourcePort, Fps fps = CONFIG_CAMSTREAM_FPS);
+	CameraStream(asio::io_context &context, uint16_t sourcePort, Fps fps = -1);
 	void run();
 	void addSink(asio::ip::udp::endpoint);
 	void removeSink(asio::ip::udp::endpoint);

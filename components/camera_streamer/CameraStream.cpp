@@ -29,16 +29,21 @@ CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f
 
 void CameraStream::run()
 {
+	using Time = decltype(currentTimeMs());
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
 	auto img = Ov2640::instance().jpeg(); // Trigger HW-initialization
+
+	Time lastSend = 0;
 
 	while(true) {
 		lock();
 		if (sinks.empty()) {
 			unlock();
 		} else {
-			auto lastSend = currentTimeMs();
+			if (fps > 0) {
+				lastSend = currentTimeMs();
+			}
 			for (auto &sink : sinks) {
 				socket.send_to(img->data(), sink);
 			}
@@ -47,8 +52,8 @@ void CameraStream::run()
 			img = Ov2640::instance().jpeg();
 
 			if (fps > 0) {
+				// Timer counter overflow and high latency are taken into account
 				auto timeDelta = currentTimeMs() - lastSend;
-				// Timer counter overflow and high latency are taken into accout
 				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
 				vTaskDelay((timeWait) / portTICK_PERIOD_MS);
 			}
