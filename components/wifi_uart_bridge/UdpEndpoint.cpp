@@ -3,8 +3,8 @@
 
 using asio::ip::udp;
 
-UdpEndpoint::UdpEndpoint(asio::io_context context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
-	kTimeout(static_cast<Time>(timeoutNoInputSec) * 1'000'000),
+UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
+	kTimeout(static_cast<Time>(timeoutNoInputSec) * 1000000),
 	kMaxClients(nMaxClients > 0),
 	socket(context, udp::endpoint(udp::v4(), port))
 {
@@ -13,7 +13,7 @@ UdpEndpoint::UdpEndpoint(asio::io_context context, uint16_t port, size_t nMaxCli
 size_t UdpEndpoint::read(asio::mutable_buffer buf)
 {
 	CliEndpoint sender;
-	size_t      nrecv = socket.receive_from(buf, endpoint);
+	size_t      nrecv = socket.receive_from(buf, sender);
 
 	if (!tryAccept(sender)) {
 		nrecv = 0;
@@ -44,9 +44,10 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 bool UdpEndpoint::expired(Time time) const
 {
-	const Time now    = esp_timer_get_time();
-	const Time passed = (now < time) ? std::numeric_limits<Time>::max - time + now - std::numeric_limits<Time>::min : now - time;
 	bool       res;
+	const Time now    = esp_timer_get_time();
+	const Time passed = (now < time) ? /*then*/ std::numeric_limits<Time>::max() - time +
+		now - std::numeric_limits<Time>::min() : /*else*/ now - time;
 
 	if (passed < kTimeout) {
 		res = true;
