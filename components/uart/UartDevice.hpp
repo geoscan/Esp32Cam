@@ -10,20 +10,13 @@
 
 #include "driver/uart.h"
 #include "driver/gpio.h"
-#include "SerialDevice.hpp"
+//#include "SerialDevice.hpp"
 
 //!
 //! \brief The UartDevice class
 //!
 class UartDevice {
 public:
-	//!
-	//! \brief UartDevice This is an overloaded constructor.
-	//!
-
-//    uart_word_length_t data_bits;       /*!< UART byte size*/
-//    uart_parity_t parity;               /*!< UART parity mode*/
-//    uart_stop_bits_t
 	UartDevice(int num,  gpio_num_t rxPin, gpio_num_t txPin, int rate, uart_parity_t parity = UART_PARITY_DISABLE,
 			   uart_stop_bits_t stopBits = UART_STOP_BITS_1);
 	//!
@@ -46,4 +39,4 @@ private:
 	int currentRate;
 };
 
-#endif // PLATFORM_LINUX_DRIVERS_UARTDEVICE_HPP_
+#endif  // PLATFORM_LINUX_DRIVERS_UARTDEVICE_HPP_

@@ -23,7 +23,7 @@ extern "C" int app_main(void)
 	httpStart();
 	cameraStreamerStart();
 
-//	wifiUartBridgeStart();
+	wifiUartBridgeStart();
 
 //	vTaskSuspend(NULL);
 //	while (true);
