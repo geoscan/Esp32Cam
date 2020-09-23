@@ -14,11 +14,5 @@ menu "Example Configuration"
 
     endchoice
 
-    config EXAMPLE_PORT
-        int "Port"
-        range 0 65535
-        default 3333
-        help
-            Local port the example server will listen on.
 
 endmenu

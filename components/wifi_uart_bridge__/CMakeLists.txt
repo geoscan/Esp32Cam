@@ -4,9 +4,9 @@ file(GLOB SOURCE_FILES
 
 idf_component_register(
 	SRCS ${SOURCE_FILES}
-	INCLUDE_DIRS "."
+	INCLUDE_DIRS
+		"."
+		"include"
 	REQUIRES
 		freertos
-		uart
-		asio
-		esp_timer)
+		uart)
