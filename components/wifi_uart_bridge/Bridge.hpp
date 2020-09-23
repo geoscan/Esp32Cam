@@ -14,6 +14,9 @@ class Bridge {
 public:
 	Bridge(Endpoint&, Endpoint&);
 	void run();
+private:
+	Endpoint &epA;
+	Endpoint &epB;
 };
 
 #endif // COMPONENTS_WIFI_UART_BRIDGE_BRIDGE_HPP
