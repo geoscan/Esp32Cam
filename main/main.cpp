@@ -17,15 +17,9 @@
 
 extern "C" int app_main(void)
 {
-//	esp_log_level_set("gpio", ESP_LOG_WARN);
 	wifiStart();
-//	rtspStart();
 	httpStart();
 	cameraStreamerStart();
-
 	wifiUartBridgeStart();
-
-//	vTaskSuspend(NULL);
-//	while (true);
 	return 0;
 }

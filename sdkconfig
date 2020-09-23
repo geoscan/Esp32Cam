@@ -145,6 +145,13 @@ CONFIG_CAMSTREAM_FPS=20
 # end of JPEG camera streamer
 
 #
+# Example Configuration
+#
+CONFIG_EXAMPLE_IPV4=y
+# CONFIG_EXAMPLE_IPV6 is not set
+# end of Example Configuration
+
+#
 # Dev. test HTTP
 #
 CONFIG_DEVTEST_HTTP_ENABLE=y
@@ -175,13 +182,6 @@ CONFIG_WIFI_UART_BRIDGE_RX_TX_BUFFER=512
 CONFIG_WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS=120
 CONFIG_WIFI_UART_BRIDGE_MAX_NCLIENTS=1
 # end of WIFI <=> UART bridge
-
-#
-# Example Configuration
-#
-CONFIG_EXAMPLE_IPV4=y
-# CONFIG_EXAMPLE_IPV6 is not set
-# end of Example Configuration
 
 #
 # Example Connection Configuration

@@ -19,4 +19,4 @@ idf_component_register(
 		freertos
 		esp_common
 		log
-		wifi_uart_bridge)
+		uart)
