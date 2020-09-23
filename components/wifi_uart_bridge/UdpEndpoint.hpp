@@ -23,7 +23,9 @@ public:
 	size_t read(asio::mutable_buffer) override;
 	size_t write(asio::const_buffer) override;
 
-	UdpEndpoint(asio::io_context, uint16_t port, size_t nMaxClients = 1, size_t timeoutNoInputSec = 120);
+	UdpEndpoint(asio::io_context, uint16_t port = CONFIG_WIFI_UART_BRIDGE_UDP_PORT,
+		size_t nMaxClients = CONFIG_WIFI_UART_BRIDGE_MAX_NCLIENTS,
+		size_t timeoutNoInputSec = CONFIG_WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS);
 private:
 
 	using CliEndpoint = asio::ip::udp::endpoint;
