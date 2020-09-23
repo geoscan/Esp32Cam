@@ -9,5 +9,6 @@ idf_component_register(
 		rtsp
 		echo_tcp
 		wifi_uart_bridge
+		deprecated_wifi_uart_bridge
 		esp_timer
 		camera_streamer)

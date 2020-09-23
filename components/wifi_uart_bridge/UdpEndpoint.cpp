@@ -1,4 +1,5 @@
 #include <limits>
+#include "utility/LockGuard.hpp"
 #include "UdpEndpoint.hpp"
 
 UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
@@ -11,7 +12,7 @@ UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxCl
 size_t UdpEndpoint::read(asio::mutable_buffer buf)
 {
 	CliEndpoint sender;
-	size_t      nrecv = socket.receive_from(buf, sender);
+	volatile size_t      nrecv = socket.receive_from(buf, sender);
 
 	if (!tryAccept(sender)) {
 		nrecv = 0;
@@ -22,20 +23,21 @@ size_t UdpEndpoint::read(asio::mutable_buffer buf)
 
 size_t UdpEndpoint::write(asio::const_buffer buf)
 {
-	lock();
-
-	auto   it    = clients.begin();
 	size_t nsent = 0;
+	decltype(clients) cpClients;
 
-	for (; it != clients.end(); ++it) {
+	{  // Copy clients for sake of thread safety
+		auto guard = Utility::makeLockGuard(mutex);
+		cpClients = clients;
+	}
+
+	for (auto it = cpClients.begin(); it != cpClients.end(); ++it) {
 		if (expired(it->second)) {
-			it = clients.erase(it);
+			it = cpClients.erase(it);
 		} else {
 			nsent = socket.send_to(buf, it->first);
 		}
 	}
-
-	unlock();
 
 	return nsent;
 }
@@ -62,11 +64,16 @@ bool UdpEndpoint::tryAccept(CliEndpoint endpoint)
 
 	if (clients.size() < kMaxClients) {
 		res = true;
-		auto itFind = clients.find(endpoint);
-		if (itFind == clients.cend()) {
-			lock();
+		bool exists = false;
+
+		{
+			auto guard = Utility::makeLockGuard(mutex);
+			exists = (clients.find(endpoint) == clients.end());
+		}
+
+		if (!exists) {
+			auto guard = Utility::makeLockGuard(mutex);
 			clients.emplace(endpoint, esp_timer_get_time());
-			unlock();
 		}
 	} else {
 		res = false;
