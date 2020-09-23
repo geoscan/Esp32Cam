@@ -5,7 +5,7 @@ size_t UartEndpoint::read(asio::mutable_buffer buf)
 	return read(buf.data(), buf.size());
 }
 
-void UartEndpoint::write(asio::const_buffer buf)
+size_t UartEndpoint::write(asio::const_buffer buf)
 {
-	write(buf.data(), buf.size());
+	return write(buf.data(), buf.size());
 }

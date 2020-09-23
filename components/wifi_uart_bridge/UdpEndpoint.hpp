@@ -21,19 +21,24 @@ class UdpClients;
 class UdpEndpoint : public Endpoint {
 public:
 	size_t read(asio::mutable_buffer) override;
-	void   write(asio::const_buffer) override;
+	size_t write(asio::const_buffer) override;
 
-	UdpEndpoint(asio::io_context, unsigned port, const unsigned nMaxClients = 1, const unsigned timeoutNoInputSec);
+	UdpEndpoint(asio::io_context, uint16_t port, size_t nMaxClients = 1, size_t timeoutNoInputSec = 120);
 private:
+
 	using CliEndpoint = asio::ip::udp::endpoint;
 	using Time        = decltype(esp_timer_get_time());
 
 	bool expired(Time) const;
 	bool tryAccept(CliEndpoint);
+	void lock();
+	void unlock();
 
-	const Time                  kTimeout;
+	const Time                  kTimeout;  // us
+	const size_t                kMaxClients;
 	asio::ip::udp::socket       socket;
 	std::map<CliEndpoint, Time> clients;
+	asio::detail::mutex         mutex;
 };
 
 #endif  // COMPONENTS_WIFI_UART_BRIDGE_UDPENDPOINT_HPP

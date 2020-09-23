@@ -16,7 +16,7 @@ public:
 	using UartDevice::UartDevice;
 
 	size_t read(asio::mutable_buffer) override;
-	void   write(asio::const_buffer) override;
+	size_t write(asio::const_buffer) override;
 };
 
 #endif  // COMPONENTS_WIFI_UART_BRIDGE_UARTENDPOINT_HPP
