@@ -2,10 +2,10 @@ menu "WIFI <=> UART bridge"
 
 	config WIFI_UART_BRIDGE_UDP_PORT
 		int "UDP port number"
-		range 1 65535
+		range 1 32767
 		default 8001
 		help
-			Number of UDP port accepting packages
+			Number of sending/receiving UDP port
 
 	config WIFI_UART_BRIDGE_RX_TX_BUFFER
 		int "RC/TX buffers capacity"

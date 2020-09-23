@@ -20,7 +20,7 @@ private:
 	Endpoint &first;
 	Endpoint &second;
 
-	using Endpoints = std::pair<std::reference_wrapper<Endpoint> /*from*/, std::reference_wrapper<Endpoint> /*to*/>;
+	using Endpoints = std::pair<Endpoint *, Endpoint *>;
 
 	static void *bridgingRoutine(void *endpoints);
 };

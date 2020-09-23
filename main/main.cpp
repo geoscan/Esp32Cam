@@ -19,7 +19,7 @@ extern "C" int app_main(void)
 {
 	wifiStart();
 	httpStart();
-	cameraStreamerStart();
+//	cameraStreamerStart();
 	wifiUartBridgeStart();
 	return 0;
 }

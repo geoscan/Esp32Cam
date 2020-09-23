@@ -1,12 +1,10 @@
 #include <limits>
 #include "UdpEndpoint.hpp"
 
-using asio::ip::udp;
-
 UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
 	kTimeout(static_cast<Time>(timeoutNoInputSec) * 1000000),
 	kMaxClients(nMaxClients > 0),
-	socket(context, udp::endpoint(udp::v4(), port))
+	socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), port))
 {
 }
 
