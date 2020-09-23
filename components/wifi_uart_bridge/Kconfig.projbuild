@@ -1,19 +1,25 @@
 menu "WIFI <=> UART bridge"
 
 	config WIFI_UART_BRIDGE_UDP_PORT
-		int "Number of UDP port accepting packages"
+		int "UDP port number"
 		range 1 65535
-		default 8888
+		default 8001
+		help
+			Number of UDP port accepting packages
 
 	config WIFI_UART_BRIDGE_RX_TX_BUFFER
-		int "Capacity of both RX and TX buffers"
+		int "RC/TX buffers capacity"
 		range 1 4096
 		default 512
+		help
+			Capacity of both RX and TX buffers
 
 	config WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS
-		int "For how long UDP client can keep silence before copter stops sending him packages"
+		int "Max client inactivity period, seconds"
 		range 60 1800
 		default 120
+		help
+			For how long UDP client can keep silence before copter stops sending him packages
 
 	config WIFI_UART_BRIDGE_MAX_NCLIENTS
 		int ""
