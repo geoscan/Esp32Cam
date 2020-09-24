@@ -17,8 +17,11 @@ void Bridge::run()
 	Endpoints routeBa{&second, &first};
 	pthread_t pth;
 
-	pthread_create(&pth, NULL, bridgingRoutine, &routeAb);
-	bridgingRoutine(&routeBa);
+//	pthread_create(&pth, NULL, bridgingRoutine, &routeAb);
+//	bridgingRoutine(&routeBa);
+
+	pthread_create(&pth, NULL, bridgingRoutine, &routeBa);
+	bridgingRoutine(&routeAb);
 }
 
 void *Bridge::bridgingRoutine(void *arg)

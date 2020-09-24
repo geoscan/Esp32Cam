@@ -63,7 +63,6 @@ private:
 	bool expired(Time) const;
 
 	// Semaphore modifiers
-	bool reachedCapacity();  // We don't have room for 1 more connection anymore
 	bool addClient(bool fAdd);
 
 	const Time            kTimeout;  // us
