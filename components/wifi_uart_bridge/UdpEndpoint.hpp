@@ -13,10 +13,9 @@
 #include <asio.hpp>
 #include <map>
 #include <utility>
+#include <functional>
 
 #include "Endpoint.hpp"
-
-class UdpClients;
 
 class UdpEndpoint : public Endpoint {
 public:
@@ -30,17 +29,48 @@ private:
 
 	using CliEndpoint = asio::ip::udp::endpoint;
 	using Time        = decltype(esp_timer_get_time());
+	using CliInfo     = std::pair<CliEndpoint, Time>;
+
+	// ------------ CliStack ------------ //
+
+	class CliStack {
+	public:
+		CliStack(std::list<CliInfo>::iterator incrementIterator, size_t clients);
+		CliInfo &pop();
+		bool empty() const;
+	private:
+		std::list<CliInfo>::iterator iter;
+		size_t size;
+	};
+
+	// ------------ CliMap ------------ //
+
+	class CliMap {
+	public:
+		Time &timestamp(CliEndpoint);
+		void setTimestamp(CliEndpoint, UdpEndpoint::Time);
+		bool contains(CliEndpoint);
+		void add(CliEndpoint, UdpEndpoint::Time);
+		CliStack stack();
+	private:
+		std::map<UdpEndpoint::CliEndpoint, std::reference_wrapper<UdpEndpoint::CliInfo>> cliMap;
+		std::list<UdpEndpoint::CliInfo> cliStack;
+		asio::detail::mutex mutex;
+	};
+
+	static Time time();
 
 	bool expired(Time) const;
-	bool tryAccept(CliEndpoint);
-	void lock();
-	void unlock();
+	// Semaphore modifiers
+	bool reachedCapacity();  // We don't have room for 1 more connection anymore
+	bool addClient(bool fAdd);
 
-	const Time                  kTimeout;  // us
-	const size_t                kMaxClients;
-	asio::ip::udp::socket       socket;
-	std::map<CliEndpoint, Time> clients;
-	asio::detail::mutex         mutex;
+	const Time            kTimeout;  // us
+	const size_t          kMaxClients;
+	SemaphoreHandle_t     semaphore;
+	CliMap                cliMap;
+	asio::ip::udp::socket socket;
 };
+
 
 #endif  // COMPONENTS_WIFI_UART_BRIDGE_UDPENDPOINT_HPP

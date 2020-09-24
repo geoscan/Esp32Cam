@@ -61,8 +61,12 @@ public:
 	}
 };
 
+
+// ------------ makeLockGuard ------------ //
+
+
 template <typename MutexType>
-LockGuard<MutexType> makeLockGuard(MutexType &mutex)
+inline LockGuard<MutexType> makeLockGuard(MutexType &mutex)
 {
 	return LockGuard<MutexType>(mutex);
 }
