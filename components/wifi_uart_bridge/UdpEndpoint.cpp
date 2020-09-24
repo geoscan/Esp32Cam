@@ -99,10 +99,10 @@ bool UdpEndpoint::addClient(bool fAdd)
 
 UdpEndpoint::Time &UdpEndpoint::CliMap::timestamp(UdpEndpoint::CliEndpoint client)
 {
-	auto    guard = Utility::makeLockGuard(mutex);
-	CliInfo &info = (CliInfo)cliMap[client];
-
-	return info.second;
+//	auto    guard = Utility::makeLockGuard(mutex);
+//	return cliMap[client].get().second;
+	static Time t;
+	return t;
 }
 
 void UdpEndpoint::CliMap::setTimestamp(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time time)
@@ -123,7 +123,8 @@ void UdpEndpoint::CliMap::add(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time
 
 	if (!contains) {
 		cliStack.emplace_back(client, time);
-		cliMap[client] = std::ref(cliStack.back());
+//		cliMap[client] = cliStack.back();
+		cliMap.emplace(client, cliStack.back());
 	}
 }
 
@@ -132,7 +133,6 @@ UdpEndpoint::CliStack UdpEndpoint::CliMap::stack()
 	auto guard = Utility::makeLockGuard(mutex);
 	return CliStack(cliStack.begin(), cliStack.size());
 }
-
 
 
 // ------------ CliStack ------------ //

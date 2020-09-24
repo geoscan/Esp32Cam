@@ -34,14 +34,15 @@ private:
 		}
 	}
 public:
-	LockGuard(const LockGuard &) = delete;
-	LockGuard &operator=(const LockGuard &) = delete;
+	LockGuard() = delete;
+	LockGuard(const LockGuard<MutexType> &) = delete;
+	LockGuard &operator=(const LockGuard<MutexType> &) = delete;
 
-	LockGuard(LockGuard &&lg) : mutex(lg.mutex) {
+	LockGuard(LockGuard<MutexType> &&lg) : mutex(lg.mutex) {
 		lg.shouldUnlock = false;
 	}
 
-	LockGuard &operator=(LockGuard &&lg)
+	LockGuard &operator=(LockGuard<MutexType> &&lg)
 	{
 		mutex = lg.mutex;
 		lg.shouldUnlock = false;

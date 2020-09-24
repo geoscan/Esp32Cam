@@ -50,17 +50,18 @@ private:
 		Time &timestamp(CliEndpoint);
 		void setTimestamp(CliEndpoint, UdpEndpoint::Time);
 		bool contains(CliEndpoint);
-		void add(CliEndpoint, UdpEndpoint::Time);
+		void add(CliEndpoint, Time);
 		CliStack stack();
 	private:
-		std::map<UdpEndpoint::CliEndpoint, std::reference_wrapper<UdpEndpoint::CliInfo>> cliMap;
-		std::list<UdpEndpoint::CliInfo> cliStack;
+		std::map<CliEndpoint, std::reference_wrapper<CliInfo>> cliMap;
+		std::list<CliInfo> cliStack;
 		asio::detail::mutex mutex;
 	};
 
 	static Time time();
 
 	bool expired(Time) const;
+
 	// Semaphore modifiers
 	bool reachedCapacity();  // We don't have room for 1 more connection anymore
 	bool addClient(bool fAdd);
