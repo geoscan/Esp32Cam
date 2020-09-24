@@ -33,7 +33,8 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 	for (auto it = cpClients.begin(); it != cpClients.end(); ++it) {
 		if (expired(it->second)) {
-			it = cpClients.erase(it);
+			auto guard = Utility::makeLockGuard(mutex);
+			clients.erase(it->first);
 		} else {
 			nsent = socket.send_to(buf, it->first);
 		}
@@ -44,18 +45,18 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 bool UdpEndpoint::expired(Time time) const
 {
-	bool       res;
+	bool       isExpired;
 	const Time now    = esp_timer_get_time();
 	const Time passed = (now < time) ? /*then*/ std::numeric_limits<Time>::max() - time +
 		now - std::numeric_limits<Time>::min() : /*else*/ now - time;
 
-	if (passed < kTimeout) {
-		res = true;
+	if (passed > kTimeout) {
+		isExpired = true;
 	} else {
-		res = false;
+		isExpired = false;
 	}
 
-	return res;
+	return isExpired;
 }
 
 bool UdpEndpoint::tryAccept(CliEndpoint endpoint)
@@ -68,7 +69,7 @@ bool UdpEndpoint::tryAccept(CliEndpoint endpoint)
 
 		{
 			auto guard = Utility::makeLockGuard(mutex);
-			exists = (clients.find(endpoint) == clients.end());
+			exists = (clients.find(endpoint) != clients.end());
 		}
 
 		if (!exists) {

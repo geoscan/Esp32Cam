@@ -21,7 +21,7 @@ extern "C" int app_main(void)
 	wifiStart();
 	httpStart();
 //	cameraStreamerStart();
-//	wifiUartBridgeStart();
-	deprecatedWifiUartBridgeStart();
+	wifiUartBridgeStart();
+//	deprecatedWifiUartBridgeStart();
 	return 0;
 }
