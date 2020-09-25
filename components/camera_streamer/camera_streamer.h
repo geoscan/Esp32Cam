@@ -9,7 +9,8 @@
 #define COMPONENTS_CAMERA_STREAMER_H
 
 #include "sdkconfig.h"
+#include <asio.hpp>
 
-void cameraStreamerStart();
+void cameraStreamerStart(asio::io_context &);
 
 #endif // COMPONENTS_CAMERA_STREAMER_H

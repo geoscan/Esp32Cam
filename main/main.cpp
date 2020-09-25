@@ -8,6 +8,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <esp_timer.h>
+#include <pthread.h>
+#include <asio.hpp>
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
@@ -18,10 +20,14 @@
 
 extern "C" int app_main(void)
 {
+	static asio::io_context context;
+
 	wifiStart();
 	httpStart();
-//	cameraStreamerStart();
-	wifiUartBridgeStart();
-//	deprecatedWifiUartBridgeStart();
+	cameraStreamerStart(context);
+	wifiUartBridgeStart(context);
+
+	context.run();
+
 	return 0;
 }

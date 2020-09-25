@@ -8,6 +8,8 @@
 #ifndef COMPONENTS_WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_H
 #define COMPONENTS_WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_H
 
-void wifiUartBridgeStart();
+#include <asio.hpp>
+
+void wifiUartBridgeStart(asio::io_context &);
 
 #endif // COMPONENTS_WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_H

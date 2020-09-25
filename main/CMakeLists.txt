@@ -11,4 +11,6 @@ idf_component_register(
 		wifi_uart_bridge
 		deprecated_wifi_uart_bridge
 		esp_timer
-		camera_streamer)
+		camera_streamer
+		asio
+		pthread)
