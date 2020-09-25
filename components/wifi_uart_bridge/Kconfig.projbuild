@@ -16,13 +16,13 @@ menu "WIFI <=> UART bridge"
 
 	config WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS
 		int "Max client inactivity period, seconds"
-		range 60 1800
-		default 120
+		range 1 1800
+		default 1
 		help
 			For how long UDP client can keep silence before copter stops sending him packages
 
 	config WIFI_UART_BRIDGE_MAX_NCLIENTS
-		int ""
+		int "Max number of clients"
 		range 1 4
 		default 1
 

@@ -31,7 +31,9 @@ private:
 	using Time        = decltype(esp_timer_get_time());
 	using CliInfo     = std::pair<CliEndpoint, Time>;
 
+
 	// ------------ CliStack ------------ //
+
 
 	class CliStack {
 	public:
@@ -43,20 +45,22 @@ private:
 		size_t size;
 	};
 
+
 	// ------------ CliMap ------------ //
+
 
 	class CliMap {
 	public:
-		Time &timestamp(CliEndpoint);
-		void setTimestamp(CliEndpoint, UdpEndpoint::Time);
+		Time &at(CliEndpoint);
 		bool contains(CliEndpoint);
-		void add(CliEndpoint, Time);
+		void set(CliEndpoint, Time);  // Checks presence of the requested endpoint, adds it if it's not there
 		CliStack stack();
 	private:
 		std::map<CliEndpoint, std::reference_wrapper<CliInfo>> cliMap;
 		std::list<CliInfo> cliStack;
-		asio::detail::mutex mutex;
+		asio::detail::mutex mutex;  // Primarily used for integrity of cliMap
 	};
+
 
 	static Time time();
 
@@ -67,7 +71,7 @@ private:
 
 	const Time            kTimeout;  // us
 	const size_t          kMaxClients;
-	SemaphoreHandle_t     semaphore;
+	SemaphoreHandle_t     semaphore;  // Counter of active clients
 	CliMap                cliMap;
 	asio::ip::udp::socket socket;
 };

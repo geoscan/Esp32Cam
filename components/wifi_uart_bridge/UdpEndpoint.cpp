@@ -29,19 +29,30 @@ UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxCl
 size_t UdpEndpoint::read(asio::mutable_buffer buf)
 {
 	CliEndpoint sender;
-	size_t      nrecv    = socket.receive_from(buf, sender);
-	const bool  contains = cliMap.contains(sender);
-	const bool  fexpired = expired(cliMap.timestamp(sender));
-	const Time  timeNow  = time();
+	size_t      nrecv    = socket.receive_from(buf, sender);	
+	const bool  active   = cliMap.contains(sender) && !expired(cliMap.at(sender));
 
-	if (!contains && addClient(true)) {  // New client, eligible to be added to active group
-		cliMap.add(sender, timeNow);
-	} else if (contains && !fexpired) {  // Existing active client
-		cliMap.setTimestamp(sender, timeNow);
-	} else {
-		if (fexpired) {
-			addClient(false);
-		}
+//	if (!contains && addClient(true)) {  // New client, eligible to be added to active group
+//		cliMap.add(sender, timeNow);
+//	} else if (contains && !fexpired) {  // Existing active client
+//		cliMap.setTimestamp(sender, timeNow);
+//	} else {
+//		if (fexpired) {
+//			addClient(false);
+//		}
+//		nrecv = 0;
+//	}
+
+
+
+	const Time timenow = time();
+
+	// !active XOR (active AND haveRoomForHim) -> accept its message
+	if (!active && addClient(true)) {
+		cliMap.set(sender, timenow);
+	} else if (active) {
+		cliMap.set(sender, timenow);
+	} else {  // otherwise -> ignore its message
 		nrecv = 0;
 	}
 
@@ -114,22 +125,15 @@ bool UdpEndpoint::addClient(bool fAdd)
 //
 // CliMap is an encapsulation of this approach.
 // CliStack is a pseudo stack which in fact is a wrapper
-// over CliMap::cliMap.
+// over CliMap::cliMap::iterator.
 
 // ------------ CliMap ------------ //
 
 
-UdpEndpoint::Time &UdpEndpoint::CliMap::timestamp(UdpEndpoint::CliEndpoint client)
+UdpEndpoint::Time &UdpEndpoint::CliMap::at(UdpEndpoint::CliEndpoint client)
 {
-//	auto    guard = Utility::makeLockGuard(mutex);
-//	return cliMap[client].get().second;
-	static Time t;
-	return t;
-}
-
-void UdpEndpoint::CliMap::setTimestamp(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time time)
-{
-	add(client, time);
+	auto guard = Utility::makeLockGuard(mutex);
+	return cliMap.at(client).get().second;
 }
 
 bool UdpEndpoint::CliMap::contains(UdpEndpoint::CliEndpoint client)
@@ -138,7 +142,7 @@ bool UdpEndpoint::CliMap::contains(UdpEndpoint::CliEndpoint client)
 	return (cliMap.find(client) != cliMap.end());
 }
 
-void UdpEndpoint::CliMap::add(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time time)
+void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time time)
 {
 	auto       guard    = Utility::makeLockGuard(mutex);
 	const bool contains = (cliMap.find(client) != cliMap.end());
@@ -147,6 +151,8 @@ void UdpEndpoint::CliMap::add(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time
 		cliStack.emplace_back(client, time);
 //		cliMap[client] = cliStack.back();
 		cliMap.emplace(client, cliStack.back());
+	} else {
+		cliMap.at(client).get().second = time;
 	}
 }
 
