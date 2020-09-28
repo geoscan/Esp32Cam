@@ -68,7 +68,8 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 		if (expired(client.second)) {
 			addClient(false);
 		} else {
-			socket.send_to(buf, client.first, 0);
+			asio::error_code err;
+			socket.send_to(buf, client.first, 0, err);
 		}
 	}
 

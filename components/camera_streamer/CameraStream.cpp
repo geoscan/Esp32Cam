@@ -45,7 +45,8 @@ void CameraStream::run()
 				lastSend = currentTimeMs();
 			}
 			for (auto &sink : sinks) {
-				socket.send_to(img->data(), sink);
+				asio::error_code err;
+				socket.send_to(img->data(), sink, 0, err);
 			}
 			unlock();
 

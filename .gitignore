@@ -6,7 +6,7 @@ CMakeCache*
 qt_build_script.sh
 CMakeLists.txt.user*
 *.autosave
-CMakeLists.txt.user
+*CMakeLists.txt.user
 .txt.user
 components/rtsp/request_parser/generated/a.out
 
