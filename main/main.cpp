@@ -20,10 +20,10 @@
 
 extern "C" int app_main(void)
 {
-	static asio::io_context context;
+	static asio::io_context context(3);
 
 	wifiStart();
-	httpStart();
+//	httpStart();
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
 

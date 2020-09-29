@@ -17,12 +17,15 @@ public:
 	Bridge(Endpoint&, Endpoint&);
 	void run();
 private:
+	static constexpr const unsigned kBufSize = 128;
+
 	Endpoint &first;
 	Endpoint &second;
 
-	using Endpoints = std::pair<Endpoint *, Endpoint *>;
+	using EpPair = std::pair<Endpoint *, Endpoint *>;
 
-	static void *bridgingRoutine(void *endpoints);
+	static void *bridgeTask(void *endpoints);
+	static void performTransfer(Endpoint &, Endpoint &, asio::mutable_buffer);
 };
 
 #endif // COMPONENTS_WIFI_UART_BRIDGE_BRIDGE_HPP

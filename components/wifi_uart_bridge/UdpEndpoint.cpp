@@ -20,7 +20,7 @@ UdpEndpoint::Time UdpEndpoint::time()
 
 UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
 	kTimeout(static_cast<Time>(timeoutNoInputSec) * 1000000),
-	kMaxClients(nMaxClients > 0),
+	kMaxClients(nMaxClients),
 	semaphore(xSemaphoreCreateCounting(kMaxClients, kMaxClients)),
 	socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), port))
 {
@@ -29,31 +29,20 @@ UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxCl
 size_t UdpEndpoint::read(asio::mutable_buffer buf)
 {
 	CliEndpoint sender;
-	size_t      nrecv    = socket.receive_from(buf, sender);	
-	const bool  active   = cliMap.contains(sender) && !expired(cliMap.at(sender));
+	size_t      nrecv = socket.receive_from(buf, sender);
 
-//	if (!contains && addClient(true)) {  // New client, eligible to be added to active group
-//		cliMap.add(sender, timeNow);
-//	} else if (contains && !fexpired) {  // Existing active client
-//		cliMap.setTimestamp(sender, timeNow);
-//	} else {
-//		if (fexpired) {
-//			addClient(false);
-//		}
-//		nrecv = 0;
-//	}
+	if (nrecv > 0) {
+		const bool active   = cliMap.contains(sender) ? !expired(cliMap.at(sender)) : false;
+		const Time timenow = time();
 
-
-
-	const Time timenow = time();
-
-	// !active XOR (active AND haveRoomForHim) -> accept its message
-	if (!active && addClient(true)) {
-		cliMap.set(sender, timenow);
-	} else if (active) {
-		cliMap.set(sender, timenow);
-	} else {  // otherwise -> ignore its message
-		nrecv = 0;
+		// !active XOR (active AND haveRoomForHim) -> accept its message
+		if (!active && addClient(true)) {
+			cliMap.set(sender, timenow);
+		} else if (active) {
+			cliMap.set(sender, timenow);
+		} else {  // otherwise -> ignore its message
+			nrecv = 0;
+		}
 	}
 
 	return nrecv;
@@ -65,6 +54,7 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 	while (!cliStack.empty()) {
 		auto client = cliStack.pop();
+//		volatile const bool exp = expired(client.second);
 		if (expired(client.second)) {
 			addClient(false);
 		} else {
@@ -81,7 +71,7 @@ bool UdpEndpoint::expired(Time time) const
 	bool       isExpired;
 	const Time now    = esp_timer_get_time();
 	const Time passed = (now < time) ? /*then*/ std::numeric_limits<Time>::max() - time +
-		now - std::numeric_limits<Time>::min() : /*else*/ now - time;
+		now - std::numeric_limits<Time>::min() : /*else*/ now - time;  // Considering overflow
 
 	if (passed > kTimeout) {
 		isExpired = true;

@@ -13,28 +13,28 @@ Bridge::Bridge(Endpoint &e1, Endpoint &e2) : first(e1), second(e2)
 
 void Bridge::run()
 {
-	Endpoints routeAb{&first, &second};
-	Endpoints routeBa{&second, &first};
-	pthread_t pth;
+	EpPair ep1 {&first, &second};
+	EpPair ep2 {&second, &first};
+	pthread_t stub;
 
-//	pthread_create(&pth, NULL, bridgingRoutine, &routeAb);
-//	bridgingRoutine(&routeBa);
-
-	pthread_create(&pth, NULL, bridgingRoutine, &routeBa);
-	bridgingRoutine(&routeAb);
+	pthread_create(&stub, 0, bridgeTask, &ep2);
+	bridgeTask(&ep1);
 }
 
-void *Bridge::bridgingRoutine(void *arg)
+void *Bridge::bridgeTask(void *endpoints)
 {
-	Endpoint  &first    = *(reinterpret_cast<Endpoints *>(arg)->first);
-	Endpoint  &second   = *(reinterpret_cast<Endpoints *>(arg)->second);
-	size_t    nrecv     = 0;
-	char      iobuf[CONFIG_WIFI_UART_BRIDGE_RX_TX_BUFFER];
+	EpPair &ep = *reinterpret_cast<EpPair *>(endpoints);
+	char buf[kBufSize];
 
 	while (true) {
-		nrecv = first.read(asio::mutable_buffer(iobuf, CONFIG_WIFI_UART_BRIDGE_RX_TX_BUFFER));
-		if (nrecv > 0) {
-			second.write(asio::const_buffer(iobuf, nrecv));
-		}
+		performTransfer(*ep.first, *ep.second, asio::mutable_buffer(buf, kBufSize));
+	}
+}
+
+void Bridge::performTransfer(Endpoint &a, Endpoint &b, asio::mutable_buffer buf)
+{
+	size_t nrecv = a.read(buf);
+	if (nrecv > 0) {
+		b.write({buf.data(), nrecv});
 	}
 }

@@ -10,12 +10,9 @@
 
 void wifiUartBridgeStart(asio::io_context &context)
 {
-	static UartEndpoint     uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
-//	static asio::io_context context;
-	static UdpEndpoint      udp(context);
-	static Bridge           bridge(uart, udp);
-	static pthread_t        pth;
+	static UartEndpoint uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
+	static UdpEndpoint  udp(context);
+	static Bridge       bridge(uart, udp);
 
-	pthread_create(&pth, NULL, Utility::run<Bridge>, &bridge);
-//	pthread_create(&pth, NULL, Utility::run<asio::io_context>, &context);
+	Utility::threadRun(bridge);
 }
