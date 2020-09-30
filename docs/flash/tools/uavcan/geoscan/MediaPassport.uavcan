@@ -1,0 +1,7 @@
+#
+# Media Passport.
+#
+
+---
+
+uint8[<=64] pairs

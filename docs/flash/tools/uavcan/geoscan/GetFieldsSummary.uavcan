@@ -1,0 +1,7 @@
+#
+# Get number of fields.
+#
+
+---
+
+uint8 total

@@ -1,0 +1,8 @@
+#
+# Optical Flow Data
+#
+
+int8 x                    # X-axis OF value
+int8 y                    # Y-axis OF value
+uint8 squal               # OF signal quality
+uint16[<=16] range        # OF sensor data, mm

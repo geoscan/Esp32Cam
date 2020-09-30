@@ -1,0 +1,7 @@
+#
+# Composite message.
+#
+
+---
+
+uint8[<=64] pairs

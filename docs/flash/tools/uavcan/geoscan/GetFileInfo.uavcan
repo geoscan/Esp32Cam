@@ -1,0 +1,13 @@
+#
+# Get information about specific file.
+#
+
+uint8 file
+uint8 flags
+
+---
+
+uint8 result
+uint8 status
+uint32 size
+uint32 checksum

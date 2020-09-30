@@ -1,0 +1,11 @@
+#
+# Write file chunk.
+#
+
+uint8 file
+uint32 position
+uint8[<=56] data
+
+---
+
+uint8 result

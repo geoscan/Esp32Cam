@@ -1,0 +1,10 @@
+#
+# Read specific field.
+#
+
+uint8 field
+
+---
+
+uint8 result
+uint8[<=8] value

@@ -1,0 +1,10 @@
+#
+# Write specific field.
+#
+
+uint8 field
+uint8[<=8] value
+
+---
+
+uint8 result

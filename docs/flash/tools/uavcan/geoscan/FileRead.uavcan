@@ -1,0 +1,12 @@
+#
+# Read file chunk.
+#
+
+uint8 file
+uint32 position
+uint8 chunk
+
+---
+
+uint8 result
+uint8[<=56] data
