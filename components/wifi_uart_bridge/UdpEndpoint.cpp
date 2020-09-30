@@ -10,18 +10,11 @@
 #include "UdpEndpoint.hpp"
 
 
-
 // ------------ UdpEndpoint ------------ //
 
-UdpEndpoint::Time UdpEndpoint::time()
-{
-	return esp_timer_get_time();
-}
-
 UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
-	kTimeout(static_cast<Time>(timeoutNoInputSec) * 1000000),
+	kTimeout(static_cast<Utility::Time>(timeoutNoInputSec) * 1000000),
 	kMaxClients(nMaxClients),
-	semaphore(xSemaphoreCreateCounting(kMaxClients, kMaxClients)),
 	socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), port))
 {
 }
@@ -31,19 +24,7 @@ size_t UdpEndpoint::read(asio::mutable_buffer buf)
 	CliEndpoint sender;
 	size_t      nrecv = socket.receive_from(buf, sender);
 
-	if (nrecv > 0) {
-		const bool active   = cliMap.contains(sender) ? !expired(cliMap.at(sender)) : false;
-		const Time timenow = time();
-
-		// !active XOR (active AND haveRoomForHim) -> accept its message
-		if (!active && addClient(true)) {
-			cliMap.set(sender, timenow);
-		} else if (active) {
-			cliMap.set(sender, timenow);
-		} else {  // otherwise -> ignore its message
-			nrecv = 0;
-		}
-	}
+	cliMap.set(sender, Utility::bootTimeUs());
 
 	return nrecv;
 }
@@ -54,46 +35,13 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 	while (!cliStack.empty()) {
 		auto client = cliStack.pop();
-//		volatile const bool exp = expired(client.second);
-		if (expired(client.second)) {
-			addClient(false);
-		} else {
+		if (!Utility::expired(client.second, kTimeout)) {
 			asio::error_code err;
 			socket.send_to(buf, client.first, 0, err);
 		}
 	}
 
 	return 1;  // TODO: change to 'void'
-}
-
-bool UdpEndpoint::expired(Time time) const
-{
-	bool       isExpired;
-	const Time now    = esp_timer_get_time();
-	const Time passed = (now < time) ? /*then*/ std::numeric_limits<Time>::max() - time +
-		now - std::numeric_limits<Time>::min() : /*else*/ now - time;  // Considering overflow
-
-	if (passed > kTimeout) {
-		isExpired = true;
-	} else {
-		isExpired = false;
-	}
-
-	return isExpired;
-}
-
-bool UdpEndpoint::addClient(bool fAdd)
-{
-	bool success = false;
-
-	if (fAdd) {
-		success = (xSemaphoreTake(semaphore, (TickType_t)0) == pdTRUE);  // Return instantly, if we can't acquire one
-	} else {
-		success = true;
-		xSemaphoreGive(semaphore);
-	}
-
-	return success;
 }
 
 
@@ -121,7 +69,7 @@ bool UdpEndpoint::addClient(bool fAdd)
 // ------------ CliMap ------------ //
 
 
-UdpEndpoint::Time &UdpEndpoint::CliMap::at(UdpEndpoint::CliEndpoint client)
+Utility::Time &UdpEndpoint::CliMap::at(UdpEndpoint::CliEndpoint client)
 {
 	auto guard = Utility::makeLockGuard(mutex);
 	return cliMap.at(client).get().second;
@@ -133,14 +81,13 @@ bool UdpEndpoint::CliMap::contains(UdpEndpoint::CliEndpoint client)
 	return (cliMap.find(client) != cliMap.end());
 }
 
-void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, UdpEndpoint::Time time)
+void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, Utility::Time time)
 {
 	auto       guard    = Utility::makeLockGuard(mutex);
 	const bool contains = (cliMap.find(client) != cliMap.end());
 
 	if (!contains) {
 		cliStack.emplace_back(client, time);
-//		cliMap[client] = cliStack.back();
 		cliMap.emplace(client, cliStack.back());
 	} else {
 		cliMap.at(client).get().second = time;

@@ -15,6 +15,7 @@
 #include <utility>
 #include <functional>
 
+#include "utility/time.hpp"
 #include "Endpoint.hpp"
 
 class UdpEndpoint : public Endpoint {
@@ -28,8 +29,7 @@ public:
 private:
 
 	using CliEndpoint = asio::ip::udp::endpoint;
-	using Time        = decltype(esp_timer_get_time());
-	using CliInfo     = std::pair<CliEndpoint, Time>;
+	using CliInfo     = std::pair<CliEndpoint, Utility::Time>;
 
 
 	// ------------ CliStack ------------ //
@@ -51,27 +51,18 @@ private:
 
 	class CliMap {
 	public:
-		Time &at(CliEndpoint);
+		Utility::Time &at(CliEndpoint);
 		bool contains(CliEndpoint);
-		void set(CliEndpoint, Time);  // Checks presence of the requested endpoint, adds it if it's not there
+		void set(CliEndpoint, Utility::Time);  // Checks presence of the requested endpoint, adds it if it's not there
 		CliStack stack();
 	private:
 		std::map<CliEndpoint, std::reference_wrapper<CliInfo>> cliMap;
 		std::list<CliInfo> cliStack;
-		asio::detail::mutex mutex;  // Primarily used for integrity of cliMap
+		asio::detail::mutex mutex;  // Primarily used for maintaining of integrity of cliMap
 	};
 
-
-	static Time time();
-
-	bool expired(Time) const;
-
-	// Semaphore modifiers
-	bool addClient(bool fAdd);
-
-	const Time            kTimeout;  // us
+	const Utility::Time   kTimeout;  // us
 	const size_t          kMaxClients;
-	SemaphoreHandle_t     semaphore;  // Counter of active clients
 	CliMap                cliMap;
 	asio::ip::udp::socket socket;
 };
