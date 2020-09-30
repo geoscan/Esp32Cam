@@ -1,4 +1,3 @@
-#include <freertos/FreeRTOS.h>
 //
 // CameraStream.cpp
 //
@@ -7,11 +6,13 @@
 //
 
 #include <esp_timer.h>
+#include <freertos/FreeRTOS.h>
 
 #include <memory>
 
 #include "CameraStream.hpp"
 #include "Ov2640.hpp"
+#include "utility/time.hpp"
 
 using asio::ip::udp;
 using namespace std;
@@ -30,6 +31,7 @@ CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f
 void CameraStream::run()
 {
 	using Time = decltype(currentTimeMs());
+	static const unsigned kWaitForConnectionMs = 500;
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
 	auto img = Ov2640::instance().jpeg(); // Trigger HW-initialization
@@ -40,6 +42,7 @@ void CameraStream::run()
 		lock();
 		if (sinks.empty()) {
 			unlock();
+			Utility::waitMs(kWaitForConnectionMs);  // To prevent resource starvation
 		} else {
 			if (fps > 0) {
 				lastSend = currentTimeMs();

@@ -7,4 +7,5 @@ idf_component_register(
 	INCLUDE_DIRS "."
 	REQUIRES
 		asio
-		pthread)
+		pthread
+		esp_timer)

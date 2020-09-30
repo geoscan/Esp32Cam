@@ -8,4 +8,5 @@ idf_component_register(
 	REQUIRES
 		freertos
 		OV2640
-		esp_common)
+		esp_common
+		utility)
