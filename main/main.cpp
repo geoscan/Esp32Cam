@@ -17,17 +17,16 @@
 #include "wifi_uart_bridge.hpp"
 #include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
+#include "ov2640.hpp"
 
 extern "C" int app_main(void)
 {
-	static asio::io_context context(3);
-
 	wifiStart();
-//	httpStart();
+	ov2640Init();
+
+	static asio::io_context context(3);
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
-
-	context.run();
 
 	return 0;
 }

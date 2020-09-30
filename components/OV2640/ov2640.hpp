@@ -1,0 +1,6 @@
+#ifndef COMPONENTS_OV2640_OV2640_HPP
+#define COMPONENTS_OV2640_OV2640_HPP
+
+void ov2640Init();
+
+#endif // OV2640_HPP

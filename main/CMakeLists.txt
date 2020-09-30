@@ -13,4 +13,5 @@ idf_component_register(
 		esp_timer
 		camera_streamer
 		asio
-		pthread)
+		pthread
+		OV2640)
