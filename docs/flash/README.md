@@ -1,18 +1,25 @@
 # Инструментарий для прошивки ESP32
-## Установка директории
-Открыть консоль в любой директории. 
-```bash
-git clone --recursive https://github.com/damurashov/espcomplete.git tools
-cd tools
-```
 
-Затем
+## Требования
+* Менеджер пакетов apt
+* python
+* python3
+* python-pip
+* python3-pip
+
+### Pip[3]:
+* pyserial
+* numpy
+
+## Начало
 
 ```bash
 ./install_env.sh
 ```
 
 ## Подготовка к прошивке
+Включить коптер.
+
 ```bash
 ./cursed.sh
 ```
