@@ -78,6 +78,18 @@ void CameraStream::removeSink(udp::endpoint ep)
 	sinks.erase(ep);
 }
 
+void CameraStream::removeSink(const asio::ip::address &addr)
+{
+	auto lock = Utility::makeLockGuard(mutex);
+	for (auto it = sinks.begin(); it != sinks.end();) {
+		if (it->address() == addr) {
+			it = sinks.erase(it);
+		} else {
+			++it;
+		}
+	}
+}
+
 void CameraStream::removeSinks()
 {
 	auto lock = Utility::makeLockGuard(mutex);

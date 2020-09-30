@@ -10,14 +10,14 @@ menu "WIFI <=> UART bridge"
 	config WIFI_UART_BRIDGE_RX_TX_BUFFER
 		int "RC/TX buffers capacity"
 		range 1 4096
-		default 512
+		default 300
 		help
 			Capacity of both RX and TX buffers
 
 	config WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS
 		int "Max client inactivity period, seconds"
 		range 1 1800
-		default 1
+		default 5
 		help
 			For how long UDP client can keep silence before copter stops sending him packages
 
@@ -25,5 +25,12 @@ menu "WIFI <=> UART bridge"
 		int "Max number of clients"
 		range 1 4
 		default 1
+
+	config WIFI_UART_BRIDGE_BAUDRATE
+		int "ESP32 <=> AutopilotBoard baudrate"
+		default 115200
+		help
+			Baudrate of UART connecting AP board and ESP32 itself
+
 
 endmenu

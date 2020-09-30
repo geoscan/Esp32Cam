@@ -1,0 +1,9 @@
+menu "Version"
+
+	config VERSION_STM_ACQ_TIMEOUT_US
+		int "STM32's FW version acquisition timeout"
+		default 500000
+		help
+			Timeout to acquire ESP32 Firmware version via UART, microseconds
+
+endmenu

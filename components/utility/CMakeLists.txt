@@ -8,4 +8,5 @@ idf_component_register(
 	REQUIRES
 		asio
 		pthread
-		esp_timer)
+		esp_common)
+#		esp_timer)

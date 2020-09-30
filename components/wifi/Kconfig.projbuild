@@ -2,13 +2,13 @@ menu "WiFi"
 
     config ESP_WIFI_SSID
         string "WiFi SSID"
-        default "myssid"
+        default "PioneerMini"
         help
             SSID (network name) for the example to connect to.
 
     config ESP_WIFI_PASSWORD
         string "WiFi Password"
-        default "mypassword"
+        default "12345678"
         help
             WiFi password (WPA or WPA2) for the example to use.
     config ESP_WIFI_CHANNEL
@@ -20,7 +20,7 @@ menu "WiFi"
 
     config ESP_MAX_STA_CONN
         int "Maximal STA connections"
-        default 4
+        default 1
         help
             Max number of the STA connects to AP.
 

@@ -108,3 +108,8 @@ std::unique_ptr<Ov2640::Image> Ov2640::jpeg(/*JpegQuality quality*/)
 
 	return imgPtr;
 }
+
+void ov2640Init()
+{
+	Ov2640::instance();
+}

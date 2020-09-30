@@ -7,11 +7,11 @@ idf_component_register(
 		wifi
 		http
 		rtsp
-		echo_tcp
 		wifi_uart_bridge
 		deprecated_wifi_uart_bridge
-		esp_timer
+		esp_common
 		camera_streamer
 		asio
 		pthread
-		OV2640)
+		OV2640
+		version)

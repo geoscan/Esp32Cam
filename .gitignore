@@ -2,11 +2,22 @@ build
 .pio
 .vscode
 qtcsettings.cmake
-CMakeCache*
 qt_build_script.sh
-CMakeLists.txt.user*
 *.autosave
 *CMakeLists.txt.user
 .txt.user
-components/rtsp/request_parser/generated/a.out
 
+CMakeLists.txt.user
+.ignore
+*txt.user
+tools/*bootloader.bin 
+tools/*esp32.bin 
+tools/*partition-table.bin
+tools/esptool/__pycache__
+tools/esptool/build
+tools/esptool/cache
+tools/esptool/dist
+
+*.bin
+*.properties
+*.idea

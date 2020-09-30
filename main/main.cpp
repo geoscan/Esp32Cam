@@ -13,18 +13,21 @@
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
-#include "echo_tcp.hpp"
 #include "wifi_uart_bridge.hpp"
 #include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
-#include "ov2640.hpp"
+#include "Ov2640.hpp"
+#include "version.hpp"
+
+static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
+	versionInit();
 	wifiStart();
+	httpStart();
 	ov2640Init();
 
-	static asio::io_context context(3);
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
 

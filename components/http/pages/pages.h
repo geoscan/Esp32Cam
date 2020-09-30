@@ -11,7 +11,7 @@
 #include "esp_netif.h"
 #include "esp_eth.h"
 #include "sdkconfig.h"
-#include "protocol_examples_common.h"
+//#include "protocol_examples_common.h"
 
 #include <esp_http_server.h>
 
@@ -21,6 +21,7 @@ extern "C" {
 
 esp_err_t cameraDemoHandler(httpd_req_t *);
 esp_err_t indexPageHandler(httpd_req_t *);
+esp_err_t infoPageHandler(httpd_req_t *);
 
 #ifdef __cplusplus
 }
@@ -32,6 +33,13 @@ const httpd_uri_t cameraDemo = {
 	.method   = HTTP_GET,
 	.handler  = cameraDemoHandler,
 	.user_ctx = 0
+};
+
+const httpd_uri_t infoPage = {
+	.uri = "/info",
+	.method = HTTP_GET,
+	.handler = infoPageHandler,
+	.user_ctx = 0,
 };
 
 const httpd_uri_t indexPage = {

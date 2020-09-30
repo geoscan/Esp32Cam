@@ -57,6 +57,7 @@ static httpd_handle_t start_webserver(void)
 //        httpd_register_uri_handler(server, &echo);
 //        httpd_register_uri_handler(server, &ctrl);
         httpd_register_uri_handler(server, &cameraDemo);
+        httpd_register_uri_handler(server, &infoPage);
         return server;
     }
 
@@ -109,10 +110,10 @@ void httpStart(void)
     /* Register event handlers to stop the server when Wi-Fi or Ethernet is disconnected,
      * and re-start it upon connection.
      */
-# ifdef CONFIG_EXAMPLE_CONNECT_WIFI
+//# ifdef CONFIG_EXAMPLE_CONNECT_WIFI
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connect_handler, &server));
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
-# endif // CONFIG_EXAMPLE_CONNECT_WIFI
+//# endif // CONFIG_EXAMPLE_CONNECT_WIFI
 # ifdef CONFIG_EXAMPLE_CONNECT_ETHERNET
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_ETH_GOT_IP, &connect_handler, &server));
     ESP_ERROR_CHECK(esp_event_handler_register(ETH_EVENT, ETHERNET_EVENT_DISCONNECTED, &disconnect_handler, &server));
