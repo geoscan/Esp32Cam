@@ -13,6 +13,7 @@
 #include "CameraStream.hpp"
 #include "Ov2640.hpp"
 #include "utility/time.hpp"
+#include "utility/LockGuard.hpp"
 
 using asio::ip::udp;
 using namespace std;
@@ -67,23 +68,20 @@ void CameraStream::run()
 
 void CameraStream::addSink(udp::endpoint ep)
 {
-	mutex.lock();
+	auto lock = Utility::makeLockGuard(mutex);
 	sinks.insert(ep);
-	mutex.unlock();
 }
 
 void CameraStream::removeSink(udp::endpoint ep)
 {
-	mutex.lock();
+	auto lock = Utility::makeLockGuard(mutex);
 	sinks.erase(ep);
-	mutex.unlock();
 }
 
 void CameraStream::removeSinks()
 {
-	mutex.lock();
+	auto lock = Utility::makeLockGuard(mutex);
 	sinks.clear();
-	mutex.unlock();
 }
 
 void CameraStream::lock()
