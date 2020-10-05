@@ -22,6 +22,7 @@
 extern "C" int app_main(void)
 {
 	wifiStart();
+	httpStart();
 	ov2640Init();
 
 	static asio::io_context context(3);
