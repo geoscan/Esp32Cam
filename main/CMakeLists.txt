@@ -14,4 +14,5 @@ idf_component_register(
 		camera_streamer
 		asio
 		pthread
-		OV2640)
+		OV2640
+		version)

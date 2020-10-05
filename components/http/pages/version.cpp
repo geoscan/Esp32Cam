@@ -7,11 +7,19 @@
 
 esp_err_t infoPageHandler(httpd_req_t *req)
 {
-//    httpd_resp_set_hdr(req, "Custom-Header-1", "Custom-Value-1");
-//    httpd_resp_set_hdr(req, "Custom-Header-2", "Custom-Value-2");
+	std::string response;
+	response.append("ESP32 Firmware Version: ");
+	response.append(ESP32_FIRMWARE_VERSION);
+	response.append("\n");
 
-//    const char* resp_str = (const char*) req->user_ctx;
-	esp_err_t res = httpd_resp_send(req, ESP32_FIRMWARE_VERSION, HTTPD_RESP_USE_STRLEN);
+	std::string stm32ver;
+	if (versionStmGet(stm32ver)) {
+		response.append("STM32 Firmware Version: ");
+		response.append(stm32ver);
+		response.append("\n");
+	}
+
+	esp_err_t res = httpd_resp_send(req, response.data(), response.size());
 
 	return res;
 }

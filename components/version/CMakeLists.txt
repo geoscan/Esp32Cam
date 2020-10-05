@@ -1,9 +1,21 @@
+file(GLOB SOURCE_FILES
+		"*.c"
+		"*.cpp")
+
+
 idf_component_register(
+	SRCS
+		${SOURCE_FILES}
 	INCLUDE_DIRS
-		".")
+		"."
+	PRIV_INCLUDE_DIRS
+		private_include
+	REQUIRES
+		uart
+		utility)
 
 
-#  -----  Configure version  -----  #
+#  -----  Configure ESP32 version  -----  #
 
 
 execute_process(

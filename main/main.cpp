@@ -18,9 +18,11 @@
 #include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
 #include "ov2640.hpp"
+#include "version.hpp"
 
 extern "C" int app_main(void)
 {
+	versionInit();
 	wifiStart();
 	httpStart();
 	ov2640Init();
