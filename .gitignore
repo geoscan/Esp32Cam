@@ -10,3 +10,4 @@ CMakeLists.txt.user*
 .txt.user
 components/rtsp/request_parser/generated/a.out
 
+CMakeLists.txt.user
