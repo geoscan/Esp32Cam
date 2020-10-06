@@ -26,7 +26,7 @@ void VersionParser::parse(const void *data, const size_t size)
 {
 	size_t pos = 0;
 	while (!parsed() && pos < size) {
-		iter(static_cast<const uint8_t *>(data)[pos]);
+		iter(static_cast<const uint8_t *>(data)[pos++]);
 	}
 }
 

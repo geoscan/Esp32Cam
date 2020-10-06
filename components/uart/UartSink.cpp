@@ -24,8 +24,7 @@ void UartSink::run(size_t timeoutUs)
 	char buf[kBufferSize];
 
 	do {
-		size_t nread = 0;
-		uart.read(buf, nread);
+		size_t nread = uart.read(buf, kBufferSize);
 
 		if (nread > 0) {
 			for (Callback &callback : callbacks) {
