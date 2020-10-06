@@ -54,8 +54,10 @@ void VersionParser::iter(const uint8_t byte)
 					reset();
 					iter(byte);
 				}
+				break;
 			} else {
 				state.id = State::Size;
+				iter(byte);
 			}
 			break;
 

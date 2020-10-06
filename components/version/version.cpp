@@ -1,7 +1,11 @@
+#include <sdkconfig.h>
+
+#include <algorithm>
+#include <string>
+
 #include "version.hpp"
 #include "UartSink.hpp"
 #include "VersionParser.hpp"
-#include <algorithm>
 
 using namespace std;
 
@@ -19,17 +23,18 @@ void versionInit()
 	UartSink stmSink(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 
 	stmSink.addCallback(cbStm32UartInput);
-	stmSink.run(500000);
+	stmSink.run(CONFIG_VERSION_STM_ACQ_TIMEOUT_US);
 }
 
 bool versionStmGet(string &str)
 {
 	bool res = false;
 
-	if (parser.parsed()) {
+	if (parser.parsed() && parser.payload().size() >= 2) {
 		res = true;
-		transform(parser.payload().cbegin(), parser.payload().cend(), back_inserter(str),
-			[](uint8_t ch) {return static_cast<char>(ch); });
+		str.append(to_string(parser.payload()[0]));
+		str.append(".");
+		str.append(to_string(parser.payload()[1]));
 	}
 
 	return res;

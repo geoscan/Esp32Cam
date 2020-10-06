@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.12.4, 2020-10-05T18:25:29. -->
+<!-- Written by QtCreator 4.12.4, 2020-10-06T11:04:43. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -99,9 +99,9 @@
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">qt_build_script.sh</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">./.ignore/qt_build_script.sh</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Command">/bin/bash</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}/..</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">/home/dmurashov/Documents/ESP32/esp32-firmware</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">ProjectExplorer.ProcessStep</value>
      </valuemap>
      <value type="int" key="ProjectExplorer.BuildStepList.StepsCount">1</value>
