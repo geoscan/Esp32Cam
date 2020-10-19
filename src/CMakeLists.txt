@@ -7,7 +7,6 @@ idf_component_register(
 		wifi
 		http
 		rtsp
-		echo_tcp
 		wifi_uart_bridge
 		deprecated_wifi_uart_bridge
 		esp_timer

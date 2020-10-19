@@ -13,7 +13,6 @@
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
-#include "echo_tcp.hpp"
 #include "wifi_uart_bridge.hpp"
 #include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
