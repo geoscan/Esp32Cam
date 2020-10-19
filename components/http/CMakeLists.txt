@@ -11,6 +11,7 @@ idf_component_register(
     REQUIRES
         wifi
         OV2640
-        protocol_examples_common
+        esp_common
+#        protocol_examples_common
         esp_http_server
         version)

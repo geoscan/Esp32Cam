@@ -27,4 +27,5 @@ idf_component_register(
 		esp_common
 		freertos
 		OV2640
-		esp_timer)
+		esp_common)
+#		esp_timer)

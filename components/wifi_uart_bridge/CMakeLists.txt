@@ -9,6 +9,7 @@ idf_component_register(
 		freertos
 		uart
 		asio
-		esp_timer
+#		esp_timer
+		esp_common
 		pthread
 		utility)
