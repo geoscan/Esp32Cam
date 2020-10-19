@@ -9,7 +9,7 @@ idf_component_register(
 		rtsp
 		wifi_uart_bridge
 		deprecated_wifi_uart_bridge
-		esp_timer
+		esp_common
 		camera_streamer
 		asio
 		pthread
