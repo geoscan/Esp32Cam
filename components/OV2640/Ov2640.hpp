@@ -10,6 +10,8 @@
 // Wrapper around C API of OV2640
 // Both Ov2640's and Ov2640::Image's methods are thread-safe
 
+void ov2640Init();
+
 // --------------------------- Ov2640 --------------------------- //
 
 class Ov2640 {
