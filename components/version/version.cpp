@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <string>
+#include <iterator>
 
 #include "version.hpp"
 #include "UartSink.hpp"
@@ -30,16 +31,21 @@ bool versionStmGet(string &str)
 {
 	bool res = false;
 
-	if (parser.parsed() && parser.payload().size() >= 2) {
+	if (parser.parsed()) {
+		const auto &payload = parser.payload();
 		res = true;
-		str.append(to_string(parser.payload()[0]));
-		str.append(".");
-		str.append(to_string(parser.payload()[1]));
 
-		const uint32_t *data = reinterpret_cast<const uint32_t *>(parser.payload().data());
-		if (parser.payload().size() >= 6 && data != nullptr) {
+		if (parser.payload().size() >= 2) {
+			str.append(to_string(payload[0]));
 			str.append(".");
-			str.append(to_string(*data));
+			str.append(to_string(payload[1]));
+		}
+
+		if (payload.size() >= 6) {
+//			uint8_t swCommit[4];
+//			copy(payload.crbegin(), next(payload.crend(), 2), swCommit);
+			str.append(".");
+			str.append(to_string(*reinterpret_cast<const uint32_t *>(&payload.data()[2])));
 		}
 	}
 
