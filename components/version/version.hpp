@@ -12,6 +12,10 @@
 
 #define ESP32_FIRMWARE_VERSION "0.2.1"
 
+#if !defined(ESP32_FIRMWARE_VERSION)
+# define ESP32_FIRMWARE_VERSION "0.0.0"
+#endif
+
 #include <string>
 
 void versionInit();

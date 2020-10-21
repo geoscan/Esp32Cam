@@ -35,6 +35,12 @@ bool versionStmGet(string &str)
 		str.append(to_string(parser.payload()[0]));
 		str.append(".");
 		str.append(to_string(parser.payload()[1]));
+
+		const uint32_t *data = reinterpret_cast<const uint32_t *>(parser.payload().data());
+		if (parser.payload().size() >= 6 && data != nullptr) {
+			str.append(".");
+			str.append(to_string(*data));
+		}
 	}
 
 	return res;
