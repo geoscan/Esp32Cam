@@ -10,14 +10,14 @@ menu "WIFI <=> UART bridge"
 	config WIFI_UART_BRIDGE_RX_TX_BUFFER
 		int "RC/TX buffers capacity"
 		range 1 4096
-		default 512
+		default 64
 		help
 			Capacity of both RX and TX buffers
 
 	config WIFI_UART_BRIDGE_INACTIVE_TIMEOUT_SECONDS
 		int "Max client inactivity period, seconds"
 		range 1 1800
-		default 1
+		default 5
 		help
 			For how long UDP client can keep silence before copter stops sending him packages
 
