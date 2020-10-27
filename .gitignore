@@ -16,4 +16,8 @@ CMakeLists.txt.user
 tools/*bootloader.bin 
 tools/*esp32.bin 
 tools/*partition-table.bin
-tools/esptool/cache/03c324095c870be72e7b6d16e5a00ee4.json tools/esptool/cache/04d5e42b1241a7cc2bfe972f4f715041.json tools/esptool/cache/3434e06dfa1998d174bfe9416ee120aa.json tools/esptool/cache/46a7ec2ba345648d3afe7511df4baa4a.json tools/esptool/cache/7b37af9c899032f42d6eb82d2c9068f9.json tools/esptool/cache/967616cec2b8f22859b9c54fd830ebd1.json tools/esptool/cache/fb84672fb93fcba3ee556812907c2f40.json
+tools/esptool/__pycache__
+tools/esptool/build
+tools/esptool/cache
+tools/esptool/dist
+
