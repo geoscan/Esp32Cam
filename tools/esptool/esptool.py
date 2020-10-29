@@ -3183,7 +3183,7 @@ def main(custom_commandline=None):
             initial_baud = args.baud
 
         if args.port is None:
-            ser_list = sorted(ports.device for ports in list_ports.comports())
+            ser_list = [ports.device for ports in list_ports.comports()]
             print("Found %d serial ports" % len(ser_list))
         else:
             ser_list = [args.port]

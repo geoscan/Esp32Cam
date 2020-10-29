@@ -28,7 +28,9 @@ def connect_and_prepare() -> bool and str:
         return
 
 
-    devices = [ports.device for ports in list_ports.comports()]
+    comports = list_ports.comports()
+    comports.reverse()
+    devices = [ports.device for ports in comports]
     for dev in devices:
         print(f'Attempting to connect{dev}')
         try:
