@@ -41,6 +41,7 @@ import sys
 import threading
 import time
 import proto
+from params import *
 
 try:
     import serial
@@ -3539,55 +3540,6 @@ pTBQygW1qaSJYpnS9s3YJHFMgRZ37tsO2I74Ftng+PRyKj5lZh8ZNazkkHl08Ahz1V7d3rup9NUqpTYI
 A1V26a2MBKefkgZE4WGuNNMIryQX9TBlPWEnZBp3KYAhb4u/cMOvS/W2eboZbw8FVFYqxrXjXbP3SNdFFuiHSriOpuHfjAIIKqkO5oyGGaR3vpPp6fqhcrtiqX9SU0HTHolhx1j/5GDn2YD+//fTb4t8jn8BWjOO\
 MzNK06R5Ul0v5p/bwbEZR81gmS9y+rtgr1W/I096hNLIZlHy9b+1NGXd\
 """)))
-
-
-def connect_and_prepare() -> bool and str:
-
-    devices = [ports.device for ports in list_ports.comports()]
-    for dev in devices:
-        print(f'Attempting to connect{dev}')
-        try:
-            messenger = proto.Messenger(proto.SerialStream(dev, 115200), 'cache')
-            messenger.connect()
-            messenger.hub.getParamList()
-        except:
-            print("Could not connect to the device")
-
-        updater = [('BoardPioneerMini_modules_uMux', 2)]
-        parsed = 0
-
-        for p, k in zip(messenger.hub.parameters.values(), messenger.hub.parameters.keys()):
-            for u in updater:
-                if p[0] == u[0]:
-                    if math.isclose(a=p[1], b=u[1], rel_tol=1e-5):
-                        print('{:s} untouched: value {:f}'.format(p[0], p[1]))
-                        parsed += 1
-                    else:
-                        messenger.hub.setParam(value=u[1], name=u[0])
-                        p0, p1 = messenger.hub.getParam(number=k)
-                        if p0 != p[0] or not math.isclose(a=p1, b=u[1], rel_tol=1e-5):
-                            print('{:s} update error'.format(p[0]))
-                        else:
-                            print('{:s} updated: old {:f}, new {:f}'.format(p[0], p[1], p1))
-                            print('Resetting controller...')
-                            time.sleep(3)
-                            messenger.hub.sendCommand(18)  # Reset
-                            print("Please wait...")
-                            time.sleep(10)
-                            parsed += 1
-
-        if parsed == len(updater):
-            print("OK")
-            return True, dev
-        else:
-            print("ERROR")
-
-        try:
-            messenger.stop()
-        except:
-            pass
-
-    return False, ''
 
 
 def _main():

@@ -21,3 +21,6 @@ tools/esptool/build
 tools/esptool/cache
 tools/esptool/dist
 
+*.bin
+*.properties
+*.idea
