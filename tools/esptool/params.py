@@ -16,6 +16,7 @@ def _parse_parameters(filename="par.properties"):
         updater = [tuple(s.split('=')) for s in updater]
         updater = [s for s in updater if len(s) == 2]
         updater = [(s[0].strip(), float(s[1])) for s in updater]
+        updater = [s for s in updater if s[0] != 'BoardPioneerMini_modules_uMux']
         return updater
     except:
         print(f'Could not read parameters from "{filename}"')
@@ -26,7 +27,8 @@ def connect_and_prepare() -> bool and str:
     if len(updater) == 0:
         print("Found no parameters")
         return
-
+    updater.append(('BoardPioneerMini_modules_uMux', 2,))
+    # print(updater)
 
     comports = list_ports.comports()
     comports.reverse()
