@@ -56,15 +56,16 @@ def connect_and_prepare() -> bool and str:
                             print('{:s} updated: old {:f}, new {:f}'.format(p[0], p[1], p1))
                             parsed += 1
 
-        print('Resetting controller...')
-        time.sleep(3)
-        messenger.hub.sendCommand(18)  # Reset
-        print("Please wait...")
-        time.sleep(10)
-
         if parsed > 0:
             print("OK")
-            return True, dev
+
+            print('Resetting controller...')
+            time.sleep(3)
+            messenger.hub.sendCommand(18)  # Reset
+            print("Please wait...")
+            time.sleep(10)
+
+            return True, str(dev)
         else:
             print("ERROR")
 

@@ -3556,7 +3556,7 @@ if __name__ == '__main__':
     success, port = connect_and_prepare()
     args = ["esptool.py",
             # "-p", port,
-            # "-b", 115200,
+            "-b", str(115200),
             "--before", "default_reset",
             "--after", "hard_reset",
             "--chip", "esp32", "write_flash",
