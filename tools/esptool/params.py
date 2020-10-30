@@ -22,6 +22,52 @@ def _parse_parameters(filename="par.properties"):
         print(f'Could not read parameters from "{filename}"')
 
 
+def _write_parameters(messenger, updater) -> int:
+    parsed = 0
+
+    for p, k in zip(messenger.hub.parameters.values(), messenger.hub.parameters.keys()):
+        for u in updater:
+            if p[0] == u[0]:
+                if math.isclose(a=p[1], b=u[1], rel_tol=1e-5):
+                    print('untouched {:s}: value {:f}'.format(p[0], p[1]))
+                    parsed += 1
+                else:
+                    time.sleep(0.01)
+                    messenger.hub.setParam(value=u[1], name=u[0])
+                    p0, p1 = messenger.hub.getParam(number=k)
+                    if p0 != p[0] or not math.isclose(a=p1, b=u[1], rel_tol=1e-5):
+                        print('update error {:s}'.format(p[0]))
+                    else:
+                        print('successfully updated {:s}: old {:f}, new {:f}'.format(p[0], p[1], p1))
+                        parsed += 1
+
+    return parsed
+
+
+PARAMS_CHECK_NOT_NULL = [
+    "Offsets_accel_xOffset",
+    "Offsets_accel_yOffset",
+    "Offsets_accel_zOffset",
+    "Offsets_gyro_xOffset",
+    "Offsets_gyro_yOffset",
+    "Offsets_gyro_zOffset"
+]
+
+
+def _check_parameters_not_null(messenger, params) -> bool:
+    print("""
+        Checking parameters not null
+        """)
+    messenger.hub.getParamList()
+    for p, k in zip(messenger.hub.parameters.values(), messenger.hub.parameters.keys()):
+        for u in params:
+            if p[0] == u:
+                if not math.isclose(p[1], b=0, rel_tol=1e-5):
+                    print(f"SUCCESS: checked {p[0]} = {p[1]}")
+                else:
+                    print(f"FAILURE: checked {p[0]} = {p[1]}")
+
+
 def connect_and_prepare() -> bool and str:
     updater = _parse_parameters()
     if len(updater) == 0:
@@ -43,25 +89,12 @@ def connect_and_prepare() -> bool and str:
             print("Could not connect to the device")
 
         # updater = [('BoardPioneerMini_modules_uMux', 2)]
-        parsed = 0
-
-        for p, k in zip(messenger.hub.parameters.values(), messenger.hub.parameters.keys()):
-            for u in updater:
-                if p[0] == u[0]:
-                    if math.isclose(a=p[1], b=u[1], rel_tol=1e-5):
-                        print('{:s} untouched: value {:f}'.format(p[0], p[1]))
-                        parsed += 1
-                    else:
-                        messenger.hub.setParam(value=u[1], name=u[0])
-                        p0, p1 = messenger.hub.getParam(number=k)
-                        if p0 != p[0] or not math.isclose(a=p1, b=u[1], rel_tol=1e-5):
-                            print('{:s} update error'.format(p[0]))
-                        else:
-                            print('{:s} updated: old {:f}, new {:f}'.format(p[0], p[1], p1))
-                            parsed += 1
+        parsed = _write_parameters(messenger, updater)
 
         if parsed > 0:
             print("OK")
+
+            _check_parameters_not_null(messenger, PARAMS_CHECK_NOT_NULL)
 
             print('Resetting controller...')
             time.sleep(3)
