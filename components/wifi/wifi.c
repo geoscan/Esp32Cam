@@ -43,11 +43,12 @@ static void get_ssid(uint8_t **data, unsigned *len)
 	// Copy MAC
 	esp_efuse_mac_get_default(mac);
 	for (int i = 0; i < MAC_LENGTH; ++i) {
-		sprintf((char *)ssid + ssidlen + i * 2, "%0x", mac[i]);
+		sprintf((char *)ssid + ssidlen + i*2, "%02x", mac[i]);
+//		*(ssid + ssidlen + i) = mac[i];
 	}
 
 	*data = ssid;
-	*len  = ssidlen + MAC_LENGTH * 2;
+	*len  = strlen((char *)ssid);
 }
 
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
