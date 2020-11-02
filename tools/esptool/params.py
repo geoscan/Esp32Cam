@@ -44,6 +44,17 @@ def _write_parameters(messenger, updater) -> int:
     return parsed
 
 
+def _get_messenger(dev):
+    try:
+        messenger = proto.Messenger(proto.SerialStream(dev, 115200), 'cache')
+        messenger.connect()
+        messenger.hub.getParamList()
+        return messenger
+    except:
+        print("Could not connect to the device")
+        return None
+
+
 PARAMS_CHECK_NOT_NULL = [
     "Offsets_accel_xOffset",
     "Offsets_accel_yOffset",
@@ -66,49 +77,58 @@ def _check_parameters_not_null(messenger, params) -> bool:
                     print(f"SUCCESS: checked {p[0]} = {p[1]}")
                 else:
                     print(f"FAILURE: checked {p[0]} = {p[1]}")
+                    return False
+    return True
 
 
 def connect_and_prepare() -> bool and str:
     updater = _parse_parameters()
-    if len(updater) == 0:
-        print("Found no parameters")
-        return
-    updater.append(('BoardPioneerMini_modules_uMux', 2,))
-    # print(updater)
 
     comports = list_ports.comports()
     comports.reverse()
     devices = [ports.device for ports in comports]
+    parsed = 0
+
     for dev in devices:
         print(f'Attempting to connect{dev}')
-        try:
-            messenger = proto.Messenger(proto.SerialStream(dev, 115200), 'cache')
-            messenger.connect()
-            messenger.hub.getParamList()
-        except:
-            print("Could not connect to the device")
+        messenger = _get_messenger(dev)
 
-        # updater = [('BoardPioneerMini_modules_uMux', 2)]
-        parsed = _write_parameters(messenger, updater)
+        if messenger is not None and updater is not None:
+            # updater = [('BoardPioneerMini_modules_uMux', 2)]
+            parsed = _write_parameters(messenger, updater)
 
-        if parsed > 0:
-            print("OK")
+            if parsed > 0:
+                print("OK")
 
-            _check_parameters_not_null(messenger, PARAMS_CHECK_NOT_NULL)
+                time.sleep(3)
+                messenger.hub.sendCommand(18)  # Reset
+                time.sleep(1)
 
+            else:
+                print("ERROR")
+
+            try:
+                messenger.stop()
+            except:
+                pass
+
+    devices = list_ports.comports()
+    for dev in reversed([port.device for port in devices]):
+        print(f'Attempting to connect{dev}')
+        messenger = _get_messenger(dev)
+
+        if messenger is not None:
+
+            if parsed > 0 and not _check_parameters_not_null(messenger, PARAMS_CHECK_NOT_NULL):
+                    print(">>> Offset Error <<<")
+                    return False, ''
+
+            _write_parameters(messenger, [('BoardPioneerMini_modules_uMux', 2)])
             print('Resetting controller...')
             time.sleep(3)
             messenger.hub.sendCommand(18)  # Reset
             print("Please wait...")
             time.sleep(10)
-
-            return True, str(dev)
-        else:
-            print("ERROR")
-
-        try:
-            messenger.stop()
-        except:
-            pass
+            return True, ''
 
     return False, ''
