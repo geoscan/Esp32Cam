@@ -29,17 +29,10 @@ static void *run(void *instance)
 
 void cameraStreamerStart(asio::io_context &context)
 {
-//	static asio::io_context    context;
-//	static asio::io_context    streamContext;
 	static CameraStream        cameraStream(context, CONFIG_CAMSTREAM_SOURCE_UDP_PORT, CONFIG_CAMSTREAM_FPS);
 	static CameraStreamControl cameraStreamControl(context, CONFIG_CAMSTREAM_SOURCE_TCP_PORT, cameraStream);
-//	auto cameraStreamControl(std::make_shared<CameraStreamControl>(controlContext, 8888, cameraStream));
 
 	static pthread_t stub;
-//	pthread_create(&stub, NULL, run<asio::io_context>,    reinterpret_cast<void *>(&context));
-//	pthread_create(&stub, NULL, run<asio::io_context>,    reinterpret_cast<void *>(&controlContext));
 	pthread_create(&stub, NULL, run<CameraStream>,        reinterpret_cast<void *>(&cameraStream));
 	pthread_create(&stub, NULL, run<CameraStreamControl>, reinterpret_cast<void *>(&cameraStreamControl));
-
-//	cameraStreamControl.run();
 }

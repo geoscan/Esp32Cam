@@ -3,6 +3,8 @@
 
 #include <memory>
 #include <asio.hpp>
+#include <atomic>
+#include <esp_event.h>
 
 #include "CameraStream.hpp"
 
@@ -14,14 +16,16 @@
 class CameraStreamControl final : public std::enable_shared_from_this<CameraStreamControl>{
 public:
 	CameraStreamControl(asio::io_context &context, unsigned port, CameraStream &);
-	// async run
-	void asyncRun();
 	void run();
 	~CameraStreamControl();
 private:
+	static void handleApDisconnected(void *arg, esp_event_base_t, int32_t eventId, void *eventData);
+
 	CameraStream            &cameraStream;
 	asio::io_context        &context;
 	asio::ip::tcp::acceptor acceptor;
+//	std::atomic_bool        fRunning;
+	std::shared_ptr<asio::ip::tcp::socket> socket;
 };
 
 #endif // CAMERASTREAMCONTROL_HPP

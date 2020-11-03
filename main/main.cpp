@@ -19,6 +19,8 @@
 #include "Ov2640.hpp"
 #include "version.hpp"
 
+static asio::io_context context(3);
+
 extern "C" int app_main(void)
 {
 	versionInit();
@@ -26,7 +28,6 @@ extern "C" int app_main(void)
 	httpStart();
 	ov2640Init();
 
-	static asio::io_context context(3);
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
 
