@@ -31,8 +31,6 @@ void CameraStreamControl::run()
 		asio::error_code        err;
 
 		acceptor.accept(*socket, clientEndpoint, err);
-		timeval tout{3, 0};
-		setsockopt(socket->native_handle(), SOL_SOCKET, SO_RCVTIMEO, &tout, sizeof(tout));
 		if (!err) {
 			asio::ip::udp::endpoint clientEndpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
 			cameraStream.addSink(clientEndpoint);
@@ -42,7 +40,6 @@ void CameraStreamControl::run()
 
 			while (err != asio::error::connection_reset && err != asio::error::eof && err != asio::error::bad_descriptor) {
 				socket->receive(asio::buffer(stubBuffer, 1), 0, err);
-//				socket->wait(asio::ip::tcp::socket::wait_error, err);
 			}
 			cameraStream.removeSinks();
 		}

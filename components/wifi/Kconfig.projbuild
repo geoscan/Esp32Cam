@@ -20,7 +20,7 @@ menu "WiFi"
 
     config ESP_MAX_STA_CONN
         int "Maximal STA connections"
-        default 4
+        default 1
         help
             Max number of the STA connects to AP.
 
