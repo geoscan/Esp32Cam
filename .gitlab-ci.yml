@@ -1,0 +1,19 @@
+default:
+    before_script:
+        - apt-get install python3 python3-pip
+        - pip3 install -U platformio
+        - git clone https://github.com/espressif/esp-idf.git
+        - cd esp-idf
+        - git checkout v4.1
+        - ./install.sh
+        - source ./export.sh
+        - cd ..
+
+platformio_build:
+    script:
+        - platformio run
+
+espidf_build:
+    script:
+        - idf.py set-target esp32
+        - idf.py build
