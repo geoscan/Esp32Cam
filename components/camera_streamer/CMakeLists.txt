@@ -9,4 +9,6 @@ idf_component_register(
 		freertos
 		OV2640
 		esp_common
-		utility)
+		utility
+		lwip
+		esp_wifi)

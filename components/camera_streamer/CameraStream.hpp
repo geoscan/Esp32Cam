@@ -22,6 +22,7 @@ public:
 	void run();
 	void addSink(asio::ip::udp::endpoint);
 	void removeSink(asio::ip::udp::endpoint);
+	void removeSink(const asio::ip::address &);
 	void removeSinks();
 	void lock();
 	void unlock();

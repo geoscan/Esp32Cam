@@ -1,3 +1,10 @@
+
+extern "C" {
+#include <dhcpserver/dhcpserver.h>
+#include <esp_wifi.h>
+}
+
+#include <array>
 #include "CameraStreamControl.hpp"
 
 using asio::ip::tcp;
@@ -32,6 +39,7 @@ void CameraStreamControl::run()
 
 		acceptor.accept(*socket, clientEndpoint, err);
 		if (!err) {
+			currentAddress = socket->remote_endpoint().address();
 			asio::ip::udp::endpoint clientEndpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
 			cameraStream.addSink(clientEndpoint);
 
@@ -41,18 +49,25 @@ void CameraStreamControl::run()
 			while (err != asio::error::connection_reset && err != asio::error::eof && err != asio::error::bad_descriptor) {
 				socket->receive(asio::buffer(stubBuffer, 1), 0, err);
 			}
-			cameraStream.removeSinks();
+			cameraStream.removeSink(clientEndpoint);
 		}
 
 		socket->close();
 	}
 }
 
-void CameraStreamControl::handleApDisconnected(void *arg, esp_event_base_t, int32_t, void *)
+void CameraStreamControl::handleApDisconnected(void *arg, esp_event_base_t, int32_t, void *data)
 {
 	auto &instance = *reinterpret_cast<CameraStreamControl *>(arg);
-	if (instance.socket) {
+	auto *eventData = reinterpret_cast<system_event_ap_stadisconnected_t *>(data);
+
+	ip4_addr_t ipAddress;
+	dhcp_search_ip_on_mac(eventData->mac, &ipAddress);
+//	tcpip_adapter_get_sta_list()
+//	esp_wifi_ap_get_sta_list
+
+	if (instance.currentAddress.to_v4().to_uint() == ntohl(ipAddress.addr)) {
+		instance.cameraStream.removeSink(instance.currentAddress);
 		instance.socket->close();
 	}
-	instance.cameraStream.removeSinks();
 }

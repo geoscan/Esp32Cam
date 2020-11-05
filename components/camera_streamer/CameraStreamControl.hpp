@@ -19,8 +19,10 @@ public:
 	void run();
 	~CameraStreamControl();
 private:
-	static void handleApDisconnected(void *arg, esp_event_base_t, int32_t eventId, void *eventData);
+	static const unsigned kMacLength = 6;
 
+	static void handleApDisconnected(void *arg, esp_event_base_t, int32_t eventId, void *eventData);
+	asio::ip::address       currentAddress;
 	CameraStream            &cameraStream;
 	asio::io_context        &context;
 	asio::ip::tcp::acceptor acceptor;
