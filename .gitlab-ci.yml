@@ -1,13 +1,7 @@
 default:
+    image: ${CI_REGISTRY_IMAGE}:latest 
     before_script:
-        - apt-get install python3 python3-pip
-        - pip3 install -U platformio
-        - git clone https://github.com/espressif/esp-idf.git
-        - cd esp-idf
-        - git checkout v4.1
-        - ./install.sh
-        - source ./export.sh
-        - cd ..
+        - source ~/esp-idf/export.sh
 
 platformio_build:
     script:
