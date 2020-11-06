@@ -1,13 +1,19 @@
 default:
-    image: ${CI_REGISTRY_IMAGE}:latest 
-    before_script:
-        - source ~/esp-idf/export.sh
+    image: ${CI_REGISTRY_IMAGE}:esp-ci-alpine 
 
 platformio_build:
+    image: ${CI_REGISTRY_IMAGE}:esp-ci-alpine 
     script:
         - platformio run
 
 espidf_build:
+    image: ${CI_REGISTRY_IMAGE}:esp-ci-alpine 
     script:
+        - ln -s /usr/bin/python3 /usr/bin/python
+        - git clone https://github.com/espressif/esp-idf.git ~/esp-idf
+        - cd ~/esp-idf
+        - git checkout v4.1
+        - sh ./install.sh
+        - source ~/esp-idf/export.sh
         - idf.py set-target esp32
         - idf.py build

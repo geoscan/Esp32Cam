@@ -1,3 +1,7 @@
 [submodule "tools/esptool"]
 	path = tools/esptool
 	url = git@gitlab.corp.geoscan.aero:pioneermini/esp-tool-for-pioneer-mini.git
+        branch = master
+[submodule "tools/etool"]
+	path = tools/etool
+	url = git@gitlab.corp.geoscan.aero:pioneermini/esp-tool-for-pioneer-mini.git
