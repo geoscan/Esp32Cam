@@ -96,7 +96,7 @@ static void wifi_init_softap(void)
         .ap = {
 //            .ssid = ESP_WIFI_SSID,
 //            .ssid_len = strlen(ESP_WIFI_SSID),
-			.ssid_len = ssid_len,
+			.ssid_len = 0,
             .channel = ESP_WIFI_CHANNEL,
             .password = ESP_WIFI_PASS,
             .max_connection = MAX_STA_CONN,
@@ -104,6 +104,7 @@ static void wifi_init_softap(void)
         },
     };
     strcpy((char *)wifi_config.ap.ssid, (char *)ssid);
+    wifi_config.ap.ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH] = '\0';
 
     if (strlen(ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
