@@ -103,6 +103,7 @@ static void wifi_init_softap(void)
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
+	ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH] = '\0';
     strcpy((char *)wifi_config.ap.ssid, (char *)ssid);
     wifi_config.ap.ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH] = '\0';
 
