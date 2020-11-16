@@ -10,7 +10,7 @@ menu "WIFI <=> UART bridge"
 	config WIFI_UART_BRIDGE_RX_TX_BUFFER
 		int "RC/TX buffers capacity"
 		range 1 4096
-		default 64
+		default 300
 		help
 			Capacity of both RX and TX buffers
 
