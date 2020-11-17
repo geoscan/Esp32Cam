@@ -97,15 +97,18 @@ static void wifi_init_softap(void)
 //            .ssid = ESP_WIFI_SSID,
 //            .ssid_len = strlen(ESP_WIFI_SSID),
 			.ssid_len = 0,
+			.ssid = {'\0'},
+			.ssid_hidden = 0,
+			.beacon_interval = 100,
             .channel = ESP_WIFI_CHANNEL,
             .password = ESP_WIFI_PASS,
             .max_connection = MAX_STA_CONN,
             .authmode = WIFI_AUTH_WPA_WPA2_PSK
         },
     };
-	ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH] = '\0';
+	ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH * 2] = '\0';
     strcpy((char *)wifi_config.ap.ssid, (char *)ssid);
-    wifi_config.ap.ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH] = '\0';
+    wifi_config.ap.ssid[strlen(ESP_WIFI_SSID) + MAC_LENGTH * 2] = '\0';
 
     if (strlen(ESP_WIFI_PASS) == 0) {
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
