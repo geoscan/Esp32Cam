@@ -41,6 +41,8 @@ static void wifi_init_softap(void)
 {
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	cfg.nvs_enable = 0;
+	cfg.ampdu_rx_enable = 0;
+	cfg.ampdu_tx_enable = 0;
 
 	esp_wifi_init(&cfg);
 	esp_wifi_set_storage(WIFI_STORAGE_RAM);
