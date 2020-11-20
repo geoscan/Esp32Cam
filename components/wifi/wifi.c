@@ -47,8 +47,6 @@ static void wifi_init_softap(void)
 	esp_wifi_set_mode(WIFI_MODE_AP);
 
 	esp_event_loop_create_default();
-	esp_netif_init();
-	esp_netif_create_default_wifi_ap();
 
 	uint8_t  *ssid;
 	unsigned ssid_len;
@@ -73,6 +71,10 @@ static void wifi_init_softap(void)
 	}
 
 	esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config);
+
+	esp_netif_init();
+	esp_netif_create_default_wifi_ap();
+
 	esp_wifi_start();
 }
 
