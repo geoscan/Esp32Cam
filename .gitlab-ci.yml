@@ -14,8 +14,11 @@ espidf_build:
         # - export CMAKE_ASM_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-gcc
     script:
         - python /root/esp-idf/tools/idf.py build
+        - cd tools
+        - ./extract_binaries.sh
     artifacts:
         paths:
-            - "./build/esp32.bin"
-            - "./build/partition_table/partition-table.bin"
-            - "./build/bootloader/bootloader.bin"
+            - "./tools/*.bin"
+            # - "./build/esp32.bin"
+            # - "./build/partition_table/partition-table.bin"
+            # - "./build/bootloader/bootloader.bin"
