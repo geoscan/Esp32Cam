@@ -1,7 +1,9 @@
 #!/bin/bash
 
+cmd_esptool="python3 ./etool/esptool.py"
+
 ./extract_binaries.sh
-mv *.bin ./esptool
-cd esptool
-python3 esptool.py
-rm ./*.bin
+$cmd_esptool umux
+$cmd_esptool reset
+sleep 10
+$cmd_esptool flash

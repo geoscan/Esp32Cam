@@ -14,4 +14,5 @@ idf_component_register(
 		asio
 		pthread
 		OV2640
-		version)
+		version
+		sd_example)
