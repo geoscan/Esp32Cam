@@ -21,8 +21,11 @@
 
 static asio::io_context context(3);
 
+extern "C" void sdInit();
+
 extern "C" int app_main(void)
 {
+	sdInit();
 	versionInit();
 	wifiStart();
 	httpStart();
