@@ -166,6 +166,12 @@ CONFIG_RTP_UDP_PORT=4321
 # end of RTSP, RTP server
 
 #
+# SD Card Example menu
+#
+# CONFIG_EXAMPLE_FORMAT_IF_MOUNT_FAILED is not set
+# end of SD Card Example menu
+
+#
 # Version
 #
 CONFIG_VERSION_STM_ACQ_TIMEOUT_US=500000
