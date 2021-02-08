@@ -1,1 +1,0 @@
-{"fields": [{"field": 0, "type": 8, "size": 1, "flags": 7, "name": "flags", "scale": 0, "unit": "", "min": 0, "max": 4294967295}, {"field": 1, "type": 8, "size": 1, "flags": 7, "name": "packetErrors", "scale": 0, "unit": "", "min": 0, "max": 4294967295}], "files": []}

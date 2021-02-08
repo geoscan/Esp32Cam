@@ -1,8 +1,0 @@
-dump.txt
-rent/pki/intermediate
-rent/pki/serial*
-rent/pki/newcerts
-rent/pki/index.txt*
-.rnd
-*.der
-
