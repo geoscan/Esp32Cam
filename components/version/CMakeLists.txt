@@ -29,9 +29,8 @@ execute_process(
 string(REGEX MATCH "(^[0-9]+.[0-9]+.[0-9]+-*[0-9]*)" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
 
 if(NOT ${ESP32_FIRMWARE_VERSION} STREQUAL "")
-#	file(REMOVE version.hpp)
 
 	string(REPLACE "\n" "" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
 	string(REPLACE "\r" "" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
-	configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.hpp.in ${CMAKE_CURRENT_SOURCE_DIR}/version.hpp @ONLY)
+	add_compile_definitions(ESP32_FIRMWARE_VERSION="${ESP32_FIRMWARE_VERSION}")
 endif()
