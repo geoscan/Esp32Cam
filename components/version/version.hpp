@@ -5,12 +5,10 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#ifndef COMPONENTS_VERSION_VERSION_HPP_IN
-#define COMPONENTS_VERSION_VERSION_HPP_IN
+#ifndef COMPONENTS_VERSION_VERSION_HPP_H
+#define COMPONENTS_VERSION_VERSION_HPP_H
 
 // <VERSION_MAJOR>.<VERSION_MINOR>.<VERSION_PATCH>-<VERSION_SUFFIX>
-
-#define ESP32_FIRMWARE_VERSION "0.2.7-15"
 
 #if !defined(ESP32_FIRMWARE_VERSION)
 # define ESP32_FIRMWARE_VERSION "0.0.0"
@@ -21,4 +19,4 @@
 void versionInit();
 bool versionStmGet(std::string&);
 
-#endif  // COMPONENTS_VERSION_VERSION_HPP_IN
+#endif  // COMPONENTS_VERSION_VERSION_HPP_H

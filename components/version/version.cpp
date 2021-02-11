@@ -42,8 +42,6 @@ bool versionStmGet(string &str)
 		}
 
 		if (payload.size() >= 6) {
-//			uint8_t swCommit[4];
-//			copy(payload.crbegin(), next(payload.crend(), 2), swCommit);
 			str.append(".");
 			str.append(to_string(*reinterpret_cast<const uint32_t *>(&payload.data()[2])));
 		}
