@@ -22,11 +22,11 @@ idf_component_register(
 # version.hpp file
 
 execute_process(
-	COMMAND git describe --abbrev=0
+	COMMAND git describe
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 	OUTPUT_VARIABLE ESP32_FIRMWARE_VERSION)
 
-string(REGEX MATCH "(^[0-9]+.[0-9]+.[0-9]+)" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
+string(REGEX MATCH "(^[0-9]+.[0-9]+.[0-9]+-*[0-9]*)" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
 
 if(NOT ${ESP32_FIRMWARE_VERSION} STREQUAL "")
 #	file(REMOVE version.hpp)
