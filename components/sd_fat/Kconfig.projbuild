@@ -1,0 +1,15 @@
+menu "SD FAT"
+
+	config SD_FAT_MOUNT_POINT
+		string "Mount Point"
+		default "/sdcard"
+		help
+			Mount point for FAT File System on connected SD card
+	
+	config SD_FAT_MAX_OPENED_FILES
+		int "Max opened files"
+		range 1 20
+		default 5
+		help
+
+endmenu
