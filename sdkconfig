@@ -166,12 +166,6 @@ CONFIG_RTP_UDP_PORT=4321
 # end of RTSP, RTP server
 
 #
-# SD Card Example menu
-#
-# CONFIG_EXAMPLE_FORMAT_IF_MOUNT_FAILED is not set
-# end of SD Card Example menu
-
-#
 # SD FAT
 #
 CONFIG_SD_FAT_MOUNT_POINT="/sdcard"
