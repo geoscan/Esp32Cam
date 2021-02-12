@@ -24,11 +24,11 @@ static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
-	sdFatInit();
 	versionInit();
 	wifiStart();
 	httpStart();
 	ov2640Init();
+	sdFatInit();
 
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
