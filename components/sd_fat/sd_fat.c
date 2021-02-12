@@ -92,6 +92,6 @@ void sdFatWriteTest()
 		return;
 	}
 
-	fprintf(f, "Geoscan");
+	fprintf(f, "Geoscan, Geoscan, Geoscan. Geoscan!");
 	fclose(f);
 }
