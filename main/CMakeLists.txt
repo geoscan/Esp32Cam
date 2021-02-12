@@ -15,4 +15,5 @@ idf_component_register(
 		pthread
 		OV2640
 		version
-		sd_example)
+		sd_example
+		sd_fat)

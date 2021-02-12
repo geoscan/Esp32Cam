@@ -18,14 +18,13 @@
 #include "camera_streamer.h"
 #include "Ov2640.hpp"
 #include "version.hpp"
+#include "sd_fat.h"
 
 static asio::io_context context(3);
 
-extern "C" void sdInit();
-
 extern "C" int app_main(void)
 {
-	sdInit();
+	sdFatInit();
 	versionInit();
 	wifiStart();
 	httpStart();
@@ -33,6 +32,8 @@ extern "C" int app_main(void)
 
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
+
+	sdFatWriteTest();
 
 	return 0;
 }

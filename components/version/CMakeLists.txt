@@ -25,7 +25,7 @@ if(NOT ${ESP32_FIRMWARE_VERSION} STREQUAL "")
 	target_compile_definitions(${COMPONENT_LIB} PUBLIC ESP32_FIRMWARE_VERSION="${ESP32_FIRMWARE_VERSION}")
 endif()
 
-# Print version message
+# Print version message.
 # https://stackoverflow.com/questions/18968979/how-to-get-colorized-output-with-cmake
 if(NOT WIN32)
   string(ASCII 27 Esc)
