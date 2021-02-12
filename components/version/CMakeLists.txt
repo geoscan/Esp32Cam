@@ -1,11 +1,7 @@
-file(GLOB SOURCE_FILES
-		"*.c"
-		"*.cpp")
-
+# Register component
 
 idf_component_register(
-	SRCS
-		${SOURCE_FILES}
+	SRC_DIRS "."
 	INCLUDE_DIRS
 		"."
 	PRIV_INCLUDE_DIRS
@@ -14,12 +10,7 @@ idf_component_register(
 		uart
 		utility)
 
-
-#  -----  Configure ESP32 version  -----  #
-# 
-# Extracts actual git tag, checks whether
-# it matches #.#.# format, and configures
-# version.hpp file
+# Add version macro
 
 execute_process(
 	COMMAND git describe
@@ -29,8 +20,17 @@ execute_process(
 string(REGEX MATCH "(^[0-9]+.[0-9]+.[0-9]+-*[0-9]*)" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
 
 if(NOT ${ESP32_FIRMWARE_VERSION} STREQUAL "")
-
 	string(REPLACE "\n" "" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
 	string(REPLACE "\r" "" ESP32_FIRMWARE_VERSION "${ESP32_FIRMWARE_VERSION}")
-	add_compile_definitions(ESP32_FIRMWARE_VERSION="${ESP32_FIRMWARE_VERSION}")
+	target_compile_definitions(${COMPONENT_LIB} PUBLIC ESP32_FIRMWARE_VERSION="${ESP32_FIRMWARE_VERSION}")
 endif()
+
+# Print version message
+# https://stackoverflow.com/questions/18968979/how-to-get-colorized-output-with-cmake
+if(NOT WIN32)
+  string(ASCII 27 Esc)
+  set(ColorReset "${Esc}[m")
+  set(Green      "${Esc}[1;32m")  # Bold; Green
+endif()
+
+message("${Green} [version]: ${ESP32_FIRMWARE_VERSION}${ColorReset}")
