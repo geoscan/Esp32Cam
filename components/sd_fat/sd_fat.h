@@ -15,7 +15,8 @@
 extern "C" {
 #endif
 
-void sdFtpInit();
+void sdFatInit();
+void sdFatWriteTest();
 
 #ifdef __cplusplus
 }

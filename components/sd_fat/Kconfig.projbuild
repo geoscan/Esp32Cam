@@ -11,5 +11,6 @@ menu "SD FAT"
 		range 1 20
 		default 5
 		help
+			Max. number of files opened simultaneously
 
 endmenu
