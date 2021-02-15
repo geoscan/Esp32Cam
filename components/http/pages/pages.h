@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 esp_err_t cameraDemoHandler(httpd_req_t *);
+esp_err_t cameraHandler(httpd_req_t *);
 esp_err_t indexPageHandler(httpd_req_t *);
 esp_err_t infoPageHandler(httpd_req_t *);
 
