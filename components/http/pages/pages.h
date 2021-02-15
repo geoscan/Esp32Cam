@@ -27,28 +27,5 @@ esp_err_t infoPageHandler(httpd_req_t *);
 }
 #endif
 
-const httpd_uri_t cameraDemo = {
-	.uri      = "/camera",
-//	.method   = HTTP_POST,
-	.method   = HTTP_GET,
-	.handler  = cameraDemoHandler,
-	.user_ctx = 0
-};
-
-const httpd_uri_t infoPage = {
-	.uri = "/info",
-	.method = HTTP_GET,
-	.handler = infoPageHandler,
-	.user_ctx = 0,
-};
-
-const httpd_uri_t indexPage = {
-	.uri      = "/hello",
-//	.method   = HTTP_POST,
-	.method   = HTTP_GET,
-	.handler  = indexPageHandler,
-	.user_ctx = (void*)"Hello World!"
-};
-
 
 #endif // COMPONENTS_HTTP_CAMERADEMO_CAMERADEMO_H
