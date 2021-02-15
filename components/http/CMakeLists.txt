@@ -12,6 +12,6 @@ idf_component_register(
         wifi
         OV2640
         esp_common
-#        protocol_examples_common
+        json
         esp_http_server
         version)
