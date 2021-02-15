@@ -18,6 +18,12 @@ static const httpd_uri_t pages[] = {
 		.method   = HTTP_GET,
 		.handler  = indexPageHandler,
 		.user_ctx = (void*)"Hello World!"
+	},
+	{
+		.uri      = "/camera",
+		.method   = HTTP_GET,
+		.handler  = cameraHandler,
+		.user_ctx = 0
 	}
 };
 
