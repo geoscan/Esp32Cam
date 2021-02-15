@@ -2,7 +2,7 @@
 
 static const httpd_uri_t pages[] = {
 	{
-		.uri      = "/camera/test",
+		.uri      = "/camera/demo",
 		.method   = HTTP_GET,
 		.handler  = cameraDemoHandler,
 		.user_ctx = 0
