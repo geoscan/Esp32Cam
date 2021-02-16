@@ -12,10 +12,20 @@
 
 using namespace std;
 
-static const char *kFunction    = "function";
-static const char *kVideoStream = "video_stream";
-static const char *kVideoRecord = "video_record";
-static const char *kPhoto       = "photo";
+static constexpr const char *kName = "name";  // key
+// Function
+static constexpr const char *kFunction    = "function";      // key
+static constexpr const char *kVideoStream = "video_stream";  // value
+static constexpr const char *kVideoRecord = "video_record";  // value
+static constexpr const char *kPhoto       = "photo";         // value
+// Command
+static constexpr const char *kCommand = "command";  // key
+static constexpr const char *kStop    = "stop";     // value
+static constexpr const char *kStart   = "start";    // value
+// JSON response
+static constexpr const char *kSuccess = "success";
+
+static constexpr esp_err_t kEspErrorNone = ESP_FAIL - 1;  // Workaround to provide 3-state bool for printStatus(2)
 
 static string getArgValueByKey(httpd_req_t *req, const char *key)
 {
@@ -53,15 +63,17 @@ static esp_err_t processPhoto(httpd_req_t *req)
 	return ESP_OK;
 }
 
-static esp_err_t printStatus(httpd_req_t *req)
+static esp_err_t printStatus(httpd_req_t *req, esp_err_t resp)
 {
-	esp_err_t res = ESP_OK;
+	esp_err_t res = kEspErrorNone;
 	auto *root = cJSON_CreateObject();
 
-	cJSON_AddItemToObject(root, "Stream Control Available", cJSON_CreateFalse());
-	cJSON_AddItemToObject(root, "Video Recording Available", cJSON_CreateFalse());
-	cJSON_AddItemToObject(root, "Photo available", cJSON_CreateFalse());
-	cJSON_AddItemToObject(root, "# Video Stream Sinks", cJSON_CreateNumber(12));
+	cJSON_AddItemToObject(root, kVideoStream, cJSON_CreateFalse());
+	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateFalse());
+
+	if (resp != kEspErrorNone) {
+		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool((int)(resp == ESP_OK)));
+	}
 
 	char *json = cJSON_Print(root);
 
@@ -76,21 +88,21 @@ static esp_err_t printStatus(httpd_req_t *req)
 
 extern "C" esp_err_t cameraHandler(httpd_req_t *req)
 {
-	esp_err_t ret = ESP_OK;
+	esp_err_t ret = kEspErrorNone;
 
 	auto value = getArgValueByKey(req, kFunction);
 
 	if (value.length() != 0) {
 		if (value == kVideoStream) {
-			processVideoStream(req);
+			ret = processVideoStream(req);
 		} else if (value == kVideoRecord) {
-			processVideoRecord(req);
+			ret = processVideoRecord(req);
 		} else if (value == kPhoto) {
-			processPhoto(req);
+			ret = processPhoto(req);
 		}
 	}
 
-	printStatus(req);
+	printStatus(req, ret);
 
 	return ret;
 }
