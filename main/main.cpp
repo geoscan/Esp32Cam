@@ -33,7 +33,5 @@ extern "C" int app_main(void)
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
 
-	sdFatWriteTest();  // Create stub file, so a user will know that his/her SD card is ready to use
-
 	return 0;
 }
