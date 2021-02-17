@@ -12,9 +12,13 @@
 #include <diskio_sdmmc.h>
 #include <diskio_impl.h>
 
+#ifndef FF_DRV_NOT_USED
+# define FF_DRV_NOT_USED 0xFF
+#endif
+
 static const int kSlotId = 1;
 static sdmmc_card_t *cardConfig;
-static BYTE pdrv = FF_DRV_NOT_USED;
+static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
 
 static esp_err_t initializeSlot()
 {
