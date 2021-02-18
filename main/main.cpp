@@ -10,6 +10,7 @@
 #include <esp_timer.h>
 #include <pthread.h>
 #include <asio.hpp>
+#include <esp_event.h>
 #include "wifi.h"
 #include "http.h"
 #include "rtsp.h"
@@ -24,6 +25,7 @@ static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
+	esp_event_loop_create_default();
 	versionInit();
 	wifiStart();
 	httpStart();
