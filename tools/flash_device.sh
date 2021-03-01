@@ -1,9 +1,7 @@
 #!/bin/bash
 
-cmd_esptool="python3 ./etool/esptool.py"
+cmd_esptool="python3 ./etool/interface.py"
 
 . ./extract_binaries.sh
-$cmd_esptool umux
-$cmd_esptool reset
-sleep 10
-$cmd_esptool flash
+$cmd_esptool pioneer_mini esp32boot
+$cmd_esptool esp32 write -f esp32.bin
