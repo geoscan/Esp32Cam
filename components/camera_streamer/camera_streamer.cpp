@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <memory>
 
+#include "utility/Run.hpp"
 #include "camera_streamer.h"
 #include "CameraStream.hpp"
 #include "CameraStreamControl.hpp"
@@ -32,7 +33,6 @@ void cameraStreamerStart(asio::io_context &context)
 	static CameraStream        cameraStream(context, CONFIG_CAMSTREAM_SOURCE_UDP_PORT, CONFIG_CAMSTREAM_FPS);
 	static CameraStreamControl cameraStreamControl(context, CONFIG_CAMSTREAM_SOURCE_TCP_PORT, cameraStream);
 
-	static pthread_t stub;
-	pthread_create(&stub, NULL, run<CameraStream>,        reinterpret_cast<void *>(&cameraStream));
-	pthread_create(&stub, NULL, run<CameraStreamControl>, reinterpret_cast<void *>(&cameraStreamControl));
+	Utility::threadRun(cameraStream, 1);
+	Utility::threadRun(cameraStreamControl, 0);
 }

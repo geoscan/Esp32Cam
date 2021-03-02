@@ -9,6 +9,7 @@
 #define COMPONENTS_UTILITY_RUN_HPP
 
 #include <pthread.h>
+#include <esp_pthread.h>
 
 namespace Utility {
 
@@ -27,17 +28,23 @@ void *run(void *instance)
 	return nullptr;
 }
 
+void setThreadCoreAffinity(int coreAffinity);
+
 template <typename Runnable>
-pthread_t threadRun(Runnable &instance)
+pthread_t threadRun(Runnable &instance, int coreAffinity = 0)
 {
+	setThreadCoreAffinity(coreAffinity);
+
 	pthread_t threadDescriptor;
 	pthread_create(&threadDescriptor, 0, run<Runnable>, &instance);
 	return threadDescriptor;
 }
 
 template <typename Runnable>
-pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr)
+pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr, int coreAffinity = 0)
 {
+	setThreadCoreAffinity(coreAffinity);
+
 	pthread_t threadDescriptor;
 	pthread_create(&threadDescriptor, &attr, run<Runnable>, &instance);
 	return threadDescriptor;
