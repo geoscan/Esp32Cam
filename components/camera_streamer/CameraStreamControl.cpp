@@ -39,9 +39,8 @@ void CameraStreamControl::run()
 
 		acceptor.accept(*socket, clientEndpoint, err);
 		if (!err) {
-			currentAddress = socket->remote_endpoint().address();
-			asio::ip::udp::endpoint clientEndpoint(socket->remote_endpoint().address(), socket->remote_endpoint().port());
-			cameraStream.addSink(clientEndpoint);
+			currentAddress = clientEndpoint.address();
+			cameraStream.addSink(clientEndpoint.address(), clientEndpoint.port());
 
 			char stubBuffer[1];
 			std::error_code err;
@@ -49,7 +48,7 @@ void CameraStreamControl::run()
 			while (err != asio::error::connection_reset && err != asio::error::eof && err != asio::error::bad_descriptor) {
 				socket->receive(asio::buffer(stubBuffer, 1), 0, err);
 			}
-			cameraStream.removeSink(clientEndpoint);
+			cameraStream.removeSink(clientEndpoint.address());
 		}
 
 		socket->close();

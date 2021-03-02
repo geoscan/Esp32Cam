@@ -18,11 +18,6 @@
 using asio::ip::udp;
 using namespace std;
 
-int64_t CameraStream::currentTimeMs()
-{
-	return esp_timer_get_time() / 1000;
-}
-
 CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f) :
 	socket(context, udp::endpoint(udp::v4(), sourcePort)),
 	fps(f)
@@ -31,7 +26,7 @@ CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f
 
 void CameraStream::run()
 {
-	using Time = decltype(currentTimeMs());
+	using Time = decltype(Utility::bootTimeUs());
 	static const unsigned kWaitForConnectionMs = 500;
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
@@ -40,53 +35,48 @@ void CameraStream::run()
 	Time lastSend = 0;
 
 	while(true) {
-		lock();
+		mutex.lock();
 		if (sinks.empty()) {
-			unlock();
+			mutex.unlock();
 			Utility::waitMs(kWaitForConnectionMs);  // To prevent resource starvation
 		} else {
 			if (fps > 0) {
-				lastSend = currentTimeMs();
+				lastSend = Utility::bootTimeUs() / 1000;
 			}
 			for (auto &sink : sinks) {
 				asio::error_code err;
-				socket.send_to(img->data(), sink, 0, err);
+				socket.send_to(img->data(), udp::endpoint{sink.first, sink.second}, 0, err);
 			}
-			unlock();
+			mutex.unlock();
 
 			img = Ov2640::instance().jpeg();
 
 			if (fps > 0) {
 				// Timer counter overflow and high latency are taken into account
-				auto timeDelta = currentTimeMs() - lastSend;
+				auto timeDelta = Utility::bootTimeUs() / 1000 - lastSend;
 				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
-				vTaskDelay((timeWait) / portTICK_PERIOD_MS);
+				Utility::waitMs(timeWait);
 			}
 		}
 	}
 }
 
-void CameraStream::addSink(udp::endpoint ep)
+void CameraStream::addSink(const asio::ip::address &addr, short unsigned port)
 {
 	auto lock = Utility::makeLockGuard(mutex);
-	sinks.insert(ep);
-}
-
-void CameraStream::removeSink(udp::endpoint ep)
-{
-	auto lock = Utility::makeLockGuard(mutex);
-	sinks.erase(ep);
+	auto it = sinks.find(addr);
+	if (it != sinks.end()) {
+		sinks.erase(it);
+	}
+	sinks.insert({addr, port});
 }
 
 void CameraStream::removeSink(const asio::ip::address &addr)
 {
 	auto lock = Utility::makeLockGuard(mutex);
-	for (auto it = sinks.begin(); it != sinks.end();) {
-		if (it->address() == addr) {
-			it = sinks.erase(it);
-		} else {
-			++it;
-		}
+	auto it = sinks.find(addr);
+	if (it != sinks.end()) {
+		sinks.erase(it);
 	}
 }
 
@@ -94,14 +84,4 @@ void CameraStream::removeSinks()
 {
 	auto lock = Utility::makeLockGuard(mutex);
 	sinks.clear();
-}
-
-void CameraStream::lock()
-{
-	mutex.lock();
-}
-
-void CameraStream::unlock()
-{
-	mutex.unlock();
 }
