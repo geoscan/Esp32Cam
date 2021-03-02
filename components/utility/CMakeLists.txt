@@ -1,6 +1,6 @@
 file(GLOB SOURCE_FILES
-		"./*.c"
-		"./*.cpp")
+		"*.c"
+		"*.cpp")
 
 idf_component_register(
 	SRCS ${SOURCE_FILES}
