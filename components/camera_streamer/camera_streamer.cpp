@@ -8,13 +8,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <pthread.h>
 #include <memory>
+#include <thread>
 
 #include "utility/Run.hpp"
 #include "camera_streamer.h"
 #include "CameraStream.hpp"
-#include "CameraStreamControl.hpp"
+#include "CameraStreamTcpControl.hpp"
 
 #ifndef CONFIG_CAMSTREAM_FPS
 # define CONFIG_CAMSTREAM_FPS -1
@@ -30,9 +30,16 @@ static void *run(void *instance)
 
 void cameraStreamerStart(asio::io_context &context)
 {
-	static CameraStream        cameraStream(context, CONFIG_CAMSTREAM_SOURCE_UDP_PORT, CONFIG_CAMSTREAM_FPS);
-	static CameraStreamControl cameraStreamControl(context, CONFIG_CAMSTREAM_SOURCE_TCP_PORT, cameraStream);
+	static asio::ip::tcp::socket tcpSocket(context);
+	static asio::ip::tcp::acceptor acceptor(context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), CONFIG_CAMSTREAM_SOURCE_TCP_PORT));
+	static asio::ip::udp::socket udpSocket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), CONFIG_CAMSTREAM_SOURCE_UDP_PORT));
 
-	Utility::threadRun(cameraStream, 1);
-	Utility::threadRun(cameraStreamControl, 0);
+	static CameraStream cameraStream(CONFIG_CAMSTREAM_FPS);
+	static CameraStreamTcpControl cameraStreamTcpControl(cameraStream, acceptor, tcpSocket, udpSocket);
+
+	Utility::setThreadCoreAffinity(1);
+	static std::thread threadCameraStream(&CameraStream::operator(), &cameraStream);
+
+	Utility::setThreadCoreAffinity(0);
+	static std::thread threadCameraStreamTcpControl(&CameraStreamTcpControl::operator(), &cameraStreamTcpControl);
 }
