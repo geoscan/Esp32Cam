@@ -5,7 +5,7 @@ extern "C" {
 }
 
 #include <array>
-#include "CameraStreamControl.hpp"
+#include "CameraStreamControls.hpp_del"
 
 using asio::ip::tcp;
 

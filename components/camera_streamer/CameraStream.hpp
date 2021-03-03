@@ -8,29 +8,28 @@
 #ifndef COMPONENTS_OV2640_CAMERASTREAM_HPP
 #define COMPONENTS_OV2640_CAMERASTREAM_HPP
 
-#include "asio.hpp"
 #include <set>
 #include <map>
 #include <mutex>
+#include <asio.hpp>
 
-// Wrapper around UDP socket that
-// sends JPEG frames to its sinks
-class CameraStream final {
+#include "utility/Subscription.hpp"
+
+class CameraStream final : public Utility::Subscription::Sender {
 public:
+	void operator()();
+
 	using Fps = short;
-	/// @param fps <= 0 -- Instant frame sending
-	///            >  0 -- Use provided value as max FPS
-	CameraStream(asio::io_context &context, uint16_t sourcePort, Fps fps = -1);
-	void run();
-	void removeSink(const asio::ip::address &);
-	void addSink(const asio::ip::address &addr, short unsigned port);
-	void removeSinks();
+
+	// Use fps = -1 to disable artificial FPS limit
+	static constexpr Fps kNoFpsLimit = -1;
+	CameraStream(Fps fps = kNoFpsLimit);
+	void addSubscriber(Utility::Subscription::Subscriber &s) override;
+	void removeSubscriber(Utility::Subscription::Subscriber &s) override;
+
 private:
-	using Sinks = std::map<asio::ip::address, short unsigned>;
-	asio::ip::udp::socket socket;
-	Sinks                 sinks;
-	std::mutex            mutex;
-	const Fps             fps;
+	std::mutex mutex;
+	Fps        fps;
 };
 
 #endif // COMPONENTS_OV2640_CAMERASTREAM_HPP

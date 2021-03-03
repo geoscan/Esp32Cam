@@ -11,42 +11,39 @@
 #include <memory>
 
 #include "CameraStream.hpp"
-#include "Ov2640.hpp"
 #include "utility/time.hpp"
 #include "utility/LockGuard.hpp"
+#include "Ov2640.hpp"
 
 using asio::ip::udp;
 using namespace std;
 
-CameraStream::CameraStream(asio::io_context &context, uint16_t sourcePort, Fps f) :
-	socket(context, udp::endpoint(udp::v4(), sourcePort)),
-	fps(f)
+using namespace Utility::Subscription;
+
+CameraStream::CameraStream(Fps f) :	fps(f)
 {
 }
 
-void CameraStream::run()
+void CameraStream::operator()()
 {
 	using Time = decltype(Utility::bootTimeUs());
 	static const unsigned kWaitForConnectionMs = 500;
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
-	auto img = Ov2640::instance().jpeg(); // Trigger HW-initialization
+	std::shared_ptr<Ov2640::Image> img = Ov2640::instance().jpeg(); // Trigger HW-initialization
 
 	Time lastSend = 0;
 
 	while(true) {
 		mutex.lock();
-		if (sinks.empty()) {
+		if (subscribers.empty()) {
 			mutex.unlock();
 			Utility::waitMs(kWaitForConnectionMs);  // To prevent resource starvation
 		} else {
 			if (fps > 0) {
 				lastSend = Utility::bootTimeUs() / 1000;
 			}
-			for (auto &sink : sinks) {
-				asio::error_code err;
-				socket.send_to(img->data(), udp::endpoint{sink.first, sink.second}, 0, err);
-			}
+			Sender::sendToSubscribers(&img);
 			mutex.unlock();
 
 			img = Ov2640::instance().jpeg();
@@ -61,27 +58,14 @@ void CameraStream::run()
 	}
 }
 
-void CameraStream::addSink(const asio::ip::address &addr, short unsigned port)
+void CameraStream::addSubscriber(Utility::Subscription::Subscriber &s)
 {
-	auto lock = Utility::makeLockGuard(mutex);
-	auto it = sinks.find(addr);
-	if (it != sinks.end()) {
-		sinks.erase(it);
-	}
-	sinks.insert({addr, port});
+	std::lock_guard<std::mutex> lock(mutex);
+	Sender::addSubscriber(s);
 }
 
-void CameraStream::removeSink(const asio::ip::address &addr)
+void CameraStream::removeSubscriber(Subscriber &s)
 {
-	auto lock = Utility::makeLockGuard(mutex);
-	auto it = sinks.find(addr);
-	if (it != sinks.end()) {
-		sinks.erase(it);
-	}
-}
-
-void CameraStream::removeSinks()
-{
-	auto lock = Utility::makeLockGuard(mutex);
-	sinks.clear();
+	std::lock_guard<std::mutex> lock(mutex);
+	Sender::removeSubscriber(s);
 }
