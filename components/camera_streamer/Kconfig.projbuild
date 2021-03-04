@@ -10,7 +10,7 @@ menu "JPEG camera streamer"
 
 	config CAMSTREAM_USE_FPS
 		bool "Specify FPS"
-		default y
+		default n
 		help
 			If disabled, the device sends frames as soon as it acquires them,
 			the performance is only determined by camera's latencies
