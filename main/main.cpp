@@ -30,7 +30,6 @@ extern "C" int app_main(void)
 	wifiStart();
 	httpStart();
 	ov2640Init();
-	sdFatInit();
 
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
