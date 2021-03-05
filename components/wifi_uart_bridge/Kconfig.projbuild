@@ -28,7 +28,7 @@ menu "WIFI <=> UART bridge"
 
 	config WIFI_UART_BRIDGE_BAUDRATE
 		int "ESP32 <=> AutopilotBoard baudrate"
-		default 2000000
+		default 115200
 		help
 			Baudrate of UART connecting AP board and ESP32 itself
 

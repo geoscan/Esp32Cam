@@ -24,10 +24,10 @@ void Bridge::run()
 void *Bridge::bridgeTask(void *endpoints)
 {
 	EpPair &ep = *reinterpret_cast<EpPair *>(endpoints);
-	char buf[kBufSize];
+	char buf[CONFIG_WIFI_UART_BRIDGE_RX_TX_BUFFER];
 
 	while (true) {
-		performTransfer(*ep.first, *ep.second, asio::mutable_buffer(buf, kBufSize));
+		performTransfer(*ep.first, *ep.second, asio::mutable_buffer(buf, CONFIG_WIFI_UART_BRIDGE_RX_TX_BUFFER));
 	}
 }
 
