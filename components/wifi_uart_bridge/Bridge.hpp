@@ -17,8 +17,6 @@ public:
 	Bridge(Endpoint&, Endpoint&);
 	void run();
 private:
-	static constexpr const unsigned kBufSize = 128;
-
 	Endpoint &first;
 	Endpoint &second;
 
