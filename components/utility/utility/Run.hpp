@@ -33,8 +33,6 @@ void setThreadCoreAffinity(int coreAffinity);
 template <typename Runnable>
 pthread_t threadRun(Runnable &instance, int coreAffinity = 0)
 {
-	setThreadCoreAffinity(coreAffinity);
-
 	pthread_t threadDescriptor;
 	pthread_create(&threadDescriptor, 0, run<Runnable>, &instance);
 	return threadDescriptor;
@@ -43,8 +41,6 @@ pthread_t threadRun(Runnable &instance, int coreAffinity = 0)
 template <typename Runnable>
 pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr, int coreAffinity = 0)
 {
-	setThreadCoreAffinity(coreAffinity);
-
 	pthread_t threadDescriptor;
 	pthread_create(&threadDescriptor, &attr, run<Runnable>, &instance);
 	return threadDescriptor;
