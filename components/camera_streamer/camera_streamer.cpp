@@ -11,22 +11,17 @@
 #include <memory>
 #include <thread>
 
-#include "utility/Run.hpp"
+#include "utility/Threading.hpp"
 #include "camera_streamer.h"
 #include "CameraStream.hpp"
 #include "CameraStreamTcpControl.hpp"
+#include "FrameSender.hpp"
 
 #ifndef CONFIG_CAMSTREAM_FPS
 # define CONFIG_CAMSTREAM_FPS -1
 #endif  // CONFIG_CAMSTREAM_FPS
 
-template <typename Runnable>
-static void *run(void *instance)
-{
-	Runnable *runnable = reinterpret_cast<Runnable *>(instance);
-	runnable->run();
-	return nullptr;
-}
+using namespace CameraStreamer;
 
 void cameraStreamerStart(asio::io_context &context)
 {
@@ -35,11 +30,12 @@ void cameraStreamerStart(asio::io_context &context)
 	static asio::ip::udp::socket udpSocket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), CONFIG_CAMSTREAM_SOURCE_UDP_PORT));
 
 	static CameraStream cameraStream(CONFIG_CAMSTREAM_FPS);
-	static CameraStreamTcpControl cameraStreamTcpControl(cameraStream, acceptor, tcpSocket, udpSocket);
+	static CameraStreamTcpControl cameraStreamTcpControl(acceptor, tcpSocket);
+	static FrameSender frameSender(udpSocket);
 
-	Utility::setThreadCoreAffinity(1);
+	Utility::Threading::setThreadCoreAffinity(1);
 	static std::thread threadCameraStream(&CameraStream::operator(), &cameraStream);
 
-	Utility::setThreadCoreAffinity(0);
+	Utility::Threading::setThreadCoreAffinity(0);
 	static std::thread threadCameraStreamTcpControl(&CameraStreamTcpControl::operator(), &cameraStreamTcpControl);
 }
