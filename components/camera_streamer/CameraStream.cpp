@@ -37,7 +37,7 @@ void CameraStream::operator()()
 			lastSend = Utility::bootTimeUs() / 1000;
 		}
 
-		key.notify(img);
+		key.notify(*img.get());
 		img = Ov2640::instance().jpeg();
 
 		if (fps > 0) {
