@@ -3,7 +3,7 @@
 #include <driver/gpio.h>
 
 #include "wifi_uart_bridge.hpp"
-#include "utility/Run.hpp"
+#include "utility/Threading.hpp"
 #include "Bridge.hpp"
 #include "UartEndpoint.hpp"
 #include "UdpEndpoint.hpp"
@@ -16,5 +16,5 @@ void wifiUartBridgeStart(asio::io_context &context)
 	static UdpEndpoint  udp(context);
 	static Bridge       bridge(uart, udp);
 
-	Utility::threadRun(bridge);
+	Utility::Threading::threadRun(bridge);
 }

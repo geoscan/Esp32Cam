@@ -1,6 +1,6 @@
-#include "utility/Run.hpp"
+#include "utility/Threading.hpp"
 
-void Utility::setThreadCoreAffinity(int coreAffinity)
+void Utility::Threading::setThreadCoreAffinity(int coreAffinity)
 {
 	auto cfg = esp_pthread_get_default_config();
 	cfg.pin_to_core = coreAffinity;

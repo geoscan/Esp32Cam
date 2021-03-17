@@ -13,6 +13,8 @@
 
 namespace Utility {
 
+namespace Threading {
+
 //
 // Convenient wrapper which may be seamlessly passed to pthread_create(4)
 //
@@ -45,6 +47,8 @@ pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr, int coreAffi
 	pthread_create(&threadDescriptor, &attr, run<Runnable>, &instance);
 	return threadDescriptor;
 }
+
+}  // namespace Threading
 
 }  // namespace Utility
 
