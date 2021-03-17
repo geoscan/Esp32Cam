@@ -17,8 +17,7 @@
 
 using asio::ip::udp;
 using namespace std;
-
-using namespace Utility::Subscription;
+using namespace CameraStreamer;
 
 CameraStream::CameraStream(Fps f) :	fps(f)
 {
@@ -27,7 +26,6 @@ CameraStream::CameraStream(Fps f) :	fps(f)
 void CameraStream::operator()()
 {
 	using Time = decltype(Utility::bootTimeUs());
-	static const unsigned kWaitForConnectionMs = 500;
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
 	std::shared_ptr<Ov2640::Image> img = Ov2640::instance().jpeg(); // Trigger HW-initialization
@@ -35,37 +33,18 @@ void CameraStream::operator()()
 	Time lastSend = 0;
 
 	while(true) {
-		mutex.lock();
-		if (subscribers.empty()) {
-			mutex.unlock();
-			Utility::waitMs(kWaitForConnectionMs);  // To prevent resource starvation
-		} else {
-			if (fps > 0) {
-				lastSend = Utility::bootTimeUs() / 1000;
-			}
-			Sender::sendToSubscribers(&img);
-			mutex.unlock();
+		if (fps > 0) {
+			lastSend = Utility::bootTimeUs() / 1000;
+		}
 
-			img = Ov2640::instance().jpeg();
+		key.notify(img);
+		img = Ov2640::instance().jpeg();
 
-			if (fps > 0) {
-				// Timer counter overflow and high latency are taken into account
-				auto timeDelta = Utility::bootTimeUs() / 1000 - lastSend;
-				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
-				Utility::waitMs(timeWait);
-			}
+		if (fps > 0) {
+			// Timer counter overflow and high latency are taken into account
+			auto timeDelta = Utility::bootTimeUs() / 1000 - lastSend;
+			auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
+			Utility::waitMs(timeWait);
 		}
 	}
-}
-
-void CameraStream::addSubscriber(Utility::Subscription::Subscriber &s)
-{
-	std::lock_guard<std::mutex> lock(mutex);
-	Sender::addSubscriber(s);
-}
-
-void CameraStream::removeSubscriber(Subscriber &s)
-{
-	std::lock_guard<std::mutex> lock(mutex);
-	Sender::removeSubscriber(s);
 }

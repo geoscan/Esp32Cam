@@ -12,24 +12,24 @@
 #define CAMERA_STREAMER_CAMERASTREAMTCPCONTROL_HPP
 
 #include <esp_event.h>
-
 #include <map>
-
 #include "CameraStream.hpp"
-#include "SinkUdp.hpp"
+#include "utility/Subscription.hpp"
+#include "Messaging.hpp"
+
+namespace CameraStreamer {
 
 class CameraStreamTcpControl {
 public:
 	void operator()();
-	CameraStreamTcpControl(CameraStream &, asio::ip::tcp::acceptor &, asio::ip::tcp::socket &, asio::ip::udp::socket &);
+	CameraStreamTcpControl(asio::ip::tcp::acceptor &, asio::ip::tcp::socket &);
 	~CameraStreamTcpControl();
 private:
-	void addUdpSink(asio::ip::address, unsigned short port);
-	void removeUdpSink(asio::ip::address);
-	void handleApClientDisconnected(asio::ip::address);  // Handle end of client's Wi-Fi connection
-	static void handleApClientDisconnected(void *arg, esp_event_base_t, int32_t, void *data);  // Handle end of client's Wi-Fi connection
+	static size_t instances;
 
-	CameraStream            &cameraStream;
+	void handleApClientDisconnected(asio::ip::address);  // Handle end of client's Wi-Fi connection
+
+	static void handleApClientDisconnected(void *arg, esp_event_base_t, int32_t, void *data);  // Handle end of client's Wi-Fi connection
 
 	struct {
 		asio::ip::tcp::socket   &socket;
@@ -37,11 +37,13 @@ private:
 	} tcp;
 
 	struct {
-		std::map<asio::ip::address, SinkUdp> map;
-		std::mutex                           mutex;
-		asio::ip::udp::socket                &udpSocket;
-	} sinks;
+		CameraStreamer::Key::TcpConnected     tcpConnected;
+		CameraStreamer::Key::TcpDisconnected  tcpDisconnected;
+		CameraStreamer::Key::WifiDisconnected wifiDisconnected;
+	} key;
 
 };
+
+}  // namespace CameraStreamer
 
 #endif  // CAMERA_STREAMER_CAMERASTREAMTCPCONTROL_HPP
