@@ -5,3 +5,6 @@
 [submodule "tools/etool"]
 	path = tools/etool
 	url = git@gitlab.corp.geoscan.aero:pioneermini/esp-tool-for-pioneer-mini.git
+[submodule "components/utility/rr"]
+	path = components/utility/rr
+	url = https://github.com/damurashov/Reciprocal-Receptacles.git
