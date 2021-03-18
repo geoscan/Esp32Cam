@@ -15,7 +15,7 @@
 #include <mutex>
 
 #include "Ov2640.hpp"
-#include "Messaging.hpp"
+#include "utility/Subscription.hpp"
 
 namespace CameraStreamer {
 
@@ -30,7 +30,7 @@ public:
 	CameraStream(Fps fps = kNoFpsLimit);
 
 private:
-	CameraStreamer::Key::NewFrame key;
+	Utility::Subscription::Key::NewFrame key;
 	Fps fps;
 };
 
