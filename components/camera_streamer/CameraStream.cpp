@@ -28,7 +28,7 @@ void CameraStream::operator()()
 	using Time = decltype(Utility::bootTimeUs());
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
-	auto img = Ov2640::instance().jpeg(); // Trigger HW-initialization
+	std::shared_ptr<Ov2640::Image> img = Ov2640::instance().jpeg(); // Trigger HW-initialization
 
 	Time lastSend = 0;
 
@@ -37,7 +37,7 @@ void CameraStream::operator()()
 			lastSend = Utility::bootTimeUs() / 1000;
 		}
 
-		key.notify(*img.get());
+		key.notify(img);
 		img = Ov2640::instance().jpeg();
 
 		if (fps > 0) {
