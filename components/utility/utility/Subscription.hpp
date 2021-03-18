@@ -18,6 +18,10 @@ struct TcpDisconnected {
 };
 struct WifiDisconnected {
 };
+struct RecordStart {
+};
+struct RecordStop {
+};
 
 }  // namespace Topic
 
@@ -29,7 +33,8 @@ namespace Key {
 	using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Ov2640::Image> &, Topic::NewFrame>;
 	using TcpDisconnected  = Rr::Subscription::Key<asio::ip::address, Topic::TcpDisconnected>;
 	using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
-
+	using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, Topic::RecordStart>;
+	using RecordStop       = Rr::Subscription::Key<void, Topic::RecordStop>;
 }  // namespace Key
 
 }  // namespace Subscription

@@ -20,6 +20,7 @@
 #include "Ov2640.hpp"
 #include "version.hpp"
 #include "sd_fat.h"
+#include "camera_recorder.h"
 
 static asio::io_context context(3);
 
@@ -33,6 +34,8 @@ extern "C" int app_main(void)
 
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
+
+	cameraRecorderInit();
 
 	return 0;
 }
