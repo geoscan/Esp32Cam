@@ -10,12 +10,12 @@ FrameSender::FrameSender(asio::ip::udp::socket &aSocket) :
 {
 }
 
-void FrameSender::processFrame(Ov2640::Image &img)
+void FrameSender::processFrame(const std::shared_ptr<Ov2640::Image> &img)
 {
 	asio::error_code err;
 	for (auto &client : clients) {
 		if (client.enabled) {
-			socket.send_to(img.data(), client.endpoint, 0, err);
+			socket.send_to(img.get()->data(), client.endpoint, 0, err);
 		}
 	}
 }
