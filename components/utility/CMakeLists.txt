@@ -12,4 +12,5 @@ idf_component_register(
 		asio
 		pthread
 		esp_common
+		OV2640
 )

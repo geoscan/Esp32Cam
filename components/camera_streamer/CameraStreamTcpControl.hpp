@@ -15,7 +15,6 @@
 #include <map>
 #include "CameraStream.hpp"
 #include "utility/Subscription.hpp"
-#include "Messaging.hpp"
 
 namespace CameraStreamer {
 
@@ -37,9 +36,9 @@ private:
 	} tcp;
 
 	struct {
-		CameraStreamer::Key::TcpConnected     tcpConnected;
-		CameraStreamer::Key::TcpDisconnected  tcpDisconnected;
-		CameraStreamer::Key::WifiDisconnected wifiDisconnected;
+		Utility::Subscription::Key::TcpConnected     tcpConnected;
+		Utility::Subscription::Key::TcpDisconnected  tcpDisconnected;
+		Utility::Subscription::Key::WifiDisconnected wifiDisconnected;
 	} key;
 
 };
