@@ -11,6 +11,7 @@ idf_component_register(
 		deprecated_wifi_uart_bridge
 		esp_common
 		camera_streamer
+		camera_recorder
 		asio
 		pthread
 		OV2640
