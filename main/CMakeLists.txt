@@ -17,4 +17,6 @@ idf_component_register(
 		OV2640
 		version
 		sd_fat
-		esp_event)
+		esp_event
+		log_udp
+)
