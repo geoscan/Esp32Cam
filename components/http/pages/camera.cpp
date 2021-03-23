@@ -105,7 +105,7 @@ static Error processPhoto(string name)
 	return ret;
 }
 
-static esp_err_t printStatus(httpd_req_t *req, esp_err_t res)
+static void printStatus(httpd_req_t *req, Error res)
 {
 	auto *root = cJSON_CreateObject();
 
@@ -139,12 +139,10 @@ static esp_err_t printStatus(httpd_req_t *req, esp_err_t res)
 	char *json = cJSON_Print(root);
 
 	httpd_resp_set_type(req, "application/json");
-	res = httpd_resp_send(req, json, strlen(json)) == ESP_OK ? Ok : Err;
+	httpd_resp_send(req, json, strlen(json));
 
 	free(json);
 	cJSON_Delete(root);
-
-	return static_cast<esp_err_t>(res);
 }
 
 extern "C" esp_err_t cameraHandler(httpd_req_t *req)
@@ -165,5 +163,5 @@ extern "C" esp_err_t cameraHandler(httpd_req_t *req)
 
 	printStatus(req, ret);
 
-	return ret;
+	return ESP_OK;
 }
