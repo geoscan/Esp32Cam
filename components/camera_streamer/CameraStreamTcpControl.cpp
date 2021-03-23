@@ -8,6 +8,7 @@
 extern "C" {
 #include <dhcpserver/dhcpserver.h>
 #include <esp_wifi.h>
+#include <esp_log.h>
 }
 #include <esp_event.h>
 #include <list>
@@ -44,6 +45,13 @@ void CameraStreamTcpControl::operator()()
 		if (!err) {
 			key.tcpConnected.notify(clientEndpoint.address(), clientEndpoint.port());
 
+			{
+				auto str = clientEndpoint.address().to_string();
+				auto port = clientEndpoint.port();
+
+				ESP_LOGI("[camera_streamer]", "connected, TCP %s:%d", str.c_str(), port);
+			}
+
 			char stubBuffer[1];
 			std::error_code err;
 
@@ -53,6 +61,13 @@ void CameraStreamTcpControl::operator()()
 			tcp.socket.close();
 
 			key.tcpDisconnected.notify(clientEndpoint.address());
+
+			{
+				auto str = clientEndpoint.address().to_string();
+				auto port = clientEndpoint.port();
+
+				ESP_LOGI("[camera_streamer]", "disconnected, TCP %s:%d", str.c_str(), port);
+			}
 		}
 	}
 }
