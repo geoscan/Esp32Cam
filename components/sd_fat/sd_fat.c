@@ -11,6 +11,8 @@
 #include <sdkconfig.h>
 #include <diskio_sdmmc.h>
 #include <diskio_impl.h>
+#include <freertos/FreeRTOS.h>
+#include <esp_log.h>
 
 #ifndef FF_DRV_NOT_USED
 # define FF_DRV_NOT_USED 0xFF
@@ -19,6 +21,8 @@
 static const int kSlotId = 1;
 static sdmmc_card_t *cardConfig;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
+static bool initialized = false;
+static const char *kTag = COMPONENT_NAME;
 
 static esp_err_t initializeSlot()
 {
@@ -69,24 +73,62 @@ static esp_err_t mountFat()
 	return err;
 }
 
-//Initializes SD card, it relies on presence of FAT-family filesystem on the
-//card.
+// Initializes SD card, it relies on presence of FAT-family filesystem on the
+// card.
 
-void sdFatInit()
+bool sdFatInit()
 {
-	if (sdmmc_host_init() != ESP_OK) {
-		return;
+	ESP_LOGI(kTag, "initializing SD card");
+
+	if (initialized) {
+		ESP_LOGI(kTag, "initializing SD card -- success (already initialized)");
+		return true;
 	}
 
-	if (initializeSlot() != ESP_OK) {
-		return;
+	esp_err_t err = ESP_OK;
+
+	err = sdmmc_host_init();
+
+	if (err == ESP_OK) {
+		err = initializeSlot();
 	}
 
-	if (initializeCard() != ESP_OK) {
-		return;
+	if (err == ESP_OK) {
+		err = initializeCard();
 	}
 
-	mountFat();
+	if (err == ESP_OK) {
+		err = mountFat();
+	}
+
+	initialized = (err == ESP_OK);
+	if (initialized) {
+		ESP_LOGI(kTag, "initializing SD card -- success");
+	} else {
+		ESP_LOGE(kTag, "initalizing SD card -- FAILED");
+	}
+
+	return initialized;
+}
+
+bool sdFatDeinit()
+{
+	ESP_LOGI(kTag, "deinitializing SD card");
+
+	if (!initialized) {
+		ESP_LOGI(kTag, "deinitializing SD card -- success (already deinitialized)");
+		return true;
+	}
+
+	initialized = (sdmmc_host_deinit() == ESP_OK);
+
+	if (!initialized) {
+		ESP_LOGI(kTag, "deinitializing SD card -- success");
+	} else {
+		ESP_LOGE(kTag, "deinitalizing SD card -- FAILED");
+	}
+
+	return !initialized;
 }
 
 void sdFatWriteTest()

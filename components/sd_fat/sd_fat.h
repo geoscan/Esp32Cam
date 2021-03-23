@@ -15,7 +15,8 @@
 extern "C" {
 #endif
 
-void sdFatInit();
+bool sdFatInit();   // Thread-safe, returns true if   initialized, false otherwise
+bool sdFatDeinit();  // Thread-safe, returns true if deinitialized, false otherwise
 void sdFatWriteTest();
 
 #ifdef __cplusplus
