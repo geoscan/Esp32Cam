@@ -14,4 +14,6 @@ idf_component_register(
         esp_common
         json
         esp_http_server
-        version)
+        version
+        camera_recorder
+)
