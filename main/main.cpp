@@ -20,7 +20,6 @@
 #include "Ov2640.hpp"
 #include "version.hpp"
 #include "sd_fat.h"
-#include "camera_recorder.h"
 #include "log_udp.h"
 
 static asio::io_context context(3);

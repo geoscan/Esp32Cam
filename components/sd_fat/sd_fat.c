@@ -22,7 +22,7 @@ static const int kSlotId = 1;
 static sdmmc_card_t *cardConfig;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
 static bool initialized = false;
-static const char *kTag = COMPONENT_NAME;
+static const char *kTag = "[sd_fat]";
 
 static esp_err_t initializeSlot()
 {
