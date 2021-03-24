@@ -7,7 +7,6 @@ platformio_build:
 espidf_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu
     before_script:
-        - git checkout esp32firm
         - export PATH=/root/xtensa/bin:$PATH
         # - export CMAKE_C_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-gcc
         # - export CMAKE_CXX_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-g++
