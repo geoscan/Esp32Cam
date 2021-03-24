@@ -73,7 +73,7 @@ static Error processVideoRecord(string command, string name)
 	static std::unique_ptr<CameraRecorder::Video> videoRecorder;
 
 	if (!videoRecorder) {
-		videoRecorder = std::make_unique<CameraRecorder::Video>();
+		videoRecorder = std::unique_ptr<CameraRecorder::Video>(new CameraRecorder::Video());
 	}
 
 	if (command == kStart) {
