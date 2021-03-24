@@ -5,12 +5,14 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <memory>
 #include <esp_http_server.h>
 #include <utility>
 #include <string>
 #include <cJSON.h>
 #include <sdkconfig.h>
 #include <Ov2640.hpp>
+#include "camera_recorder/Video.hpp"
 
 using namespace std;
 
@@ -66,9 +68,22 @@ static Error processVideoStream()
 	return Err;
 }
 
-static Error processVideoRecord()
+static Error processVideoRecord(string command, string name)
 {
-	return Err;
+	static std::unique_ptr<CameraRecorder::Video> videoRecorder;
+
+	if (!videoRecorder) {
+		videoRecorder = std::make_unique<CameraRecorder::Video>();
+	}
+
+	if (command == kStart) {
+		std::thread th(&CameraRecorder::Video::operator(), videoRecorder.get());
+		videoRecorder->recordStart(name);
+		th.detach();
+	} else if (command == kStop) {
+		videoRecorder->recordStop();
+	}
+	return Ok;
 }
 
 static Error processPhoto(string name)
@@ -155,7 +170,7 @@ extern "C" esp_err_t cameraHandler(httpd_req_t *req)
 		if (value == kVideoStream) {
 			ret = processVideoStream();
 		} else if (value == kVideoRecord) {
-			ret = processVideoRecord();
+			ret = processVideoRecord(getArgValueByKey(req, kCommand), getArgValueByKey(req, kName));
 		} else if (value == kPhoto) {
 			ret = processPhoto(getArgValueByKey(req, kName));
 		}
