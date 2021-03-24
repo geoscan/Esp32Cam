@@ -1,56 +1,57 @@
 #ifndef AVILIB_H
 #define AVILIB_H
 
+#include <stdio.h>
 
 typedef struct
 {
-   long pos;
-   long len;
+	long pos;
+	long len;
 } video_index_entry;
 
 typedef struct
 {
-   long pos;
-   long len;
-   long tot;
+	long pos;
+	long len;
+	long tot;
 } audio_index_entry;
 
 typedef struct
 {
-   long   fdes;              /* File descriptor of AVI file */
-   long   mode;              /* 0 for reading, 1 for writing */
+	FILE   *fdes;             /* File descriptor of AVI file */
+	long   mode;              /* 0 for reading, 1 for writing */
 
-   long   width;             /* Width  of a video frame */
-   long   height;            /* Height of a video frame */
-   double fps;               /* Frames per second */
-   char   compressor[8];     /* Type of compressor, 4 bytes + padding for 0 byte */
-   long   video_strn;        /* Video stream number */
-   long   video_frames;      /* Number of video frames */
-   char   video_tag[4];      /* Tag of video data */
-   long   video_pos;         /* Number of next frame to be read
-                                (if index present) */
+	long   width;             /* Width  of a video frame */
+	long   height;            /* Height of a video frame */
+	double fps;               /* Frames per second */
+	char   compressor[8];     /* Type of compressor, 4 bytes + padding for 0 byte */
+	long   video_strn;        /* Video stream number */
+	long   video_frames;      /* Number of video frames */
+	char   video_tag[4];      /* Tag of video data */
+	long   video_pos;         /* Number of next frame to be read
+								(if index present) */
 
-   long   a_fmt;             /* Audio format, see #defines below */
-   long   a_chans;           /* Audio channels, 0 for no audio */
-   long   a_rate;            /* Rate in Hz */
-   long   a_bits;            /* bits per audio sample */
-   long   audio_strn;        /* Audio stream number */
-   long   audio_bytes;       /* Total number of bytes of audio data */
-   long   audio_chunks;      /* Chunks of audio data in the file */
-   char   audio_tag[4];      /* Tag of audio data */
-   long   audio_posc;        /* Audio position: chunk */
-   long   audio_posb;        /* Audio position: byte within chunk */
+	long   a_fmt;             /* Audio format, see #defines below */
+	long   a_chans;           /* Audio channels, 0 for no audio */
+	long   a_rate;            /* Rate in Hz */
+	long   a_bits;            /* bits per audio sample */
+	long   audio_strn;        /* Audio stream number */
+	long   audio_bytes;       /* Total number of bytes of audio data */
+	long   audio_chunks;      /* Chunks of audio data in the file */
+	char   audio_tag[4];      /* Tag of audio data */
+	long   audio_posc;        /* Audio position: chunk */
+	long   audio_posb;        /* Audio position: byte within chunk */
 
-   long   pos;               /* position in file */
-   long   n_idx;             /* number of index entries actually filled */
-   long   max_idx;           /* number of index entries actually allocated */
-   char (*idx)[16]; /* index entries (AVI idx1 tag) */
-   video_index_entry * video_index;
-   audio_index_entry * audio_index;
-   long   last_pos;          /* Position of last frame written */
-   long   last_len;          /* Length of last frame written */
-   int    must_use_index;    /* Flag if frames are duplicated */
-   long   movi_start;
+	long   pos;               /* position in file */
+	long   n_idx;             /* number of index entries actually filled */
+	long   max_idx;           /* number of index entries actually allocated */
+	char (*idx)[16];          /* index entries (AVI idx1 tag) */
+	video_index_entry * video_index;
+	audio_index_entry * audio_index;
+	long   last_pos;          /* Position of last frame written */
+	long   last_len;          /* Length of last frame written */
+	int    must_use_index;    /* Flag if frames are duplicated */
+	long   movi_start;
 } avi_t;
 
 #define AVI_MODE_WRITE  0
@@ -59,45 +60,45 @@ typedef struct
 /* The error codes delivered by avi_open_input_file */
 
 #define AVI_ERR_SIZELIM      1     /* The write of the data would exceed
-                                      the maximum size of the AVI file.
-                                      This is more a warning than an error
-                                      since the file may be closed safely */
+									  the maximum size of the AVI file.
+									  This is more a warning than an error
+									  since the file may be closed safely */
 
 #define AVI_ERR_OPEN         2     /* Error opening the AVI file - wrong path
-                                      name or file nor readable/writable */
+									  name or file nor readable/writable */
 
 #define AVI_ERR_READ         3     /* Error reading from AVI File */
 
 #define AVI_ERR_WRITE        4     /* Error writing to AVI File,
-                                      disk full ??? */
+									  disk full ??? */
 
 #define AVI_ERR_WRITE_INDEX  5     /* Could not write index to AVI file
-                                      during close, file may still be
-                                      usable */
+									  during close, file may still be
+									  usable */
 
 #define AVI_ERR_CLOSE        6     /* Could not write header to AVI file
-                                      or not truncate the file during close,
-                                      file is most probably corrupted */
+									  or not truncate the file during close,
+									  file is most probably corrupted */
 
 #define AVI_ERR_NOT_PERM     7     /* Operation not permitted:
-                                      trying to read from a file open
-                                      for writing or vice versa */
+									  trying to read from a file open
+									  for writing or vice versa */
 
 #define AVI_ERR_NO_MEM       8     /* malloc failed */
 
 #define AVI_ERR_NO_AVI       9     /* Not an AVI file */
 
 #define AVI_ERR_NO_HDRL     10     /* AVI file has no has no header list,
-                                      corrupted ??? */
+									  corrupted ??? */
 
 #define AVI_ERR_NO_MOVI     11     /* AVI file has no has no MOVI list,
-                                      corrupted ??? */
+									  corrupted ??? */
 
 #define AVI_ERR_NO_VIDS     12     /* AVI file contains no video data */
 
 #define AVI_ERR_NO_IDX      13     /* The file has been opened with
-                                      getIndex==0, but an operation has been
-                                      performed that needs an index */
+									  getIndex==0, but an operation has been
+									  performed that needs an index */
 
 /* Possible Audio formats */
 
@@ -150,8 +151,8 @@ int  AVI_set_audio_position(avi_t *AVI, long byte);
 long AVI_read_audio(avi_t *AVI, char *audbuf, long bytes);
 
 int  AVI_read_data(avi_t *AVI, char *vidbuf, long max_vidbuf,
-                               char *audbuf, long max_audbuf,
-                               long *len);
+								char *audbuf, long max_audbuf,
+								long *len);
 
 void AVI_print_error(char *str);
 char *AVI_strerror();
