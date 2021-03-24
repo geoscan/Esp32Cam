@@ -1,8 +1,12 @@
 //
-// Recorder.hpp
+// Video.hpp
 //
 // Created on: Mar 18, 2021
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+// Runs continuously, receives frames, writes them to a file. Works as a sink,
+// meaning that there must be a stream of frames. As for Mar 24, 2021,
+// CameraStreamer::CameraStream is used as the stream source.
 //
 
 #ifndef CAMERA_RECORDER_CAMERA_RECORDER_CAMERARECORDER_HPP
@@ -16,16 +20,18 @@ extern "C" {
 #include <array>
 #include <etl/circular_buffer.h>
 #include "utility/Subscription.hpp"
+#include "camera_recorder/Recorder.hpp"
 
 namespace CameraRecorder {
 
-class Recorder {
+class Video : public Recorder {
 public:
 	void operator()();
-	void newFrame(const std::shared_ptr<Ov2640::Image> &);
-	void recordStart(const std::string &filename);
-	void recordStop();
-	Recorder();
+	void newFrame(const std::shared_ptr<Ov2640::Image> &) override;
+	void recordStart(const std::string &filename) override;
+	void recordStop() override;
+
+	using Recorder::Recorder;
 private:
 	static constexpr std::size_t kRingBufferCapacity = 2;
 	static constexpr std::size_t kFrameCountRequired = 100;
@@ -56,12 +62,6 @@ private:
 			std::mutex mutex;
 		} sync;
 	} record;
-
-	struct {
-		Utility::Subscription::Key::NewFrame    newFrame;
-		Utility::Subscription::Key::RecordStart recordStart;
-		Utility::Subscription::Key::RecordStop  recordStop;
-	} key;
 };
 
 }  // namespace CameraRecorder

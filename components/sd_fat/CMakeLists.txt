@@ -6,5 +6,3 @@ idf_component_register(
 		driver
 	INCLUDE_DIRS "."
 )
-
-target_compile_definitions(${COMPONENT_LIB} PUBLIC COMPONENT_NAME="[${COMPONENT_NAME}]")
