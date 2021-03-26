@@ -12,7 +12,6 @@
 #include <cJSON.h>
 #include <sdkconfig.h>
 #include <Ov2640.hpp>
-#include "camera_recorder/Video.hpp"
 
 using namespace std;
 
@@ -70,19 +69,6 @@ static Error processVideoStream()
 
 static Error processVideoRecord(string command, string name)
 {
-	static std::unique_ptr<CameraRecorder::Video> videoRecorder;
-
-	if (!videoRecorder) {
-		videoRecorder = std::unique_ptr<CameraRecorder::Video>(new CameraRecorder::Video());
-	}
-
-	if (command == kStart) {
-		std::thread th(&CameraRecorder::Video::operator(), videoRecorder.get());
-		videoRecorder->recordStart(name);
-		th.detach();
-	} else if (command == kStop) {
-		videoRecorder->recordStop();
-	}
 	return Ok;
 }
 
