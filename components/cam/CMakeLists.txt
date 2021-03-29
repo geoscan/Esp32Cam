@@ -8,6 +8,6 @@ idf_component_register(
 		.
 	REQUIRES
 		utility
-		OV2640
+		cam
 		esp_common
 )

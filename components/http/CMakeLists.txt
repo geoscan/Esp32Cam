@@ -10,7 +10,7 @@ idf_component_register(
     INCLUDE_DIRS "."
     REQUIRES
         wifi
-        OV2640
+        cam
         esp_common
         json
         esp_http_server

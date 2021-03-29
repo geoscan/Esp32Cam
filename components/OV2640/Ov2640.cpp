@@ -1,23 +1,11 @@
 #include "Ov2640.hpp"
 #include "esp_camera.h"
 #include <algorithm>
-#include "CameraLock.hpp"
 
 using namespace std;
 
-bool Ov2640::isInit{false};
+// ------------ Ov2640 ------------ //
 
-Ov2640::Ov2640()
-{
-	CamOv2640::CameraLock lock;
-	init();
-}
-
-Ov2640::~Ov2640()
-{
-	CamOv2640::CameraLock lock;
-	esp_camera_deinit();
-}
 
 void Ov2640::init()
 {
@@ -72,44 +60,28 @@ void Ov2640::init()
 		.fb_count     = 1  //if more than one, i2s runs in continuous mode. Use only with JPEG
 	};
 
-	//
-	isInit = esp_camera_init(&cameraConfig) == ESP_OK ? true : false;
+	esp_camera_init(&cameraConfig);
 }
 
-Ov2640 &Ov2640::instance()
+std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 {
-	static Ov2640 inst;
-	return inst;
+	auto fb = esp_camera_fb_get();
+
+	if (!fb) {
+		return std::make_shared<Cam::Frame>();
+	}
+
+	return std::shared_ptr<Cam::Frame>(new Ov2640::Frame(fb));
 }
 
-std::unique_ptr<Ov2640::Image> Ov2640::jpeg(/*JpegQuality quality*/)
+
+// ------------ Ov2640::Frame ------------ //
+
+Ov2640::Frame::Frame(camera_fb_t *aFb) : Cam::Frame(aFb->buf, aFb->len), fb(aFb)
 {
-	static constexpr uint8_t kJpegQuality = 80;
-	CamOv2640::CameraLock    lock;
-	unique_ptr<Image>        imgPtr(new Image());
-	Image                    &img = *imgPtr;
-
-	if (!isInit) {
-		return {};
-	}
-
-	img.mFrameBuffer = esp_camera_fb_get();
-
-	if (!img.mFrameBuffer) {
-		return {};
-	}
-
-	if (img.mFrameBuffer->format == PIXFORMAT_JPEG) {
-		img.mData = img.mFrameBuffer->buf;
-		img.len  = img.mFrameBuffer->len;
-	} else {
-		frame2jpg(img.mFrameBuffer, kJpegQuality, reinterpret_cast<uint8_t **>(&img.mData), &img.len);
-	}
-
-	return imgPtr;
 }
 
-void ov2640Init()
+Ov2640::Frame::~Frame()
 {
-	Ov2640::instance();
+	esp_camera_fb_return(fb);
 }

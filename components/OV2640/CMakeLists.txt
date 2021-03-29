@@ -67,4 +67,5 @@ idf_component_register(
 #		protocol_examples_common
 		esp_http_server
 		asio
-		freertos)
+		freertos
+		cam)
