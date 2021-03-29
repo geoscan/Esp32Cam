@@ -17,7 +17,7 @@ namespace CameraStreamer {
 class FrameSender {
 public:
 	FrameSender(asio::ip::udp::socket &);
-	void processFrame(const std::shared_ptr<Ov2640::Image> &);
+	void processFrame(const std::shared_ptr<Cam::Frame> &);
 	void processTcpConnected(asio::ip::address, unsigned short);
 	void processTcpDisconnected(asio::ip::address);
 private:

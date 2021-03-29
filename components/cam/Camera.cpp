@@ -9,6 +9,8 @@
 
 using namespace Cam;
 
+CameraBase *Cam::Camera::instance = nullptr;
+
 void Camera::setInstance(CameraBase &aCameraBase)
 {
 	instance = &aCameraBase;

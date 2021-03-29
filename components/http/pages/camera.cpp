@@ -91,14 +91,14 @@ static Error processPhoto(string name)
 	}
 
 	// Try to capture an image
-	auto image = Ov2640::instance().jpeg();
+	auto image = Cam::Camera::getInstance().getFrame();
 	if (!image) {
 		return ErrCam;
 	}
 
 	Error ret = Ok;
 	// Try to write
-	if (fwrite(image->data().data(), 1, image->data().size(), file) != image->data().size()) {
+	if (fwrite(image->data(), 1, image->size(), file) != image->size()) {
 		ret = ErrSd;
 	}
 	fclose(file);

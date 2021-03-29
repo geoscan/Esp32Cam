@@ -9,23 +9,20 @@ file(GLOB
 		"rtsp/*.c"
 		"rtsp/*.cpp")
 
-idf_component_register(
-	SRCS
-		${SOURCE_FILES}
-		request_parser/generated/lex.yy.cpp
-		request_parser/generated/rtsp.tab.cpp
-    INCLUDE_DIRS
-		"."
-		"rtp"
-		"rtsp"
-		"rtp_packet"
-#	PRIV_INCLUDE_DIRS
-		"./request_parser/generated"
-    REQUIRES
-        asio
-		pthread
-		esp_common
-		freertos
-		OV2640
-		esp_common)
-#		esp_timer)
+#idf_component_register(
+#	SRCS
+#		${SOURCE_FILES}
+#		request_parser/generated/lex.yy.cpp
+#		request_parser/generated/rtsp.tab.cpp
+#    INCLUDE_DIRS
+#		"."
+#		"rtp"
+#		"rtsp"
+#		"rtp_packet"
+#    REQUIRES
+#        asio
+#		pthread
+#		esp_common
+#		freertos
+#		OV2640
+#		esp_common)

@@ -13,11 +13,11 @@ extern "C" esp_err_t cameraDemoHandler(httpd_req_t *req)
 		httpd_resp_set_hdr(req, "Content-Disposition", "inline; filename=capture.jpg");
 	}
 
-	auto img = Ov2640::instance().jpeg();
+	auto img = Cam::Camera::getInstance().getFrame();
 
-	if (res == ESP_OK && img->valid()) {
+	if (res == ESP_OK && img->data() != nullptr) {
 //		res = httpd_resp_send(req, static_cast<const char *>(img.getData().data), img.getData().len);
-		res = httpd_resp_send(req, static_cast<const char *>(img->data().data()), img->data().size());
+		res = httpd_resp_send(req, static_cast<const char *>(img->data()), img->size());
 	}
 
 	return res;

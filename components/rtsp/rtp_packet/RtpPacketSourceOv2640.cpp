@@ -46,7 +46,7 @@ Packets RtpPacketSourceOv2640::packets()
 		return {};
 	}
 
-	auto     imagePtr = Ov2640::instance().jpeg();
+	auto     imagePtr = Cam::Camera::getInstance().getFrame();
 	unsigned offset   = 0;
 	BufPtr   data     = reinterpret_cast<BufPtr>(imagePtr->data().data());
 	size_t   dataLen  = imagePtr->data().size();

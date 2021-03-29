@@ -28,7 +28,7 @@ void CameraStream::operator()()
 	using Time = decltype(Utility::bootTimeUs());
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
-	std::shared_ptr<Ov2640::Image> img = Ov2640::instance().jpeg(); // Trigger HW-initialization
+	auto img = Cam::Camera::getInstance().getFrame();
 
 	Time lastSend = 0;
 
@@ -38,7 +38,7 @@ void CameraStream::operator()()
 		}
 
 		key.notify(img);
-		img = Ov2640::instance().jpeg();
+		img = Cam::Camera::getInstance().getFrame();
 
 		if (fps > 0) {
 			// Timer counter overflow and high latency are taken into account

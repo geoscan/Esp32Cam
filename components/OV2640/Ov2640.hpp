@@ -6,54 +6,24 @@
 #include <cstdint>
 #include <memory>
 #include "asio.hpp"
+#include "cam/Camera.hpp"
 
-// Wrapper around C API of OV2640
-// Both Ov2640's and Ov2640::Image's methods are thread-safe
-
-void ov2640Init();
+// Wrapper around C API for OV2640
 
 // --------------------------- Ov2640 --------------------------- //
 
-class Ov2640 {
+class Ov2640 : public Cam::CameraBase {
 public:
-	struct Image;
-
-	static Ov2640 &instance();
-
-	Ov2640(const Ov2640 &) = delete;
-	Ov2640(Ov2640 &&) = delete;
-	Ov2640 &operator=(const Ov2640 &) = delete;
-	Ov2640 &operator=(Ov2640 &&) = delete;
-	~Ov2640();
-
-	std::unique_ptr<Ov2640::Image> jpeg();
-
+	void init() override;
+	std::shared_ptr<Cam::Frame> getFrame() override;
 private:
-	static void init();
-	static bool isInit;
-	Ov2640();
-};
-
-
-// ---------------------------  Image --------------------------- //
-
-
-struct Ov2640::Image final {
-	friend class Ov2640;
-	const camera_fb_t *frameBuffer() const;
-
-	asio::const_buffer data();
-	bool valid() const;
-	Image(const Image &) = delete;
-	Image(Image &&) = delete;
-	Image &operator=(const Image &) = delete;
-	Image &operator=(Image &) = delete;
-	~Image();
-private:
-	Image() = default;
-	void        *mData        {nullptr};
-	size_t      len           {0};
-	camera_fb_t *mFrameBuffer {nullptr};
+	class Frame : public Cam::Frame {
+		camera_fb_t *fb;
+	public:
+		using Cam::Frame::Buffer;
+		Frame(camera_fb_t *);
+		~Frame();
+	};
 };
 
 

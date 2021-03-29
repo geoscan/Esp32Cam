@@ -3,7 +3,7 @@
 
 #include <rr/subscription/subscription.hpp>
 #include <asio.hpp>
-#include "Ov2640.hpp"
+#include "cam/Camera.hpp"
 
 namespace Utility {
 namespace Subscription {
@@ -30,7 +30,7 @@ using Port = unsigned short;
 namespace Key {
 
 	using TcpConnected     = Rr::Subscription::KeyBase<Topic::TcpConnected, Rr::Subscription::DefaultSyncTraits, asio::ip::address, Port>;
-	using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Ov2640::Image> &, Topic::NewFrame>;
+	using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Cam::Frame> &, Topic::NewFrame>;
 	using TcpDisconnected  = Rr::Subscription::Key<asio::ip::address, Topic::TcpDisconnected>;
 	using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
 	using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, Topic::RecordStart>;
