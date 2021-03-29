@@ -1,0 +1,18 @@
+menu "cam"
+
+choice CAM_MODEL
+	prompt "Select camera model"
+	help
+		Camera model
+
+	config CAM_MODEL_OV2640
+		bool "OV2640"
+		default y
+		depends on OV2640_SUPPORT
+	if !OV2640_SUPPORT
+		comment "OV2640_SUPPORT -- disabled"
+	endif
+
+endchoice
+
+endmenu
