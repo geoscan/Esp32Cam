@@ -5,10 +5,13 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <esp_log.h>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "utility/time.hpp"
 
 using namespace CameraRecorder;
+
+static constexpr const char *kTag = "[camera_recorder: mjpeg/avi]";
 
 void RecMjpgAvi::updateFps()
 {
@@ -37,7 +40,8 @@ void RecMjpgAvi::onNewFrame(Key::Type aFrame)
 
 bool RecMjpgAvi::start(const char *aFilename)
 {
-	if ((stat.fd = AVI_open_output_file(const_cast<char *>(aFilename)))) {
+	if ((stat.fd = AVI_open_output_file(const_cast<char *>(aFilename))) != nullptr) {
+		ESP_LOGI(kTag, "successfully opened file %s", aFilename);
 		stat.started = std::chrono::microseconds(Utility::bootTimeUs());
 	    stat.frames  = 0;
 	    stat.fps     = NAN;
@@ -51,15 +55,18 @@ bool RecMjpgAvi::start(const char *aFilename)
 void RecMjpgAvi::stop()
 {
 	stat.running = false;
+	ESP_LOGD(kTag, "waiting until record thread is stopped");
 	if (thread.joinable()) {
 		thread.join();
 	}
+	ESP_LOGD(kTag, "record thread stopped");
 }
 
 void RecMjpgAvi::recordRoutine()
 {
 	decltype(frame) f;
 
+	ESP_LOGI(kTag, "record thread started");
 	while (stat.running) {
 		f = frame;  // Safely acquired ownership through incrementing smart pointer's counter
 		if (f) {
@@ -70,5 +77,8 @@ void RecMjpgAvi::recordRoutine()
 
 	// Set video properties
 	calculateFps();
-	AVI_set_video(stat.fd, stat.width, stat.height, stat.fps, const_cast<char *>("MJPG"));
+	AVI_set_video(stat.fd, stat.width, stat.height, stat.fps, const_cast<char *>("MJPG"));		
+	ESP_LOGI(kTag, "video_meta, w: %d, h: %d, fps: %f", stat.width, stat.height, stat.fps);
+	AVI_close(stat.fd);
+	ESP_LOGI(kTag, "closed output file");
 }
