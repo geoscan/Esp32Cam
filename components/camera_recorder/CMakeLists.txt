@@ -7,4 +7,5 @@ idf_component_register(
 		camera_recorder
 	REQUIRES
 		utility
+		avilib
 )
