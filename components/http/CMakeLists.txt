@@ -15,4 +15,6 @@ idf_component_register(
         json
         esp_http_server
         version
+		camera_recorder
+		sd_fat
 )
