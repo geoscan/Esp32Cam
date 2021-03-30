@@ -12,6 +12,8 @@
 #include <cJSON.h>
 #include <sdkconfig.h>
 #include <Ov2640.hpp>
+#include "camera_recorder/RecMjpgAvi.hpp"
+#include "sd_fat.h"
 
 using namespace std;
 
@@ -69,6 +71,16 @@ static Error processVideoStream()
 
 static Error processVideoRecord(string command, string name)
 {
+	static CameraRecorder::RecMjpgAvi recorder;
+	sdFatInit();
+	if (command == "start") {
+		if (recorder.start(name.c_str())) {
+			return Ok;
+		}
+		return Err;
+	} else {
+		recorder.stop();
+	}
 	return Ok;
 }
 
