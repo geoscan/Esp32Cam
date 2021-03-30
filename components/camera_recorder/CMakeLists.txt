@@ -4,7 +4,7 @@ idf_component_register(
 	SRCS
 		${SOURCES}
 	INCLUDE_DIRS
-		camera_recorder
+		.
 	REQUIRES
 		utility
 		avilib
