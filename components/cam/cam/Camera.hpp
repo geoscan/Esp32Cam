@@ -10,10 +10,9 @@
 
 #include <memory>
 #include "utility/Buffer.hpp"
+#include "Frame.hpp"
 
 namespace Cam {
-
-using Frame = Utility::Buffer;
 
 class CameraBase {
 public:

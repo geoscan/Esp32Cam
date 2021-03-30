@@ -85,3 +85,13 @@ Ov2640::Frame::~Frame()
 {
 	esp_camera_fb_return(fb);
 }
+
+int Ov2640::Frame::width()
+{
+	return fb->width;
+}
+
+int Ov2640::Frame::height()
+{
+	return fb->height;
+}

@@ -23,6 +23,8 @@ private:
 		using Cam::Frame::Buffer;
 		Frame(camera_fb_t *);
 		~Frame();
+		int width() override;
+		int height() override;
 	};
 };
 
