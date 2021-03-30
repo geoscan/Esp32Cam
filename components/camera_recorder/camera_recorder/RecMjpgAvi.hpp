@@ -10,6 +10,7 @@
 
 #include <type_traits>
 #include <chrono>
+#include <cmath>
 #include "Record.hpp"
 
 extern "C" {
@@ -26,10 +27,13 @@ private:
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
 		avi_t *fd;
-		bool running = false;
 		std::chrono::microseconds started;
+
+		bool running       = false;
 		std::size_t frames = 0;
-		float fps;
+		int width          = -1;
+		int height         = -1;
+		float fps          = NAN;
 	} stat;
 
 	void updateFps();
