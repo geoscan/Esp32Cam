@@ -1,14 +1,13 @@
-menu "Debug info over UDP"
+menu "[log_udp]"
 
 	config DEBUG_UDP_ENABLE
 		bool "Enable sending debug information over UDP"
-		default n
+		default y
 		help
 			If set, debug information will be redirected to UDP. The system will open UDP socket
 			which'll be used for sending debug information to recipients. To be added, a recipient
 			should "trigger" the socket by sending an arbitrary message (won't be processed), thus
 			it reports its IP/UDP address/port.
-
 
 	config DEBUG_UDP_PORT
 		int "Port number"
@@ -20,7 +19,7 @@ menu "Debug info over UDP"
 	config DEBUG_UDP_MSGLEN
 		int "Max message length"
 		range 1 65535
-		default 60
+		default 150
 		help
 			Max. length of a debug message transferred over UDP
 

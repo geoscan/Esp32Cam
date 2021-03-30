@@ -1,4 +1,4 @@
-menu "Camera OVxxxx"
+menu "[OV2640]"
       
 config OV2640_SUPPORT
 	bool "OV2640 Support"

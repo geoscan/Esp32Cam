@@ -1,4 +1,4 @@
-menu "Dev. test HTTP"
+menu "[http]"
 
 	config DEVTEST_HTTP_ENABLE
 		bool "Enable dev. test HTTP server"

@@ -1,4 +1,4 @@
-menu "WIFI <=> UART bridge"
+menu "[wifi_uart_bridge]"
 
 	config WIFI_UART_BRIDGE_UDP_PORT
 		int "UDP port number"

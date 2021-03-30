@@ -1,4 +1,4 @@
-menu "cam"
+menu "[cam]"
 
 choice CAM_MODEL
 	prompt "Select camera model"
