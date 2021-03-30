@@ -72,7 +72,10 @@ static Error processVideoStream()
 static Error processVideoRecord(string command, string name)
 {
 	static CameraRecorder::RecMjpgAvi recorder;
+	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
+	name.append(".avi");
 	sdFatInit();
+
 	if (command == "start") {
 		if (recorder.start(name.c_str())) {
 			return Ok;
