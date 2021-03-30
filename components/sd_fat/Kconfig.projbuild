@@ -1,4 +1,4 @@
-menu "SD FAT"
+menu "[sd_fat]"
 
 	config SD_FAT_MOUNT_POINT
 		string "Mount Point"

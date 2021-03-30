@@ -1,4 +1,4 @@
-menu "JPEG camera streamer"
+menu "[camera_streamer]"
 
 	config CAMSTREAM_SOURCE_UDP_PORT
 		int "Default port device uses for sending frames"
