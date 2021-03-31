@@ -14,6 +14,7 @@
 #include <Ov2640.hpp>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "sd_fat.h"
+#include "utility/time.hpp"
 
 using namespace std;
 
@@ -76,13 +77,19 @@ static Error processVideoRecord(string command, string name)
 	name.append(".avi");
 	sdFatInit();
 
+	Utility::waitMs(100);
+
+	ESP_LOGI("[http]", "command: %s, name: %s", command.c_str(), name.c_str());
+
 	if (command == "start") {
 		if (recorder.start(name.c_str())) {
 			return Ok;
 		}
 		return Err;
-	} else {
+	} else if (command == "stop") {
 		recorder.stop();
+	} else {
+		return Err;
 	}
 	return Ok;
 }

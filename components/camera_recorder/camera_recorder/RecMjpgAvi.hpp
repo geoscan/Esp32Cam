@@ -22,15 +22,11 @@ namespace CameraRecorder {
 
 class RecMjpgAvi : public Record {
 private:
-	std::thread thread;
-	std::decay<Key::Type>::type frame;
-
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
 		avi_t *fd;
 		std::chrono::microseconds started;
 
-		bool running       = false;
 		std::size_t frames = 0;
 		int width          = -1;
 		int height         = -1;
@@ -40,7 +36,6 @@ private:
 	void updateFps();
 	void calculateFps();
 	void onNewFrame(Key::Type) override;
-	void recordRoutine();
 public:
 	using Record::Record;
 	bool start(const char *filename) override;

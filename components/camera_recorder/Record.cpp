@@ -9,7 +9,7 @@
 
 using namespace CameraRecorder;
 
-Record::Record() : key(&Record::onNewFrame, this)
+Record::Record() : key(&Record::onNewFrame, this, false)
 {
 }
 

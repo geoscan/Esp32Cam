@@ -16,7 +16,6 @@ namespace CameraRecorder {
 class Record {
 protected:
 	using Key = Utility::Subscription::Key::NewFrame;  // Smart pointer to smth. having "data()" and "size()" methods, with automatic deallocation
-private:
 	Key key;
 	virtual void onNewFrame(Key::Type) = 0;
 public:
