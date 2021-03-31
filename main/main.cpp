@@ -34,7 +34,5 @@ extern "C" int app_main(void)
 	logUdpStart(context);
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
-
-
 	return 0;
 }
