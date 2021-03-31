@@ -1,0 +1,59 @@
+//
+// Semaphore.impl
+//
+// Created on: Mar 31, 2021
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "Semaphore.hpp"  // Makes no effect, being used to enable syntax highlighting
+
+namespace Utility {
+
+template <std::size_t Slots, std::size_t FreeSlots>
+inline Semaphore<Slots, FreeSlots>::Semaphore() : sem(xSemaphoreCreateCounting(Slots, FreeSlots), [](void *handle) {vSemaphoreDelete(handle);})
+{
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+inline constexpr std::ptrdiff_t Semaphore<Slots, FreeSlots>::max() const
+{
+	return Slots;
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+inline void Semaphore<Slots, FreeSlots>::acquire()
+{
+	xSemaphoreTake(sem.get(), portMAX_DELAY);
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+inline void Semaphore<Slots, FreeSlots>::release()
+{
+	xSemaphoreGive(sem.get());
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+inline bool Semaphore<Slots, FreeSlots>::try_acquire()
+{
+	return xSemaphoreTake(sem.get(), 0) == pdTRUE;
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+template <class Rep, class Period>
+inline bool Semaphore<Slots, FreeSlots>::try_acquire_for(const std::chrono::duration<Rep, Period> &duration)
+{
+	return xSemaphoreTake(sem.get(), std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() / portTICK_PERIOD_MS) == pdTRUE;
+}
+
+template <std::size_t Slots, std::size_t FreeSlots>
+template <class Clock, class Duration>
+inline bool Semaphore<Slots, FreeSlots>::try_acquire_until(const std::chrono::time_point<Clock, Duration> &time)
+{
+	auto now = std::chrono::system_clock::now();
+	if (now >= time) {
+		return false;
+	}
+	return try_acquire_for((time - std::chrono::system_clock::now()).time_since_epoch());
+}
+
+}  // namespace Utility

@@ -12,6 +12,7 @@
 #include <chrono>
 #include <cmath>
 #include "Record.hpp"
+#include "utility/Semaphore.hpp"
 
 extern "C" {
 #include "avilib/avilib.h"
