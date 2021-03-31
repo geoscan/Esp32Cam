@@ -13,4 +13,5 @@ idf_component_register(
 		pthread
 		esp_common
 		OV2640
+		freertos
 )
