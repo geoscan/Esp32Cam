@@ -81,9 +81,24 @@ Ov2640::Frame::Frame(camera_fb_t *aFb) : Cam::Frame(aFb->buf, aFb->len), fb(aFb)
 {
 }
 
+Ov2640::Frame::Frame(Frame &&frame) : Cam::Frame(std::move(frame)), fb(frame.fb)
+{
+	frame.fb = nullptr;
+}
+
+Ov2640::Frame &Ov2640::Frame::operator=(Frame &&frame)
+{
+	*static_cast<Cam::Frame *>(this) = std::move(frame);
+	fb = frame.fb;
+	frame.fb = nullptr;
+	return *this;
+}
+
 Ov2640::Frame::~Frame()
 {
-	esp_camera_fb_return(fb);
+	if (fb) {
+		esp_camera_fb_return(fb);
+	}
 }
 
 int Ov2640::Frame::width()

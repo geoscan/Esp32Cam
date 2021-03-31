@@ -20,9 +20,15 @@ private:
 	class Frame : public Cam::Frame {
 		camera_fb_t *fb;
 	public:
-		using Cam::Frame::Buffer;
+		Frame &operator=(const Frame &) = delete;
+		Frame(const Frame &) = delete;
+
+		Frame(Frame &&);
+		Frame &operator=(Frame &&);
+
 		Frame(camera_fb_t *);
 		~Frame();
+
 		int width() override;
 		int height() override;
 	};
