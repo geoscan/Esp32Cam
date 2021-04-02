@@ -63,7 +63,7 @@ void Ov2640::init()
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
 		.n_managed_buffers = CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS,  // Use manual buffer management (n_managed_buffers > 0)
 #else
-		.n_managed_buffers = 0;
+		.n_managed_buffers = 0,
 #endif
 	};
 
