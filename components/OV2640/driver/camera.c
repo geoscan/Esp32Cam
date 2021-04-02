@@ -134,6 +134,8 @@ typedef struct {
 
 camera_state_t* s_state = NULL;
 
+camera_fb_int_t **s_managed_buffers;
+
 static void i2s_init();
 static int i2s_run();
 static void IRAM_ATTR vsync_isr(void* arg);
@@ -229,13 +231,15 @@ static void camera_fb_deinit()
     }
 }
 
-static esp_err_t camera_fb_init(size_t count)
+static esp_err_t camera_fb_init(size_t count, bool deinit)
 {
     if(!count) {
         return ESP_ERR_INVALID_ARG;
     }
 
-    camera_fb_deinit();
+	if (deinit) {
+		camera_fb_deinit();
+	}
 
     ESP_LOGI(TAG, "Allocating %u frame buffers (%d KB total)", count, (s_state->fb_size * count) / 1024);
 
@@ -1208,11 +1212,29 @@ esp_err_t camera_init(const camera_config_t* config)
         goto fail;
     }
 
-    //s_state->fb_size = 75 * 1024;
-    err = camera_fb_init(s_state->config.fb_count);
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to allocate frame buffer");
-        goto fail;
+    if (s_state->config.n_managed_buffers) {
+		s_state->config.fb_count = 1;
+		// Manual buffer management
+
+		s_managed_buffers = calloc(s_state->config.n_managed_buffers, sizeof(camera_fb_int_t *));
+		for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
+			esp_err_t err = camera_fb_init(1, false);
+			if (err != ESP_OK) {
+				ESP_LOGE(TAG, "Failed to allocate frame buffer");
+				goto fail;
+			}
+
+			s_managed_buffers[i] = s_state->fb;
+		}
+    } else {
+		// Default buffer management
+
+		//s_state->fb_size = 75 * 1024;
+		err = camera_fb_init(s_state->config.fb_count, true);
+		if (err != ESP_OK) {
+			ESP_LOGE(TAG, "Failed to allocate frame buffer");
+			goto fail;
+		}
     }
 
     s_state->data_ready = xQueueCreate(16, sizeof(size_t));
@@ -1410,6 +1432,19 @@ camera_fb_t* esp_camera_fb_get()
         }
     }
     return (camera_fb_t*)fb;
+}
+
+camera_fb_t* esp_camera_nfb_get(size_t n)
+{
+    if (s_state == NULL) {
+        return NULL;
+    }
+    // Make sure there is no ongoing writing process
+    if(!I2S0.conf.rx_start && s_state->config.n_managed_buffers) {
+		s_state->fb = s_managed_buffers[n];
+		return esp_camera_fb_get();
+    }
+    return NULL;
 }
 
 void esp_camera_fb_return(camera_fb_t * fb)
