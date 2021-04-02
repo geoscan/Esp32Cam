@@ -1440,7 +1440,8 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
         return NULL;
     }
     // Make sure there is no ongoing writing process
-    if(!I2S0.conf.rx_start && s_state->config.n_managed_buffers) {
+    if(!I2S0.conf.rx_start) {
+		assert(n < s_state->config.n_managed_buffers);
 		s_state->fb = s_managed_buffers[n];
 		return esp_camera_fb_get();
     }
