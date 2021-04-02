@@ -61,5 +61,23 @@ choice CAMERA_TASK_PINNED_TO_CORE
         bool "NO_AFFINITY"
 
 endchoice
-    
+
+config OV2640_CUSTOM_BUFFER_MANAGEMENT
+	bool "OV2640_CUSTOM_BUFFER_MANAGEMENT"
+	default y
+	help
+
+		Default OV2640's driver offers custom implementation of frame buffer
+		management, and it really lacks performance on some chips (probably because
+		it uses FreeRTOS' queues). This field enables custom buffer management.
+
+if OV2640_CUSTOM_BUFFER_MANAGEMENT
+	config OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS
+		int "OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS"
+		range 1 3
+		default 2
+		help
+			Number of buffers
+endif
+
 endmenu
