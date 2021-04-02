@@ -45,10 +45,12 @@ void RecMjpgAvi::onNewFrame(Key::Type aFrame)
 {
 	logWriting();
 
-	stat.width = aFrame->width();
-	stat.height = aFrame->height();
-	AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size());
-	updateFps();
+	if (aFrame->size()) {
+		stat.width = aFrame->width();
+		stat.height = aFrame->height();
+		AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size());
+		updateFps();
+	}
 }
 
 bool RecMjpgAvi::start(const char *aFilename)
