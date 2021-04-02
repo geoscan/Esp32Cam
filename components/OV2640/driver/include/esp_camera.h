@@ -105,6 +105,8 @@ typedef struct {
 
     int jpeg_quality;               /*!< Quality of JPEG output. 0-63 lower means higher quality  */
     size_t fb_count;                /*!< Number of frame buffers to be allocated. If more than one, then each frame will be acquired (double speed)  */
+
+	size_t n_managed_buffers;  // When > 0, buffer management gets overriden by user
 } camera_config_t;
 
 /**
@@ -154,10 +156,21 @@ esp_err_t esp_camera_deinit();
 
 /**
  * @brief Obtain pointer to a frame buffer.
+ * If manual buffer management is used, 0th buffer is selected
  *
  * @return pointer to the frame buffer
  */
 camera_fb_t* esp_camera_fb_get();
+
+/**
+ * @brief Obtain pointer to a specified frame buffer
+ * @arg n Number of the buffer. If the number exceeds
+ *        the overall number of buffers, an assertion
+ *        gets raised
+ *
+ * @return pointer to the frame buffer
+ */
+camera_fb_t* esp_camera_nfb_get(size_t n);
 
 /**
  * @brief Return the frame buffer to be reused again.

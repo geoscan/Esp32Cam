@@ -57,7 +57,9 @@ void Ov2640::init()
 		.frame_size   = FRAMESIZE_VGA,  // QQVGA-UXGA Do not use sizes above QVGA when not JPEG
 
 		.jpeg_quality = 12, //0-63 lower number means higher quality
-		.fb_count     = 1  //if more than one, i2s runs in continuous mode. Use only with JPEG
+		.fb_count     = 1,  //if more than one, i2s runs in continuous mode. Use only with JPEG
+
+		.n_managed_buffers = 2,  // Use manual buffer management
 	};
 
 	esp_camera_init(&cameraConfig);
