@@ -1,6 +1,7 @@
+#include <sdkconfig.h>
+#include <algorithm>
 #include "Ov2640.hpp"
 #include "esp_camera.h"
-#include <algorithm>
 
 using namespace std;
 
@@ -59,12 +60,40 @@ void Ov2640::init()
 		.jpeg_quality = 12, //0-63 lower number means higher quality
 		.fb_count     = 1,  //if more than one, i2s runs in continuous mode. Use only with JPEG
 
-		.n_managed_buffers = 2,  // Use manual buffer management
+#if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
+		.n_managed_buffers = CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS,  // Use manual buffer management (n_managed_buffers > 0)
+#else
+		.n_managed_buffers = 0;
+#endif
 	};
 
 	esp_camera_init(&cameraConfig);
 }
 
+#if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
+std::shared_ptr<Cam::Frame> Ov2640::getFrame()
+{
+	static std::array<std::weak_ptr<Cam::Frame>, CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS> wpBuffers;
+
+	// Find a buffer which is not being used at the moment
+	for (size_t i = 0; i < wpBuffers.size(); ++i) {
+		if (wpBuffers[i].expired()) {
+
+			auto frameBuffer = esp_camera_nfb_get(i);
+			if (!frameBuffer) {
+				break;
+			}
+
+			std::shared_ptr<Ov2640::Frame> sp(new Ov2640::Frame(frameBuffer));
+			wpBuffers[i] = sp;
+
+			return sp;
+		}
+	}
+
+	return std::make_shared<Cam::Frame>();
+}
+#else
 std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 {
 	auto fb = esp_camera_fb_get();
@@ -75,6 +104,7 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 
 	return std::shared_ptr<Cam::Frame>(new Ov2640::Frame(fb));
 }
+#endif
 
 
 // ------------ Ov2640::Frame ------------ //
