@@ -13,12 +13,14 @@ using namespace CameraRecorder;
 
 static constexpr const char *kTag = "[camera_recorder: mjpeg/avi]";
 
-static void logWriting()
+void RecMjpgAvi::logWriting(Key::Type frame)
 {
 	static constexpr std::size_t kPeriod = 50;
 	static std::size_t iter = 0;
+
 	if (iter++ % kPeriod == 0) {
-		ESP_LOGI(kTag, "Record -- writing");
+		ESP_LOGI(kTag, "Record -- writing %dth frame, %dx%d, %dkb",
+			iter * kPeriod, frame->width(), frame->height(), frame->size() / 1024);
 	}
 }
 
@@ -43,13 +45,22 @@ void RecMjpgAvi::calculateFps()
 
 void RecMjpgAvi::onNewFrame(Key::Type aFrame)
 {
-	logWriting();
 
-	if (aFrame->size()) {
+	if (aFrame.get() != nullptr && aFrame->data() != nullptr && aFrame->size()) {
 		stat.width = aFrame->width();
 		stat.height = aFrame->height();
-		AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size());
-		updateFps();
+		if (AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size()) != 0) {
+
+			ESP_LOGW(kTag, "Recording -- failed to write a frame");
+
+		} else {
+			updateFps();
+			logWriting(aFrame);
+		}
+	} else {
+
+		ESP_LOGW(kTag, "Recording -- empty frame");
+
 	}
 }
 

@@ -36,6 +36,7 @@ private:
 	void updateFps();
 	void calculateFps();
 	void onNewFrame(Key::Type) override;
+	static void logWriting(Key::Type);
 public:
 	using Record::Record;
 	bool start(const char *filename) override;

@@ -7,6 +7,8 @@ using namespace std;
 
 // ------------ Ov2640 ------------ //
 
+static constexpr const char *kTag = "[OV2640]";
+
 
 void Ov2640::init()
 {
@@ -74,22 +76,34 @@ void Ov2640::init()
 std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 {
 	static std::array<std::weak_ptr<Cam::Frame>, CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS> wpBuffers;
+	static size_t usedBuffers = 0;
 
 	// Find a buffer which is not being used at the moment
-	for (size_t i = 0; i < wpBuffers.size(); ++i) {
+
+	for (size_t i = 0, nUsed = 0; i < wpBuffers.size(); ++i) {
+		if (i > 0) {
+			ESP_LOGI(kTag, "using additional buffers");
+		}
 		if (wpBuffers[i].expired()) {
 
 			auto frameBuffer = esp_camera_nfb_get(i);
 			if (!frameBuffer) {
-				break;
+				continue;
 			}
 
 			std::shared_ptr<Ov2640::Frame> sp(new Ov2640::Frame(frameBuffer));
 			wpBuffers[i] = sp;
 
 			return sp;
+		} else {
+			++nUsed;
+			if (nUsed != usedBuffers) {
+				usedBuffers = nUsed;
+				ESP_LOGI(kTag, "# used buffers: %d", usedBuffers);
+			}
 		}
 	}
+	ESP_LOGW(kTag, "could not find a free buffer");
 
 	return std::make_shared<Cam::Frame>();
 }
