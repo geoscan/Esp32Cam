@@ -38,6 +38,7 @@ void CameraStream::operator()()
 		}
 
 		key.notify(img);
+		img.reset();
 		img = Cam::Camera::getInstance().getFrame();
 
 		if (fps > 0) {
