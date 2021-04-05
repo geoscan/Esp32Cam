@@ -18,6 +18,7 @@ struct Frame : Utility::Buffer {
 
 	virtual int width();
 	virtual int height();
+	virtual bool valid();
 };
 
 }  // namespace Cam
