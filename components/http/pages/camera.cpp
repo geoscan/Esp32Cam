@@ -33,6 +33,23 @@ static constexpr const char *kStart   = "start";    // value
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
 
+static struct {
+	bool videoRecRunning = false;
+} status;
+
+static struct {
+	CameraRecorder::RecMjpgAvi mjpgAvi;
+	CameraRecorder::RecFrame   frame;
+} rec;
+
+static void wifiDisconnectHandler(Utility::Subscription::Key::WifiDisconnected::Type)
+{
+	rec.mjpgAvi.stop();
+	status.videoRecRunning = false;
+}
+
+static Utility::Subscription::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
+
 enum Error : esp_err_t {
 	// Standard ESP's errors
 	Ok      = ESP_OK,
@@ -73,7 +90,6 @@ static Error processVideoStream()
 
 static Error processVideoRecord(string command, string name)
 {
-	static CameraRecorder::RecMjpgAvi recorder;
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(".avi");
 	sdFatInit();
@@ -82,13 +98,15 @@ static Error processVideoRecord(string command, string name)
 
 	ESP_LOGI("[http]", "command: %s, name: %s", command.c_str(), name.c_str());
 
-	if (command == "start") {
-		if (recorder.start(name.c_str())) {
+	if (command == "start" && !status.videoRecRunning) {
+		if (rec.mjpgAvi.start(name.c_str())) {
+			status.videoRecRunning = true;
 			return Ok;
 		}
 		return Err;
-	} else if (command == "stop") {
-		recorder.stop();
+	} else if (command == "stop" && status.videoRecRunning) {
+		rec.mjpgAvi.stop();
+		status.videoRecRunning = false;
 	} else {
 		return Err;
 	}
@@ -109,17 +127,14 @@ static Error processPhoto(string name)
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(kJpg);
 
-	CameraRecorder::RecFrame recFrame;
-
-	return recFrame.start(name.c_str()) ? Ok : Err;
+	return rec.frame.start(name.c_str()) ? Ok : Err;
 }
 
 static void printStatus(httpd_req_t *req, Error res)
 {
 	auto *root = cJSON_CreateObject();
 
-	cJSON_AddItemToObject(root, kVideoStream, cJSON_CreateFalse());
-	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateFalse());
+	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateBool(status.videoRecRunning));
 
 	if (res != ErrNone) {
 		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool((int)(res == Ok)));
