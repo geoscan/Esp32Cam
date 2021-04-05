@@ -18,3 +18,8 @@ int Frame::height()
 {
 	return -1;
 }
+
+bool Frame::valid()
+{
+	return (size() > 0 && data() != nullptr);
+}
