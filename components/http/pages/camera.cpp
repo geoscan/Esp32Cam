@@ -13,6 +13,7 @@
 #include <sdkconfig.h>
 #include <Ov2640.hpp>
 #include "camera_recorder/RecMjpgAvi.hpp"
+#include "camera_recorder/RecFrame.hpp"
 #include "sd_fat.h"
 #include "utility/time.hpp"
 
@@ -98,6 +99,8 @@ static Error processPhoto(string name)
 {
 	static constexpr const char *kJpg = ".jpg";
 
+	sdFatInit();
+
 	if (name.length() == 0) {
 		return ErrArg;
 	}
@@ -106,26 +109,9 @@ static Error processPhoto(string name)
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(kJpg);
 
-	// Try to open file
-	auto *file = fopen(name.c_str(), "wb");
-	if (file == NULL) {
-		return ErrSd;
-	}
+	CameraRecorder::RecFrame recFrame;
 
-	// Try to capture an image
-	auto image = Cam::Camera::getInstance().getFrame();
-	if (!image) {
-		return ErrCam;
-	}
-
-	Error ret = Ok;
-	// Try to write
-	if (fwrite(image->data(), 1, image->size(), file) != image->size()) {
-		ret = ErrSd;
-	}
-	fclose(file);
-
-	return ret;
+	return recFrame.start(name.c_str()) ? Ok : Err;
 }
 
 static void printStatus(httpd_req_t *req, Error res)
