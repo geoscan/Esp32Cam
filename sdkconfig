@@ -156,13 +156,6 @@ CONFIG_EXAMPLE_IPV4=y
 # end of Example Configuration
 
 #
-# [http]
-#
-CONFIG_DEVTEST_HTTP_ENABLE=y
-CONFIG_DEVTEST_HTTP_ENABLE_CAM=y
-# end of [http]
-
-#
 # [log_udp]
 #
 CONFIG_DEBUG_UDP_ENABLE=y

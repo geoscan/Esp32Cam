@@ -70,12 +70,10 @@ static void connectHandler(void* arg, esp_event_base_t event_base,
 
 void httpStart(void)
 {
-#ifdef CONFIG_DEVTEST_HTTP_ENABLE /* Enable demos on dev. HTTP server */
 	static httpd_handle_t server = NULL;
 
 	ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connectHandler, &server));
 	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnectHandler, &server));
 
 	server = startWebserver();
-#endif
 }
