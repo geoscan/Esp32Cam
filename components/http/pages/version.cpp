@@ -8,11 +8,12 @@
 
 esp_err_t infoPageHandler(httpd_req_t *req)
 {
-	std::string stm32ver;
 	auto *versions = cJSON_CreateArray();
 	cJSON_AddItemToArray(versions, cJSON_CreateString(ESP32_FIRMWARE_VERSION));
-	if (versionStmGet(stm32ver)) {
-		cJSON_AddItemToArray(versions, cJSON_CreateString(stm32ver.c_str()));
+
+	std::string connectedSerialVersion = connectedSerialVersionGet();
+	if (connectedSerialVersion.size()) {
+		cJSON_AddItemToArray(versions, cJSON_CreateString(connectedSerialVersion.c_str()));
 	}
 
 	char *json = cJSON_Print(versions);

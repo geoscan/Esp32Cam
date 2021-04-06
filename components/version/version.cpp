@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 #include <iterator>
+#include <chrono>
 
 #include "version.hpp"
 #include "UartSink.hpp"
@@ -11,41 +12,47 @@
 using namespace std;
 
 static VersionParser parser;
-
-static void cbStm32UartInput(const void *data, size_t size)
-{
-	if (!parser.parsed()) {
-		parser.parse(data, size);
-	}
-}
+static std::string version;
 
 void versionInit()
 {
-	UartSink stmSink(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
+#ifdef CONFIG_VERSION_ACQUISITION_ENABLE
 
-	stmSink.addCallback(cbStm32UartInput);
-	stmSink.run(CONFIG_VERSION_STM_ACQ_TIMEOUT_US);
-}
+	uint8_t buffer[CONFIG_VERSION_SERIAL_BUFFER_SIZE];
+	UartDevice uartDevice(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 
-bool versionStmGet(string &str)
-{
-	bool res = false;
+	const auto timeEnd = std::chrono::system_clock::now() + std::chrono::microseconds(CONFIG_VERSION_STM_ACQ_TIMEOUT_US);
 
+	// Acquire and try to parse
+	while (std::chrono::system_clock::now() < timeEnd && !parser.parsed()) {
+		uartDevice.read(buffer, sizeof(buffer));
+		parser.parse(buffer, sizeof(buffer));
+	}
+
+	// Apply proper formatting
 	if (parser.parsed()) {
 		const auto &payload = parser.payload();
-		res = true;
 
 		if (parser.payload().size() >= 2) {
-			str.append(to_string(payload[0]));
-			str.append(".");
-			str.append(to_string(payload[1]));
+			version.append(to_string(payload[0]));
+			version.append(".");
+			version.append(to_string(payload[1]));
 		}
 
 		if (payload.size() >= 6) {
-			str.append(".");
-			str.append(to_string(*reinterpret_cast<const uint32_t *>(&payload.data()[2])));
+			version.append(".");
+			version.append(to_string(*reinterpret_cast<const uint32_t *>(&payload.data()[2])));
 		}
 	}
 
-	return res;
+#endif  // #ifdef CONFIG_VERSION_ACQUISITION_ENABLE
+}
+
+std::string connectedSerialVersionGet()
+{
+#ifdef CONFIG_VERSION_ACQUISITION_ENABLE
+	return version;
+#else
+	return {};
+#endif  // #ifdef CONFIG_VERSION_ACQUISITION_ENABLE
 }
