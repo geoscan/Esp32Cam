@@ -1,9 +1,25 @@
 menu "[version]"
 
-	config VERSION_STM_ACQ_TIMEOUT_US
-		int "STM32's FW version acquisition timeout"
-		default 1000000
+	config VERSION_ACQUISITION_ENABLE
+		bool "VERSION_ACQUIRE_ENABLE"
+		default y
 		help
-			Timeout to acquire ESP32 Firmware version via UART, microseconds
+			Try to acquire connected serial device version on startup
+
+	if VERSION_ACQUISITION_ENABLE
+
+		config VERSION_STM_ACQ_TIMEOUT_US
+			int "STM32's FW version acquisition timeout"
+			default 1000000
+			help
+				Timeout to acquire connected serial device version
+
+		config VERSION_SERIAL_BUFFER_SIZE
+			int SERIAL_BUFFER_SIZE
+			default 256
+			help
+				Size of the buffer used to acquire connected serial device version
+
+	endif
 
 endmenu

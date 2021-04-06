@@ -17,6 +17,6 @@
 #include <string>
 
 void versionInit();
-bool versionStmGet(std::string&);
+std::string connectedSerialVersionGet();
 
 #endif  // COMPONENTS_VERSION_VERSION_HPP_H
