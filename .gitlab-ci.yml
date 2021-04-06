@@ -1,3 +1,6 @@
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
 platformio_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu 
     script:
