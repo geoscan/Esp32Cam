@@ -9,7 +9,8 @@
 #define DEBUG_UDP_PRIVATE_INCLUDE_ENDPOINT_HPP
 
 #include <asio.hpp>
-#include <forward_list>
+#include <list>
+#include "utility/Subscription.hpp"
 
 namespace LogUdp {
 
@@ -19,8 +20,12 @@ public:
 	void operator()();
 	void send(const char *);
 private:
+	void onWifiDisconnected(Utility::Subscription::Key::WifiDisconnected::Type);
+
+	std::mutex mut;
+	Utility::Subscription::Key::WifiDisconnected keyWifiDisconnected;
 	asio::ip::udp::socket &socket;
-	std::forward_list<asio::ip::udp::endpoint> endpoints;
+	std::list<asio::ip::udp::endpoint> endpoints;
 };
 
 }  // namespace DebugUdp

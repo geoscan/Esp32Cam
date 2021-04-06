@@ -7,4 +7,5 @@ idf_component_register(
 	REQUIRES
 		asio
 		esp_common
+		utility
 )
