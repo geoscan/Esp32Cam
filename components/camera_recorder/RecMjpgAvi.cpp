@@ -16,11 +16,12 @@ static constexpr const char *kTag = "[camera_recorder: mjpeg/avi]";
 void RecMjpgAvi::logWriting(Key::Type frame)
 {
 	static constexpr std::size_t kPeriod = 50;
-	static std::size_t iter = 0;
+	std::size_t iter = 0;
 
-	if (iter++ % kPeriod == 0) {
-		ESP_LOGI(kTag, "Record -- writing %dth frame, %dx%d, %dkb",
-			iter * kPeriod, frame->width(), frame->height(), frame->size() / 1024);
+	if (iter ++ == kPeriod) {
+		iter = 0;
+		ESP_LOGI(kTag, "Record -- writing frame, %dx%d, %dkb",
+			frame->width(), frame->height(), frame->size() / 1024);
 	}
 }
 
