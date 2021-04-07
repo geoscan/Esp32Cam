@@ -15,7 +15,7 @@ menu "[version]"
 				Timeout to acquire connected serial device version
 
 		config VERSION_SERIAL_BUFFER_SIZE
-			int SERIAL_BUFFER_SIZE
+			int "SERIAL_BUFFER_SIZE"
 			default 256
 			help
 				Size of the buffer used to acquire connected serial device version
