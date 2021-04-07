@@ -17,7 +17,7 @@
 #include "Ov2640.hpp"
 #include "utility/Subscription.hpp"
 
-namespace CameraStreamer {
+namespace CameraThread {
 
 class CameraStream final {
 public:
