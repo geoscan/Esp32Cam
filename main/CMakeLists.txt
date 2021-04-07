@@ -18,4 +18,5 @@ idf_component_register(
 		sd_fat
 		esp_event
 		log_udp
+		camera_thread
 )

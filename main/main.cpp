@@ -17,6 +17,7 @@
 #include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
 #include "cam/cam.hpp"
+#include "camera_thread/camera_thread.hpp"
 #include "version.hpp"
 #include "sd_fat.h"
 #include "log_udp.h"
@@ -30,6 +31,7 @@ extern "C" int app_main(void)
 	wifiStart();
 	httpStart();
 	camInit();
+	cameraThreadInit();
 
 	logUdpStart(context);
 	cameraStreamerStart(context);

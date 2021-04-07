@@ -15,13 +15,4 @@ menu "[camera_streamer]"
 			If disabled, the device sends frames as soon as it acquires them,
 			the performance is only determined by camera's latencies
 
-	if CAMSTREAM_USE_FPS
-
-		config CAMSTREAM_FPS
-			int "FPS"
-			range 1 30
-			default 20
-
-	endif
-
 endmenu

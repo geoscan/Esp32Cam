@@ -13,7 +13,6 @@
 
 #include <esp_event.h>
 #include <map>
-#include "CameraStream.hpp"
 #include "utility/Subscription.hpp"
 
 namespace CameraStreamer {

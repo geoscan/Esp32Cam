@@ -17,7 +17,7 @@
 
 using asio::ip::udp;
 using namespace std;
-using namespace CameraStreamer;
+using namespace CameraThread;
 
 CameraStream::CameraStream(Fps f) :	fps(f)
 {
