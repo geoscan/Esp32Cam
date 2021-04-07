@@ -16,7 +16,7 @@ static constexpr const char *kTag = "[camera_recorder: mjpeg/avi]";
 void RecMjpgAvi::logWriting(Key::Type frame)
 {
 	static constexpr std::size_t kPeriod = 50;
-	std::size_t iter = 0;
+	static std::size_t iter = 0;
 
 	if (iter ++ == kPeriod) {
 		iter = 0;
