@@ -219,16 +219,24 @@ timeout:
 
 static void camera_fb_deinit()
 {
-    camera_fb_int_t * _fb1 = s_state->fb, * _fb2 = NULL;
-    while(s_state->fb) {
-        _fb2 = s_state->fb;
-        s_state->fb = _fb2->next;
-        if(_fb2->next == _fb1) {
-            s_state->fb = NULL;
-        }
-        free(_fb2->buf);
-        free(_fb2);
-    }
+	if (s_state->config.n_managed_buffers == 0) {  // Custom buffer management was not used
+		camera_fb_int_t * _fb1 = s_state->fb, * _fb2 = NULL;
+		while(s_state->fb) {
+			_fb2 = s_state->fb;
+			s_state->fb = _fb2->next;
+			if(_fb2->next == _fb1) {
+				s_state->fb = NULL;
+			}
+			free(_fb2->buf);
+			free(_fb2);
+		}
+	} else {
+		for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
+			free(s_managed_buffers[i]->buf);
+			free(s_managed_buffers[i]);
+			free(s_managed_buffers);
+		}
+	}
 }
 
 static esp_err_t camera_fb_init(size_t count, bool deinit)
