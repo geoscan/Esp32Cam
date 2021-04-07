@@ -122,29 +122,6 @@ static int avi_add_chunk(avi_t *AVI, char *tag, char *data, int length)
 
 static int avi_add_index_entry(avi_t *AVI, char *tag, long flags, long pos, long len)
 {
-	void *ptr;
-
-	if (AVI->n_idx >= AVI->max_idx)
-	{
-		ptr = realloc((void *)AVI->idx, (AVI->max_idx + 4096) * 16);
-		if (ptr == 0)
-		{
-			AVI_errno = AVI_ERR_NO_MEM;
-			return -1;
-		}
-		AVI->max_idx += 4096;
-		AVI->idx = (char((*)[16]))ptr;
-	}
-
-	/* Add index entry */
-
-	memcpy(AVI->idx[AVI->n_idx], tag, 4);
-	long2str(AVI->idx[AVI->n_idx] + 4, flags);
-	long2str(AVI->idx[AVI->n_idx] + 8, pos);
-	long2str(AVI->idx[AVI->n_idx] + 12, len);
-
-	/* Update counter */
-
 	AVI->n_idx++;
 
 	return 0;
@@ -273,7 +250,8 @@ static int avi_close_output_file(avi_t *AVI)
 	  readable in the most cases */
 
 	idxerror = 0;
-	ret = avi_add_chunk(AVI, "idx1", (void *)AVI->idx, AVI->n_idx * 16);
+//	ret = avi_add_chunk(AVI, "idx1", (void *)AVI->idx, AVI->n_idx * 16);
+	ret = 0;
 	hasIndex = (ret == 0);
 	if (ret)
 	{
