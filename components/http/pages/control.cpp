@@ -169,7 +169,7 @@ static void printStatus(httpd_req_t *req, Error res)
 	cJSON_Delete(root);
 }
 
-extern "C" esp_err_t cameraHandler(httpd_req_t *req)
+extern "C" esp_err_t controlHandler(httpd_req_t *req)
 {
 	Error ret = ErrNone;
 
