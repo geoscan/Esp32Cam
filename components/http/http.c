@@ -20,9 +20,9 @@ static const httpd_uri_t pages[] = {
 		.user_ctx = (void*)"Hello World!"
 	},
 	{
-		.uri      = "/camera",
+		.uri      = "/control",
 		.method   = HTTP_GET,
-		.handler  = cameraHandler,
+		.handler  = controlHandler,
 		.user_ctx = 0
 	}
 };
