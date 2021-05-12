@@ -19,14 +19,15 @@ UartDevice::UartDevice(int num, gpio_num_t rxPin, gpio_num_t txPin, int rate, ua
 		.source_clk = UART_SCLK_APB,
 	};
 	// We won't use a buffer for sending data.
-	uart_driver_install(num, kBufferSize * 2, kBufferSize * 2, 0, NULL, 0);
+	if (!uart_is_driver_installed(num)) {
+		uart_driver_install(num, kBufferSize * 2, kBufferSize * 2, 0, NULL, 0);
+	}
 	uart_param_config(num, &uart_config);
 	uart_set_pin(num, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
 UartDevice::~UartDevice()
 {
-	uart_driver_delete(uartNum);
 }
 
 size_t UartDevice::read(void *data, size_t size)
