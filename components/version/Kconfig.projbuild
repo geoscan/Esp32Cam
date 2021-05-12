@@ -16,9 +16,15 @@ menu "[version]"
 
 		config VERSION_SERIAL_BUFFER_SIZE
 			int "SERIAL_BUFFER_SIZE"
-			default 256
+			default 64
 			help
 				Size of the buffer used to acquire connected serial device version
+
+		config VERSION_UART_BAUDRATE
+			int "VERSION_UART_BAUDRATE"
+			default 115200
+			help
+				Baudrate of the uart used for connected device's version acquisition
 
 	endif
 
