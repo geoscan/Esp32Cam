@@ -22,3 +22,4 @@ tools/esptool/dist
 *.properties
 *.idea
 /tools/cache
+sdkconfig.old
