@@ -26,11 +26,12 @@ static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
-	esp_event_loop_create_default();
+	camInit();
 	versionInit();
+
+	esp_event_loop_create_default();
 	wifiStart();
 	httpStart();
-	camInit();
 	cameraThreadInit();
 
 	logUdpStart(context);
