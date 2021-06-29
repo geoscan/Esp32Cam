@@ -1,11 +1,16 @@
-//
+﻿//
 // camera.cpp
 //
 // Created on: Feb 15, 2021
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
+// API providing client with an access to resources such as:
+// * Camera
+// * Wifi
+//
 
 #include <memory>
+#include <algorithm>
 #include <esp_http_server.h>
 #include <utility>
 #include <string>
@@ -15,20 +20,30 @@
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "camera_recorder/RecFrame.hpp"
 #include "sd_fat.h"
+#include "wifi.h"
 #include "utility/time.hpp"
 
 using namespace std;
 
-static constexpr const char *kName = "name";  // key
+// Various keys
+static constexpr const char *kName     = "name";      // key
+static constexpr const char *kSsid     = "ssid";      // key
+static constexpr const char *kPassword = "password";  // key
+static constexpr const char *kIp       = "ip";        // key
+static constexpr const char *kGateway  = "gateway";   // key
+static constexpr const char *kNetmask  = "netmask";   // key
 // Function
 static constexpr const char *kFunction    = "function";      // key
 static constexpr const char *kVideoStream = "video_stream";  // value
 static constexpr const char *kVideoRecord = "video_record";  // value
 static constexpr const char *kPhoto       = "photo";         // value
+static constexpr const char *kWifi        = "wifi";          // value
 // Command
-static constexpr const char *kCommand = "command";  // key
-static constexpr const char *kStop    = "stop";     // value
-static constexpr const char *kStart   = "start";    // value
+static constexpr const char *kCommand    = "command";     // key
+static constexpr const char *kStop       = "stop";        // value
+static constexpr const char *kStart      = "start";       // value
+static constexpr const char *kConnect    = "connect";     //value
+static constexpr const char *kDisconnect = "disconnect";  //value
 // JSON response
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
@@ -57,11 +72,20 @@ enum Error : esp_err_t {
 	ErrArg  = ESP_ERR_INVALID_ARG,
 
 	// Custom errors
-	ErrNone = ESP_FAIL - 1,
-	ErrCam  = ESP_FAIL - 2,
-	ErrSd   = ESP_FAIL - 3,
+	ErrNone    = ESP_FAIL - 1,
+	ErrCam     = ESP_FAIL - 2,
+	ErrSd      = ESP_FAIL - 3,
+	ErrIpParse = ESP_FAIL - 4,
 };
 
+///
+/// \brief getArgValueByKey Parses GET request and extracts values corresponding to the key it is provided with
+///
+/// \param req Request object
+/// \param key Get key to search for
+///
+/// \return "", if no such key has been found. Value of the key otherwise.
+///
 static string getArgValueByKey(httpd_req_t *req, const char *key)
 {
 	static constexpr size_t kValueBufSize = 20;
@@ -130,6 +154,37 @@ static Error processPhoto(string name)
 	return rec.frame.start(name.c_str()) ? Ok : Err;
 }
 
+static Error processWifi(string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
+{
+	const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
+	esp_err_t connResult;
+
+	if (useExplicitAddress) {
+		std::array<asio::error_code, 3> arrErr;
+		asio::ip::address_v4::bytes_type ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_bytes();
+		asio::ip::address_v4::bytes_type gateway = asio::ip::make_address_v4(aGateway, arrErr[1]).to_bytes();
+		asio::ip::address_v4::bytes_type netmask = asio::ip::make_address_v4(aNetmask, arrErr[2]).to_bytes();
+
+		if (std::any_of(arrErr.begin(), arrErr.end(), [](const asio::error_code &errCode) {return static_cast<bool>(errCode);}))
+		{
+			return ErrIpParse;
+		}
+
+		connResult = wifiConfigStaConnection(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
+	} else {
+		connResult = wifiConfigStaConnection(aSsid.c_str(), aPassword.c_str(), nullptr, nullptr, nullptr);
+	}
+
+	switch (connResult) {
+		case ESP_OK:
+			return Ok;
+
+		default:
+			return Err;
+	}
+
+}
+
 static void printStatus(httpd_req_t *req, Error res)
 {
 	auto *root = cJSON_CreateObject();
@@ -151,6 +206,10 @@ static void printStatus(httpd_req_t *req, Error res)
 
 				case ErrArg:
 					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("Wrong input argument(s)"));
+					break;
+
+				case ErrIpParse:
+					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("IP parsing error"));
 					break;
 
 				default:
@@ -182,6 +241,12 @@ extern "C" esp_err_t controlHandler(httpd_req_t *req)
 			ret = processVideoRecord(getArgValueByKey(req, kCommand), getArgValueByKey(req, kName));
 		} else if (value == kPhoto) {
 			ret = processPhoto(getArgValueByKey(req, kName));
+		} else if (value == kWifi) {
+			ret = processWifi(getArgValueByKey(req, kSsid),
+				getArgValueByKey(req, kPassword),
+				getArgValueByKey(req, kIp),
+				getArgValueByKey(req, kGateway),
+				getArgValueByKey(req, kNetmask));
 		}
 	}
 
