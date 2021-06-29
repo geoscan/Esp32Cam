@@ -72,8 +72,9 @@ void httpStart(void)
 {
 	static httpd_handle_t server = NULL;
 
-	ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &connectHandler, &server));
-	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnectHandler, &server));
+	// WARNING: It only works if we have limitation of clients number set to 1. Otherwise, counting mechanism must be implemented
+	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connectHandler, &server));
+	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, &disconnectHandler, &server));
 
 	server = startWebserver();
 }
