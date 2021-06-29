@@ -4,7 +4,6 @@
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/event_groups.h"
 #include "nvs_flash.h"
 
 #include <string.h>
@@ -59,14 +58,6 @@ static void decorateSsid(uint8_t **data, unsigned *len, const char *prefix)
 	*len  = strlen((char *)ssid);
 }
 
-static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
-{
-	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-		esp_wifi_connect();
-		ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
-	}
-}
-
 ///
 /// \brief wifiConfigStaConnection configures client (the chip is a station) connection parameters
 ///
@@ -80,7 +71,7 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 {
 	const bool useDhcp = (ip == NULL || gateway == NULL || netmask == NULL);
 
-	// If Wi-Fi has already been initialized, we try to connect
+	// If the Wi-Fi has already been initialized, we will try to connect later
 	const esp_err_t disconnectResult = esp_wifi_disconnect();
 	const bool shouldConnect = !(disconnectResult == ESP_ERR_WIFI_NOT_INIT || disconnectResult == ESP_ERR_WIFI_NOT_STARTED);
 
@@ -158,15 +149,12 @@ void wifi_init_sta(void)
 	wifiDriverInit();
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA) );
 
-	typedef uint8_t Ip[4];
-	wifiConfigStaConnection("testtest", "12345678", (Ip){192, 168, 43, 42}, (Ip){192, 168, 4, 1}, (Ip){255, 255, 255, 0});
+	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
 
 	uint8_t  *ssid;
 	unsigned ssid_len;
 	decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
 	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, (char *)ssid, CONFIG_ESP_WIFI_PASSWORD);
-
-	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL));
 
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
