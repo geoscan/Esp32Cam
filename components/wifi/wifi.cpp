@@ -4,6 +4,7 @@
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/event_groups.h"
 #include "nvs_flash.h"
 #include "utility/Algorithm.hpp"
 
@@ -29,6 +30,9 @@
 wifi_config_t sStaWifiConfig;
 wifi_config_t sApWifiConfig;
 esp_netif_t *sStaEspNetif = NULL;
+
+static constexpr unsigned kBitConnected = BIT0;
+static constexpr unsigned kBitDisconnected = BIT1;
 
 ///
 /// \brief get_ssid Decorates SSID with MAC address, using the latter as a suffix
@@ -64,17 +68,15 @@ static void decorateSsid(uint8_t **data, unsigned *len, const char *prefix)
 /// \param gateway          Gateway of the network, if NULL, a DHCP client will be used
 /// \param netmask          Netmask of the network, if NULL, a DHCP client will be used
 ///
-esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4], uint8_t gateway[4], uint8_t netmask[4])
+esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr, uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
 {
 	const bool useDhcp = (ip == NULL || gateway == NULL || netmask == NULL);
-
-	// If the Wi-Fi has already been initialized, we will try to connect later
-	const esp_err_t disconnectResult = esp_wifi_disconnect();
-	const bool shouldConnect = !(disconnectResult == ESP_ERR_WIFI_NOT_INIT || disconnectResult == ESP_ERR_WIFI_NOT_STARTED);
 
 	if (sStaEspNetif == NULL) {
 		sStaEspNetif = esp_netif_create_default_wifi_sta();
 	}
+
+	// Configure IP acquisition
 
 	if (useDhcp) {
 		esp_err_t err = esp_netif_dhcpc_start(sStaEspNetif);
@@ -97,6 +99,8 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 		CUSTOM_ESP_ERR_RETURN(esp_netif_set_ip_info(sStaEspNetif, &netifIpInfo));
 	}
 
+	// Apply config
+
 	memset(&sStaWifiConfig, 0, sizeof(sStaWifiConfig));
 	sStaWifiConfig.sta.pmf_cfg.capable = true;
 	sStaWifiConfig.sta.pmf_cfg.required = false;
@@ -105,11 +109,52 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 
 	CUSTOM_ESP_ERR_RETURN(esp_wifi_set_config(ESP_IF_WIFI_STA, &sStaWifiConfig));
 
-	if (shouldConnect) {
-		return esp_wifi_connect();
+	return ESP_OK;
+}
+
+static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* eventData)
+{
+	EventGroupHandle_t eventGroupHandle = *reinterpret_cast<EventGroupHandle_t *>(arg);
+
+	if (eventId == WIFI_EVENT_STA_CONNECTED) {
+		xEventGroupSetBits(eventGroupHandle, kBitConnected);
+	} else if (eventId == WIFI_EVENT_STA_DISCONNECTED) {
+		xEventGroupSetBits(eventGroupHandle, kBitDisconnected);
+	}
+}
+
+///
+/// \brief wifiStaConnect Tries to connect to an Access Point. The parameters
+/// are the same as for \ref wifiConfigStaConnection
+///
+esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr, uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
+{
+	// Disconnect from an AP
+	{
+		const esp_err_t err = esp_wifi_disconnect();
+		if (Utility::Algorithm::in(err, ESP_ERR_WIFI_NOT_INIT, ESP_ERR_WIFI_NOT_STARTED)) {
+			return err;
+		}
 	}
 
-	return ESP_OK;
+	// Update connection configuration
+	CUSTOM_ESP_ERR_RETURN(wifiConfigStaConnection(targetApSsid, targetApPassword, ip, gateway, netmask));
+
+	// Establish connection
+
+	EventGroupHandle_t wifiEventGroup = xEventGroupCreate();
+	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler, &wifiEventGroup);
+	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler, &wifiEventGroup);
+
+	CUSTOM_ESP_ERR_RETURN(esp_wifi_connect());
+	const EventBits_t bits = xEventGroupWaitBits(wifiEventGroup, kBitConnected | kBitDisconnected, pdFALSE, pdFALSE, portMAX_DELAY);
+	const esp_err_t err = (bits & kBitConnected) ? ESP_OK : ESP_FAIL;
+
+	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler);
+	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler);
+	vEventGroupDelete(wifiEventGroup);
+
+	return err;
 }
 
 ///
