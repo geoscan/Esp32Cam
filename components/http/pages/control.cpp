@@ -22,6 +22,7 @@
 #include "sd_fat.h"
 #include "wifi.h"
 #include "utility/time.hpp"
+#include "esp_wifi.h"
 
 using namespace std;
 
@@ -154,8 +155,15 @@ static Error processPhoto(string name)
 	return rec.frame.start(name.c_str()) ? Ok : Err;
 }
 
-static Error processWifi(string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
+static Error processWifi(string aCommand, string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
 {
+	if (aCommand == kDisconnect) {
+		esp_wifi_disconnect();
+		return Ok;
+	} else if (aCommand != kConnect) {
+		return ErrArg;
+	}
+
 	const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
 	esp_err_t connResult;
 
@@ -242,7 +250,8 @@ extern "C" esp_err_t controlHandler(httpd_req_t *req)
 		} else if (value == kPhoto) {
 			ret = processPhoto(getArgValueByKey(req, kName));
 		} else if (value == kWifi) {
-			ret = processWifi(getArgValueByKey(req, kSsid),
+			ret = processWifi(getArgValueByKey(req, kCommand),
+				getArgValueByKey(req, kSsid),
 				getArgValueByKey(req, kPassword),
 				getArgValueByKey(req, kIp),
 				getArgValueByKey(req, kGateway),
