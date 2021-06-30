@@ -5,6 +5,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "nvs_flash.h"
+#include "utility/Algorithm.hpp"
 
 #include <string.h>
 #include <stdlib.h>
@@ -80,9 +81,17 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	}
 
 	if (useDhcp) {
-		esp_netif_dhcpc_start(sStaEspNetif);
+		esp_err_t err = esp_netif_dhcpc_start(sStaEspNetif);
+		if (!Utility::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED)) {
+			return err;
+		}
 	} else {
-		esp_netif_dhcpc_stop(sStaEspNetif);
+		{
+			esp_err_t err = esp_netif_dhcpc_stop(sStaEspNetif);
+			if (!Utility::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED)) {
+				return err;
+			}
+		}
 
 		esp_netif_ip_info_t netifIpInfo;
 		IP4_ADDR(&netifIpInfo.ip, ip[0], ip[1], ip[2], ip[3]);
@@ -117,7 +126,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 {
 	esp_netif_create_default_wifi_ap();
 
-	const bool usePassword = (aPassword == NULL || strlen(aPassword) == 0);
+	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
 
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
 	sApWifiConfig.ap.ssid_len = 0;  // auto

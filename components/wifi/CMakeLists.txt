@@ -1,16 +1,6 @@
-# Edit following two lines to set component requirements (see docs)
-#set(COMPONENT_REQUIRES )
-#set(COMPONENT_PRIV_REQUIRES esp_wifi)
-
-#set(COMPONENT_SRCS "wifi.c")
-#set(COMPONENT_ADD_INCLUDEDIRS "include")
-
-#register_component()
-
 idf_component_register(
 	SRCS
-		"wifi.c"
-#		"get_ap_name_suffix.cpp"
+		"wifi.cpp"
 	INCLUDE_DIRS "."
 	REQUIRES
 		esp_wifi
@@ -19,4 +9,6 @@ idf_component_register(
 		freertos
 		esp_common
 		log
-		uart)
+		uart
+		utility
+)
