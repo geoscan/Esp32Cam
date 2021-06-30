@@ -19,10 +19,6 @@
 
 #define min(a,b) (a<b?a:b)
 
-#define STA_RETRY_NUM 4
-#define STA_SSID      "testtest"
-#define STA_PASSWORD  "12345678"
-
 #define CUSTOM_ESP_ERR_RETURN(x)  \
 	{	esp_err_t err;  \
 		if ((err = (x)) != ESP_OK)   \
