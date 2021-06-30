@@ -178,9 +178,9 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 			return ErrIpParse;
 		}
 
-		connResult = wifiConfigStaConnection(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
+		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
 	} else {
-		connResult = wifiConfigStaConnection(aSsid.c_str(), aPassword.c_str(), nullptr, nullptr, nullptr);
+		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), nullptr, nullptr, nullptr);
 	}
 
 	switch (connResult) {
