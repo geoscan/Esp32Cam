@@ -1,7 +1,7 @@
 #ifndef UTILITY_UTILITY_SUBSCRIPTION_HPP
 #define UTILITY_UTILITY_SUBSCRIPTION_HPP
 
-#include <rr/subscription/subscription.hpp>
+#include "subscription/Subscription.hpp"
 #include <asio.hpp>
 #include "cam/Camera.hpp"
 

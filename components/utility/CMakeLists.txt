@@ -6,7 +6,6 @@ idf_component_register(
 	SRCS ${SOURCE_FILES}
 	INCLUDE_DIRS
 		.
-		rr/rr-include
 	PRIV_INCLUDE_DIRS
 	REQUIRES
 		asio
