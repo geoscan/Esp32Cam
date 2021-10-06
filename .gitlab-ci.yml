@@ -4,16 +4,12 @@ variables:
 platformio_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu 
     script:
-        - git checkout esp32firm
         - platformio run
 
 espidf_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu
     before_script:
         - export PATH=/root/xtensa/bin:$PATH
-        # - export CMAKE_C_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-gcc
-        # - export CMAKE_CXX_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-g++
-        # - export CMAKE_ASM_COMPILER=/root/xtensa/bin/xtensa-esp32-elf-gcc
     script:
         - python /root/esp-idf/tools/idf.py build
         - cd tools
@@ -21,6 +17,3 @@ espidf_build:
     artifacts:
         paths:
             - "./tools/*.bin"
-            # - "./build/esp32.bin"
-            # - "./build/partition_table/partition-table.bin"
-            # - "./build/bootloader/bootloader.bin"
