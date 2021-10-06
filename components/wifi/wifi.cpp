@@ -107,7 +107,7 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	strcpy((char *)sStaWifiConfig.sta.password, targetApPassword);
 	strcpy((char *)sStaWifiConfig.sta.ssid, targetApSsid);
 
-	CUSTOM_ESP_ERR_RETURN(esp_wifi_set_config(ESP_IF_WIFI_STA, &sStaWifiConfig));
+	CUSTOM_ESP_ERR_RETURN(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_STA, &sStaWifiConfig));
 
 	return ESP_OK;
 }
@@ -180,7 +180,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	strcpy((char *)&sApWifiConfig.ap.ssid, (char *)aSsid);
 	strcpy((char *)&sApWifiConfig.ap.password, aPassword);
 
-	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &sApWifiConfig) );
+	ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_AP, &sApWifiConfig) );
 }
 
 static void wifiDriverInit()
