@@ -5,8 +5,8 @@
 
 ## esp-idf framework
 
-
-### [Хорошая официальная инструкция](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/)
+* [Windows](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html)
+* [Хорошая официальная инструкция](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/)
 
 ### TL; DR
 
@@ -40,6 +40,65 @@ source $IDF_PATH/export.sh
 ```
 
 **Важно**: требуется именно команда `source`, не исполнение скрипта.
+
+## TL; DR linux
+
+1. Инициализировать подмодули
+
+```bash
+git submodule update --init --recursive
+```
+
+2. Вместе с подмодулями в директорию `espidf/` скопируется фреймворк `esp-idf`
+
+```bash
+cd espidf
+install.sh
+```
+
+3. Работа с `esp-idf` во многом автоматизируется python-скриптами, поставляемыми вместе с самим фреймворком. Фреймворки полагаются на системную переменную `IDF_PATH`, указывающую на папку `esp-idf`, склонированную из `github.com/espressif/esp-idf`.
+
+   Добавление переменной `$IDF_PATH`
+
+```bash
+export IDF_PATH=`pwd`
+```
+
+4. Перед каждой сборкой надо настраивать окружение
+
+```bash
+source $IDF_PATH/export.sh
+```
+
+5. Запуск сборки
+
+```bash
+idf.py build
+```
+
+```
+idf.py build
+Executing action: all (aliases: build)
+Running cmake in directory /home/dmurashov/Documents/ESP32/esp32-firmware/build
+Executing "cmake -G Ninja -DPYTHON_DEPS_CHECKED=1 -DESP_PLATFORM=1 --warn-uninitialized -DIDF_TARGET=esp32 -DCCACHE_ENABLE=0 /home/dmurashov/Documents/ESP32/esp32-firmware"...
+Warn about uninitialized values.
+-- Found Git: /usr/bin/git (found version "2.17.1")
+-- Component directory /home/dmurashov/Documents/ESP32/esp-idf/components/tinyusb does not contain a CMakeLists.txt file. No component will be added
+-- The C compiler identification is GNU 8.2.0
+-- The CXX compiler identification is GNU 8.2.0
+-- The ASM compiler identification is GNU
+-- Found assembler: /home/dmurashov/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /home/dmurashov/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /home/dmurashov/.espressif/tools/xtensa-esp32-elf/esp-2020r2-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+```
 
 # Проект
 ## Сборка проекта
@@ -116,7 +175,7 @@ ESP order | ESP name | JTAG order | JTAG name
 
 ### Известные проблемы
 #### `esp32.cpu0: IR capture error; saw 0x1f not 0x01`
-Возможно, пины `12`-`15` используются прошивкой. 
+Возможно, пины `12`-`15`, используемые для JTAG-подключения, сконфигурированы на момент запуска, поэтому не могут использоваться.
 
 ## HW/SW: Segger JLink + OpenOCD + ESP32
 
