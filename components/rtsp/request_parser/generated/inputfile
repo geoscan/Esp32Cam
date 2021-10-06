@@ -1,6 +1,0 @@
-rtsp://example.com/media.mp4 RTSP/1.0
-sdf
-CSeq: 3.2
-Session: 2
-Require: implicit-play
-Proxy-Require: gzipped-messages;colonseparated; separated-with-whitespace

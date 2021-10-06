@@ -14,7 +14,6 @@
 #include "wifi.h"
 #include "http.h"
 #include "wifi_uart_bridge.hpp"
-#include "deprecated_wifi_uart_bridge.hpp"
 #include "camera_streamer.h"
 #include "cam/cam.hpp"
 #include "camera_thread/camera_thread.hpp"
