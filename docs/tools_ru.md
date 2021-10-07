@@ -9,7 +9,7 @@
 
 Прошивка ESP32 - главная задача `njet`. Реализуется вызовом ESPTool. Если Вам требуется дополнительные функции, пользуйтесь `njet` для перевода ESP32 в режим bootloader, затем ESPTool для работы с *ESP32 First-stage Bootloader*.
 
-Пример того как прошивать ESP32 на *Pioneer* или *Pioneer Mini* см. в `tools/njet/flash_pioneer[_mini].sh`.
+Пример того как прошивать ESP32 на *Pioneer* или *Pioneer Mini* см. в `tools/njet/flash_pioneer[_mini].sh`.  Обратите внимание, что скрипты написаны для Linux. Для Windows команды аналогичны, с учетом особенностей *Windows Shell*.
 
 # `jlink_openocd_scripts`
 
