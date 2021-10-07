@@ -1,0 +1,1 @@
+Firmware for ESP32, a part of Pioneer and Pioneer Mini hardware.
