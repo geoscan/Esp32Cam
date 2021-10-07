@@ -8,40 +8,9 @@
 * [Windows](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/windows-setup.html)
 * [Хорошая официальная инструкция](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/)
 
-### TL; DR
-
-`esp-idf` framework подтянет нужные зависимости, включая toolset `xtensa-esp32-elf`. Нужно:
-
-1. Склонировать [esp-idf](https://github.com/espressif/esp-idf)
-
-```bash
-git clone --recursive https://github.com/espressif/esp-idf
-```
-
-2. Переключиться на нужный тэг/ветку *(2021-02-10, используется `v4.3-dev`, более ранние тоже подходят)*
-
-```bash
-git checkout v4.3-dev
-```
-
-3. Запустить скрипт `install.sh` из директории `esp-idf`
-
-Работа с `esp-idf` во многом автоматизируется python-скриптами, поставляемыми вместе с самим фреймворком. Фреймворки полагаются на системную переменную `IDF_PATH`, указывающую на папку `esp-idf`, склонированную из `github.com/espressif/esp-idf`.
-
-Добавление переменной `$IDF_PATH`.
-```bash
-export IDF_PATH=<IDF path>
-```
-
-Использование скриптов `esp-idf` требует предварительной инициализации окружения командой переменной строки
-
-```bash
-source $IDF_PATH/export.sh
-```
-
-**Важно**: требуется именно команда `source`, не исполнение скрипта.
-
 ## TL; DR linux
+
+Воспринимайте этот мануал как *вспомогательный*. Официальная инструкция точнее и полнее.
 
 1. Инициализировать подмодули
 
@@ -49,7 +18,7 @@ source $IDF_PATH/export.sh
 git submodule update --init --recursive
 ```
 
-2. Вместе с подмодулями в директорию `espidf/` скопируется фреймворк `esp-idf`
+2. Вместе с подмодулями в директорию `espidf/` скопируется фреймворк `esp-idf`, с использованием которого написана прошивка. Запустите установку необходимых инструментов.
 
 ```bash
 cd espidf
@@ -64,7 +33,7 @@ install.sh
 export IDF_PATH=`pwd`
 ```
 
-4. Перед каждой сборкой надо настраивать окружение
+4. Перед каждой сборкой надо настраивать окружение. `esp-idf` это автоматизирует.
 
 ```bash
 source $IDF_PATH/export.sh
@@ -175,7 +144,7 @@ ESP order | ESP name | JTAG order | JTAG name
 
 ### Известные проблемы
 #### `esp32.cpu0: IR capture error; saw 0x1f not 0x01`
-Возможно, пины `12`-`15`, используемые для JTAG-подключения, сконфигурированы на момент запуска, поэтому не могут использоваться.
+Возможно, пины `12`-`15`, используемые для JTAG-подключения, сконфигурированы на момент попытки подключения. Попробуйте стереть память и попробовать заново.
 
 ## HW/SW: Segger JLink + OpenOCD + ESP32
 
