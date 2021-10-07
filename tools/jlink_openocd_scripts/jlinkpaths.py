@@ -5,7 +5,7 @@ address_partition_table        = hex(0x8000)
 address_firmware               = hex(0x10000)
 
 path_home                       = str(Path.home())
-path_project                    = f"{path_home}/Documents/ESP32/esp32-firmware"
+path_project                    = str(Path(__file__).resolve().parent.parent.parent)
 path_openocd_scripts_location   = f"{path_home}/.local/bin/openocd-esp32/share/openocd/scripts"
 path_openocd_executable         = f"{path_home}/.local/bin/openocd-esp32/bin/openocd"
 path_openocd_config             = f"{path_home}/.jlinkesp32.cfg"
