@@ -23,3 +23,4 @@ tools/esptool/dist
 *.idea
 /tools/cache
 sdkconfig.old
+tools/*/cache
