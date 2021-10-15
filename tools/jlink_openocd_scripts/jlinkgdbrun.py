@@ -46,4 +46,4 @@ def prepare_gdbinit():
 
 if __name__ == "__main__":
     prepare_gdbinit()
-    os.system(f"{path_xtensa_binaries}/xtensa-esp32-elf-gdb" + f" --command={path_gdbinit}")
+    os.system(f"xtensa-esp32-elf-gdb" + f" --command={path_gdbinit}")
