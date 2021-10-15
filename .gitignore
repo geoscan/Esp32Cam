@@ -24,3 +24,5 @@ tools/esptool/dist
 /tools/cache
 sdkconfig.old
 tools/*/cache
+tools/idftools
+tools/jlink_openocd_scripts/__pycache__/
