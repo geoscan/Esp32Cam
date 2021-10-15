@@ -25,3 +25,4 @@ espidf_build_deps:
     artifacts:
         paths:
             - "./tools/*.bin"
+    when: manual
