@@ -18,6 +18,8 @@ espidf_build:
 espidf_build_deps:
     image: ${CI_REGISTRY_IMAGE}:ubuntu
     script:
+        - export PATH=`echo $PATH | sed 's/[^:]*esp32[^:]*:/:/g'`
+        - echo $PATH
         - make configure
         - make build
         - cd tools
