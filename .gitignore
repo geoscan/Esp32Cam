@@ -29,3 +29,4 @@ tools/jlink_openocd_scripts/__pycache__/
 tools/jlink_openocd_scripts/.jlinkesp32.cfg
 tools/jlink_openocd_scripts/.jlinkgdbinit
 cache/
+environment.sh
