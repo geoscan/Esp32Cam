@@ -47,7 +47,7 @@ jlinkespconnect: jlinkespconnect_preconfigured
 jlinkespconnect_:
 	$(EXE_PYTHON) $(PATH_JLINK_SCRIPTS)/jlinkesp32.py
 
-jlinkgdbconnect: build jlinkgdbconnect_preconfigured
+jlinkgdbconnect: jlinkgdbconnect_preconfigured
 jlinkgdbconnect_:
 	$(EXE_PYTHON) $(PATH_JLINK_SCRIPTS)/jlinkgdbrun.py
 
