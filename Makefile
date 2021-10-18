@@ -9,6 +9,11 @@ PATH_COMPILED_BOOTLOADER := $(shell pwd)/build/bootloader/bootloader.bin
 PATH_COMPILED_PARTTABLE := $(shell pwd)/build/partition_table/partition-table.bin
 PATH_COMPILED_FIRMWARE := $(shell pwd)/build/esp32.bin
 
+PATH_ENVIRONMENT := environment.sh
+
+REMOVE_LIST := build $(PATH_IDF_TOOLS_PATH) $(PATH_ENVIRONMENT)
+PRINT_PREFIX := "\\n\\n\\n------------------ "
+
 EXE_PYTHON := python3
 EXE_NJET := $(PATH_NJET)/njet
 
@@ -33,6 +38,10 @@ rebuild: build_preconfigured
 clean: clean_preconfigured
 clean_:
 	idf.py clean
+
+menuconfig: menuconfig_preconfigured
+menuconfig_:
+	idf.py menuconfig
 
 jlinkespconnect: jlinkespconnect_preconfigured 
 jlinkespconnect_:
@@ -70,31 +79,33 @@ flashmini: build
 
 # Expands the stem $* automatic variable. Calls a new instance of make recursively
 %_preconfigured:
-	@echo ---------------------------------
-	@echo " $*"
-	@echo ---------------------------------
+	@echo $(PRINT_PREFIX) " $*"
 
 	$(SNIPPET_EXPORT_PATHS) && \
 		. $(PATH_IDF_PATH)/export.sh && \
 		$(MAKE) $*_
 
-	@echo ---------------------------------
-	@echo " $* - SUCCESS"
-	@echo ---------------------------------
+	@echo $(PRINT_PREFIX) " $* - SUCCESS"
 
 # Clean / deconfigure the project completely, remove all installed dependencies and tools
 distclean:
-	@echo -- Cleaning everything
-	rm -rf build
-	rm -rf $(PATH_IDF_TOOLS_PATH)
+	@echo $(PRINT_PREFIX) Cleaning everything
+	rm -rf $(REMOVE_LIST)
 	git submodule deinit --all --force
 
 # Configure the project
 configure:
-	@echo -- Initializing submodules
+	@echo $(PRINT_PREFIX) Initializing submodules
 	git submodule update --init --recursive
 
-	@echo -- Installing ESP IDF
+	@echo $(PRINT_PREFIX) Installing ESP IDF
 	$(SNIPPET_EXPORT_PATHS) && $(PATH_IDF_PATH)/install.sh
+	echo "$(SNIPPET_EXPORT_PATHS) && . $(PATH_IDF_PATH)/export.sh" > $(PATH_ENVIRONMENT)
+	
+	@echo $(PRINT_PREFIX) SUCCESS
+	@echo Configuring done
+	@echo Use \"make *\" or \". $(PATH_ENVIRONMENT)\" and further calls to manage your project
+	@echo The latter one will give you access to the entire ESP-IDF toolset, you are encouraged
+	@echo to use it
 
 #.PHONY: build_preconfigured clean_preconfigured jlinkespconnect jlinkgdbconnect rebuild
