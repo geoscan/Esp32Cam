@@ -6,6 +6,7 @@ platformio_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu 
     script:
         - platformio run
+    when: manual
 
 espidf_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu
