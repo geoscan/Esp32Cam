@@ -3,4 +3,4 @@
 	url = https://github.com/espressif/esp-idf.git
 [submodule "components/lib/mavlink/mavlink"]
 	path = components/lib/mavlink/mavlink
-	url = git@gitlab.corp.geoscan.aero:internal/mavlink.git
+	url = ../../internal/mavlink.git
