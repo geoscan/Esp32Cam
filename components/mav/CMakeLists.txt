@@ -1,5 +1,12 @@
+set(PATH_MAVLINK_HEADERS ${PROJECT_BINARY_DIR}/lib)
+
 idf_component_register(
 	DEPENDS mavlink
+	SRCS "Parser.cpp"
+	PRIV_INCLUDE_DIRS
+		${PATH_MAVLINK_HEADERS}
+		priv_include
+	INCLUDE_DIRS
 )
 set(PATH_MAVLINK_HEADERS ${PROJECT_BINARY_DIR}/lib)
 add_custom_target(MavlinkCopyGenerated
