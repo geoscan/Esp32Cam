@@ -1,0 +1,45 @@
+//
+// Buffer.impl
+//
+// Created on: Dec 02, 2021
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#ifndef UTILITY_UTILITY_BUFFER_IMPL
+#define UTILITY_UTILITY_BUFFER_IMPL
+
+namespace Utility {
+
+template <typename T>
+inline T *Tbuffer<T>::data() const
+{
+	return std::get<0>(*this);
+}
+
+template <typename T>
+std::size_t Tbuffer<T>::size() const
+{
+	return std::get<1>(*this);
+}
+
+template <typename T>
+typename ::Utility::Impl::InterpType<T>::Type &Tbuffer<T>::at(std::uint8_t aPos)
+{
+	return reinterpret_cast<typename Impl::InterpType<T>::Type *>(data())[aPos];
+}
+
+template <typename T>
+template <typename TypeTo>
+Tbuffer<TypeTo> Tbuffer<T>::as()
+{
+	static_assert(!std::is_pointer<TypeTo>::value, "Please, use raw types, e.g. int, float, std::vector<...>, etc");
+	static_assert(!std::is_reference<TypeTo>::value, "Please, use raw types, e.g. int, float, std::vector<...>, etc");
+
+	constexpr auto kSzTypeFrom = sizeof(typename Impl::InterpType<T>::Type);
+	constexpr auto kSzTypeTo = sizeof(typename Impl::InterpType<TypeTo>::Type);
+
+	return {reinterpret_cast<TypeTo *>(data()), kSzTypeFrom * size() / kSzTypeTo};
+}
+}  // namespace Utility
+
+#endif  // UTILITY_UTILITY_BUFFER_IMPL
