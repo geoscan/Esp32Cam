@@ -1,9 +1,9 @@
 idf_component_register(
-	DEPENDS
-		mavlink
+	PRIV_REQUIRES
 		utility
-	SRCS_DIRS
+		mavlink
+	SRC_DIRS
 		"."
 	PRIV_INCLUDE_DIRS
-		priv_include
+		"priv_include"
 )
