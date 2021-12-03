@@ -10,8 +10,15 @@
 #include "utility/Buffer.hpp"
 #include "Marshalling.hpp"
 
-void Mav::MarshallingBase::push(const mavlink_message_t &aMavlinkMessage, Utility::Buffer aBuffer)
+std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Utility::Buffer aBuffer)
 {
-	assert(aBuffer.size() >= kMavlinkMessageMaxLength);
-	mavlink_msg_to_send_buffer(static_cast<std::uint8_t *>(aBuffer.data()), &aMavlinkMessage);
+	assert(aBuffer.size() >= sizeof(mavlink_message_t));
+	return mavlink_msg_to_send_buffer(static_cast<std::uint8_t *>(aBuffer.data()), &aMavlinkMessage);
+}
+
+void Mav::Marshalling::push(const mavlink_message_t &aMessage)
+{
+	typename Mav::HoldQueue::value_type hold;
+	hold.setSize(push(aMessage, hold.asBuffer()));
+	Mav::HoldQueue::push(std::move(hold));
 }

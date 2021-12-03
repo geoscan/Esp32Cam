@@ -9,32 +9,26 @@
 #define MAV_PRIV_INCLUDE_MARSHALLING_HPP_
 
 #include <queue>
-#include <vector>
-#include <cstdint>
-#include <type_traits>
-#include "Mavlink.hpp"
-
-namespace Utility {
-
-template <typename T>
-class Tbuffer;
-
-using Buffer = Tbuffer<void>;
-using ConstBuffer = Tbuffer<const void>;
-
-}  // namespace Utility
+#include "utility/Buffer.hpp"
 
 struct __mavlink_message;
-typedef struct __mavlink_message mavlink_message_t;
+typedef __mavlink_message mavlink_message_t;
 
 namespace Mav {
 
-struct MarshallingBase {
-public:
-	static void push(const mavlink_message_t &, Utility::Buffer);
+using HoldQueue = std::queue<Utility::Thold<std::uint8_t, sizeof(mavlink_message_t)>>;
+class Marshalling : HoldQueue {
+private:
+	using HoldQueue::push;
 
-protected:
-	static constexpr std::size_t kMavlinkMessageMaxLength = 280;
+public:
+	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
+
+	///
+	/// \brief push
+	/// \return true, if there was room for one message
+	///
+	void push(const mavlink_message_t &);
 };
 
 }  // namespace Mav
