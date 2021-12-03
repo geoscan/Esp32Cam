@@ -81,6 +81,12 @@ inline Tbuffer<T> Thold<T, N>::asBuffer()
 {
 	return toBuffer<T>(*this);
 }
+
+template <typename T, std::size_t N>
+inline Tbuffer<const T> Thold<T, N>::asBuffer() const
+{
+	return toBuffer<const T>(*this);
+}
 }  // namespace Utility
 
 #endif  // UTILITY_UTILITY_BUFFER_IMPL

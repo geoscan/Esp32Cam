@@ -81,6 +81,7 @@ struct Thold : std::array<T, N> {
 	std::size_t size() const;
 
 	Tbuffer<T> asBuffer();
+	Tbuffer<const T> asBuffer() const;
 
 private:
 	std::size_t mSize = 0;
