@@ -28,6 +28,8 @@ public:
 	void push(Utility::ConstBuffer buffer);
 
 private:
+	using std::queue<mavlink_message_t>::push;
+private:
 	struct {
 		mavlink_message_t rxMessage;
 		mavlink_status_t rxStatus;
