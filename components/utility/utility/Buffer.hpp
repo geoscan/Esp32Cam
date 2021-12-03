@@ -47,9 +47,7 @@ struct Tbuffer : std::tuple<T *, std::size_t> {
 	using Type = T;
 
 	T *data() const;
-
 	std::size_t size() const;
-
 	typename Impl::InterpType<T>::Type &at(std::uint8_t aPos);
 
 	template <typename TypeTo>
