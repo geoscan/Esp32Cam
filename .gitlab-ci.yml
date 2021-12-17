@@ -23,7 +23,8 @@ espidf_build_deps:
     script:
         - echo $PATH
         - make configure
-        - make build
+        - source ./environment.sh
+        - idf.py build
         - cd tools
         - ./extract_binaries.sh
     artifacts:
