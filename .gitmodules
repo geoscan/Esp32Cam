@@ -6,4 +6,4 @@
 	url = ../../internal/mavlink.git
 [submodule "components/lib/rr/rr"]
 	path = components/lib/rr/rr
-	url = ../../reciprocal-receptacles.git
+	url = ../../d.murashov/reciprocal-receptacles
