@@ -1,0 +1,13 @@
+# RR configuration varaibles
+set(RRO_STL_USED ON CACHE BOOL "")
+set(RRO_STATIC_CAST_FN_CONVERSION OFF CACHE BOOL "")
+set(RRO_ENABLE_CASSERT ON CACHE BOOL "")
+set(RRO_ENABLE_DEBUG OFF CACHE BOOL "")
+
+idf_component_register(
+	PRIV_INCLUDE_DIRS
+	INCLUDE_DIRS
+		"${CMAKE_CURRENT_SOURCE_DIR}/rr/src/"
+)
+
+add_subdirectory(rr EXCLUDE_FROM_ALL)
