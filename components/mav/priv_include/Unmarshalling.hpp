@@ -25,6 +25,7 @@ namespace Mav {
 class Unmarshalling final : public std::queue<mavlink_message_t> {
 public:
 	using std::queue<mavlink_message_t>::queue;
+
 	void push(Utility::ConstBuffer buffer);
 
 private:
