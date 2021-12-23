@@ -17,7 +17,7 @@ typedef __mavlink_message mavlink_message_t;
 namespace Mav {
 
 using HoldQueue = std::queue<Utility::Thold<std::uint8_t, sizeof(mavlink_message_t)>>;
-class Marshalling : HoldQueue {
+class Marshalling : public HoldQueue {
 private:
 	using HoldQueue::push;
 
