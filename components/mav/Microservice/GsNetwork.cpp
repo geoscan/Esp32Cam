@@ -60,7 +60,7 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 		for (auto &ipConnectService : Utility::Subscription::Key::IpConnect::getIterators()) {
 			auto result = ipConnectService(ipConnect);
 
-			if (result.result == Utility::Subscription::Result::Success) {
+			if (result.resultCode == Utility::Subscription::ResultCode::Success) {
 				aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 				break;
 			}
@@ -88,7 +88,7 @@ Mav::Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage
 	for (auto &ipSendService : Utility::Subscription::Key::IpSend::getIterators()) {
 		auto result = ipSendService(ipDestMessage);
 
-		if (result.result == Utility::Subscription::Result::Success) {
+		if (result.resultCode == Utility::Subscription::ResultCode::Success) {
 			aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 			break;
 		}
