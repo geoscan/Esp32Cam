@@ -132,7 +132,7 @@ struct IpConnect : IpDestEndpoint {
 /// \brief A generic return. It can be detailed through using an additional
 /// subject-specific enum
 ///
-enum class Result {
+enum class ResultCode {
 	None = -1,  ///< A request cannot be fulfilled by this particular provider
 	Success = 0,
 	Fail,
@@ -147,14 +147,14 @@ enum class Result {
 /// necessary in the future.
 ///
 struct IpResult {
-	Result result;  ///< Generic result.
+	ResultCode resultCode;  ///< Generic result.
 };
 
 ///
 /// \brief Resulting information from making a routing request
 ///
 struct RoutingResult {
-	Result result = Result::None;  ///< Generic result
+	ResultCode resultCode;  ///< Generic result
 };
 
 namespace Key {
