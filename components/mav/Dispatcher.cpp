@@ -52,9 +52,13 @@ Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUartReceived(Util
 		default:  // Message has been processed from inside, no actions required
 			break;
 	};
+
+	return {};
 }
 
 Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUdpReceived(Utility::Subscription::Message &aMessage)
 {
 	Utility::Subscription::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
+
+	return {};
 }
