@@ -26,7 +26,7 @@ struct MavlinkUdpReceived;
 struct MavlinkUartSend;
 struct MavlinkUdpSend;
 struct MavlinkForward;
-struct IpConnect;
+struct Ip;
 struct IpDisconnect;
 }  // namespace Topic
 
@@ -134,7 +134,7 @@ struct IpConnect : IpDestEndpoint {
 ///
 enum class Result {
 	None = -1,  ///< A request cannot be fulfilled by this particular provider
-	Ok = 0,
+	Success = 0,
 	Fail,
 
 	Max,
@@ -173,7 +173,8 @@ using MavlinkUdpReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUar
 using MavlinkUdpSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUdpSend>;
 using MavlinkUartSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartSend>;
 
-using IpConnect = IndModule<IpResult(const IpConnect &), Topic::IpConnect>;  ///< Fullfill a TCP connection request
+using IpConnect = IndModule<IpResult(const IpConnect &), Topic::Ip>;  ///< Fullfill a TCP connection request
+using IpSend = IndModule<RoutingResult(const IpDestMessage &message), Topic::Ip>;  ///< Send an IP package
 
 }  // namespace Key
 
