@@ -29,6 +29,8 @@ public:
 	Ret process(mavlink_message_t &aMavlinkMessage) override;
 
 private:
+
+	// All the following handlers are expected to pack the repsonse message if, of course, they have any
 	Ret processConnectDisconnect(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	Ret processSend(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	Ret processReceived(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);

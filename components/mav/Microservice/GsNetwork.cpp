@@ -7,8 +7,10 @@
 
 #include "Mavlink.hpp"
 #include "Microservice/GsNetwork.hpp"
+#include "Globals.hpp"
 #include "utility/Subscription.hpp"
 #include <algorithm>
+#include <utility/Algorithm.hpp>
 
 using namespace Mav::Mic;
 
@@ -43,26 +45,30 @@ Mav::Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 
 Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-//	using namespace Utility::Subscription;
 
-//	IpEndpointCommand ipEndpointCommand;
-//	ipEndpointCommand.command = aMavlinkMavGsNetwork.command == MAV_GS_NETWORK_COMMAND_CONNECT ? IpEndpointCommand::Connect : IpEndpointCommand::Disconnect;
-//	ipEndpointCommand.port = aMavlinkMavGsNetwork.src_port;
-//	ipEndpointCommand.endpoint.port = aMavlinkMavGsNetwork.dest_port;
-//	std::copy_n(aMavlinkMavGsNetwork.dest_ip4, sizeof(aMavlinkMavGsNetwork.dest_ip4), ipEndpointCommand.ipv4);
+	if (aMavlinkMavGsNetwork.transport == MAV_GS_NETWORK_TRANSPORT_TCP) {  // Connect command can only be evaluated for TCP transport
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
+	} else {
+		Utility::Subscription::IpConnect ipConnect;
 
-//	unsigned result = IpEndpointResult::Unprocessed;
+		std::copy(aMavlinkMavGsNetwork.dest_ip4, aMavlinkMavGsNetwork.dest_ip4 + 4, ipConnect.address);
+		ipConnect.port = aMavlinkMavGsNetwork.dest_port;
+		ipConnect.hostPort = aMavlinkMavGsNetwork.src_port;
+		ipConnect.connect = (aMavlinkMavGsNetwork.command == MAV_GS_NETWORK_COMMAND_CONNECT);
 
-//	for (auto &callable : Key::ProcessIpEndpointCommand::getIterators()) {
-//		if ((result = callable(ipEndpointCommand)) != IpEndpointResult::Unprocessed) {
-//			break;
-//		}
-//	}
+		for (auto &ipConnectService : Utility::Subscription::Key::IpConnect::getIterators()) {
+			auto result = ipConnectService(ipConnect);
 
-//	aMavlinkMavGsNetwork.ack = (result == IpEndpointResult::Success) ? MAV_GS_NETWORK_ACK_SUCCESS :
-//		MAV_GS_NETWORK_ACK_FAIL;
+			if (result.result != Utility::Subscription::Result::None) {
+				aMavlinkMavGsNetwork.ack = (result.result == Utility::Subscription::Result::Ok) ? MAV_GS_NETWORK_ACK_SUCCESS : MAV_GS_NETWORK_ACK_FAIL;
+				break;
+			}
+		}
+	}
 
-	return Ret::Ignored;
+	mavlink_msg_mav_gs_network_encode(Mav::Globals::getSysId(), Mav::Globals::getCompId(), &aMavlinkMessage, &aMavlinkMavGsNetwork);
+
+	return Ret::Response;
 }
 
 Mav::Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
