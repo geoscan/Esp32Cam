@@ -127,6 +127,11 @@ struct IpConnect : IpDestEndpoint {
 
 // Routing and control result types
 
+
+///
+/// \brief A generic return. It can be detailed through using an additional
+/// subject-specific enum
+///
 enum class Result {
 	None = -1,  ///< A request cannot be fulfilled by this particular provider
 	Ok = 0,
@@ -136,7 +141,7 @@ enum class Result {
 };
 
 ///
-/// \brief Encapsulates all the necessary information acquired from making an
+/// \brief Encapsulates all the resulting information acquired from making an
 /// IP request such as connect or disconnect. Nesting is used to provide
 /// painless extension without changing too much code, if such will be rendered
 /// necessary in the future.
@@ -145,7 +150,11 @@ struct IpResult {
 	Result result;  ///< Generic result.
 };
 
+///
+/// \brief Resulting information from making a routing request
+///
 struct RoutingResult {
+	Result result = Result::None;  ///< Generic result
 };
 
 namespace Key {
@@ -164,7 +173,7 @@ using MavlinkUdpReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUar
 using MavlinkUdpSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUdpSend>;
 using MavlinkUartSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartSend>;
 
-using IpConnect = IndModule<IpResult(const IpConnect &), Topic::IpConnect>;  ///<
+using IpConnect = IndModule<IpResult(const IpConnect &), Topic::IpConnect>;  ///< Fullfill a TCP connection request
 
 }  // namespace Key
 
