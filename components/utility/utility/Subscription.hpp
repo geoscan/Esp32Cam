@@ -140,21 +140,30 @@ enum class ResultCode {
 	Max,
 };
 
+struct ResultGeneric {
+	ResultCode resultCode;  ///< Generic result code
+};
+
 ///
 /// \brief Encapsulates all the resulting information acquired from making an
 /// IP request such as connect or disconnect. Nesting is used to provide
 /// painless extension without changing too much code, if such will be rendered
 /// necessary in the future.
 ///
-struct IpResult {
-	ResultCode resultCode;  ///< Generic result.
+struct IpResult : ResultGeneric {
 };
 
+struct ProcessReceivedResult {};
+
 ///
-/// \brief Resulting information from making a routing request
+/// \brief Resulting information from making a send request
 ///
-struct RoutingResult {
-	ResultCode resultCode;  ///< Generic result
+struct SendResult : ResultGeneric {};
+
+struct IpSendResult : SendResult {
+};
+
+struct UartSendResult : SendResult {
 };
 
 namespace Key {
@@ -168,13 +177,14 @@ using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, 
 using RecordStop       = Rr::Subscription::Key<void, Topic::RecordStop>;
 
 // As for 2021-12-23, a duplex 1-to-1 version of forwarding is used. No locking is required
-using MavlinkUartReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUdpReceived>;
-using MavlinkUdpReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartReceived>;
-using MavlinkUdpSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUdpSend>;
-using MavlinkUartSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartSend>;
+using MavlinkUartReceived = NoLockKey<ProcessReceivedResult(Message &), Topic::MavlinkUdpReceived>;
+using MavlinkUdpReceived = NoLockKey<ProcessReceivedResult(Message &), Topic::MavlinkUartReceived>;
+using MavlinkUdpSend = NoLockKey<IpSendResult(Message &), Topic::MavlinkUdpSend>;
+using MavlinkUartSend = NoLockKey<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
 
-using IpConnect = IndModule<IpResult(const IpConnect &), Topic::Ip>;  ///< Fullfill a TCP connection request
-using IpSend = IndModule<RoutingResult(const IpDestMessage &message), Topic::Ip>;  ///< Send an IP package
+using IpConnect = IndModule<IpResult(const Utility::Subscription::IpConnect &)>;  ///< Fullfill a TCP connection request
+using IpSend = IndModule<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
+using UartSend = IndModule<UartSendResult(const UartMessage &)>;  ///< Send a package over serial
 
 }  // namespace Key
 
