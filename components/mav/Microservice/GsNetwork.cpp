@@ -55,18 +55,20 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 		ipConnect.port = aMavlinkMavGsNetwork.dest_port;
 		ipConnect.hostPort = aMavlinkMavGsNetwork.src_port;
 		ipConnect.connect = (aMavlinkMavGsNetwork.command == MAV_GS_NETWORK_COMMAND_CONNECT);
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
 
 		for (auto &ipConnectService : Utility::Subscription::Key::IpConnect::getIterators()) {
 			auto result = ipConnectService(ipConnect);
 
-			if (result.result != Utility::Subscription::Result::None) {
-				aMavlinkMavGsNetwork.ack = (result.result == Utility::Subscription::Result::Ok) ? MAV_GS_NETWORK_ACK_SUCCESS : MAV_GS_NETWORK_ACK_FAIL;
+			if (result.result == Utility::Subscription::Result::Success) {
+				aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 				break;
 			}
 		}
 	}
 
 	mavlink_msg_mav_gs_network_encode(Mav::Globals::getSysId(), Mav::Globals::getCompId(), &aMavlinkMessage, &aMavlinkMavGsNetwork);
+	std::memset(aMavlinkMavGsNetwork.payload, 0, sizeof(aMavlinkMavGsNetwork.payload));
 
 	return Ret::Response;
 }
