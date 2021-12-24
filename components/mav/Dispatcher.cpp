@@ -49,7 +49,7 @@ Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUartReceived(Util
 			marshalling.pop();
 			break;
 
-		default:  // Message has been processed from inside, no actions required
+		default:  // Message has been processed by some Microservice instance, no actions required
 			break;
 	};
 
