@@ -127,7 +127,6 @@ struct IpConnect : IpDestEndpoint {
 
 // Routing and control result types
 
-
 ///
 /// \brief A generic return. It can be detailed through using an additional
 /// subject-specific enum
@@ -140,6 +139,9 @@ enum class ResultCode {
 	Max,
 };
 
+///
+/// \brief A generic structure storing result of an operation
+///
 struct ResultGeneric {
 	ResultCode resultCode;  ///< Generic result code
 };
@@ -153,16 +155,27 @@ struct ResultGeneric {
 struct IpResult : ResultGeneric {
 };
 
-struct ProcessReceivedResult {};
+///
+/// \brief Result of processing an incoming packet
+///
+struct ProcessReceivedResult {
+};
 
 ///
-/// \brief Resulting information from making a send request
+/// \brief Dedicated structure to store a result of sending a byte package
 ///
-struct SendResult : ResultGeneric {};
+struct SendResult : ResultGeneric {
+};
 
+///
+/// \brief Dedicated structure to store a result of sending a byte package over IP
+///
 struct IpSendResult : SendResult {
 };
 
+///
+/// \brief Dedicated structure to store a result of sending a byte package over UART
+///
 struct UartSendResult : SendResult {
 };
 
