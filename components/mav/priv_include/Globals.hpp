@@ -8,6 +8,8 @@
 #ifndef MAV_PRIV_INCLUDE_GLOBALS_HPP
 #define MAV_PRIV_INCLUDE_GLOBALS_HPP
 
+#include "Mavlink.hpp"
+
 namespace Mav {
 
 ///
@@ -15,8 +17,15 @@ namespace Mav {
 /// identifiers, etc.
 ///
 struct Globals {
-	constexpr unsigned char getSysId();
-	constexpr unsigned char getCompId();
+	static constexpr unsigned char getSysId()
+	{
+		return 1;
+	}
+
+	static constexpr unsigned char getCompId()
+	{
+		return MAV_COMP_ID_UDP_BRIDGE;
+	}
 };
 
 }  // namespace Mav
