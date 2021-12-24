@@ -75,7 +75,29 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 
 Mav::Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-	return Ret::Ignored;
+	Utility::Subscription::IpDestMessage ipDestMessage;
+
+	ipDestMessage.payload = Utility::ConstBuffer{aMavlinkMavGsNetwork.payload, aMavlinkMavGsNetwork.length};
+	ipDestMessage.port = aMavlinkMavGsNetwork.dest_port;
+	ipDestMessage.hostPort = aMavlinkMavGsNetwork.src_port;
+	std::copy(aMavlinkMavGsNetwork.dest_ip4, aMavlinkMavGsNetwork.dest_ip4 + 4, ipDestMessage.address);
+	ipDestMessage.transport = (aMavlinkMavGsNetwork.transport == MAV_GS_NETWORK_TRANSPORT_TCP) ?
+		Utility::Subscription::IpTransport::Tcp : Utility::Subscription::IpTransport::Udp;
+	aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
+
+	for (auto &ipSendService : Utility::Subscription::Key::IpSend::getIterators()) {
+		auto result = ipSendService(ipDestMessage);
+
+		if (result.result == Utility::Subscription::Result::Success) {
+			aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+			break;
+		}
+	}
+
+	mavlink_msg_mav_gs_network_encode(Mav::Globals::getSysId(), Mav::Globals::getCompId(), &aMavlinkMessage, &aMavlinkMavGsNetwork);
+	std::memset(aMavlinkMavGsNetwork.payload, 0, sizeof(aMavlinkMavGsNetwork.payload));
+
+	return Ret::Response;
 }
 
 Mav::Microservice::Ret GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
