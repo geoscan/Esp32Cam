@@ -26,6 +26,8 @@ struct MavlinkUdpReceived;
 struct MavlinkUartSend;
 struct MavlinkUdpSend;
 struct MavlinkForward;
+struct IpConnect;
+struct IpDisconnect;
 }  // namespace Topic
 
 ///
@@ -57,49 +59,94 @@ using NoLockKey = Rr::Key<Tsignature, Ttopic, std::list, Rr::MockMutexTrait>;
 template <class Tsignature, class Ttopic = Topic::Default>
 using NoLockModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::MockMutexTrait>;
 
-// Various types pertaining to subscription mechanisms
+// Various typedefs pertaining to subscription mechanisms
 
-using Port = std::uint16_t;
-using UartNum = std::uint8_t;
+using Port = std::uint16_t;  ///< TCP / UDP port
+using UartNum = std::uint8_t;  ///< Id. of UART interface
+using Ip4 = std::uint8_t[4];  ///< IPv4 Address
+
+// Atomic entities serving as shortcuts for concrete types used in routing and
+// different control commands.
+
+struct IpTransport {
+	enum {
+		Tcp,
+		Udp,
+	} transport;  ///< A type of IP transport that is being used
+};
 
 struct IpEndpoint {
-	std::uint8_t address[4];
-	Port port;
+	Ip4 address;  ///< Remote IP address
+	Port port;  ///< Remote IP port
 };
 
 struct IpEndpointHost {
-	Port hostPort;
+	Port hostPort;  ///< Local IP port
 };
 
 struct UartEndpoint {
-	UartNum uartNum;
-};
-
-enum class EndpointType {
-	Tcp,
-	Udp,
-	Uart,
-	Unspecified,
+	UartNum uartNum;  ///< Id. of UART interface being used
 };
 
 struct Message {
-	Utility::ConstBuffer payload;
+	Utility::ConstBuffer payload;  ///< Raw bytes transferred with an interface
 };
 
+// Derivatives of the atomic entities defined above
+
+///
+/// \brief In/Out message. Message buffer + info on UART used
+///
 struct UartMessage : Message, UartEndpoint {
 };
 
-struct IpMessage : Message, IpEndpoint {
-	enum IpTransport {
-		Tcp,
-		Udp,
-	} transport;
+///
+/// \brief Incoming message
+///
+struct IpMessage : Message, IpEndpoint, IpTransport {
 };
 
+///
+/// \brief Outgoing message
+///
 struct IpDestMessage : IpMessage, IpEndpointHost {
 };
 
-using RoutingResult = void;  // Extension point
+///
+/// \brief Socket control operations
+///
+struct IpDestEndpoint : IpEndpoint, IpEndpointHost {
+};
+
+///
+/// \brief Encapsulation of a command evaluated upon an IP interface
+///
+struct IpConnect : IpDestEndpoint {
+	bool connect;  ///< true for connect, false for disconnect
+};
+
+// Routing and control result types
+
+enum class Result {
+	None = -1,  ///< A request cannot be fulfilled by this particular provider
+	Ok = 0,
+	Fail,
+
+	Max,
+};
+
+///
+/// \brief Encapsulates all the necessary information acquired from making an
+/// IP request such as connect or disconnect. Nesting is used to provide
+/// painless extension without changing too much code, if such will be rendered
+/// necessary in the future.
+///
+struct IpResult {
+	Result result;  ///< Generic result.
+};
+
+struct RoutingResult {
+};
 
 namespace Key {
 
@@ -116,6 +163,8 @@ using MavlinkUartReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUd
 using MavlinkUdpReceived = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartReceived>;
 using MavlinkUdpSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUdpSend>;
 using MavlinkUartSend = NoLockKey<RoutingResult(Message &), Topic::MavlinkUartSend>;
+
+using IpConnect = IndModule<IpResult(const IpConnect &), Topic::IpConnect>;  ///<
 
 }  // namespace Key
 
