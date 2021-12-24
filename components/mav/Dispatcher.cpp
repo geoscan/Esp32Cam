@@ -38,6 +38,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::Subscription::Message &
 
 Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUartReceived(Utility::Subscription::Message &aMessage)
 {
+	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	switch (process(aMessage)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			Utility::Subscription::Key::MavlinkUdpSend::notify(aMessage);
