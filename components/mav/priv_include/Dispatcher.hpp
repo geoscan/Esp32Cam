@@ -37,8 +37,8 @@ protected:
 	Mav::Microservice::Ret process(Utility::Subscription::Message &aMessage);
 
 private:
-	Utility::Subscription::RoutingResult onMavlinkUartReceived(Utility::Subscription::Message &aMessage);
-	Utility::Subscription::RoutingResult onMavlinkUdpReceived(Utility::Subscription::Message &aMessage);
+	Utility::Subscription::ProcessReceivedResult onMavlinkUartReceived(Utility::Subscription::Message &aMessage);
+	Utility::Subscription::ProcessReceivedResult onMavlinkUdpReceived(Utility::Subscription::Message &aMessage);
 
 private:
 	struct {

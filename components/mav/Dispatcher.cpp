@@ -36,7 +36,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::Subscription::Message &
 	return ret;
 }
 
-Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUartReceived(Utility::Subscription::Message &aMessage)
+Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Utility::Subscription::Message &aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	switch (process(aMessage)) {
@@ -57,7 +57,7 @@ Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUartReceived(Util
 	return {};
 }
 
-Utility::Subscription::RoutingResult Mav::Dispatcher::onMavlinkUdpReceived(Utility::Subscription::Message &aMessage)
+Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUdpReceived(Utility::Subscription::Message &aMessage)
 {
 	Utility::Subscription::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
 
