@@ -62,7 +62,6 @@ using NoLockModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::MockMutexTrai
 // Various typedefs pertaining to subscription mechanisms
 
 using Port = std::uint16_t;  ///< TCP / UDP port
-using UartNum = std::uint8_t;  ///< Id. of UART interface
 using Ip4 = std::uint8_t[4];  ///< IPv4 Address
 
 // Atomic entities serving as shortcuts for concrete types used in routing and
@@ -82,6 +81,10 @@ struct IpEndpoint {
 
 struct IpEndpointHost {
 	Port hostPort;  ///< Local IP port
+};
+
+enum class UartNum : int {
+	Mavlink = 0,
 };
 
 struct UartEndpoint {
