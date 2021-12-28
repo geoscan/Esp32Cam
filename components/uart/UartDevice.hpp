@@ -19,19 +19,13 @@ class UartDevice {
 public:
 	UartDevice(int num,  gpio_num_t rxPin, gpio_num_t txPin, int rate, uart_parity_t parity = UART_PARITY_DISABLE,
 			   uart_stop_bits_t stopBits = UART_STOP_BITS_1);
-	//!
-	//! \brief UartDevice
-	//! \param num
-	//! \param rate
-	//! \param blocking or non-blocking write
-	//! \param parity
-	//! \param stopBits
-	//!
 	virtual ~UartDevice();
 
 	size_t read(void *data, size_t size);
 	size_t write(const void *data, size_t size);
 	size_t bytesToRead();
+
+	int getNum() const;
 private:
 	static constexpr size_t kBufferSize{1024};
 

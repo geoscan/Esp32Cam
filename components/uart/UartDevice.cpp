@@ -52,3 +52,8 @@ size_t UartDevice::bytesToRead()
 	else
 		return 0;
 }
+
+int UartDevice::getNum() const
+{
+	return uartNum;
+}
