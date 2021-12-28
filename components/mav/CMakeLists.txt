@@ -1,0 +1,10 @@
+idf_component_register(
+	PRIV_REQUIRES
+		utility
+		mavlink
+	SRC_DIRS
+		"./"
+		"Microservice/"
+	PRIV_INCLUDE_DIRS
+		"priv_include"
+)

@@ -1,0 +1,27 @@
+//
+// Aggregate.impl
+//
+// Created on: Dec 23, 2021
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "Aggregate.hpp"
+
+template <class ...Tmics>
+Mav::Mic::Aggregate<Tmics...>::Aggregate(): microservices{{std::unique_ptr<Microservice>{new Tmics}...}}
+{
+}
+
+template <class ...Tmics>
+Mav::Microservice::Ret Mav::Mic::Aggregate<Tmics...>::process(mavlink_message_t &aMessage)
+{
+	for (auto &ptrMicroservice : microservices) {
+		auto ret = ptrMicroservice->process(aMessage);
+
+		if (ret != Ret::Ignored) {
+			return ret;
+		}
+	}
+
+	return Ret::Ignored;
+}

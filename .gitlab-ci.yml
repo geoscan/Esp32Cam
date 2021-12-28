@@ -21,10 +21,10 @@ espidf_build_deps:
         GIT_SUBMODULE_STRATEGY: recursive
     image: ${CI_REGISTRY_IMAGE}:ubuntu
     script:
-        - export PATH=`echo $PATH | sed 's/[^:]*esp32[^:]*:/:/g'`
         - echo $PATH
         - make configure
-        - make build
+        - source ./environment.sh
+        - idf.py build
         - cd tools
         - ./extract_binaries.sh
     artifacts:
