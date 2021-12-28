@@ -1,0 +1,35 @@
+//
+// uart.cpp
+//
+// Created on: Dec 28, 2021
+//     Author: Dmitry Murashov (dmtrDOTmurashovATgmailDOTcom (gmail.com))
+//
+
+#include "uart/uart.hpp"
+#include "UartDevice.hpp"
+#include "Task.hpp"
+#include "utility/Threading.hpp"
+
+#include <thread>
+
+namespace Uart {
+
+static Task *task = nullptr;
+
+void init()
+{
+	static Task sTask {
+		UartDevice{UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_WIFI_UART_BRIDGE_BAUDRATE, UART_PARITY_DISABLE, UART_STOP_BITS_1}  // MAVLink / Autopilot link
+	};
+
+	task = &sTask;
+}
+
+void start()
+{
+	init();
+	Utility::Threading::setThreadCoreAffinity(0);
+	static std::thread thread{&Task::operator(), task};
+}
+
+}  // namespace Uart
