@@ -21,7 +21,16 @@ public:
 			   uart_stop_bits_t stopBits = UART_STOP_BITS_1);
 	virtual ~UartDevice();
 
-	size_t read(void *data, size_t size);
+	///
+	/// \brief  Read from UART interface associated with this RAII UART wrapper
+	/// \param  aWaitMs Block duration. 0 for persistent block
+	/// \return Number of bytes read
+	///
+	size_t read(void *data, size_t size, size_t aWaitMs = 0);
+
+	///
+	/// \return Number of bytes written
+	///
 	size_t write(const void *data, size_t size);
 	size_t bytesToRead();
 
