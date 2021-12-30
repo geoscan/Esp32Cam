@@ -1,7 +1,3 @@
-variables:
-    GIT_SUBMODULE_STRATEGY: recursive
-
-
 platformio_build:
     image: ${CI_REGISTRY_IMAGE}:ubuntu 
     script:
@@ -21,6 +17,8 @@ espidf_build:
             - "./tools/*.bin"
 
 espidf_build_deps:
+    variables:
+        GIT_SUBMODULE_STRATEGY: recursive
     image: ${CI_REGISTRY_IMAGE}:ubuntu
     script:
         - export PATH=`echo $PATH | sed 's/[^:]*esp32[^:]*:/:/g'`
