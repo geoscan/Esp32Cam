@@ -33,6 +33,7 @@ static httpd_handle_t startWebserver(void)
 {
 	httpd_handle_t server = NULL;
 	httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+	config.stack_size += 1024;
 
 	// Start the httpd server
 	if (httpd_start(&server, &config) == ESP_OK) {
