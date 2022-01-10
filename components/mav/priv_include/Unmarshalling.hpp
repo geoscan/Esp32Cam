@@ -10,6 +10,7 @@
 
 #include <queue>
 #include "Mavlink.hpp"
+#include "utility/CircularBuffer.hpp"
 
 namespace Utility {
 
@@ -22,15 +23,16 @@ using ConstBuffer = Tbuffer<const void>;
 
 namespace Mav {
 
-class Unmarshalling final : public std::queue<mavlink_message_t> {
-public:
-	using std::queue<mavlink_message_t>::queue;
+static constexpr auto kUnmarshallingQueueMaxSize = 2;
+using UnmarshallingHoldQueue = typename Utility::CircularBuffer<mavlink_message_t, kUnmarshallingQueueMaxSize, false>;
+using UnmarshallingBaseType = typename std::queue<mavlink_message_t, UnmarshallingHoldQueue>;
 
+class Unmarshalling final : public UnmarshallingBaseType {
+public:
 	void push(Utility::ConstBuffer buffer);
 
 private:
-	using std::queue<mavlink_message_t>::push;
-private:
+	using UnmarshallingBaseType::push;
 	struct {
 		mavlink_message_t rxMessage;
 		mavlink_status_t rxStatus;

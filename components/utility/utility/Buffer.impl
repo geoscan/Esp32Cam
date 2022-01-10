@@ -61,32 +61,6 @@ inline Tbuffer<Tto> toBuffer(TdataTraitFrom &&aFrom)
 	return toBuffer<Tto>(aFrom.data(), aFrom.size());
 }
 
-// Impl. Thold
-
-template <typename T, std::size_t N>
-inline void Thold<T, N>::setSize(std::size_t aSize)
-{
-	assert(aSize <= N);
-	mSize = aSize;
-}
-
-template <typename T, std::size_t N>
-inline std::size_t Thold<T, N>::size() const
-{
-	return mSize;
-}
-
-template <typename T, std::size_t N>
-inline Tbuffer<T> Thold<T, N>::asBuffer()
-{
-	return toBuffer<T>(*this);
-}
-
-template <typename T, std::size_t N>
-inline Tbuffer<const T> Thold<T, N>::asBuffer() const
-{
-	return toBuffer<const T>(*this);
-}
 }  // namespace Utility
 
 #endif  // UTILITY_UTILITY_BUFFER_IMPL

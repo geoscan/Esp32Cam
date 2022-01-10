@@ -33,7 +33,7 @@ extern "C" int app_main(void)
 	httpStart();
 	cameraThreadInit();
 
-	logUdpStart(context);
+//	logUdpStart(context);
 	cameraStreamerStart(context);
 	wifiUartBridgeStart(context);
 	return 0;

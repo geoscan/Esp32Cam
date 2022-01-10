@@ -7,4 +7,6 @@ idf_component_register(
 		"Microservice/"
 	PRIV_INCLUDE_DIRS
 		"priv_include"
+	INCLUDE_DIRS
+		"include"
 )

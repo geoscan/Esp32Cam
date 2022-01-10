@@ -62,7 +62,6 @@ using NoLockModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::MockMutexTrai
 // Various typedefs pertaining to subscription mechanisms
 
 using Port = std::uint16_t;  ///< TCP / UDP port
-using UartNum = std::uint8_t;  ///< Id. of UART interface
 using Ip4 = std::uint8_t[4];  ///< IPv4 Address
 
 // Atomic entities serving as shortcuts for concrete types used in routing and
@@ -82,6 +81,10 @@ struct IpEndpoint {
 
 struct IpEndpointHost {
 	Port hostPort;  ///< Local IP port
+};
+
+enum class UartNum : int {
+	Mavlink = 0,
 };
 
 struct UartEndpoint {
@@ -148,9 +151,7 @@ struct ResultGeneric {
 
 ///
 /// \brief Encapsulates all the resulting information acquired from making an
-/// IP request such as connect or disconnect. Nesting is used to provide
-/// painless extension without changing too much code, if such will be rendered
-/// necessary in the future.
+/// IP request such as connect or disconnect.
 ///
 struct IpResult : ResultGeneric {
 };

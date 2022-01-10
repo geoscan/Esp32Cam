@@ -34,7 +34,7 @@ public:
 	Dispatcher();
 
 protected:
-	Mav::Microservice::Ret process(Utility::Subscription::Message &aMessage);
+	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage);
 
 private:
 	Utility::Subscription::ProcessReceivedResult onMavlinkUartReceived(Utility::Subscription::Message &aMessage);

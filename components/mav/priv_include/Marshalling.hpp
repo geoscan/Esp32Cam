@@ -10,24 +10,20 @@
 
 #include <queue>
 #include "utility/Buffer.hpp"
+#include "utility/CircularBuffer.hpp"
 
 struct __mavlink_message;
 typedef __mavlink_message mavlink_message_t;
 
 namespace Mav {
 
-using HoldQueue = std::queue<Utility::Thold<std::uint8_t, sizeof(mavlink_message_t)>>;
-class Marshalling : public HoldQueue {
-private:
-	using HoldQueue::push;
+static constexpr unsigned kMarshallingQueueMaxSize = 1;
+using MarshallingHoldQueue = typename Utility::CircularBuffer<mavlink_message_t, kMarshallingQueueMaxSize, false>;
+using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
+class Marshalling : public std::queue<MarshallingHoldQueue> {
 public:
 	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
-
-	///
-	/// \brief push
-	/// \return true, if there was room for one message
-	///
 	void push(const mavlink_message_t &);
 };
 
