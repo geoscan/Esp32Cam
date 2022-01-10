@@ -13,6 +13,9 @@
 #include <type_traits>
 #include <cstdint>
 #include <initializer_list>
+#include <memory>
+#include <type_traits>
+#include <algorithm>
 
 namespace Utility {
 
@@ -32,6 +35,11 @@ struct InterpType<void> {
 
 template <>
 struct InterpType<const void> {
+	using Type = const uint8_t;
+};
+
+template <>
+struct InterpType<const volatile void> {
 	using Type = const uint8_t;
 };
 
@@ -68,24 +76,6 @@ Tbuffer<Tto> toBuffer(Tfrom *aFromPtr, std::size_t aBufferSize);
 ///
 template <typename Tto, typename TdataTraitFrom>
 Tbuffer<Tto> toBuffer(TdataTraitFrom &&);
-
-// Thold
-
-template <typename T, std::size_t N>
-struct Thold : std::array<T, N> {
-	using std::array<T, N>::data;
-	using std::array<T, N>::operator=;
-	using std::array<T, N>::array;
-
-	void setSize(std::size_t);
-	std::size_t size() const;
-
-	Tbuffer<T> asBuffer();
-	Tbuffer<const T> asBuffer() const;
-
-private:
-	std::size_t mSize = 0;
-};
 
 using Buffer = typename ::Utility::Tbuffer<void>;
 using ConstBuffer = typename ::Utility::Tbuffer<const void>;
