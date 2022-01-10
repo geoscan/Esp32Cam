@@ -18,7 +18,7 @@ std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Uti
 
 void Mav::Marshalling::push(const mavlink_message_t &aMessage)
 {
-	typename Mav::HoldQueue::value_type hold;
-	hold.setSize(push(aMessage, hold.asBuffer()));
-	Mav::HoldQueue::push(std::move(hold));
+	if (size() < kMarshallingQueueMaxSize) {
+		push(aMessage, {&back(), sizeof(mavlink_message_t)});
+	}
 }

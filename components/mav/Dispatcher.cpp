@@ -18,19 +18,19 @@ Mav::Dispatcher::Dispatcher():
 {
 }
 
-Mav::Microservice::Ret Mav::Dispatcher::process(Utility::Subscription::Message &aMessage)
+Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 {
 	auto ret = Microservice::Ret::Ignored;
-	unmarshalling.push(aMessage.payload);  // parse incoming message, check whether it is a mavlink
+	unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
 
 	if (unmarshalling.size()) {
-		auto message = unmarshalling.back();
+		auto &message = unmarshalling.front();
 		ret = micAggregate.process(message);
 
 		if (ret == Microservice::Ret::Response) {
 			marshalling.push(message);
-			unmarshalling.pop();
 		}
+		unmarshalling.pop();
 	}
 
 	return ret;
@@ -39,13 +39,13 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::Subscription::Message &
 Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Utility::Subscription::Message &aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
-	switch (process(aMessage)) {
+	switch (process(aMessage.payload)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			Utility::Subscription::Key::MavlinkUdpSend::notify(aMessage);
 			break;
 
 		case Microservice::Ret::Response:  // send response back
-			aMessage.payload = marshalling.back().asBuffer();
+			aMessage.payload = Utility::Buffer(&marshalling.back(), sizeof(marshalling.back()));
 			Utility::Subscription::Key::MavlinkUartSend::notify(aMessage);
 			marshalling.pop();
 			break;
