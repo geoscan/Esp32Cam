@@ -151,9 +151,7 @@ struct ResultGeneric {
 
 ///
 /// \brief Encapsulates all the resulting information acquired from making an
-/// IP request such as connect or disconnect. Nesting is used to provide
-/// painless extension without changing too much code, if such will be rendered
-/// necessary in the future.
+/// IP request such as connect or disconnect.
 ///
 struct IpResult : ResultGeneric {
 };
