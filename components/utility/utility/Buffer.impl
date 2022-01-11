@@ -28,7 +28,7 @@ inline std::size_t Tbuffer<T>::size() const
 }
 
 template <typename T>
-inline typename ::Utility::Impl::InterpType<T>::Type &Tbuffer<T>::at(std::uint8_t aPos)
+inline typename Tbuffer<T>::InterpType &Tbuffer<T>::at(std::uint8_t aPos)
 {
 	return reinterpret_cast<typename Impl::InterpType<T>::Type *>(data())[aPos];
 }
@@ -38,6 +38,22 @@ template <typename TypeTo>
 inline Tbuffer<TypeTo> Tbuffer<T>::as()
 {
 	return toBuffer<TypeTo>(data(), size());
+}
+
+template <class T>
+inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset) const
+{
+	return slice(aOffset, size());
+}
+
+template <class T>
+inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset, std::size_t aOffsetEnd) const
+{
+	assert(aOffset < size());
+	assert(aOffsetEnd <= size());
+	auto *d = reinterpret_cast<typename Tbuffer<T>::InterpType *>(data());  // void* in pointer arithmetics
+
+	return toBuffer<T>(d + aOffset, aOffsetEnd - aOffset);
 }
 
 // toBuffer

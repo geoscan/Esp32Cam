@@ -24,7 +24,7 @@ struct Microservice {
 	///
 	enum class Ret {
 		Ignored,  ///< This Microservice instance does not handle such messages
-		Response,  ///< The message passed as a parameter has been changed, and how it should be passed as a response
+		Response,  ///< The message passed as a parameter now contains response MAVLink package
 		NoResponse,  ///< The message has been processed, no response required
 	};
 

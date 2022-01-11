@@ -9,6 +9,7 @@
 #include "UartDevice.hpp"
 #include "Task.hpp"
 #include "utility/Threading.hpp"
+#include "OnSend.hpp"
 
 #include <thread>
 
@@ -18,10 +19,12 @@ static Task *task = nullptr;
 
 void init()
 {
-	static Task sTask {
+	static UartDevice devices[] = {
 		UartDevice{UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_WIFI_UART_BRIDGE_BAUDRATE, UART_PARITY_DISABLE, UART_STOP_BITS_1}  // MAVLink / Autopilot link
 	};
-
+	static Task sTask{devices[0]};
+	static OnSend<3> onSend{devices[0]};
+	(void)onSend;
 	task = &sTask;
 }
 
