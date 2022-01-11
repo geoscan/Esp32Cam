@@ -21,7 +21,7 @@ namespace Utility {
 
 namespace Impl {
 
-// void and const void should be interpreted as std::uint8_t
+// void, const void, and const volatile void should be interpreted as std::uint8_t
 
 template <typename T>
 struct InterpType {
@@ -53,13 +53,17 @@ struct Tbuffer : std::tuple<T *, std::size_t> {
 	using std::tuple<T *, std::size_t>::operator=;
 
 	using Type = T;
+	using InterpType = typename Impl::InterpType<T>::Type;  // T, or one of the uint8_t's derivatives, if T is void
 
 	T *data() const;
 	std::size_t size() const;
-	typename Impl::InterpType<T>::Type &at(std::uint8_t aPos);
+	InterpType &at(std::uint8_t aPos);
 
 	template <typename TypeTo>
-	Tbuffer<TypeTo> as();
+	Tbuffer<TypeTo> as();  ///< Reinterpret the buffer for another type. The type's sizeof() is taken into consideration, so size() of the newly constructed instance may differ
+
+	Tbuffer<T> slice(std::size_t aOffset) const;  ///< Constructs a slice from a given offset
+	Tbuffer<T> slice(std::size_t aOffsetBegin, std::size_t aOffsetEnd) const;  /// Constructs a slice satisfying the given range [aOffsetBegin; aOffsetEnd)
 };
 
 template <typename Tto, typename Tfrom>
