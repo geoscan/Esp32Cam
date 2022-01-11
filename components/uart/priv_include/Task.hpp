@@ -26,7 +26,7 @@ public:
 private:
 	static constexpr unsigned kBufferSize = 512;
 	std::array<std::uint8_t, kBufferSize> buffer;
-	std::list<UartDevice *> uartDevices;
+	const std::list<UartDevice *> uartDevices;
 };
 
 }  // namespace Uart

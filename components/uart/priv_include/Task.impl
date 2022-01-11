@@ -11,7 +11,7 @@
 #include <type_traits>
 
 template <class ...Tuarts>
-Uart::Task::Task(Tuarts &&...aArgs): uartDevices{std::forward<Tuarts>(aArgs)...}
+Uart::Task::Task(Tuarts &&...aArgs): uartDevices{(&aArgs)...}
 {
 }
 
