@@ -191,10 +191,10 @@ using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, 
 using RecordStop       = Rr::Subscription::Key<void, Topic::RecordStop>;
 
 // As for 2021-12-23, a duplex 1-to-1 version of forwarding is used. No locking is required
-using MavlinkUartReceived = NoLockKey<ProcessReceivedResult(Message &), Topic::MavlinkUdpReceived>;
-using MavlinkUdpReceived = NoLockKey<ProcessReceivedResult(Message &), Topic::MavlinkUartReceived>;
-using MavlinkUdpSend = NoLockKey<IpSendResult(Message &), Topic::MavlinkUdpSend>;
-using MavlinkUartSend = NoLockKey<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
+using MavlinkUartReceived = NoLockModule<ProcessReceivedResult(Message &), Topic::MavlinkUdpReceived>;
+using MavlinkUdpReceived = NoLockModule<ProcessReceivedResult(Message &), Topic::MavlinkUartReceived>;
+using MavlinkUdpSend = NoLockModule<IpSendResult(Message &), Topic::MavlinkUdpSend>;
+using MavlinkUartSend = NoLockModule<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
 
 using IpConnect = IndModule<IpResult(const Utility::Subscription::IpConnect &)>;  ///< Fullfill a TCP connection request
 using IpSend = IndModule<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
