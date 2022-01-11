@@ -1,0 +1,60 @@
+//
+// OnSend.impl
+//
+// Created on: Jan 11, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "OnSend.hpp"  // Makes no effect. Being used to enable syntax highlighting
+
+template <unsigned N>
+template <class ...Ta>
+inline Uart::OnSend<N>::OnSend(Ta &&...aArgs): OnSendBase<N>{{nullptr}}, key{{&OnSend::onMavlinkSend, this}}
+{
+	using Tlist = int[];
+	(void)Tlist{((void)(this->at(aArgs.getNum()) = &aArgs), 0)...};
+}
+
+template <unsigned N>
+inline Utility::Subscription::UartSendResult Uart::OnSend<N>::send(const Utility::Subscription::UartMessage &aMessage)
+{
+	unsigned num = static_cast<unsigned>(aMessage.uartNum);
+	Utility::Subscription::UartSendResult result;
+
+	if (N < num) {
+		result.resultCode = Utility::Subscription::ResultCode::None;
+
+		return result;
+	}
+
+	auto *dev = this->at(num);
+
+	if (!dev) {
+		result.resultCode = Utility::Subscription::ResultCode::None;
+
+		return result;
+	} else {
+		std::size_t pos = 0;
+		std::size_t nwr = 42;
+
+		while (nwr && pos < aMessage.payload.size()) {
+			nwr = dev->write(aMessage.payload.slice(pos));
+			pos += nwr;
+		}
+
+		result.resultCode = pos == aMessage.payload.size() ?
+			Utility::Subscription::ResultCode::Success :
+			Utility::Subscription::ResultCode::Fail;
+
+		return result;
+	}
+}
+
+template <unsigned N>
+inline Utility::Subscription::UartSendResult Uart::OnSend<N>::onMavlinkSend(Utility::Subscription::Message &a)
+{
+	Utility::Subscription::UartMessage message;
+	message.payload = a.payload;
+	message.uartNum = Utility::Subscription::UartNum::Mavlink;
+	return send(message);
+}
