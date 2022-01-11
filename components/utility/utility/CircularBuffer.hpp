@@ -8,7 +8,6 @@
 #ifndef UTILITY_UTILITY_CIRCULARBUFFER_HPP
 #define UTILITY_UTILITY_CIRCULARBUFFER_HPP
 
-
 #include <array>
 #include <utility>
 #include <type_traits>
@@ -43,13 +42,13 @@ public:
 
 	void push(unsigned a = 1)
 	{
-		assert(capacity());
+		assert(capacity() >= a);
 		sz += a;
 	}
 
 	void pop(unsigned a = 1)
 	{
-		assert(size());
+		assert(size() >= a);
 		base = fwd(base, a);
 		--sz;
 	}
@@ -57,7 +56,7 @@ public:
 	static unsigned back(unsigned aBase, unsigned a = 1)
 	{
 		a = a % N;
-		return aBase > a ? aBase - a : N - a + aBase - 1;
+		return aBase < a ? N - a + aBase : aBase - a;
 	}
 
 	static unsigned fwd(unsigned aBase, unsigned a = 1)
@@ -69,6 +68,7 @@ public:
 template <class TcontiguousContainer, class Tvalue, unsigned N, int Ninc>
 struct CircularIterator {
 	unsigned pos;
+	unsigned ttl;
 	TcontiguousContainer &arr;
 
 	template <bool F>
@@ -88,6 +88,8 @@ struct CircularIterator {
 	CircularIterator &operator++()
 	{
 		incPos<(Ninc > 0)>();
+		--ttl;
+
 		return *this;
 	}
 
@@ -103,12 +105,12 @@ struct CircularIterator {
 
 	bool operator==(const CircularIterator &a)
 	{
-		return pos == a.pos;
+		return ttl == a.ttl && pos == a.pos && &arr == &a.arr;
 	}
 
 	bool operator!=(const CircularIterator &a)
 	{
-		return pos != a.pos;
+		return ttl != a.ttl || pos != a.pos || &arr != &a.arr;
 	}
 };
 
@@ -246,42 +248,42 @@ public:
 
 	iterator begin()
 	{
-		return {cc.tail(), *this};
+		return {cc.tail(), cc.size(), *this};
 	}
 
 	iterator end()
 	{
-		return {cc.head(), *this};
+		return {cc.head(), 0, *this};
 	}
 
 	const_iterator cbegin() const
 	{
-		return {cc.tail(), *this};
+		return {cc.tail(), cc.size(), *this};
 	}
 
 	const_iterator cend() const
 	{
-		return {cc.head(), *this};
+		return {cc.head(), 0, *this};
 	}
 
 	reverse_iterator rbegin()
 	{
-		return {CircularCounter<N>::back(cc.head(), 1), *this};
+		return {CircularCounter<N>::back(cc.head(), 1), cc.size(), *this};
 	}
 
 	reverse_iterator rend()
 	{
-		return {CircularCounter<N>::back(cc.tail(), 1), *this};
+		return {CircularCounter<N>::back(cc.tail(), 1), 0, *this};
 	}
 
 	const_reverse_iterator crbegin() const
 	{
-		return {CircularCounter<N>::back(cc.head(), 1), *this};
+		return {CircularCounter<N>::back(cc.head(), 1), cc.size(), *this};
 	}
 
 	const_reverse_iterator crend() const
 	{
-		return {CircularCounter<N>::back(cc.tail(), 1), *this};
+		return {CircularCounter<N>::back(cc.tail(), 1), 0, *this};
 	}
 };
 
