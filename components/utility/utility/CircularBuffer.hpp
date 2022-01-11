@@ -53,7 +53,7 @@ public:
 		--sz;
 	}
 
-	static unsigned back(unsigned aBase, unsigned a = 1)
+	static unsigned rev(unsigned aBase, unsigned a = 1)
 	{
 		a = a % N;
 		return aBase < a ? N - a + aBase : aBase - a;
@@ -82,7 +82,7 @@ struct CircularIterator {
 	typename std::enable_if<!F>::type
 	incPos()
 	{
-		pos = CircularCounter<N>::back(pos, 1);
+		pos = CircularCounter<N>::rev(pos, 1);
 	}
 
 	CircularIterator &operator++()
@@ -187,7 +187,7 @@ public:
 	reference back()
 	{
 		assert(cc.size());
-		return at(CircularCounter<N>::back(cc.head(), 1));
+		return at(CircularCounter<N>::rev(cc.head(), 1));
 	}
 
 	reference front()
@@ -198,7 +198,7 @@ public:
 	const_reference back() const
 	{
 		assert(cc.size());
-		return at(CircularCounter<N>::back(cc.head(), 1));
+		return at(CircularCounter<N>::rev(cc.head(), 1));
 	}
 
 	const_reference front() const
@@ -268,22 +268,22 @@ public:
 
 	reverse_iterator rbegin()
 	{
-		return {CircularCounter<N>::back(cc.head(), 1), cc.size(), *this};
+		return {CircularCounter<N>::rev(cc.head(), 1), cc.size(), *this};
 	}
 
 	reverse_iterator rend()
 	{
-		return {CircularCounter<N>::back(cc.tail(), 1), 0, *this};
+		return {CircularCounter<N>::rev(cc.tail(), 1), 0, *this};
 	}
 
 	const_reverse_iterator crbegin() const
 	{
-		return {CircularCounter<N>::back(cc.head(), 1), cc.size(), *this};
+		return {CircularCounter<N>::rev(cc.head(), 1), cc.size(), *this};
 	}
 
 	const_reverse_iterator crend() const
 	{
-		return {CircularCounter<N>::back(cc.tail(), 1), 0, *this};
+		return {CircularCounter<N>::rev(cc.tail(), 1), 0, *this};
 	}
 };
 
