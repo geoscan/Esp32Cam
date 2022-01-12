@@ -10,7 +10,7 @@
 
 #include <asio.hpp>
 #include <list>
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 namespace LogUdp {
 
@@ -20,10 +20,10 @@ public:
 	void operator()();
 	void send(const char *);
 private:
-	void onWifiDisconnected(Utility::Subscription::Key::WifiDisconnected::Type);
+	void onWifiDisconnected(Sub::Key::WifiDisconnected::Type);
 
 	std::mutex mut;
-	Utility::Subscription::Key::WifiDisconnected keyWifiDisconnected;
+	Sub::Key::WifiDisconnected keyWifiDisconnected;
 	asio::ip::udp::socket &socket;
 	std::list<asio::ip::udp::endpoint> endpoints;
 };

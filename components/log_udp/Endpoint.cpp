@@ -34,7 +34,7 @@ void LogUdp::Endpoint::send(const char *msg)
 	}
 }
 
-void LogUdp::Endpoint::onWifiDisconnected(Utility::Subscription::Key::WifiDisconnected::Type aAddress)
+void LogUdp::Endpoint::onWifiDisconnected(Sub::Key::WifiDisconnected::Type aAddress)
 {
 	std::lock_guard<std::mutex> lock{mut};
 	endpoints.clear();
