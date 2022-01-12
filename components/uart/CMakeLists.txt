@@ -10,5 +10,6 @@ idf_component_register(
 	PRIV_INCLUDE_DIRS
 		priv_include
 	REQUIRES
+		sub
 		freertos
 		utility)

@@ -1,13 +1,11 @@
 idf_component_register(
-	PRIV_REQUIRES
-		sub
-		utility
-		mavlink
 	SRC_DIRS
-		"./"
-		"Microservice/"
+		"."
 	PRIV_INCLUDE_DIRS
 		"priv_include"
 	INCLUDE_DIRS
 		"include"
+	REQUIRES
+		rr
+		utility
 )

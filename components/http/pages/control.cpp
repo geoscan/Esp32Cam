@@ -58,13 +58,13 @@ static struct {
 	CameraRecorder::RecFrame   frame;
 } rec;
 
-static void wifiDisconnectHandler(Utility::Subscription::Key::WifiDisconnected::Type)
+static void wifiDisconnectHandler(Sub::Key::WifiDisconnected::Type)
 {
 	rec.mjpgAvi.stop();
 	status.videoRecRunning = false;
 }
 
-static Utility::Subscription::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
+static Sub::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
 
 enum Error : esp_err_t {
 	// Standard ESP's errors

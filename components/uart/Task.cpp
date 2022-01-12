@@ -19,13 +19,13 @@ void Uart::Task::operator()()
 			auto nRead = uartDevice->read(buffer.data(), buffer.size());
 
 			if (nRead) {
-				Subscription::UartMessage uartMessage;
+				Sub::UartMessage uartMessage;
 				uartMessage.payload = decltype(uartMessage.payload){buffer.data(), nRead};
-				uartMessage.uartNum = static_cast<Subscription::UartNum>(uartDevice->getNum());
+				uartMessage.uartNum = static_cast<Sub::UartNum>(uartDevice->getNum());
 
 				switch (uartMessage.uartNum) {
-					case Subscription::UartNum::Mavlink:
-						Subscription::Key::MavlinkUartReceived::notify(uartMessage);
+					case Sub::UartNum::Mavlink:
+						Sub::Key::MavlinkUartReceived::notify(uartMessage);
 						break;
 
 					default:

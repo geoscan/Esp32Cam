@@ -13,7 +13,7 @@
 
 #include <esp_event.h>
 #include <map>
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 namespace CameraStreamer {
 
@@ -35,9 +35,9 @@ private:
 	} tcp;
 
 	struct {
-		Utility::Subscription::Key::TcpConnected     tcpConnected;
-		Utility::Subscription::Key::TcpDisconnected  tcpDisconnected;
-		Utility::Subscription::Key::WifiDisconnected wifiDisconnected;
+		Sub::Key::TcpConnected     tcpConnected;
+		Sub::Key::TcpDisconnected  tcpDisconnected;
+		Sub::Key::WifiDisconnected wifiDisconnected;
 	} key;
 
 };

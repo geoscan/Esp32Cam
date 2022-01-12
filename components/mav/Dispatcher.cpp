@@ -5,7 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 #include "Mavlink.hpp"
 #include "Marshalling.hpp"
 #include "Unmarshalling.hpp"
@@ -24,6 +24,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 	unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
 
 	if (unmarshalling.size()) {
+		ESP_LOGI("mav dispatcher", "message received");
 		auto &message = unmarshalling.front();
 		ret = micAggregate.process(message);
 
@@ -36,17 +37,17 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 	return ret;
 }
 
-Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Utility::Subscription::Message &aMessage)
+Sub::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Sub::Message &aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	switch (process(aMessage.payload)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
-			Utility::Subscription::Key::MavlinkUdpSend::notify(aMessage);
+			Sub::Key::MavlinkUdpSend::notify(aMessage);
 			break;
 
 		case Microservice::Ret::Response:  // send response back
 			aMessage.payload = Utility::Buffer(&marshalling.back(), sizeof(marshalling.back()));
-			Utility::Subscription::Key::MavlinkUartSend::notify(aMessage);
+			Sub::Key::MavlinkUartSend::notify(aMessage);
 			marshalling.pop();
 			break;
 
@@ -57,9 +58,9 @@ Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartRecei
 	return {};
 }
 
-Utility::Subscription::ProcessReceivedResult Mav::Dispatcher::onMavlinkUdpReceived(Utility::Subscription::Message &aMessage)
+Sub::ProcessReceivedResult Mav::Dispatcher::onMavlinkUdpReceived(Sub::Message &aMessage)
 {
-	Utility::Subscription::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
+	Sub::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
 
 	return {};
 }

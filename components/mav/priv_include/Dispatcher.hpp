@@ -11,7 +11,7 @@
 #ifndef MAV_PRIV_INCLUDE_DISPATCHER_HPP
 #define MAV_PRIV_INCLUDE_DISPATCHER_HPP
 
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
 #include <list>
@@ -37,13 +37,13 @@ protected:
 	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage);
 
 private:
-	Utility::Subscription::ProcessReceivedResult onMavlinkUartReceived(Utility::Subscription::Message &aMessage);
-	Utility::Subscription::ProcessReceivedResult onMavlinkUdpReceived(Utility::Subscription::Message &aMessage);
+	Sub::ProcessReceivedResult onMavlinkUartReceived(Sub::Message &aMessage);
+	Sub::ProcessReceivedResult onMavlinkUdpReceived(Sub::Message &aMessage);
 
 private:
 	struct {
-		Utility::Subscription::Key::MavlinkUartReceived fromUart;
-		Utility::Subscription::Key::MavlinkUdpReceived fromUdp;
+		Sub::Key::MavlinkUartReceived fromUart;
+		Sub::Key::MavlinkUdpReceived fromUdp;
 	} key;
 
 	Marshalling marshalling;

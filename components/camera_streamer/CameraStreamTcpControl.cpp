@@ -82,6 +82,6 @@ void CameraStreamTcpControl::handleApClientDisconnected(void */*nullptr*/, esp_e
 	ip4_addr_t ipAddress;
 	dhcp_search_ip_on_mac(reinterpret_cast<system_event_ap_stadisconnected_t *>(data)->mac, &ipAddress);
 
-	Utility::Subscription::Key::WifiDisconnected key;
+	Sub::Key::WifiDisconnected key;
 	key.notify(asio::ip::address_v4(ntohl(ipAddress.addr)));
 }
