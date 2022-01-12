@@ -5,13 +5,12 @@
 #include <Rr/Key.hpp>
 #include <Rr/Module.hpp>
 #include <Rr/SyncTrait.hpp>
-#include "Buffer.hpp"
+#include "utility/Buffer.hpp"
 #include "cam/Camera.hpp"
 #include <asio.hpp>
 #include <list>
 
-namespace Utility {
-namespace Subscription {
+namespace Sub {
 
 namespace Topic {
 struct NewFrame;
@@ -196,13 +195,11 @@ using MavlinkUdpReceived = NoLockModule<ProcessReceivedResult(Message &), Topic:
 using MavlinkUdpSend = NoLockModule<IpSendResult(Message &), Topic::MavlinkUdpSend>;
 using MavlinkUartSend = NoLockModule<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
 
-using IpConnect = IndModule<IpResult(const Utility::Subscription::IpConnect &)>;  ///< Fullfill a TCP connection request
+using IpConnect = IndModule<IpResult(const Sub::IpConnect &)>;  ///< Fullfill a TCP connection request
 using IpSend = IndModule<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
 using UartSend = IndModule<UartSendResult(const UartMessage &)>;  ///< Send a package over serial
 
 }  // namespace Key
-
-}  // namespace Subscription
-}  // namespace Utility
+}  // namespace Sub
 
 #endif // UTILITY_UTILITY_SUBSCRIPTION_HPP
