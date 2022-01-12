@@ -1,0 +1,3 @@
+Various subscription facilities. Primarily (or exclusively, probably depends on when you read that), they use Rr library. 
+
+This component has been decomposed out of "utility" since post-0.4.5
