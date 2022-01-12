@@ -8,7 +8,7 @@
 #include "Mavlink.hpp"
 #include "Microservice/GsNetwork.hpp"
 #include "Globals.hpp"
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 #include <algorithm>
 #include <utility/Algorithm.hpp>
 
@@ -49,7 +49,7 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 	if (aMavlinkMavGsNetwork.transport == MAV_GS_NETWORK_TRANSPORT_TCP) {  // Connect command can only be evaluated for TCP transport
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
 	} else {
-		Utility::Subscription::IpConnect ipConnect;
+		Sub::IpConnect ipConnect;
 
 		std::copy(aMavlinkMavGsNetwork.dest_ip4, aMavlinkMavGsNetwork.dest_ip4 + 4, ipConnect.address);
 		ipConnect.port = aMavlinkMavGsNetwork.dest_port;
@@ -57,10 +57,10 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 		ipConnect.connect = (aMavlinkMavGsNetwork.command == MAV_GS_NETWORK_COMMAND_CONNECT);
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
 
-		for (auto &ipConnectService : Utility::Subscription::Key::IpConnect::getIterators()) {
+		for (auto &ipConnectService : Sub::Key::IpConnect::getIterators()) {
 			auto result = ipConnectService(ipConnect);
 
-			if (result.resultCode == Utility::Subscription::ResultCode::Success) {
+			if (result.resultCode == Sub::ResultCode::Success) {
 				aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 				break;
 			}
@@ -75,20 +75,20 @@ Mav::Microservice::Ret GsNetwork::processConnectDisconnect(mavlink_message_t &aM
 
 Mav::Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-	Utility::Subscription::IpDestMessage ipDestMessage;
+	Sub::IpDestMessage ipDestMessage;
 
 	ipDestMessage.payload = Utility::ConstBuffer{aMavlinkMavGsNetwork.payload, aMavlinkMavGsNetwork.length};
 	ipDestMessage.port = aMavlinkMavGsNetwork.dest_port;
 	ipDestMessage.hostPort = aMavlinkMavGsNetwork.src_port;
 	std::copy(aMavlinkMavGsNetwork.dest_ip4, aMavlinkMavGsNetwork.dest_ip4 + 4, ipDestMessage.address);
 	ipDestMessage.transport = (aMavlinkMavGsNetwork.transport == MAV_GS_NETWORK_TRANSPORT_TCP) ?
-		Utility::Subscription::IpTransport::Tcp : Utility::Subscription::IpTransport::Udp;
+		Sub::IpTransport::Tcp : Sub::IpTransport::Udp;
 	aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
 
-	for (auto &ipSendService : Utility::Subscription::Key::IpSend::getIterators()) {
+	for (auto &ipSendService : Sub::Key::IpSend::getIterators()) {
 		auto result = ipSendService(ipDestMessage);
 
-		if (result.resultCode == Utility::Subscription::ResultCode::Success) {
+		if (result.resultCode == Sub::ResultCode::Success) {
 			aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 			break;
 		}

@@ -1,5 +1,6 @@
 idf_component_register(
 	PRIV_REQUIRES
+		sub
 		utility
 		mavlink
 	SRC_DIRS
