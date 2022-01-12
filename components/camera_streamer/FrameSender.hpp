@@ -10,7 +10,7 @@
 
 #include <forward_list>
 #include "Ov2640.hpp"
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 namespace CameraStreamer {
 
@@ -23,9 +23,9 @@ public:
 private:
 	asio::ip::udp::socket &socket;
 	struct {
-		Utility::Subscription::Key::NewFrame        newFrame;
-		Utility::Subscription::Key::TcpConnected    tcpConnected;
-		Utility::Subscription::Key::TcpDisconnected tcpDisconnected;
+		Sub::Key::NewFrame        newFrame;
+		Sub::Key::TcpConnected    tcpConnected;
+		Sub::Key::TcpDisconnected tcpDisconnected;
 	} key;
 	struct Client {
 		asio::ip::udp::endpoint endpoint;
