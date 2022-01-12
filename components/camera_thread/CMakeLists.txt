@@ -9,6 +9,7 @@ idf_component_register(
 	INCLUDE_DIRS
 		include
 	REQUIRES
+		sub
 		utility
 		cam
 )

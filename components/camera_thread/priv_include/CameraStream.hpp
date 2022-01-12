@@ -15,7 +15,7 @@
 #include <mutex>
 
 #include "Ov2640.hpp"
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 namespace CameraThread {
 
@@ -30,7 +30,7 @@ public:
 	CameraStream(Fps fps = kNoFpsLimit);
 
 private:
-	Utility::Subscription::Key::NewFrame key;
+	Sub::Key::NewFrame key;
 	Fps fps;
 };
 
