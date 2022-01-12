@@ -11,7 +11,7 @@
 #ifndef UART_PRIV_INCLUDE_ONSEND_HPP
 #define UART_PRIV_INCLUDE_ONSEND_HPP
 
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 #include <array>
 
 class UartDevice;
@@ -30,17 +30,17 @@ using OnSendBase = std::array<UartDevice *, N>;
 template <unsigned N>
 class OnSend : OnSendBase<N> {
 	struct {
-		Utility::Subscription::Key::MavlinkUartSend mavlinkUartSend;
+		Sub::Key::MavlinkUartSend mavlinkUartSend;
 	} key;
 
 private:
-	Utility::Subscription::UartSendResult send(const Utility::Subscription::UartMessage &);
+	Sub::UartSendResult send(const Sub::UartMessage &);
 
 public:
 	template <class ...Ta>
 	OnSend(Ta &&...);
 
-	Utility::Subscription::UartSendResult onMavlinkSend(Utility::Subscription::Message &aMessage);
+	Sub::UartSendResult onMavlinkSend(Sub::Message &aMessage);
 };
 
 }  // namespace Uart

@@ -16,18 +16,18 @@ inline Uart::OnSend<N>::OnSend(Ta &&...aArgs): OnSendBase<N>{{nullptr}}, key{{&O
 }
 
 template <unsigned N>
-inline Utility::Subscription::UartSendResult Uart::OnSend<N>::send(const Utility::Subscription::UartMessage &aMessage)
+inline Sub::UartSendResult Uart::OnSend<N>::send(const Sub::UartMessage &aMessage)
 {
 	unsigned num = static_cast<unsigned>(aMessage.uartNum);
-	Utility::Subscription::UartSendResult result;
+	Sub::UartSendResult result;
 
 	if (N < num) {
-		result.resultCode = Utility::Subscription::ResultCode::None;
+		result.resultCode = Sub::ResultCode::None;
 	} else {
 		auto *dev = this->at(num);
 
 		if (!dev) {
-			result.resultCode = Utility::Subscription::ResultCode::None;
+			result.resultCode = Sub::ResultCode::None;
 
 		} else {
 			std::size_t pos = 0;
@@ -39,8 +39,8 @@ inline Utility::Subscription::UartSendResult Uart::OnSend<N>::send(const Utility
 			}
 
 			result.resultCode = pos == aMessage.payload.size() ?
-				Utility::Subscription::ResultCode::Success :
-				Utility::Subscription::ResultCode::Fail;
+				Sub::ResultCode::Success :
+				Sub::ResultCode::Fail;
 		}
 	}
 
@@ -48,10 +48,10 @@ inline Utility::Subscription::UartSendResult Uart::OnSend<N>::send(const Utility
 }
 
 template <unsigned N>
-inline Utility::Subscription::UartSendResult Uart::OnSend<N>::onMavlinkSend(Utility::Subscription::Message &a)
+inline Sub::UartSendResult Uart::OnSend<N>::onMavlinkSend(Sub::Message &a)
 {
-	Utility::Subscription::UartMessage message;
+	Sub::UartMessage message;
 	message.payload = a.payload;
-	message.uartNum = Utility::Subscription::UartNum::Mavlink;
+	message.uartNum = Sub::UartNum::Mavlink;
 	return send(message);
 }

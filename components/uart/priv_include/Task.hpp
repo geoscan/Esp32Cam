@@ -10,7 +10,7 @@
 
 #include <list>
 #include <array>
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 class UartDevice;
 
