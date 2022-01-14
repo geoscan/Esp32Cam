@@ -17,8 +17,8 @@
 namespace Socket {
 
 ///
-/// \brief Converts async callback-based operations into synchronous-like
-/// through implementing producer-consumer synchronization scheme.
+/// \brief Converts async callback-based operations into synchronous-like ones
+/// through implementing the producer-consumer synchronization scheme.
 ///
 /// \tparam asio::ip::tcp::socket or asio::ip::udp::socket
 ///
