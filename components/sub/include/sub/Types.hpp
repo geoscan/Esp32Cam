@@ -112,7 +112,7 @@ struct IpResult : ResultGeneric {
 ///
 /// \brief Result of processing an incoming packet
 ///
-struct ProcessReceivedResult {
+struct MavReceiveResult {
 };
 
 ///

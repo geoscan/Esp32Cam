@@ -37,8 +37,8 @@ protected:
 	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage);
 
 private:
-	Sub::ProcessReceivedResult onMavlinkUartReceived(Sub::Message &aMessage);
-	Sub::ProcessReceivedResult onMavlinkUdpReceived(Sub::Message &aMessage);
+	Sub::MavReceiveResult onMavlinkUartReceived(Sub::Message &aMessage);
+	Sub::MavReceiveResult onMavlinkUdpReceived(Sub::Message &aMessage);
 
 private:
 	struct {
