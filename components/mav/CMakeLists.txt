@@ -10,4 +10,6 @@ idf_component_register(
 		"priv_include"
 	INCLUDE_DIRS
 		"include"
+	REQUIRES
+		socket
 )
