@@ -12,28 +12,27 @@
 #include <asio.hpp>
 #include <cstdint>
 #include "sub/Subscription.hpp"
+#include <memory>
 
 namespace Sub {
 namespace Socket {
 
-enum class Cmd {
-	Received,
+// Process received
+
+template <class Tproto>
+struct ArgReceived {
+	asio::ip::basic_endpoint<Tproto> sender;
+	std::uint16_t localPort;
+	asio::const_buffer payload;
 };
 
-template <class Tproto, Cmd>
-struct Tcommand {
-	asio::ip::basic_endpoint<Tproto> endpoint;
-	std::uint16_t port;  ///< Local port
+struct RetReceived {
+	asio::const_buffer response;
+	std::unique_ptr<char[]> bufferHold;
 };
 
-template <class Tproto, Cmd Icmd>
-struct TretCommand {  ///< Return type
-	asio::error_code errorCode;
-	std::uint16_t port;  ///< Opened port
-};
-
-template <class Tproto, Cmd Icmd>
-using Key = typename Sub::IndModule< TretCommand<Tproto, Icmd>(const Tcommand<Tproto, Icmd> &)>;
+template <class Tproto>
+using Received = typename Sub::IndModule<RetReceived(const ArgReceived<Tproto> &)>;
 
 }  // namespace Socket
 }  // namespace Sub
