@@ -21,6 +21,7 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 
 	{
 		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+		(void)lock;
 
 		return it->write_some(std::forward<TbufferType>(aBuffer), aErr);
 	}
@@ -39,10 +40,12 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 			it = container.udp.emplace(container.udp.end(), ioContext);
 			aLocalPort = it->local_endpoint(aErr).port();
 		}
+		udpAsyncReceiveFrom(*it);
 	}
 
 	{
 		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+		(void)lock;
 
 		return it->send_to(std::forward<TbufferType>(aBuffer), aRemoteEndpoint, 0, aErr);
 	}

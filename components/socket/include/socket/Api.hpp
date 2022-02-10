@@ -31,6 +31,8 @@ private:
 		Container<asio::ip::udp::socket> udp;
 	} container;
 
+	static constexpr auto kReceiveBufferSize = 128;
+
 public:
 	Api(asio::io_context &, std::mutex &aSyncAsyncMutex);
 	void connect(const asio::ip::tcp::endpoint &, std::uint16_t &aLocalPort, asio::error_code &aErr,
@@ -49,6 +51,8 @@ public:
 	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, Tbuf &&,
 		asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 
+private:
+	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket);
 };
 
 }  // namespace Sock

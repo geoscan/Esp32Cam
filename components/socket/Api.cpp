@@ -19,7 +19,6 @@ Api::Api(asio::io_context &aIoContext, std::mutex &aSyncAsyncMutex):
 void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLocalPort, asio::error_code &aErr,
 	asio::ip::tcp aTcp)
 {
-	static constexpr auto kReceiveBufferSize = 256;
 	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
 
 	if (it != container.tcpConnected.end()) {
@@ -43,7 +42,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 
 	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
 	container.tcpConnected.back().async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
-		[this, buffer](const asio::error_code &aErrorCode, std::size_t anTransferred) mutable {
+		[this, buffer, aRemoteEndpoint](const asio::error_code &aErrorCode, std::size_t anTransferred) mutable {
 		// TODO: event, on received
 	});
 }
@@ -85,6 +84,7 @@ void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUd
 	}
 
 	container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+	udpAsyncReceiveFrom(container.udp.back());
 }
 
 void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
@@ -114,6 +114,17 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 		std::lock_guard<std::mutex> lock{syncAsyncMutex};
 		it->close(aErr);
 	}
+}
+
+void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
+{
+	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
+	std::shared_ptr<asio::ip::udp::endpoint> endpoint;
+
+	aSocket.async_receive_from(asio::buffer(buffer.get(), kReceiveBufferSize), *endpoint.get(),
+		[buffer, endpoint] (const asio::error_code &aError, std::size_t anReceived) mutable {
+		// TODO: event
+	});
 }
 
 }  // namespace Sock
