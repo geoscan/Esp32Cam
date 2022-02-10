@@ -108,7 +108,22 @@ Microservice::Ret GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
 	auto addr = getAddress(aMavlinkMavGsNetwork);
 	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code err;
-	Sock::Api::getInstance().connect({addr, aMavlinkMavGsNetwork.remote_port}, aMavlinkMavGsNetwork.host_port, err);
+
+	switch (aMavlinkMavGsNetwork.transport) {
+		case MAV_GS_NETWORK_TRANSPORT_TCP4:
+			Sock::Api::getInstance().connect({addr, aMavlinkMavGsNetwork.remote_port}, aMavlinkMavGsNetwork.host_port,
+				err);
+
+			break;
+
+		case MAV_GS_NETWORK_TRANSPORT_TCP6:
+			Sock::Api::getInstance().connect({addr, aMavlinkMavGsNetwork.remote_port}, aMavlinkMavGsNetwork.host_port,
+				err, asio::ip::tcp::v6());
+
+			break;
+
+	}
+
 	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
 
 	return res;
@@ -134,14 +149,22 @@ Microservice::Ret GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 
 	switch (aMavlinkMavGsNetwork.transport) {
 		case MAV_GS_NETWORK_TRANSPORT_TCP4:
-		case MAV_GS_NETWORK_TRANSPORT_TCP6:
 			Sock::Api::getInstance().openTcp(aMavlinkMavGsNetwork.host_port, errorCode);
 
 			break;
 
+		case MAV_GS_NETWORK_TRANSPORT_TCP6:
+			Sock::Api::getInstance().openTcp(aMavlinkMavGsNetwork.host_port, errorCode, asio::ip::tcp::v6());
+
+			break;
+
 		case MAV_GS_NETWORK_TRANSPORT_UDP4:
-		case MAV_GS_NETWORK_TRANSPORT_UDP6:
 			Sock::Api::getInstance().openUdp(aMavlinkMavGsNetwork.host_port, errorCode);
+
+			break;
+
+		case MAV_GS_NETWORK_TRANSPORT_UDP6:
+			Sock::Api::getInstance().openUdp(aMavlinkMavGsNetwork.host_port, errorCode, asio::ip::udp::v6());
 
 			break;
 	}
@@ -188,9 +211,14 @@ Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
 			break;
 
 		case MAV_GS_NETWORK_TRANSPORT_UDP4:
-		case MAV_GS_NETWORK_TRANSPORT_UDP6:
 			Sock::Api::getInstance().sendTo(asio::ip::udp::endpoint{addr, aMavlinkMavGsNetwork.remote_port},
 				aMavlinkMavGsNetwork.host_port, getBuffer(aMavlinkMavGsNetwork), errorCode);
+
+			break;
+
+		case MAV_GS_NETWORK_TRANSPORT_UDP6:
+			Sock::Api::getInstance().sendTo(asio::ip::udp::endpoint{addr, aMavlinkMavGsNetwork.remote_port},
+				aMavlinkMavGsNetwork.host_port, getBuffer(aMavlinkMavGsNetwork), errorCode, asio::ip::udp::v6());
 
 			break;
 	}
