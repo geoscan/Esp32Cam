@@ -7,15 +7,24 @@
 
 #include "Task.hpp"
 
-using namespace Socket;
+using namespace Sock;
 
-void Task::operator()() {
-	while (true) {
-		if (ioContext.stopped()) {
-			ioContext.restart();
-		}
+void Task::iter()
+{
+	if (ioContext.stopped()) {
+		ioContext.restart();
+	}
+	{
+		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+
 		if (!ioContext.poll()) {
 			std::this_thread::sleep_for(pollPeriod);
 		}
+	}
+}
+
+void Task::run() {
+	while (true) {
+		iter();
 	}
 }

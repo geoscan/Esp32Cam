@@ -11,22 +11,26 @@
 #include <asio.hpp>
 #include <chrono>
 #include <thread>
+#include <mutex>
 
-namespace Socket {
+namespace Sock {
 
 class Task {
 	asio::io_context &ioContext;
 	std::chrono::microseconds pollPeriod;
-public:
+	std::mutex &syncAsyncMutex;
 
+public:
 	template <class Rep, class Period>
-	Task(asio::io_context &aContext, std::chrono::duration<Rep, Period> aPollPeriod):
+	Task(asio::io_context &aContext, std::chrono::duration<Rep, Period> aPollPeriod, std::mutex &aSyncAsyncMutex):
 		ioContext{aContext},
-		pollPeriod{std::chrono::duration_cast<decltype(pollPeriod)>(aPollPeriod)}
+		pollPeriod{std::chrono::duration_cast<decltype(pollPeriod)>(aPollPeriod)},
+		syncAsyncMutex{aSyncAsyncMutex}
 	{
 	}
 
-	void operator()();
+	void iter();
+	void run();
 };
 
 }  // namespace Socket
