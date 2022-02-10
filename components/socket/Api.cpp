@@ -40,11 +40,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 		return;
 	}
 
-	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
-	container.tcpConnected.back().async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
-		[this, buffer, aRemoteEndpoint](const asio::error_code &aErrorCode, std::size_t anTransferred) mutable {
-		// TODO: event, on received
-	});
+	tcpAsyncReceiveFrom(container.tcpConnected.back());
 }
 
 void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aPort, asio::error_code &aErr)
@@ -120,10 +116,47 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 {
 	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
 	std::shared_ptr<asio::ip::udp::endpoint> endpoint;
+	auto port = aSocket.local_endpoint().port();
 
 	aSocket.async_receive_from(asio::buffer(buffer.get(), kReceiveBufferSize), *endpoint.get(),
-		[buffer, endpoint] (const asio::error_code &aError, std::size_t anReceived) mutable {
-		// TODO: event
+		[this, buffer, endpoint, port, &aSocket] (const asio::error_code &aError, std::size_t anReceived) mutable {
+
+		if (!aError) {
+			for (auto &cb : Sub::Socket::Received<asio::ip::udp>::getIterators()) {
+				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::udp>{*endpoint.get(), port, asio::buffer(buffer.get(),
+					anReceived)});
+
+				if (ret.response.size()) {
+					asio::error_code err;
+					aSocket.send_to(ret.response, *endpoint.get(), 0, err);
+				}
+			}
+		}
+
+		udpAsyncReceiveFrom(aSocket);
+	});
+}
+
+void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
+{
+	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
+
+	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
+		[this, buffer, &aSocket](const asio::error_code &aErr, std::size_t anReceived) mutable {
+
+		if (!aErr) {
+			for (auto &cb : Sub::Socket::Received<asio::ip::tcp>::getIterators()) {
+				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::tcp>{aSocket.remote_endpoint(),
+					aSocket.local_endpoint().port(), asio::buffer(buffer.get(), anReceived)});
+
+				if (ret.response.size()) {
+					asio::error_code err;
+					aSocket.write_some(ret.response, err);
+				}
+			}
+		}
+
+		tcpAsyncReceiveFrom(aSocket);
 	});
 }
 

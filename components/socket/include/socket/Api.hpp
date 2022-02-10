@@ -22,9 +22,6 @@ private:
 	asio::io_context &ioContext;
 	std::mutex &syncAsyncMutex;  ///< Shared b/w reactive requests to this Api, and whatever task that triggers asio::io_context in a loop
 
-	using KeyUdpReceived = typename Sub::Socket::Key<asio::ip::udp, Sub::Socket::Cmd::Received>;
-	using KeyTcpReceived = typename Sub::Socket::Key<asio::ip::tcp, Sub::Socket::Cmd::Received>;
-
 	struct {
 		Container<asio::ip::tcp::socket> tcpConnected;
 		Container<asio::ip::tcp::acceptor> tcpListening;
@@ -53,6 +50,7 @@ public:
 
 private:
 	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket);
+	void tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket);
 };
 
 }  // namespace Sock
