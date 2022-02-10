@@ -12,21 +12,19 @@ namespace Sock {
 namespace ContainerImpl {
 
 template <class Tproto, template <class...> class Tobject>
-inline void
-Container<Tobject<Tproto>>::pop(std::uint16_t aLocalPort)
+inline typename ContainerBase<Tobject<Tproto>>::iterator
+Container<Tobject<Tproto>>::find(std::uint16_t aLocalPort)
 {
 	auto it = std::find_if(begin(), end(), [aLocalPort](const Value &aVal) {
 		return aVal.local_endpoint().port() == aLocalPort;
 	});
 
-	if (it != end()) {
-		erase(it);
-	}
+	return it;
 }
 
 template <class Tproto, template <class...> class Tobject>
-inline void
-Container<Tobject<Tproto>>::pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort)
+inline typename ContainerBase<Tobject<Tproto>>::iterator
+Container<Tobject<Tproto>>::find(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort)
 {
 	auto it = std::find_if(begin(), end(), [&aRemoteEndpoint, aLocalPort](const Value &aVal) {
 		asio::error_code err;
@@ -40,6 +38,26 @@ Container<Tobject<Tproto>>::pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint
 
 		return localPort == aLocalPort && remoteEndpoint == aRemoteEndpoint;
 	});
+
+	return it;
+}
+
+template <class Tproto, template <class...> class Tobject>
+inline void
+Container<Tobject<Tproto>>::pop(std::uint16_t aLocalPort)
+{
+	auto it = find(aLocalPort);
+
+	if (it != end()) {
+		erase(it);
+	}
+}
+
+template <class Tproto, template <class...> class Tobject>
+inline void
+Container<Tobject<Tproto>>::pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort)
+{
+	auto it = find(aRemoteEndpoint, aLocalPort);
 
 	if (it != end()) {
 		erase(it);

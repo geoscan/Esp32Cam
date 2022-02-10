@@ -64,8 +64,12 @@ struct Container<Tobject<Tproto>> : public ContainerBase<Tobject<Tproto>> {
 	using Base::end;
 	using Base::begin;
 	using Base::push_back;
+	using Base::pop_back;
 	using Base::back;
 	using Base::erase;
+
+	typename Base::iterator find(std::uint16_t aLocalPort);
+	typename Base::iterator find(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort);
 
 	void pop(std::uint16_t aLocalPort);
 	void pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort);
