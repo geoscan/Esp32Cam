@@ -33,18 +33,21 @@ private:
 
 public:
 	Api(asio::io_context &, std::mutex &aSyncAsyncMutex);
-	void connect(const asio::ip::tcp::endpoint &, std::uint16_t &aLocalPort, asio::error_code &aErr);
+	void connect(const asio::ip::tcp::endpoint &, std::uint16_t &aLocalPort, asio::error_code &aErr,
+		asio::ip::tcp = asio::ip::tcp::v4());
 	void disconnect(const asio::ip::tcp::endpoint &, std::uint16_t aLocalPort, asio::error_code &aErr);
-	void openTcp(std::uint16_t aLocalPort, asio::error_code &aErr);  ///< Open a listening socket
-	void openUdp(std::uint16_t aLocalPort, asio::error_code &aErr);
+	void openTcp(std::uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp = asio::ip::tcp::v4());  ///< Open a listening socket
+	void openUdp(std::uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 	void closeTcp(std::uint16_t aPort, asio::error_code &aErr);
 	void closeUdp(std::uint16_t aPort, asio::error_code &aErr);
 
 	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&, asio::error_code &aErr);
+	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&,
+		asio::error_code &aErr);
 
 	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&, asio::error_code &aErr);
+	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, Tbuf &&,
+		asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 
 };
 

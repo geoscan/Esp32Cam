@@ -16,7 +16,8 @@ Api::Api(asio::io_context &aIoContext, std::mutex &aSyncAsyncMutex):
 {
 }
 
-void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLocalPort, asio::error_code &aErr)
+void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLocalPort, asio::error_code &aErr,
+	asio::ip::tcp aTcp)
 {
 	static constexpr auto kReceiveBufferSize = 256;
 	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
@@ -27,7 +28,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 	}
 
 	if (aLocalPort != 0) {
-		container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{asio::ip::tcp::v4(), aLocalPort});
+		container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 	} else {
 		container.tcpConnected.emplace_back(ioContext);
 		aLocalPort = container.tcpConnected.back().local_endpoint().port();
@@ -62,15 +63,28 @@ void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16
 	it->close(aErr);
 }
 
-void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr)
+void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTcp)
 {
 	auto it = container.tcpListening.find(aLocalPort);
 
 	if (it != container.tcpListening.end()) {
-		aErr = asio::error::already_started;
+		aErr = asio::error::already_open;
+		return;
 	}
 
-	container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{asio::ip::tcp::v4(), aLocalPort});
+	container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
+}
+
+void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUdp)
+{
+	auto it = container.udp.find(aLocalPort);
+
+	if (it != container.udp.end()) {
+		aErr = asio::error::already_open;
+		return;
+	}
+
+	container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
 }
 
 void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)

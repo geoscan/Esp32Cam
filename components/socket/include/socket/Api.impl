@@ -27,13 +27,18 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 }
 
 template <class TbufferType>
-std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort,  TbufferType &&aBuffer,
-	asio::error_code &aErr)
+std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort,  TbufferType &&aBuffer,
+	asio::error_code &aErr, asio::ip::udp aUdp)
 {
 	auto it = container.udp.find(aRemoteEndpoint, aLocalPort);
 
 	if (it == container.udp.end()) {
-		it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{asio::ip::udp::v4(), aLocalPort});
+		if (aLocalPort != 0) {
+			it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+		} else {
+			it = container.udp.emplace(container.udp.end(), ioContext);
+			aLocalPort = it->local_endpoint(aErr).port();
+		}
 	}
 
 	{
