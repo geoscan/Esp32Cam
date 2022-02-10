@@ -1,0 +1,40 @@
+//
+// MakeSingleton.impl
+//
+// Created on: Feb 10, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "MakeSingleton.hpp"  // For IDE syntax highlighting
+
+namespace Utility {
+
+template <class T>
+T *MakeSingleton<T>::instance = nullptr;
+
+template<class T>
+MakeSingleton<T>::MakeSingleton(T &aInstance)
+{
+	instance = aInstance;
+}
+
+template <class T>
+inline void MakeSingleton<T>::setInstance(T &aInstance)
+{
+	instance = aInstance;
+}
+
+template <class T>
+inline T &MakeSingleton<T>::getInstance()
+{
+	return *instance;
+}
+
+template <class T>
+inline bool MakeSingleton<T>::checkInstance()
+{
+	return instance != nullptr;
+}
+
+
+}  // namespace Utility
