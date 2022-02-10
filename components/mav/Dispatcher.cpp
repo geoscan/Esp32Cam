@@ -37,7 +37,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 	return ret;
 }
 
-Sub::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Sub::Message &aMessage)
+Sub::MavReceiveResult Mav::Dispatcher::onMavlinkUartReceived(Sub::Message &aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	switch (process(aMessage.payload)) {
@@ -58,7 +58,7 @@ Sub::ProcessReceivedResult Mav::Dispatcher::onMavlinkUartReceived(Sub::Message &
 	return {};
 }
 
-Sub::ProcessReceivedResult Mav::Dispatcher::onMavlinkUdpReceived(Sub::Message &aMessage)
+Sub::MavReceiveResult Mav::Dispatcher::onMavlinkUdpReceived(Sub::Message &aMessage)
 {
 	Sub::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
 

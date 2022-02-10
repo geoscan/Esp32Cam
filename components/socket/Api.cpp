@@ -1,0 +1,163 @@
+//
+// Api.cpp
+//
+// Created on: Feb 09, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "socket/Api.hpp"
+
+namespace Sock {
+
+Api::Api(asio::io_context &aIoContext, std::mutex &aSyncAsyncMutex):
+	MakeSingleton<Api>{*this},
+	ioContext{aIoContext},
+	syncAsyncMutex{aSyncAsyncMutex}
+{
+}
+
+void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLocalPort, asio::error_code &aErr,
+	asio::ip::tcp aTcp)
+{
+	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
+
+	if (it != container.tcpConnected.end()) {
+		aErr = asio::error::already_connected;
+		return;
+	}
+
+	if (aLocalPort != 0) {
+		container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
+	} else {
+		container.tcpConnected.emplace_back(ioContext);
+		aLocalPort = container.tcpConnected.back().local_endpoint().port();
+	}
+	container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+
+	if (aErr) {
+		container.tcpConnected.back().close();
+		container.tcpConnected.pop_back();
+		return;
+	}
+
+	tcpAsyncReceiveFrom(container.tcpConnected.back());
+}
+
+void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aPort, asio::error_code &aErr)
+{
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	auto it = container.tcpConnected.find(aRemoteEndpoint, aPort);
+	(void)lock;
+
+	if (it != container.tcpConnected.end()) {
+		aErr = asio::error::not_connected;
+		return;
+	}
+
+	it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
+	it->close(aErr);
+}
+
+void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTcp)
+{
+	auto it = container.tcpListening.find(aLocalPort);
+
+	if (it != container.tcpListening.end()) {
+		aErr = asio::error::already_open;
+		return;
+	}
+
+	container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
+}
+
+void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUdp)
+{
+	auto it = container.udp.find(aLocalPort);
+
+	if (it != container.udp.end()) {
+		aErr = asio::error::already_open;
+		return;
+	}
+
+	container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+	udpAsyncReceiveFrom(container.udp.back());
+}
+
+void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
+{
+	auto it = container.udp.find(aPort);
+
+	if (it == container.udp.end()) {
+		aErr = asio::error::not_found;
+	}
+
+	{
+		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+		it->close(aErr);
+	}
+}
+
+void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
+{
+	auto it = container.tcpListening.find(aPort);
+
+	if (it == container.tcpListening.end()) {
+		aErr = asio::error::not_found;
+		return;
+	}
+
+	{
+		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+		it->close(aErr);
+	}
+}
+
+void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
+{
+	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
+	std::shared_ptr<asio::ip::udp::endpoint> endpoint;
+	auto port = aSocket.local_endpoint().port();
+
+	aSocket.async_receive_from(asio::buffer(buffer.get(), kReceiveBufferSize), *endpoint.get(),
+		[this, buffer, endpoint, port, &aSocket] (const asio::error_code &aError, std::size_t anReceived) mutable {
+
+		if (!aError) {
+			for (auto &cb : Sub::Socket::Received<asio::ip::udp>::getIterators()) {
+				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::udp>{*endpoint.get(), port, asio::buffer(buffer.get(),
+					anReceived)});
+
+				if (ret.response.size()) {
+					asio::error_code err;
+					aSocket.send_to(ret.response, *endpoint.get(), 0, err);
+				}
+			}
+		}
+
+		udpAsyncReceiveFrom(aSocket);
+	});
+}
+
+void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
+{
+	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
+
+	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
+		[this, buffer, &aSocket](const asio::error_code &aErr, std::size_t anReceived) mutable {
+
+		if (!aErr) {
+			for (auto &cb : Sub::Socket::Received<asio::ip::tcp>::getIterators()) {
+				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::tcp>{aSocket.remote_endpoint(),
+					aSocket.local_endpoint().port(), asio::buffer(buffer.get(), anReceived)});
+
+				if (ret.response.size()) {
+					asio::error_code err;
+					aSocket.write_some(ret.response, err);
+				}
+			}
+		}
+
+		tcpAsyncReceiveFrom(aSocket);
+	});
+}
+
+}  // namespace Sock
