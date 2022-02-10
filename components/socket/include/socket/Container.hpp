@@ -20,12 +20,12 @@ namespace ContainerImpl {
 
 struct CallRemoteEndpoint {  ///< SFINAE wrapper
 	template <class T, class ...Ta>
-	auto call(T &&aT, Ta &&...aArgs) -> decltype(aT.remote_endpoint(std::forward<Ta>(aArgs)...))
+	static auto call(T &&aT, Ta &&...aArgs) -> decltype(aT.remote_endpoint(std::forward<Ta>(aArgs)...))
 	{
 		return aT.remote_endpoint(std::forward<Ta>(aArgs)...);
 	}
 
-	void call(...)  ///< SFINAE fallback
+	static void call(...)  ///< SFINAE fallback
 	{
 		assert(false);
 	}
