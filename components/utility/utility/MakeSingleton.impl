@@ -15,7 +15,7 @@ T *MakeSingleton<T>::instance = nullptr;
 template<class T>
 MakeSingleton<T>::MakeSingleton(T &aInstance)
 {
-	instance = aInstance;
+	instance = &aInstance;
 }
 
 template <class T>
