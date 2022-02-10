@@ -15,6 +15,7 @@ espidf_build:
     artifacts:
         paths:
             - "./tools/*.bin"
+    when: manual
 
 espidf_build_deps:
     variables:
