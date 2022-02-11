@@ -8,13 +8,13 @@
 #include "Routing.hpp"
 #include "socket/Api.hpp"
 
-using namespace Sub;
+using namespace Bdg;
 
-Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
+Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 {
 	switch (static_cast<Uart>(aUart.uartNum)) {
 		case Uart::Mavlink:
-			for (auto &callable : Rout::OnMavlinkReceived::getIterators()) {
+			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUart.payload);  // Only 1 module serving MAVLink events is expected to be attached
 
 				if (!response.payloadHold) {  // Message has not been claimed. Forward
@@ -44,23 +44,26 @@ Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 	}
 }
 
-Rout::Response Routing::operator()(const Rout::Socket<asio::ip::tcp> &)
+
+
+
+Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &)
 {
 	return {};
 }
 
-Rout::Response Routing::operator()(const Rout::Socket<asio::ip::udp> &aUdp)
+Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &aUdp)
 {
 	switch (static_cast<Udp>(aUdp.localPort)) {
 
 		case Udp::Mavlink:
 			container.udpEndpoints.push_back(aUdp.remoteEndpoint);  // Remember the client
 
-			for (auto &callable : Rout::OnMavlinkReceived::getIterators()) {
+			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUdp.payload);
 
 				if (!response.payloadHold) {  // Message has not been claimed. Forward.
-					Rout::UartSend::notify(Rout::Uart{aUdp.payload, static_cast<decltype(Rout::Uart::uartNum)>(Uart::Mavlink)});
+					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload, static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
 				} else {
 					return response;
 				}
@@ -74,7 +77,7 @@ Rout::Response Routing::operator()(const Rout::Socket<asio::ip::udp> &aUdp)
 	}
 }
 
-Rout::Response Routing::onReceived(const Rout::ReceivedVariant &aVariant)
+Sub::Rout::Response Routing::onReceived(const Sub::Rout::ReceivedVariant &aVariant)
 {
 	return mapbox::util::apply_visitor(*this, aVariant);
 }

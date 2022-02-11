@@ -11,10 +11,9 @@
 #include "sub/Rout.hpp"
 #include <list>
 
-namespace Sub {
+namespace Bdg {
 
 class Routing {
-
 private:
 
 	enum class Uart {
@@ -26,10 +25,10 @@ private:
 	};
 
 public:
-	Rout::Response operator()(const Rout::Uart &);
-	Rout::Response operator()(const Rout::Socket<asio::ip::tcp> &);
-	Rout::Response operator()(const Rout::Socket<asio::ip::udp> &);
-	Rout::Response onReceived(const Rout::ReceivedVariant &);
+	Sub::Rout::Response operator()(const Sub::Rout::Uart &);
+	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::tcp> &);
+	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::udp> &);
+	Sub::Rout::Response onReceived(const Sub::Rout::ReceivedVariant &);
 
 private:
 	struct {
@@ -37,6 +36,6 @@ private:
 	} container;
 };
 
-}  // namespace Sub
+}  // namespace Bdg
 
 #endif // SUB_PRIV_INCLUDE_ROUTING_HPP
