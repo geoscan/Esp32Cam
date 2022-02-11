@@ -31,7 +31,7 @@ struct Socket {
 
 struct Uart {
 	Payload payload;
-	unsigned char uartNum;
+	int uartNum;
 };
 
 struct Response {
