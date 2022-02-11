@@ -5,6 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include "sub/Rout.hpp"
 #include "utility/Buffer.hpp"
 #include "UartDevice.hpp"
 #include "Task.hpp"
@@ -17,21 +18,7 @@ void Uart::Task::operator()()
 	while (true) {
 		for (auto &uartDevice : uartDevices) {
 			auto nRead = uartDevice->read(buffer.data(), buffer.size());
-
-			if (nRead) {
-				Sub::UartMessage uartMessage;
-				uartMessage.payload = decltype(uartMessage.payload){buffer.data(), nRead};
-				uartMessage.uartNum = static_cast<Sub::UartNum>(uartDevice->getNum());
-
-				switch (uartMessage.uartNum) {
-					case Sub::UartNum::Mavlink:
-						Sub::Key::MavlinkUartReceived::notify(uartMessage);
-						break;
-
-					default:
-						break;
-				}
-			}
+			Sub::Rout::OnReceived::notify(Sub::Rout::Uart{{buffer.data(), nRead}, uartDevice->getNum()});
 		}
 	}
 }
