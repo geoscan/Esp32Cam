@@ -26,34 +26,60 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 	}
 
 	mavlink_mav_gs_network_t mavlinkMavGsNetwork;
+	Ret ret;
 	mavlink_msg_mav_gs_network_decode(&aMavlinkMessage, &mavlinkMavGsNetwork);
 
-	if (mavlinkMavGsNetwork.ack != MAV_GS_NETWORK_ACK_NONE) {  // Response message
-		return Ret::NoResponse;
+	switch (mavlinkMavGsNetwork.ack) {
+		case MAV_GS_NETWORK_ACK_NONE:
+			ret = Ret::NoResponse;
+
+			break;
+
+		case MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE:
+			ret = Ret::Response;
+
+			break;
+
+		default:  // Non-request message
+			return Ret::NoResponse;
 	}
 
 	switch (mavlinkMavGsNetwork.command) {  // Command message
 		case MAV_GS_NETWORK_COMMAND_CONNECT:
-			return processConnect(aMavlinkMessage, mavlinkMavGsNetwork);
+			processConnect(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		case MAV_GS_NETWORK_COMMAND_DISCONNECT:
-			return processDisconnect(aMavlinkMessage, mavlinkMavGsNetwork);
+			processDisconnect(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		case MAV_GS_NETWORK_COMMAND_SEND:
-			return processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		case MAV_GS_NETWORK_COMMAND_OPEN:
-			return processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		case MAV_GS_NETWORK_COMMAND_CLOSE:
-			return processClose(aMavlinkMessage, mavlinkMavGsNetwork);
+			processClose(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		case MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED:
-			return processReceived(aMavlinkMessage, mavlinkMavGsNetwork);
+			processReceived(aMavlinkMessage, mavlinkMavGsNetwork);
+
+			break;
 
 		default:
 			return Ret::Ignored;
 	}
+
+	return ret;
 }
 
 asio::ip::address GsNetwork::getAddress(mavlink_mav_gs_network_t & aMavlinkMavGsNetwork)  ///< Extract address from payload field
@@ -102,11 +128,10 @@ asio::const_buffer GsNetwork::getBuffer(mavlink_mav_gs_network_t &aMavlinkMavGsN
 
 }
 
-Microservice::Ret GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
 	auto addr = getAddress(aMavlinkMavGsNetwork);
-	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code err;
 
 	switch (aMavlinkMavGsNetwork.transport) {
@@ -125,26 +150,20 @@ Microservice::Ret GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
 	}
 
 	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
-
-	return res;
 }
 
-Microservice::Ret GsNetwork::processDisconnect(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processDisconnect(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
 	auto addr = getAddress(aMavlinkMavGsNetwork);
-	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code err;
 	Sock::Api::getInstance().disconnect({addr, aMavlinkMavGsNetwork.remote_port}, aMavlinkMavGsNetwork.host_port, err);
 	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
-
-	return res;
 }
 
-Microservice::Ret GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code errorCode;
 
 	switch (aMavlinkMavGsNetwork.transport) {
@@ -169,37 +188,33 @@ Microservice::Ret GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 			break;
 	}
 	aMavlinkMavGsNetwork.ack = errorCode ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
-
-	return res;
 }
 
-Microservice::Ret GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code errorCode;
 
 	switch (aMavlinkMavGsNetwork.transport) {
 		case MAV_GS_NETWORK_TRANSPORT_TCP4:
 		case MAV_GS_NETWORK_TRANSPORT_TCP6:
 			Sock::Api::getInstance().closeTcp(aMavlinkMavGsNetwork.host_port, errorCode);
+
 			break;
 
 		case MAV_GS_NETWORK_TRANSPORT_UDP4:
 		case MAV_GS_NETWORK_TRANSPORT_UDP6:
 			Sock::Api::getInstance().closeUdp(aMavlinkMavGsNetwork.host_port, errorCode);
+
 			break;
 	}
 	aMavlinkMavGsNetwork.ack = errorCode ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
-
-	return res;
 }
 
-Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
 	auto addr = getAddress(aMavlinkMavGsNetwork);
-	auto res = aMavlinkMavGsNetwork.ack == MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE ? Ret::NoResponse : Ret::Response;
 	asio::error_code errorCode;
 
 	switch (aMavlinkMavGsNetwork.transport) {
@@ -223,12 +238,9 @@ Microservice::Ret GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
 			break;
 	}
 	aMavlinkMavGsNetwork.ack = errorCode ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
-
-	return res;
 }
 
-Microservice::Ret GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage,
+void GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
-	return Ret::Ignored;
 }
