@@ -16,4 +16,5 @@ idf_component_register(
 		esp_common
 		pthread
 		utility
+		socket
 		sub)
