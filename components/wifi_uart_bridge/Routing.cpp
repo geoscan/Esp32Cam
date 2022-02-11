@@ -44,9 +44,6 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 	}
 }
 
-
-
-
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &)
 {
 	return {};
