@@ -45,9 +45,9 @@ struct Mavlink;
 }  // namespace Topic
 
 using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart>;
-using OnMavlinkReceived = Sub::NoLockModule<Response(Payload), Topic::Mavlink>;
-using OnReceived = Sub::IndModule<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
-using UartSend = Sub::IndModule<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
+using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
+using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
+using UartSend = Sub::IndKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
 }  // namespace Rout
 }  // namespace Sub

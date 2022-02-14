@@ -1,15 +1,34 @@
 #ifndef UTILITY_UTILITY_SUBSCRIPTION_HPP
 #define UTILITY_UTILITY_SUBSCRIPTION_HPP
 
-#include <Rr/Subscription.hpp>
-#include <Rr/Key.hpp>
-#include <Rr/Module.hpp>
-#include <Rr/SyncTrait.hpp>
+#include <Rr/Util/Key.hpp>
 #include "utility/Buffer.hpp"
 #include "cam/Camera.hpp"
 #include "sub/Types.hpp"
 #include <asio.hpp>
 #include <list>
+
+namespace Rr {
+namespace Subscription {
+
+struct MutSyncTrait {
+	static constexpr auto kPolicy = Rr::Sync::Policy::Type::Mutex;
+	using Mutex = std::mutex;
+};
+
+using DefaultSyncTrait = MutSyncTrait;
+
+template <class Targ, class Ttopic>
+using Key = typename Rr::Util::LegacyKey<void(Targ), DefaultSyncTrait, std::list, Ttopic>;
+
+template <class Ttopic>
+using KeyVoid = typename Rr::Util::LegacyKey<void(), DefaultSyncTrait, std::list, Ttopic>;
+
+template <class Ttopic, class TsyncTrait, class ...Targs>
+using KeyBase = typename Rr::Util::LegacyKey<void(Targs...), DefaultSyncTrait, std::list, Ttopic>;
+
+}  // namespace Subscription
+}  // namespace Rr
 
 namespace Sub {
 
@@ -30,33 +49,20 @@ struct Ip;
 struct IpDisconnect;
 }  // namespace Topic
 
-///
-/// \brief Synchronization group
-///
-enum class SyncGroup : unsigned {
-	MavlinkRouting = 0,
+struct MutSyncTrait {
+	static constexpr auto kPolicy = Rr::Sync::Policy::Type::Mutex;
+	using Mutex = std::mutex;
 };
 
-template <class Tsignature, SyncGroup Igroup, class Ttopic = Topic::Default>
-using GroupKey = Rr::Key<Tsignature, Ttopic, std::list, Rr::DefaultGroupMutexTrait<(unsigned)Igroup>>;
-
-template <class Tsignature, SyncGroup Igroup, class Ttopic = Topic::Default>
-using GroupModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::DefaultGroupMutexTrait<(unsigned)Igroup>>;
-
-template <SyncGroup Igroup>
-using GroupLock = Rr::GroupMutexLock<Rr::DefaultGroupMutexTrait<unsigned(Igroup)>>;
+struct NoSyncTrait {
+	static constexpr auto kPolicy = Rr::Sync::Policy::Type::None;
+};
 
 template <class Tsignature, class Ttopic = Topic::Default>
-using IndKey = Rr::Key<Tsignature, Ttopic, std::list, Rr::DefaultMutexTrait>;
+using IndKey = Rr::Util::Key<Tsignature, MutSyncTrait, std::list, Ttopic>;
 
 template <class Tsignature, class Ttopic = Topic::Default>
-using IndModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::DefaultMutexTrait>;
-
-template <class Tsignature, class Ttopic = Topic::Default>
-using NoLockKey = Rr::Key<Tsignature, Ttopic, std::list, Rr::MockMutexTrait>;
-
-template <class Tsignature, class Ttopic = Topic::Default>
-using NoLockModule = Rr::Module<Tsignature, Ttopic, std::list, Rr::MockMutexTrait>;
+using NoLockKey = Rr::Util::Key<Tsignature, NoSyncTrait, std::list, Ttopic>;
 
 namespace Key {
 
@@ -66,19 +72,19 @@ using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Cam::Frame>
 using TcpDisconnected  = Rr::Subscription::Key<asio::ip::address, Topic::TcpDisconnected>;
 using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
 using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, Topic::RecordStart>;
-using RecordStop       = Rr::Subscription::Key<void, Topic::RecordStop>;
+using RecordStop       = Rr::Subscription::KeyVoid<Topic::RecordStop>;
 
 // As for 2021-12-23, a duplex 1-to-1 version of forwarding is used. No locking is required
-using MavlinkUartReceived = NoLockModule<MavReceiveResult(Message &), Topic::MavlinkUdpReceived>;
-using MavlinkUdpReceived = NoLockModule<MavReceiveResult(Message &), Topic::MavlinkUartReceived>;
-using MavlinkUdpSend = NoLockModule<IpSendResult(Message &), Topic::MavlinkUdpSend>;
-using MavlinkUartSend = NoLockModule<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
+using MavlinkUartReceived = NoLockKey<MavReceiveResult(Message &), Topic::MavlinkUdpReceived>;
+using MavlinkUdpReceived = NoLockKey<MavReceiveResult(Message &), Topic::MavlinkUartReceived>;
+using MavlinkUdpSend = NoLockKey<IpSendResult(Message &), Topic::MavlinkUdpSend>;
+using MavlinkUartSend = NoLockKey<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
 
-using IpConnect = IndModule<IpResult(const Sub::IpConnect &)>;  ///< Fullfill a TCP connection request
-using IpSend = IndModule<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
-using IpReceived = IndModule<void(const IpDestMessage &)>;  ///< Handle IP received data
+using IpConnect = IndKey<IpResult(const Sub::IpConnect &)>;  ///< Fullfill a TCP connection request
+using IpSend = IndKey<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
+using IpReceived = IndKey<void(const IpDestMessage &)>;  ///< Handle IP received data
 
-using UartSend = IndModule<UartSendResult(const UartMessage &)>;  ///< Send a package over serial
+using UartSend = IndKey<UartSendResult(const UartMessage &)>;  ///< Send a package over serial
 
 }  // namespace Key
 }  // namespace Sub
