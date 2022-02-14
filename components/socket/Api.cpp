@@ -130,7 +130,7 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 					asio::const_buffer(buffer.get(), anReceived)
 				});
 
-				// If a subscribers provides a response, send it
+				// If a subscriber provides a response, send it
 				if (response.getType() == Sub::Rout::Response::Type::Response) {
 					asio::error_code err;
 					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
@@ -157,7 +157,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 					asio::const_buffer(buffer.get(), anReceived)
 				});
 
-				// If a subscribers provides a response, send it
+				// If a subscriber provides a response, send it
 				if (response.getType() == Sub::Rout::Response::Type::Response) {
 					asio::error_code err;
 					aSocket.write_some(response.payload, err);
