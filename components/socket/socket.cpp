@@ -16,7 +16,6 @@ namespace Sock {
 static void apiInit(Sock::Api &aApi)
 {
 	constexpr auto kUdpOpen = {8001 /* AP protocol (MAVLink) */};
-
 	asio::error_code err;
 
 	for (auto port : kUdpOpen) {
