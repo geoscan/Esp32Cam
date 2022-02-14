@@ -6,6 +6,7 @@
 //
 
 #include "socket/Api.hpp"
+#include "sub/Rout.hpp"
 
 namespace Sock {
 
@@ -122,13 +123,16 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 		[this, buffer, endpoint, port, &aSocket] (const asio::error_code &aError, std::size_t anReceived) mutable {
 
 		if (!aError) {
-			for (auto &cb : Sub::Socket::Received<asio::ip::udp>::getIterators()) {
-				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::udp>{*endpoint.get(), port, asio::buffer(buffer.get(),
-					anReceived)});
+			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {
+				auto response = cb(Sub::Rout::Socket<asio::ip::udp>{
+					*endpoint.get(),
+					port,
+					asio::const_buffer(buffer.get(), anReceived)
+				});
 
-				if (ret.response.size()) {
+				if (response.payload.size()) {
 					asio::error_code err;
-					aSocket.send_to(ret.response, *endpoint.get(), 0, err);
+					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
 				}
 			}
 		}
@@ -145,13 +149,16 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		[this, buffer, &aSocket](const asio::error_code &aErr, std::size_t anReceived) mutable {
 
 		if (!aErr) {
-			for (auto &cb : Sub::Socket::Received<asio::ip::tcp>::getIterators()) {
-				auto ret = cb(Sub::Socket::ArgReceived<asio::ip::tcp>{aSocket.remote_endpoint(),
-					aSocket.local_endpoint().port(), asio::buffer(buffer.get(), anReceived)});
+			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {
+				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
+					aSocket.remote_endpoint(),
+					aSocket.local_endpoint().port(),
+					asio::const_buffer(buffer.get(), anReceived)
+				});
 
-				if (ret.response.size()) {
+				if (response.payload.size()) {
 					asio::error_code err;
-					aSocket.write_some(ret.response, err);
+					aSocket.write_some(response.payload, err);
 				}
 			}
 		}
