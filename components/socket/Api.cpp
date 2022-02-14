@@ -123,13 +123,14 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 		[this, buffer, endpoint, port, &aSocket] (const asio::error_code &aError, std::size_t anReceived) mutable {
 
 		if (!aError) {
-			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {
+			for (auto &cb : Sub::Rout::OnReceived::getIterators()) { // Notify subscribers
 				auto response = cb(Sub::Rout::Socket<asio::ip::udp>{
 					*endpoint.get(),
 					port,
 					asio::const_buffer(buffer.get(), anReceived)
 				});
 
+				// If a subscribers provides a response, send it
 				if (response.payload.size()) {
 					asio::error_code err;
 					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
@@ -149,13 +150,14 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		[this, buffer, &aSocket](const asio::error_code &aErr, std::size_t anReceived) mutable {
 
 		if (!aErr) {
-			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {
+			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
 				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
 					aSocket.remote_endpoint(),
 					aSocket.local_endpoint().port(),
 					asio::const_buffer(buffer.get(), anReceived)
 				});
 
+				// If a subscribers provides a response, send it
 				if (response.payload.size()) {
 					asio::error_code err;
 					aSocket.write_some(response.payload, err);
