@@ -39,7 +39,7 @@ struct Response {
 	PayloadHold payloadHold;
 
 	enum class Type {
-		Ignored = 1,
+		Ignored,
 		Acknowledged,
 		Response,
 	};
