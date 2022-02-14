@@ -9,4 +9,5 @@ idf_component_register(
 		rr
 		utility
 		asio
+		mapbox_variant
 )

@@ -5,8 +5,8 @@
 //     Author: Dmitry Murashov (dmtrDOTmurashovATgmailDOTcom (gmail.com))
 //
 
-#ifndef SOCKET_INCLUDE_SOCKET_SOCKET_HPP
-#define SOCKET_INCLUDE_SOCKET_SOCKET_HPP
+#ifndef SOCKET_INCLUDE_SOCKET_API_HPP
+#define SOCKET_INCLUDE_SOCKET_API_HPP
 
 #include "utility/MakeSingleton.hpp"
 #include "sub/Socket.hpp"
@@ -57,4 +57,4 @@ private:
 
 #include "Api.impl"
 
-#endif // Api_INCLUDE_Api_Api_HPP
+#endif // SOCKET_INCLUDE_SOCKET_API_HPP
