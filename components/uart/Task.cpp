@@ -18,7 +18,14 @@ void Uart::Task::operator()()
 	while (true) {
 		for (auto &uartDevice : uartDevices) {
 			auto nRead = uartDevice->read(buffer.data(), buffer.size());
-			Sub::Rout::OnReceived::notify(Sub::Rout::Uart{{buffer.data(), nRead}, uartDevice->getNum()});
+
+			for (auto &callable : Sub::Rout::OnReceived::getIterators()) {
+				auto response = callable(Sub::Rout::Uart{{buffer.data(), nRead}, uartDevice->getNum()});
+
+				if (response.getType() == Sub::Rout::Response::Type::Response) {
+					uartDevice->write(response.payload);
+				}
+			}
 		}
 	}
 }
