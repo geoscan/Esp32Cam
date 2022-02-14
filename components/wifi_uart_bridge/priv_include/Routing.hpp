@@ -17,7 +17,7 @@ class Routing {
 private:
 
 	enum class Uart {
-		Mavlink = 1,  // Mavlink, etc.
+		Mavlink = 0,  // Mavlink, etc.
 	};
 
 	enum class Udp {  ///< Named UDP ports
