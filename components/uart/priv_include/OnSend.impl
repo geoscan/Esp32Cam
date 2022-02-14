@@ -9,49 +9,28 @@
 
 template <unsigned N>
 template <class ...Ta>
-inline Uart::OnSend<N>::OnSend(Ta &&...aArgs): OnSendBase<N>{{nullptr}}, key{{&OnSend::onMavlinkSend, this}}
+inline Uart::OnSend<N>::OnSend(Ta &&...aArgs) :
+	OnSendBase<N>{{nullptr}},
+	key{{&OnSend::send, this}}
 {
 	using List = int[];
 	(void)List{((void)(this->at(aArgs.getNum()) = &aArgs), 0)...};
 }
 
 template <unsigned N>
-inline Sub::UartSendResult Uart::OnSend<N>::send(const Sub::UartMessage &aMessage)
+inline Sub::Rout::UartSend::Ret Uart::OnSend<N>::send(Sub::Rout::UartSend::Arg<0> aMessage)
 {
-	unsigned num = static_cast<unsigned>(aMessage.uartNum);
-	Sub::UartSendResult result;
+	if (aMessage.uartNum < N) {
+		auto *dev = this->at(aMessage.uartNum);
 
-	if (N < num) {
-		result.resultCode = Sub::ResultCode::None;
-	} else {
-		auto *dev = this->at(num);
-
-		if (!dev) {
-			result.resultCode = Sub::ResultCode::None;
-
-		} else {
+		if (dev) {
 			std::size_t pos = 0;
-			std::size_t nwr = 42;
+			std::size_t nwr = 0;
 
 			while (nwr && pos < aMessage.payload.size()) {
-				nwr = dev->write(aMessage.payload.slice(pos));
+				nwr = dev->write(Utility::toBuffer<const void>(aMessage.payload).slice(pos));
 				pos += nwr;
 			}
-
-			result.resultCode = pos == aMessage.payload.size() ?
-				Sub::ResultCode::Success :
-				Sub::ResultCode::Fail;
 		}
 	}
-
-	return result;
-}
-
-template <unsigned N>
-inline Sub::UartSendResult Uart::OnSend<N>::onMavlinkSend(Sub::Message &a)
-{
-	Sub::UartMessage message;
-	message.payload = a.payload;
-	message.uartNum = Sub::UartNum::Mavlink;
-	return send(message);
 }

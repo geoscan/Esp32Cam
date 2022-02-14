@@ -12,6 +12,7 @@
 #define UART_PRIV_INCLUDE_ONSEND_HPP
 
 #include "sub/Subscription.hpp"
+#include "sub/Rout.hpp"
 #include <array>
 
 class UartDevice;
@@ -25,22 +26,20 @@ using OnSendBase = std::array<UartDevice *, N>;
 /// \brief Handles UART send requests through use of Rr lib-based subscription
 /// mechanism
 ///
-/// \tparam N - number of uart interfaces
+/// \tparam N - number of uart interfaces (overall). Storing pointers in an array enables faster access.
 ///
-template <unsigned N>
-class OnSend : OnSendBase<N> {
+template <unsigned NuartInterfaces>
+class OnSend : OnSendBase<NuartInterfaces> {
 	struct {
-		Sub::Key::MavlinkUartSend mavlinkUartSend;
+		Sub::Rout::UartSend uartSend;
 	} key;
 
 private:
-	Sub::UartSendResult send(const Sub::UartMessage &);
+	Sub::Rout::UartSend::Ret send(Sub::Rout::UartSend::Arg<0>);
 
 public:
 	template <class ...Ta>
 	OnSend(Ta &&...);
-
-	Sub::UartSendResult onMavlinkSend(Sub::Message &aMessage);
 };
 
 }  // namespace Uart
