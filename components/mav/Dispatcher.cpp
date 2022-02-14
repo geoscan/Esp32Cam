@@ -13,7 +13,7 @@
 #include "Dispatcher.hpp"
 
 Mav::Dispatcher::Dispatcher():
-	key{{&Dispatcher::onMavlinkUartReceived, this}, {&Dispatcher::onMavlinkUdpReceived, this}},
+	key{{&Dispatcher::onMavlinkReceived, this}},
 	micAggregate{}
 {
 }
@@ -37,30 +37,35 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 	return ret;
 }
 
-Sub::MavReceiveResult Mav::Dispatcher::onMavlinkUartReceived(Sub::Message &aMessage)
+
+Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0> aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
-	switch (process(aMessage.payload)) {
+	Sub::Rout::Response response;
+
+	if (marshalling.size()) {
+		marshalling.pop();
+	}
+
+	switch (process(Utility::toBuffer<const void>(aMessage))) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
-			Sub::Key::MavlinkUdpSend::notify(aMessage);
+			response.setType(Sub::Rout::Response::Type::Ignored);
+
+			break;
+
+		case Microservice::Ret::NoResponse:
+			response.setType(Sub::Rout::Response::Type::Acknowledged);
+
 			break;
 
 		case Microservice::Ret::Response:  // send response back
-			aMessage.payload = Utility::Buffer(&marshalling.back(), sizeof(marshalling.back()));
-			Sub::Key::MavlinkUartSend::notify(aMessage);
-			marshalling.pop();
+			response.payload = Sub::Rout::Payload{&marshalling.back(), sizeof(marshalling.back())};
+
 			break;
 
 		default:  // Message has been processed by some Microservice instance, no actions required
 			break;
 	};
 
-	return {};
-}
-
-Sub::MavReceiveResult Mav::Dispatcher::onMavlinkUdpReceived(Sub::Message &aMessage)
-{
-	Sub::Key::MavlinkUartSend::notify(aMessage);  // forward the message to UART interface
-
-	return {};
+	return response;
 }
