@@ -37,6 +37,15 @@ struct Uart {
 struct Response {
 	Payload payload;
 	PayloadHold payloadHold;
+
+	enum class Type {
+		Ignored = 1,
+		Acknowledged,
+		Response,
+	};
+
+	Type getType();
+	void setType(Type);
 };
 
 namespace Topic {
