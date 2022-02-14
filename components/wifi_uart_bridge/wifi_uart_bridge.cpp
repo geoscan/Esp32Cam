@@ -7,6 +7,9 @@
 #include "Bridge.hpp"
 #include "UartEndpoint.hpp"
 #include "UdpEndpoint.hpp"
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "socket/Api.hpp"
+#include "Routing.hpp"
 
 void wifiUartBridgeStart(asio::io_context &context)
 {
@@ -18,3 +21,13 @@ void wifiUartBridgeStart(asio::io_context &context)
 
 	Utility::Threading::threadRun(bridge);
 }
+
+namespace Bdg {
+
+void init()
+{
+	static Routing routing;
+	(void)routing;
+}
+
+}  // namespace Bdg
