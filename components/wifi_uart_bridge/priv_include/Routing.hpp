@@ -29,11 +29,16 @@ public:
 	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::tcp> &);
 	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::udp> &);
 	Sub::Rout::Response onReceived(const Sub::Rout::ReceivedVariant &);
+	Routing();
 
 private:
 	struct {
 		std::set<asio::ip::udp::endpoint> udpEndpoints;  ///> Memoized clients
 	} container;
+
+	struct {
+		Sub::Rout::OnReceived onReceived;
+	} key;
 };
 
 }  // namespace Bdg

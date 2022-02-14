@@ -81,3 +81,7 @@ Sub::Rout::Response Routing::onReceived(const Sub::Rout::ReceivedVariant &aVaria
 {
 	return mapbox::util::apply_visitor(*this, aVariant);
 }
+
+Routing::Routing() : key{{&Routing::onReceived, this}}
+{
+}
