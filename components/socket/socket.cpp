@@ -11,7 +11,7 @@
 #include <thread>
 #include <chrono>
 
-using namespace Sock;
+namespace Sock {
 
 static void apiInit(Sock::Api &aApi)
 {
@@ -24,7 +24,7 @@ static void apiInit(Sock::Api &aApi)
 	}
 }
 
-void init(asio::io_context &aIoContext)
+void start(asio::io_context &aIoContext)
 {
 	static constexpr const std::chrono::milliseconds taskPollPeriod{200};
 	static std::mutex syncAsyncMutex;
@@ -38,8 +38,10 @@ void init(asio::io_context &aIoContext)
 	(void)thread;
 }
 
-void init()
+void start()
 {
 	static asio::io_context ioContext;
-	Sock::init(ioContext);
+	Sock::start(ioContext);
 }
+
+}  // namespace Sock
