@@ -54,7 +54,9 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 	switch (static_cast<Udp>(aUdp.localPort)) {
 
 		case Udp::Mavlink:
-			container.udpEndpoints.push_back(aUdp.remoteEndpoint);  // Remember the client
+			if (container.udpEndpoints.find(aUdp.remoteEndpoint) == container.udpEndpoints.end()) {
+				container.udpEndpoints.emplace(aUdp.remoteEndpoint);  // Remember the client
+			}
 
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUdp.payload);

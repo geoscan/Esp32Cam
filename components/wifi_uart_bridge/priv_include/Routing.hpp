@@ -9,7 +9,7 @@
 #define SUB_PRIV_INCLUDE_ROUTING_HPP
 
 #include "sub/Rout.hpp"
-#include <list>
+#include <set>
 
 namespace Bdg {
 
@@ -32,7 +32,7 @@ public:
 
 private:
 	struct {
-		std::list<asio::ip::udp::endpoint> udpEndpoints;  ///> Memoized clients
+		std::set<asio::ip::udp::endpoint> udpEndpoints;  ///> Memoized clients
 	} container;
 };
 
