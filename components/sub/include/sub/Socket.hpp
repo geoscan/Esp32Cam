@@ -8,7 +8,6 @@
 #ifndef SUB_INCLUDE_SUB_SOCKET_HPP
 #define SUB_INCLUDE_SUB_SOCKET_HPP
 
-#include <Rr/Module.hpp>
 #include <asio.hpp>
 #include <cstdint>
 #include "sub/Subscription.hpp"
@@ -32,7 +31,7 @@ struct RetReceived {
 };
 
 template <class Tproto>
-using Received = typename Sub::IndModule<RetReceived(const ArgReceived<Tproto> &)>;
+using Received = typename Sub::IndKey<RetReceived(const ArgReceived<Tproto> &)>;
 
 }  // namespace Socket
 }  // namespace Sub
