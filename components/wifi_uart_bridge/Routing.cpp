@@ -17,7 +17,7 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUart.payload);  // Only 1 module serving MAVLink events is expected to be attached
 
-				if (!response.payloadHold) {  // Message has not been claimed. Forward
+				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward
 
 					if (!Sock::Api::checkInstance()) {
 						return {};
@@ -59,8 +59,9 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUdp.payload);
 
-				if (!response.payloadHold) {  // Message has not been claimed. Forward.
-					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload, static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
+				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward.
+					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload,
+						static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
 				} else {
 					return response;
 				}
