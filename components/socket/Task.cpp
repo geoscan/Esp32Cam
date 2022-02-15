@@ -6,6 +6,7 @@
 //
 
 #include "Task.hpp"
+#include "utility/time.hpp"
 
 using namespace Sock;
 
@@ -16,10 +17,12 @@ void Task::iter()
 	}
 	{
 		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+		asio::error_code err;
 
-		if (!ioContext.poll()) {
-			std::this_thread::sleep_for(pollPeriod);
+		if (!ioContext.poll_one(err)) {
+			Utility::waitMs(std::chrono::duration_cast<std::chrono::milliseconds>(pollPeriod).count());
 		}
+
 	}
 }
 
