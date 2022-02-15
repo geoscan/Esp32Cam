@@ -46,6 +46,17 @@ struct Response {
 
 	Type getType();
 	void setType(Type);
+	Response(const Response &) = default;
+	Response(Response &&) = default;
+	Response &operator=(const Response &) = default;
+	Response &operator=(Response &&) = default;
+	Response(Type);
+	Response();
+
+	template <class T1, class T2>
+	Response(T1 &&aT1, T2 &&aT2) : payload{std::forward<T1>(aT1)}, payloadHold{std::forward<T2>(aT2)}
+	{
+	}
 };
 
 namespace Topic {

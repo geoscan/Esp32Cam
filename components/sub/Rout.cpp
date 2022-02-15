@@ -26,5 +26,15 @@ void Response::setType(Type aType)
 	}
 }
 
+Response::Response(Response::Type aType) : payload{}, payloadHold{}
+{
+	setType(aType);
+}
+
+Response::Response() : Response(Type::Ignored)
+{
+
+}
+
 }  // namespace Rout
 }  // namespace Sub
