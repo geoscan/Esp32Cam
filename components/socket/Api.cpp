@@ -116,11 +116,11 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 {
 	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
-	std::shared_ptr<asio::ip::udp::endpoint> endpoint;
+	auto endpoint = std::make_shared<asio::ip::udp::endpoint>();
 	auto port = aSocket.local_endpoint().port();
 
 	aSocket.async_receive_from(asio::buffer(buffer.get(), kReceiveBufferSize), *endpoint.get(),
-		[this, buffer, endpoint, port, &aSocket] (const asio::error_code &aError, std::size_t anReceived) mutable {
+		[this, buffer, endpoint, port, &aSocket] (asio::error_code aError, std::size_t anReceived) mutable {
 
 		if (!aError) {
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) { // Notify subscribers
