@@ -77,7 +77,7 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 	}
 }
 
-Sub::Rout::Response Routing::onReceived(const Sub::Rout::ReceivedVariant &aVariant)
+Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVariant)
 {
 	return mapbox::util::apply_visitor(*this, aVariant);
 }
