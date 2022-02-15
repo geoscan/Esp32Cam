@@ -41,7 +41,7 @@ struct Response {
 	enum class Type {
 		Ignored,  ///< The message has not been recognized as the one that was addressed to a receiver
 		Consumed,  ///< The message was addressed to a receiver. No response is sent
-		Response,  ///< The message was addressed to a received. There is a response message prepared.
+		Response,  ///< The message was addressed to a receiver. There is a response message ready to be sent
 	};
 
 	Type getType();
