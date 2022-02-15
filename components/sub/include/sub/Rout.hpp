@@ -40,7 +40,7 @@ struct Response {
 
 	enum class Type {
 		Ignored,
-		Acknowledged,
+		Consumed,
 		Response,
 	};
 
