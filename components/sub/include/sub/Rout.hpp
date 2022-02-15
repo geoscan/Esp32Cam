@@ -24,7 +24,7 @@ using Payload = asio::const_buffer;
 
 template <class Tproto>
 struct Socket {
-	asio::ip::basic_endpoint<Tproto> remoteEndpoint;
+	const asio::ip::basic_endpoint<Tproto> &remoteEndpoint;
 	std::uint16_t localPort;
 	Payload payload;
 };
