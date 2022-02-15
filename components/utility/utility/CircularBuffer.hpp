@@ -71,6 +71,15 @@ struct CircularIterator {
 	unsigned ttl;
 	TcontiguousContainer &arr;
 
+	using value_type = Tvalue;
+	using size_type = unsigned;
+	using difference_type = std::ptrdiff_t;
+	using reference = Tvalue&;
+	using const_reference = const Tvalue&;
+	using pointer = Tvalue*;
+	using const_pointer = const Tvalue*;
+	using iterator_category = std::forward_iterator_tag;
+
 	template <bool F>
 	typename std::enable_if<F>::type
 	incPos()
@@ -119,7 +128,6 @@ class CircularBuffer : std::array<uint8_t, N * sizeof(T)> {
 public:
 	using value_type = T;
 	using size_type = unsigned;
-	using difference_type = std::ptrdiff_t;
 	using reference = T&;
 	using const_reference = const T&;
 	using pointer = T*;
@@ -157,7 +165,7 @@ private:
 	}
 
 public:  // Types
-	using ThisType = CircularBuffer<T, N>;
+	using ThisType = CircularBuffer<T, N, FallowOverwrite>;
 
 	using iterator = CircularIterator<ThisType, value_type, N, 1>;
 	using const_iterator = CircularIterator<const ThisType, const value_type, N, 1>;
