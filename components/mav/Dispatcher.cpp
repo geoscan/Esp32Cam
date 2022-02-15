@@ -43,7 +43,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	Sub::Rout::Response response;
 
-	if (marshalling.size()) {
+	while (marshalling.size()) {
 		marshalling.pop();
 	}
 
