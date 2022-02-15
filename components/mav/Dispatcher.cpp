@@ -54,7 +54,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 			break;
 
 		case Microservice::Ret::NoResponse:
-			response.setType(Sub::Rout::Response::Type::Acknowledged);
+			response.setType(Sub::Rout::Response::Type::Consumed);
 
 			break;
 
