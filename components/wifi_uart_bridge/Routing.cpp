@@ -20,7 +20,7 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward
 
 					if (!Sock::Api::checkInstance()) {
-						return {};
+						return {Sub::Rout::Response::Type::Ignored};
 					}
 
 					asio::error_code err;
@@ -36,17 +36,17 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 
 			}
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 
 		default:
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 	}
 }
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &)
 {
-	return {};
+	return {Sub::Rout::Response::Type::Ignored};
 }
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &aUdp)
@@ -69,11 +69,10 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 				}
 			}
 
-			return {};
-
+			return {Sub::Rout::Response::Type::Ignored};
 		default:
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 	}
 }
 
