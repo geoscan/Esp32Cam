@@ -42,7 +42,7 @@ extern "C" int app_main(void)
 
 	Mav::init();
 	Bdg::init();
-	Sock::start(context);
+	Sock::start();
 	Uart::start();
 	return 0;
 }
