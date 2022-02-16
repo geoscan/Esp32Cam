@@ -6,7 +6,7 @@
 #include <chrono>
 
 #include "version.hpp"
-#include "UartSink.hpp"
+#include "UartDevice.hpp"
 #include "VersionParser.hpp"
 
 using namespace std;

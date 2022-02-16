@@ -9,13 +9,13 @@
 #define CAMERA_RECORDER_CAMERA_RECORDER_RECORDER_HPP
 
 #include <vector>
-#include "utility/Subscription.hpp"
+#include "sub/Subscription.hpp"
 
 namespace CameraRecorder {
 
 class Record {
 protected:
-	using Key = Utility::Subscription::Key::NewFrame;  // Smart pointer to smth. having "data()" and "size()" methods, with automatic deallocation
+	using Key = Sub::Key::NewFrame;  // Smart pointer to smth. having "data()" and "size()" methods, with automatic deallocation
 	Key key;
 	virtual void onNewFrame(Key::Type) = 0;
 public:

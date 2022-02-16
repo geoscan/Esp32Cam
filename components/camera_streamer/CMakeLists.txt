@@ -6,6 +6,7 @@ idf_component_register(
 	SRCS ${SOURCE_FILES}
 	INCLUDE_DIRS "."
 	REQUIRES
+		sub
 		freertos
 		OV2640
 		esp_common

@@ -5,6 +5,7 @@ idf_component_register(
 	PRIV_INCLUDE_DIRS private_include
 	INCLUDE_DIRS log_udp
 	REQUIRES
+		sub
 		asio
 		esp_common
 		utility

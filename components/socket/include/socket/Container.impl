@@ -1,0 +1,68 @@
+//
+// Container.impl
+//
+// Created on: Feb 10, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "Container.hpp"  // For IDE syntax highlighting
+#include <algorithm>
+
+namespace Sock {
+namespace ContainerImpl {
+
+template <class Tproto, template <class...> class Tobject>
+inline typename ContainerBase<Tobject<Tproto>>::iterator
+Container<Tobject<Tproto>>::find(std::uint16_t aLocalPort)
+{
+	auto it = std::find_if(begin(), end(), [aLocalPort](const Value &aVal) {
+		return aVal.local_endpoint().port() == aLocalPort;
+	});
+
+	return it;
+}
+
+template <class Tproto, template <class...> class Tobject>
+inline typename ContainerBase<Tobject<Tproto>>::iterator
+Container<Tobject<Tproto>>::find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort)
+{
+	auto it = std::find_if(begin(), end(), [&aRemoteEndpoint, aLocalPort](const Value &aVal) {
+		asio::error_code err;
+		auto remoteEndpoint = CallRemoteEndpoint::call(aVal, err);
+
+		if (err) {
+			return false;
+		}
+
+		auto localPort = aVal.local_endpoint().port();
+
+		return localPort == aLocalPort && remoteEndpoint == aRemoteEndpoint;
+	});
+
+	return it;
+}
+
+template <class Tproto, template <class...> class Tobject>
+inline void
+Container<Tobject<Tproto>>::pop(std::uint16_t aLocalPort)
+{
+	auto it = find(aLocalPort);
+
+	if (it != end()) {
+		erase(it);
+	}
+}
+
+template <class Tproto, template <class...> class Tobject>
+inline void
+Container<Tobject<Tproto>>::pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort)
+{
+	auto it = find(aRemoteEndpoint, aLocalPort);
+
+	if (it != end()) {
+		erase(it);
+	}
+}
+
+}  // namespace ContainerImpl
+}  // namespace Sock

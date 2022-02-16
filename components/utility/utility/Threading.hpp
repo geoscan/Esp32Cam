@@ -32,6 +32,30 @@ void *run(void *instance)
 
 void setThreadCoreAffinity(int coreAffinity);
 
+///
+/// \brief Config is a convenience RAII-wrapper over standard C-style esp
+/// config setters. It initiates a config structure on construction, and
+/// applies it when destructed.
+///
+class Config {
+	esp_pthread_cfg_t config;
+
+public:
+	///
+	/// \param aFromDefault Initialize struct from default config. If false, a
+	/// currently used config will serve as a template
+	///
+	Config(bool aFromDefault);
+	~Config();
+
+	// setters
+	Config &core(int a = 0);  ///< Pin to core
+	Config &stack(int a = CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT);  ///< stack size
+	Config &inherit(bool inheritCfg = true);  ///< use this config further
+	Config &name(const char *a);  ///< name of the thread
+	Config &priority(int a = CONFIG_PTHREAD_TASK_PRIO_DEFAULT);
+};
+
 template <typename Runnable>
 pthread_t threadRun(Runnable &instance, int coreAffinity = 0)
 {

@@ -17,4 +17,7 @@ idf_component_register(
 		esp_event
 		log_udp
 		camera_thread
+		mav
+		uart
+		socket
 )

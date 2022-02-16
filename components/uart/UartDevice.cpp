@@ -31,10 +31,16 @@ UartDevice::~UartDevice()
 {
 }
 
-size_t UartDevice::read(void *data, size_t size)
+size_t UartDevice::read(void *data, size_t size, size_t aWaitMs)
 {
-	ssize_t count = uart_read_bytes(uartNum, static_cast<uint8_t *>(data), size, /*10 / portTICK_RATE_MS*/0);
+	ssize_t count = uart_read_bytes(uartNum, static_cast<uint8_t *>(data), size,
+		aWaitMs ? aWaitMs / portTICK_RATE_MS : 0);
 	return count > 0 ? static_cast<uint32_t>(count) : 0;
+}
+
+size_t UartDevice::read(Utility::Buffer aBuffer, size_t aWaitMs)
+{
+	return read(aBuffer.data(), aBuffer.size(), aWaitMs);
 }
 
 size_t UartDevice::write(const void *data, size_t size)
@@ -51,4 +57,9 @@ size_t UartDevice::bytesToRead()
 		return static_cast<size_t>(bytesAvailable);
 	else
 		return 0;
+}
+
+int UartDevice::getNum() const
+{
+	return uartNum;
 }

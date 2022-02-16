@@ -1,0 +1,18 @@
+//
+// UartTask.impl
+//
+// Created on: Dec 28, 2021
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#ifndef UART_PRIV_INCLUDE_UARTTASK_IMPL
+#define UART_PRIV_INCLUDE_UARTTASK_IMPL
+
+#include <type_traits>
+
+template <class ...Tuarts>
+inline Uart::Task::Task(Tuarts &&...aArgs): uartDevices{(&aArgs)...}
+{
+}
+
+#endif  // UART_PRIV_INCLUDE_UARTTASK_IMPL

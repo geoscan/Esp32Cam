@@ -1,0 +1,36 @@
+//
+// OnSend.impl
+//
+// Created on: Jan 11, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#include "OnSend.hpp"  // Makes no effect. Being used to enable syntax highlighting
+
+template <unsigned N>
+template <class ...Ta>
+inline Uart::OnSend<N>::OnSend(Ta &&...aArgs) :
+	OnSendBase<N>{{nullptr}},
+	key{{&OnSend::send, this}}
+{
+	using List = int[];
+	(void)List{((void)(this->at(aArgs.getNum()) = &aArgs), 0)...};
+}
+
+template <unsigned N>
+inline Sub::Rout::UartSend::Ret Uart::OnSend<N>::send(Sub::Rout::UartSend::Arg<0> aMessage)
+{
+	if (aMessage.uartNum < N) {
+		auto *dev = this->at(aMessage.uartNum);
+
+		if (dev) {
+			std::size_t pos = 0;
+			std::size_t nwr = 1;
+
+			while (nwr && pos < aMessage.payload.size()) {
+				nwr = dev->write(Utility::toBuffer<const void>(aMessage.payload).slice(pos));
+				pos += nwr;
+			}
+		}
+	}
+}

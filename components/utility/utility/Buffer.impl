@@ -1,0 +1,82 @@
+//
+// Buffer.impl
+//
+// Created on: Dec 02, 2021
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#ifndef UTILITY_UTILITY_BUFFER_IMPL
+#define UTILITY_UTILITY_BUFFER_IMPL
+
+#include "Buffer.hpp"
+#include <cassert>
+
+namespace Utility {
+
+// Impl. Tbuffer
+
+template <typename T>
+inline T *Tbuffer<T>::data() const
+{
+	return std::get<0>(*this);
+}
+
+template <typename T>
+inline std::size_t Tbuffer<T>::size() const
+{
+	return std::get<1>(*this);
+}
+
+template <typename T>
+inline typename Tbuffer<T>::InterpType &Tbuffer<T>::at(std::uint8_t aPos)
+{
+	return reinterpret_cast<typename Impl::InterpType<T>::Type *>(data())[aPos];
+}
+
+template <typename T>
+template <typename TypeTo>
+inline Tbuffer<TypeTo> Tbuffer<T>::as()
+{
+	return toBuffer<TypeTo>(data(), size());
+}
+
+template <class T>
+inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset) const
+{
+	return slice(aOffset, size());
+}
+
+template <class T>
+inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset, std::size_t aOffsetEnd) const
+{
+	assert(aOffset < size());
+	assert(aOffsetEnd <= size());
+	auto *d = reinterpret_cast<typename Tbuffer<T>::InterpType *>(data());  // void* in pointer arithmetics
+
+	return toBuffer<T>(d + aOffset, aOffsetEnd - aOffset);
+}
+
+// toBuffer
+
+template <typename Tto, typename Tfrom>
+inline Tbuffer<Tto> toBuffer(Tfrom *aFromPtr, std::size_t aSize)
+{
+	static_assert(!std::is_pointer<Tto>::value, "Please, use raw types, e.g. int, float, std::vector<...>, etc");
+	static_assert(!std::is_reference<Tto>::value, "Please, use raw types, e.g. int, const float, std::vector<...>, etc");
+
+	constexpr auto kSzTypeFrom = sizeof(typename Impl::InterpType<Tfrom>::Type);
+	constexpr auto kSzTypeTo = sizeof(typename Impl::InterpType<Tto>::Type);
+
+	return {reinterpret_cast<Tto *>(aFromPtr), kSzTypeFrom * aSize / kSzTypeTo};
+}
+
+template <typename Tto, typename TdataTraitFrom>
+inline Tbuffer<Tto> toBuffer(TdataTraitFrom &&aFrom)
+{
+	static_assert(std::is_pointer<decltype(aFrom.data())>::value, "TdataTraitFrom::data() should return pointer");
+	return toBuffer<Tto>(aFrom.data(), aFrom.size());
+}
+
+}  // namespace Utility
+
+#endif  // UTILITY_UTILITY_BUFFER_IMPL
