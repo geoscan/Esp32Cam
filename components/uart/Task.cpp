@@ -9,6 +9,7 @@
 #include "utility/Buffer.hpp"
 #include "UartDevice.hpp"
 #include "Task.hpp"
+#include "utility/time.hpp"
 
 using namespace Uart;
 using namespace Utility;
@@ -27,5 +28,6 @@ void Uart::Task::operator()()
 				}
 			}
 		}
+		Utility::waitMs(20);
 	}
 }
