@@ -24,7 +24,6 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 	unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
 
 	if (unmarshalling.size()) {
-		ESP_LOGI("mav dispatcher", "message received");
 		auto &message = unmarshalling.front();
 		ret = micAggregate.process(message);
 
