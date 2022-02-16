@@ -17,7 +17,7 @@ namespace Sock {
 
 class Task {
 	asio::io_context &ioContext;
-	std::chrono::microseconds pollPeriod;
+	std::chrono::milliseconds pollPeriod;
 	std::mutex &syncAsyncMutex;
 
 public:
