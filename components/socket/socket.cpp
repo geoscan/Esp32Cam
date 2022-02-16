@@ -10,6 +10,7 @@
 #include "Task.hpp"
 #include <thread>
 #include <chrono>
+#include "utility/Threading.hpp"
 
 namespace Sock {
 
@@ -25,13 +26,13 @@ static void apiInit(Sock::Api &aApi)
 
 void start(asio::io_context &aIoContext)
 {
-	static constexpr const std::chrono::milliseconds taskPollPeriod{200};
 	static std::mutex syncAsyncMutex;
-	static Task task{aIoContext, taskPollPeriod, syncAsyncMutex};
+	static Task task{aIoContext, syncAsyncMutex};
 	static Sock::Api api{aIoContext, syncAsyncMutex};
 
 	apiInit(api);
 
+	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT + 1024);
 	static std::thread thread{&Task::run, &task};
 	(void)api;
 	(void)thread;
