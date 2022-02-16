@@ -21,7 +21,7 @@ protected:
 	MakeSingleton &operator=(const MakeSingleton &) = delete;
 	MakeSingleton &operator=(MakeSingleton &&) = delete;
 
-	MakeSingleton() = default;
+	MakeSingleton() = delete;
 	MakeSingleton(T &);
 
 public:

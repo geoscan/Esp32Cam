@@ -6,6 +6,7 @@
 //
 
 #include "MakeSingleton.hpp"  // For IDE syntax highlighting
+#include <cassert>
 
 namespace Utility {
 
@@ -15,13 +16,14 @@ T *MakeSingleton<T>::instance = nullptr;
 template<class T>
 MakeSingleton<T>::MakeSingleton(T &aInstance)
 {
-	instance = &aInstance;
+	assert(instance == nullptr);
+	setInstance(aInstance);
 }
 
 template <class T>
 inline void MakeSingleton<T>::setInstance(T &aInstance)
 {
-	instance = aInstance;
+	instance = &aInstance;
 }
 
 template <class T>
