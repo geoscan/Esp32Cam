@@ -15,21 +15,12 @@ void Task::iter()
 	if (ioContext.stopped()) {
 		ioContext.restart();
 	}
-	bool fWait = false;
-	{
-		std::lock_guard<std::mutex> lock{syncAsyncMutex};
-
-		if (!ioContext.poll()) {
-			fWait = true;
-		}
-	}
-	if (fWait) {
-		Utility::waitMs(std::chrono::duration_cast<std::chrono::milliseconds>(pollPeriod).count());
-	}
+	ioContext.poll();
 }
 
 void Task::run() {
 	while (true) {
 		iter();
+		Utility::waitMs(20);
 	}
 }

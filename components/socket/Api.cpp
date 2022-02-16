@@ -132,6 +132,8 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 
 				// If a subscriber provides a response, send it
 				if (response.getType() == Sub::Rout::Response::Type::Response) {
+					std::lock_guard<std::mutex> lock{syncAsyncMutex};
+					(void)lock;
 					asio::error_code err;
 					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
 				}
