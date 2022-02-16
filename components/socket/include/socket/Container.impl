@@ -24,7 +24,7 @@ Container<Tobject<Tproto>>::find(std::uint16_t aLocalPort)
 
 template <class Tproto, template <class...> class Tobject>
 inline typename ContainerBase<Tobject<Tproto>>::iterator
-Container<Tobject<Tproto>>::find(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort)
+Container<Tobject<Tproto>>::find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort)
 {
 	auto it = std::find_if(begin(), end(), [&aRemoteEndpoint, aLocalPort](const Value &aVal) {
 		asio::error_code err;
@@ -55,7 +55,7 @@ Container<Tobject<Tproto>>::pop(std::uint16_t aLocalPort)
 
 template <class Tproto, template <class...> class Tobject>
 inline void
-Container<Tobject<Tproto>>::pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort)
+Container<Tobject<Tproto>>::pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort)
 {
 	auto it = find(aRemoteEndpoint, aLocalPort);
 

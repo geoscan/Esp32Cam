@@ -23,7 +23,7 @@ public:
 	void operator()();
 
 private:
-	static constexpr unsigned kBufferSize = 512;
+	static constexpr unsigned kBufferSize = 256;
 	std::array<std::uint8_t, kBufferSize> buffer;
 	const std::list<UartDevice *> uartDevices;
 };

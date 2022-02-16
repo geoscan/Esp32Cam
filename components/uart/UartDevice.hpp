@@ -33,7 +33,13 @@ public:
 	/// \return Number of bytes written
 	///
 	size_t write(const void *data, size_t size);
-	size_t write(Utility::ConstBuffer buffer);
+
+	template <class Tbuffer>
+	size_t write(Tbuffer &&aBuffer)
+	{
+		return write(aBuffer.data(), aBuffer.size());
+	}
+
 	size_t bytesToRead();
 
 	int getNum() const;

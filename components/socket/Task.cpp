@@ -6,6 +6,7 @@
 //
 
 #include "Task.hpp"
+#include "utility/time.hpp"
 
 using namespace Sock;
 
@@ -14,17 +15,12 @@ void Task::iter()
 	if (ioContext.stopped()) {
 		ioContext.restart();
 	}
-	{
-		std::lock_guard<std::mutex> lock{syncAsyncMutex};
-
-		if (!ioContext.poll()) {
-			std::this_thread::sleep_for(pollPeriod);
-		}
-	}
+	ioContext.poll();
 }
 
 void Task::run() {
 	while (true) {
 		iter();
+		Utility::waitMs(20);
 	}
 }

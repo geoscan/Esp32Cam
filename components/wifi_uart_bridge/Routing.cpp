@@ -17,10 +17,10 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUart.payload);  // Only 1 module serving MAVLink events is expected to be attached
 
-				if (!response.payloadHold) {  // Message has not been claimed. Forward
+				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward
 
 					if (!Sock::Api::checkInstance()) {
-						return {};
+						return {Sub::Rout::Response::Type::Ignored};
 					}
 
 					asio::error_code err;
@@ -36,45 +36,53 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 
 			}
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 
 		default:
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 	}
 }
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &)
 {
-	return {};
+	return {Sub::Rout::Response::Type::Ignored};
 }
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &aUdp)
 {
 	switch (static_cast<Udp>(aUdp.localPort)) {
 
-		case Udp::Mavlink:
-			container.udpEndpoints.push_back(aUdp.remoteEndpoint);  // Remember the client
+		case Udp::Mavlink: {
+			auto it = std::find(container.udpEndpoints.begin(), container.udpEndpoints.end(), aUdp.remoteEndpoint);
+			if (container.udpEndpoints.end() == it) {
+				container.udpEndpoints.emplace_back(aUdp.remoteEndpoint);  // Remember the client
+			}
 
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
 				auto response = callable(aUdp.payload);
 
-				if (!response.payloadHold) {  // Message has not been claimed. Forward.
-					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload, static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
+				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward.
+					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload,
+						static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
 				} else {
 					return response;
 				}
 			}
 
-			return {};
-
+			return {Sub::Rout::Response::Type::Ignored};
+		}
 		default:
 
-			return {};
+			return {Sub::Rout::Response::Type::Ignored};
 	}
 }
 
-Sub::Rout::Response Routing::onReceived(const Sub::Rout::ReceivedVariant &aVariant)
+Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVariant)
 {
 	return mapbox::util::apply_visitor(*this, aVariant);
+}
+
+Routing::Routing() : key{{&Routing::onReceived, this}}
+{
 }

@@ -49,11 +49,6 @@ size_t UartDevice::write(const void *data, size_t size)
 	return count > 0 ? static_cast<size_t>(count) : 0;
 }
 
-size_t UartDevice::write(Utility::ConstBuffer buffer)
-{
-	return write(buffer.data(), buffer.size());
-}
-
 size_t UartDevice::bytesToRead()
 {
 	size_t bytesAvailable;

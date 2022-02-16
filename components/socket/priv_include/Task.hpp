@@ -17,14 +17,11 @@ namespace Sock {
 
 class Task {
 	asio::io_context &ioContext;
-	std::chrono::microseconds pollPeriod;
 	std::mutex &syncAsyncMutex;
 
 public:
-	template <class Rep, class Period>
-	Task(asio::io_context &aContext, std::chrono::duration<Rep, Period> aPollPeriod, std::mutex &aSyncAsyncMutex):
+	Task(asio::io_context &aContext, std::mutex &aSyncAsyncMutex):
 		ioContext{aContext},
-		pollPeriod{std::chrono::duration_cast<decltype(pollPeriod)>(aPollPeriod)},
 		syncAsyncMutex{aSyncAsyncMutex}
 	{
 	}

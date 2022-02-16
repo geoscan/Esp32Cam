@@ -11,8 +11,8 @@
 #include <asio.hpp>
 
 namespace Sock {
-void init();
-void init(asio::io_context &);
+void start();
+void start(asio::io_context &);
 }  // namespace Socket
 
 #endif // SOCKET_INCLUDE_SOCKET_SOCKET_HPP

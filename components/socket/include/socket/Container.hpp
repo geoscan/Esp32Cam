@@ -69,10 +69,10 @@ struct Container<Tobject<Tproto>> : public ContainerBase<Tobject<Tproto>> {
 	using Base::erase;
 
 	typename Base::iterator find(std::uint16_t aLocalPort);
-	typename Base::iterator find(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort);
+	typename Base::iterator find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
 
 	void pop(std::uint16_t aLocalPort);
-	void pop(asio::ip::basic_endpoint<Tproto> aRemoteEndpoint, std::uint16_t aLocalPort);
+	void pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
 };
 
 }  // namespace ContainerImpl

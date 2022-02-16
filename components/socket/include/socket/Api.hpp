@@ -17,6 +17,13 @@
 
 namespace Sock {
 
+///
+/// \brief The Api class Is a wrapper over asio providing convenient interface for working w/ sockets.
+///
+/// Socket::Api has been originally introduced due to the necessity to decouple MAVLink parsing routines (Geoscan
+/// "MAVLink GS_NETWORK" subprotocol) from managing sockets. It provides all the conventional UDP/TCP/IP operations
+/// such as connect to a remote endpoint, open a listening socket, etc.
+///
 class Api : public Utility::MakeSingleton<Api> {
 private:
 	asio::io_context &ioContext;

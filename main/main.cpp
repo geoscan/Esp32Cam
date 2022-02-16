@@ -20,6 +20,10 @@
 #include "version.hpp"
 #include "sd_fat.h"
 #include "log_udp.h"
+#include "mav/mav.hpp"
+#include "uart/uart.hpp"
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "socket/socket.hpp"
 
 static asio::io_context context(3);
 
@@ -35,6 +39,10 @@ extern "C" int app_main(void)
 
 //	logUdpStart(context);
 	cameraStreamerStart(context);
-	wifiUartBridgeStart(context);
+
+	Mav::init();
+	Bdg::init();
+	Sock::start();
+	Uart::start();
 	return 0;
 }

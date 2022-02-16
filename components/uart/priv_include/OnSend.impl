@@ -25,7 +25,7 @@ inline Sub::Rout::UartSend::Ret Uart::OnSend<N>::send(Sub::Rout::UartSend::Arg<0
 
 		if (dev) {
 			std::size_t pos = 0;
-			std::size_t nwr = 0;
+			std::size_t nwr = 1;
 
 			while (nwr && pos < aMessage.payload.size()) {
 				nwr = dev->write(Utility::toBuffer<const void>(aMessage.payload).slice(pos));
