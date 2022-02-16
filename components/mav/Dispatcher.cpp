@@ -40,7 +40,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0> aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
-	Sub::Rout::Response response;
+	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
 
 	while (marshalling.size()) {
 		marshalling.pop();
