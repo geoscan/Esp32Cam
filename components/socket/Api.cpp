@@ -20,95 +20,95 @@ Api::Api(asio::io_context &aIoContext, std::mutex &aSyncAsyncMutex):
 void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLocalPort, asio::error_code &aErr,
 	asio::ip::tcp aTcp)
 {
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	(void)lock;
 	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
 
 	if (it != container.tcpConnected.end()) {
 		aErr = asio::error::already_connected;
-		return;
-	}
-
-	if (aLocalPort != 0) {
-		container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 	} else {
-		container.tcpConnected.emplace_back(ioContext);
-		aLocalPort = container.tcpConnected.back().local_endpoint().port();
-	}
-	container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+		if (aLocalPort != 0) {
+			container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
+		} else {
+			container.tcpConnected.emplace_back(ioContext);
+			aLocalPort = container.tcpConnected.back().local_endpoint().port();
+		}
 
-	if (aErr) {
-		container.tcpConnected.back().close();
-		container.tcpConnected.pop_back();
-		return;
+		container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+
+		if (aErr) {
+			container.tcpConnected.back().close();
+			container.tcpConnected.pop_back();
+		} else {
+			tcpAsyncReceiveFrom(container.tcpConnected.back());
+		}
 	}
 
-	tcpAsyncReceiveFrom(container.tcpConnected.back());
 }
 
 void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aPort, asio::error_code &aErr)
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
-	auto it = container.tcpConnected.find(aRemoteEndpoint, aPort);
 	(void)lock;
+	auto it = container.tcpConnected.find(aRemoteEndpoint, aPort);
 
 	if (it != container.tcpConnected.end()) {
 		aErr = asio::error::not_connected;
-		return;
+	} else {
+		it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
+		it->close(aErr);
 	}
-
-	it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
-	it->close(aErr);
 }
 
 void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTcp)
 {
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	(void)lock;
 	auto it = container.tcpListening.find(aLocalPort);
 
 	if (it != container.tcpListening.end()) {
 		aErr = asio::error::already_open;
-		return;
+	} else {
+		container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 	}
-
-	container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 }
 
 void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUdp)
 {
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	(void)lock;
 	auto it = container.udp.find(aLocalPort);
 
 	if (it != container.udp.end()) {
 		aErr = asio::error::already_open;
-		return;
+	} else {
+		container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+		udpAsyncReceiveFrom(container.udp.back());
 	}
-
-	container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
-	udpAsyncReceiveFrom(container.udp.back());
 }
 
 void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
 {
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	(void)lock;
 	auto it = container.udp.find(aPort);
 
 	if (it == container.udp.end()) {
 		aErr = asio::error::not_found;
-	}
-
-	{
-		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	} else {
 		it->close(aErr);
 	}
 }
 
 void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 {
+	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	(void)lock;
 	auto it = container.tcpListening.find(aPort);
 
 	if (it == container.tcpListening.end()) {
 		aErr = asio::error::not_found;
-		return;
-	}
-
-	{
-		std::lock_guard<std::mutex> lock{syncAsyncMutex};
+	} else {
 		it->close(aErr);
 	}
 }
