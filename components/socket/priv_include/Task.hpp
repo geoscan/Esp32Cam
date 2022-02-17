@@ -17,12 +17,10 @@ namespace Sock {
 
 class Task {
 	asio::io_context &ioContext;
-	std::mutex &syncAsyncMutex;
 
 public:
-	Task(asio::io_context &aContext, std::mutex &aSyncAsyncMutex):
-		ioContext{aContext},
-		syncAsyncMutex{aSyncAsyncMutex}
+	Task(asio::io_context &aContext):
+		ioContext{aContext}
 	{
 	}
 

@@ -27,7 +27,7 @@ static void apiInit(Sock::Api &aApi)
 void start(asio::io_context &aIoContext)
 {
 	static std::mutex syncAsyncMutex;
-	static Task task{aIoContext, syncAsyncMutex};
+	static Task task{aIoContext};
 	static Sock::Api api{aIoContext, syncAsyncMutex};
 
 	apiInit(api);
