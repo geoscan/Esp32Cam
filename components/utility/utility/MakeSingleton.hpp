@@ -8,6 +8,8 @@
 #ifndef UTILITY_UTILITY_MAKESINGLETON_HPP
 #define UTILITY_UTILITY_MAKESINGLETON_HPP
 
+#include <cassert>
+
 namespace Utility {
 
 template <class T>
@@ -20,18 +22,35 @@ protected:
 	MakeSingleton(MakeSingleton &&) = delete;
 	MakeSingleton &operator=(const MakeSingleton &) = delete;
 	MakeSingleton &operator=(MakeSingleton &&) = delete;
-
 	MakeSingleton() = delete;
-	MakeSingleton(T &);
+
+	MakeSingleton(T &aInstance)
+	{
+		setInstance(aInstance);
+	}
 
 public:
-	static T &getInstance();
-	static void setInstance(T &);
-	static bool checkInstance();
+	static T &getInstance()
+	{
+		assert(instance != nullptr);
+		return *instance;
+	}
+
+	static void setInstance(T &aInstance)
+	{
+		assert(instance == nullptr);
+		instance = &aInstance;
+	}
+
+	static bool checkInstance()
+	{
+		return instance != nullptr;
+	}
 };
 
-}  // namespace Utility
+template <class T>
+T *MakeSingleton<T>::instance = nullptr;
 
-#include "MakeSingleton.impl"
+}  // namespace Utility
 
 #endif // UTILITY_UTILITY_MAKESINGLETON_HPP
