@@ -28,7 +28,7 @@ private:
 
 public:
 	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
-	void push(const mavlink_message_t &);
+	std::size_t push(const mavlink_message_t &);
 };
 
 }  // namespace Mav
