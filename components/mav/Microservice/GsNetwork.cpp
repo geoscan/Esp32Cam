@@ -79,6 +79,9 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 			return Ret::Ignored;
 	}
 
+	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
+		&mavlinkMavGsNetwork);
+
 	return ret;
 }
 
