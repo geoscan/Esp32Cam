@@ -31,12 +31,12 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 
 	switch (mavlinkMavGsNetwork.ack) {
 		case MAV_GS_NETWORK_ACK_NONE:
-			ret = Ret::NoResponse;
+			ret = Ret::Response;
 
 			break;
 
 		case MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE:
-			ret = Ret::Response;
+			ret = Ret::NoResponse;
 
 			break;
 
