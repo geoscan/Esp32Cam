@@ -61,7 +61,7 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_OPEN:
-			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+			processOpen(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
