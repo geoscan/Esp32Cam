@@ -19,6 +19,7 @@ std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Uti
 void Mav::Marshalling::push(const mavlink_message_t &aMessage)
 {
 	if (size() < kMarshallingQueueMaxSize) {
+		BaseType::push({});
 		push(aMessage, {&back(), sizeof(mavlink_message_t)});
 	}
 }
