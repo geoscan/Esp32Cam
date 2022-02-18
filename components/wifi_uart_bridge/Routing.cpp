@@ -12,6 +12,8 @@ using namespace Bdg;
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 {
+	return {Sub::Rout::Response::Type::Ignored};
+
 	switch (static_cast<Uart>(aUart.uartNum)) {
 		case Uart::Mavlink:
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
