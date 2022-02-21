@@ -22,7 +22,13 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
-	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
+	Container<asio::ip::tcp::socket>::iterator it;
+
+	if (aLocalPort == 0) {
+		it = container.tcpConnected.find(aRemoteEndpoint);
+	} else {
+		it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
+	}
 
 	if (it != container.tcpConnected.end()) {
 		aErr = asio::error::already_connected;
