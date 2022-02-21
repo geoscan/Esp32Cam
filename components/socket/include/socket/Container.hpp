@@ -57,6 +57,7 @@ struct Container<Tobject<Tproto>> : public ContainerBase<Tobject<Tproto>> {
 	using Socket = typename GetSocketType<Tproto>::Type;
 	using Base = ContainerBase<Tobject<Tproto>>;
 	using Value = typename Base::value_type;
+	using Iterator = typename Base::iterator;
 
 	using Base::Base;
 	using Base::emplace;
@@ -70,9 +71,10 @@ struct Container<Tobject<Tproto>> : public ContainerBase<Tobject<Tproto>> {
 
 	typename Base::iterator find(std::uint16_t aLocalPort);
 	typename Base::iterator find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
+	typename Base::iterator find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint);
 
-	void pop(std::uint16_t aLocalPort);
-	void pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
+	template <class ...Ts>
+	void pop(Ts &&...aTs);
 };
 
 }  // namespace ContainerImpl

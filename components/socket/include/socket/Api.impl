@@ -30,7 +30,11 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
-	auto it = container.udp.find(aLocalPort);
+	Container<asio::ip::udp::socket>::iterator it;
+
+	if (0 == aLocalPort) {
+		it = container.udp.find(aLocalPort);
+	}
 
 	if (it == container.udp.end()) {
 		if (aLocalPort != 0) {

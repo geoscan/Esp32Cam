@@ -47,6 +47,7 @@ private:
 
 	Marshalling marshalling;
 	Unmarshalling unmarshalling;
+	std::size_t marshallingSize = 0;
 	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
 };
 

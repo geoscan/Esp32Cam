@@ -16,9 +16,14 @@ std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Uti
 	return mavlink_msg_to_send_buffer(static_cast<std::uint8_t *>(aBuffer.data()), &aMavlinkMessage);
 }
 
-void Mav::Marshalling::push(const mavlink_message_t &aMessage)
+std::size_t Mav::Marshalling::push(const mavlink_message_t &aMessage)
 {
+	auto ret = 0;
+
 	if (size() < kMarshallingQueueMaxSize) {
-		push(aMessage, {&back(), sizeof(mavlink_message_t)});
+		BaseType::push({});
+		ret = push(aMessage, {&back(), sizeof(mavlink_message_t)});
 	}
+
+	return ret;
 }

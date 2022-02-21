@@ -22,7 +22,13 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
-	auto it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
+	Container<asio::ip::tcp::socket>::iterator it;
+
+	if (aLocalPort == 0) {
+		it = container.tcpConnected.find(aRemoteEndpoint);
+	} else {
+		it = container.tcpConnected.find(aRemoteEndpoint, aLocalPort);
+	}
 
 	if (it != container.tcpConnected.end()) {
 		aErr = asio::error::already_connected;
@@ -31,7 +37,6 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 		} else {
 			container.tcpConnected.emplace_back(ioContext);
-			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 		}
 
 		container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
@@ -40,6 +45,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			container.tcpConnected.back().close();
 			container.tcpConnected.pop_back();
 		} else {
+			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 			tcpAsyncReceiveFrom(container.tcpConnected.back());
 		}
 	}
