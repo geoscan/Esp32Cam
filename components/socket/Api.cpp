@@ -63,6 +63,7 @@ void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16
 	} else {
 		it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
 		it->close(aErr);
+		container.tcpConnected.erase(it);
 	}
 }
 
@@ -103,6 +104,7 @@ void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
 		aErr = asio::error::not_found;
 	} else {
 		it->close(aErr);
+		container.udp.erase(it);
 	}
 }
 
@@ -116,6 +118,7 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 		aErr = asio::error::not_found;
 	} else {
 		it->close(aErr);
+		container.tcpListening.erase(it);
 	}
 }
 
