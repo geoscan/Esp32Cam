@@ -31,7 +31,6 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
 		} else {
 			container.tcpConnected.emplace_back(ioContext);
-			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 		}
 
 		container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
@@ -40,6 +39,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			container.tcpConnected.back().close();
 			container.tcpConnected.pop_back();
 		} else {
+			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 			tcpAsyncReceiveFrom(container.tcpConnected.back());
 		}
 	}
