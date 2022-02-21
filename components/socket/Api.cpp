@@ -147,9 +147,8 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
 				}
 			}
+			udpAsyncReceiveFrom(aSocket);
 		}
-
-		udpAsyncReceiveFrom(aSocket);
 	});
 }
 
@@ -174,9 +173,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 					aSocket.write_some(response.payload, err);
 				}
 			}
+			tcpAsyncReceiveFrom(aSocket);
 		}
-
-		tcpAsyncReceiveFrom(aSocket);
 	});
 }
 
