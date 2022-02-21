@@ -58,11 +58,12 @@ void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16
 	(void)lock;
 	auto it = container.tcpConnected.find(aRemoteEndpoint, aPort);
 
-	if (it != container.tcpConnected.end()) {
+	if (it == container.tcpConnected.end()) {
 		aErr = asio::error::not_connected;
 	} else {
 		it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
 		it->close(aErr);
+		container.tcpConnected.erase(it);
 	}
 }
 
@@ -103,6 +104,7 @@ void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
 		aErr = asio::error::not_found;
 	} else {
 		it->close(aErr);
+		container.udp.erase(it);
 	}
 }
 
@@ -116,6 +118,7 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 		aErr = asio::error::not_found;
 	} else {
 		it->close(aErr);
+		container.tcpListening.erase(it);
 	}
 }
 
@@ -144,9 +147,8 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
 				}
 			}
+			udpAsyncReceiveFrom(aSocket);
 		}
-
-		udpAsyncReceiveFrom(aSocket);
 	});
 }
 
@@ -171,9 +173,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 					aSocket.write_some(response.payload, err);
 				}
 			}
+			tcpAsyncReceiveFrom(aSocket);
 		}
-
-		tcpAsyncReceiveFrom(aSocket);
 	});
 }
 
