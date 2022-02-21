@@ -73,8 +73,8 @@ struct Container<Tobject<Tproto>> : public ContainerBase<Tobject<Tproto>> {
 	typename Base::iterator find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
 	typename Base::iterator find(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint);
 
-	void pop(std::uint16_t aLocalPort);
-	void pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort);
+	template <class ...Ts>
+	void pop(Ts &&...aTs);
 };
 
 }  // namespace ContainerImpl

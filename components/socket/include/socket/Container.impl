@@ -61,21 +61,11 @@ Container<Tobject<Tproto>>::find(const asio::ip::basic_endpoint<Tproto> &aRemote
 }
 
 template <class Tproto, template <class...> class Tobject>
+template <class ...Ts>
 inline void
-Container<Tobject<Tproto>>::pop(std::uint16_t aLocalPort)
+Container<Tobject<Tproto>>::pop(Ts &&...aTs)
 {
-	auto it = find(aLocalPort);
-
-	if (it != end()) {
-		erase(it);
-	}
-}
-
-template <class Tproto, template <class...> class Tobject>
-inline void
-Container<Tobject<Tproto>>::pop(const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort)
-{
-	auto it = find(aRemoteEndpoint, aLocalPort);
+	auto it = find(std::forward<Ts>(aTs)...);
 
 	if (it != end()) {
 		erase(it);
