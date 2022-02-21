@@ -58,7 +58,7 @@ void Api::disconnect(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16
 	(void)lock;
 	auto it = container.tcpConnected.find(aRemoteEndpoint, aPort);
 
-	if (it != container.tcpConnected.end()) {
+	if (it == container.tcpConnected.end()) {
 		aErr = asio::error::not_connected;
 	} else {
 		it->shutdown(asio::ip::tcp::socket::shutdown_both, aErr);
