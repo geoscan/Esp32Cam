@@ -56,6 +56,7 @@ public:
 		asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 
 private:
+	void tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aPort);
 	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket);
 	void tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket);
 };

@@ -77,7 +77,25 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 		aErr = asio::error::already_open;
 	} else {
 		container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
+		tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
 	}
+}
+
+void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLocalPort)
+{
+	aAcceptor.async_accept(
+		[this, &aAcceptor, aLocalPort] (asio::error_code aError, asio::ip::tcp::socket aSocket) mutable {
+			std::lock_guard<std::mutex> lock{syncAsyncMutex};
+			(void)lock;
+
+			if (aError) {
+				closeTcp(aLocalPort, aError);
+			} else {
+				container.tcpConnected.emplace_back(std::move(aSocket));
+				tcpAsyncReceiveFrom(container.tcpConnected.back());
+				tcpAsyncAccept(aAcceptor, aLocalPort);
+			}
+	});
 }
 
 void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUdp)
