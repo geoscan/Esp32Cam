@@ -50,9 +50,9 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			container.tcpConnected.back().close();
 			container.tcpConnected.pop_back();
 		} else {
+			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 			ESP_LOGI(kDebugTag, "connect to %s : %d from port %d - success",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
-			aLocalPort = container.tcpConnected.back().local_endpoint().port();
 			tcpAsyncReceiveFrom(container.tcpConnected.back());
 		}
 	}
