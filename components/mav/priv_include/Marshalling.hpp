@@ -22,9 +22,13 @@ using MarshallingHoldQueue = typename Utility::CircularBuffer<mavlink_message_t,
 using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
 class Marshalling : public std::queue<MarshallingHoldQueue> {
+private:
+	using BaseType = typename std::queue<MarshallingHoldQueue>;
+	using BaseType::push;
+
 public:
 	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
-	void push(const mavlink_message_t &);
+	std::size_t push(const mavlink_message_t &);
 };
 
 }  // namespace Mav

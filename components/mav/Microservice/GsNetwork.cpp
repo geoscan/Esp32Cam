@@ -31,12 +31,12 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 
 	switch (mavlinkMavGsNetwork.ack) {
 		case MAV_GS_NETWORK_ACK_NONE:
-			ret = Ret::NoResponse;
+			ret = Ret::Response;
 
 			break;
 
 		case MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE:
-			ret = Ret::Response;
+			ret = Ret::NoResponse;
 
 			break;
 
@@ -61,7 +61,7 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_OPEN:
-			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
+			processOpen(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
@@ -78,6 +78,9 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 		default:
 			return Ret::Ignored;
 	}
+
+	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
+		&mavlinkMavGsNetwork);
 
 	return ret;
 }
