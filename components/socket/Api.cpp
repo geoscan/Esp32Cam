@@ -7,6 +7,7 @@
 
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
+#include "utility/Algorithm.hpp"
 
 namespace Sock {
 
@@ -192,6 +193,13 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 				}
 			}
 			tcpAsyncReceiveFrom(aSocket);
+		} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
+			asio::error::bad_descriptor))
+		{
+			ESP_LOGE(kDebugTag, "tcpAsyncreceiveFrom %s : %d on port %d - error, disconnecting...",
+				aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
+				aSocket.local_endpoint().port());
+			disconnect(aSocket.remote_endpoint(), aSocket.local_endpoint().port(), aErr);
 		}
 	});
 }
