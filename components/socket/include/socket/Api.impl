@@ -32,23 +32,21 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
-	Container<asio::ip::udp::socket>::iterator it;
+	auto it{container.udp.end()};
 
-	if (0 == aLocalPort) {  // FIXME: BUG
+	if (0 != aLocalPort) {
 		it = container.udp.find(aLocalPort);
 	}
 
 	if (it == container.udp.end()) {
-		if (aLocalPort != 0) {
-			it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
-			ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d on port %d - no such socket was found, created",
-				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
-		} else {
-			it = container.udp.emplace(container.udp.end(), ioContext);
+		it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+
+		if (aLocalPort == 0) {
 			aLocalPort = it->local_endpoint(aErr).port();
-			ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d - no such socket was found, created on port %d",
-				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 		}
+
+		ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d - no such socket was found, created on port %d",
+			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 		udpAsyncReceiveFrom(*it);
 	}
 
