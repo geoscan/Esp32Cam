@@ -103,7 +103,10 @@ void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLoca
 
 			if (aError) {
 				ESP_LOGE(kDebugTag, "tcpAsyncAccept error(%d)", aError.value());
-				closeTcp(aLocalPort, aError);
+
+				if (aError != asio::error::operation_aborted) {
+					closeTcp(aLocalPort, aError);
+				}
 			} else {
 				ESP_LOGI(kDebugTag, "tcpAsyncAccept accepted %s : %d on port %d",
 					aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
