@@ -36,6 +36,7 @@ private:
 	} container;
 
 	static constexpr auto kReceiveBufferSize = 128;
+	static constexpr const char *kDebugTag = "Sock::Api";
 
 public:
 	Api(asio::io_context &, std::mutex &aSyncAsyncMutex);
