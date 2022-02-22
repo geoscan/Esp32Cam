@@ -194,9 +194,12 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 			}
 			udpAsyncReceiveFrom(aSocket);
 		} else {
-			ESP_LOGE(kDebugTag, "udpAsyncReceiveFrom on port %d - error(%d), closing", aSocket.local_endpoint().port(),
+			ESP_LOGE(kDebugTag, "udpAsyncReceiveFrom on port %d - error(%d), closing", port,
 				aError.value());
-			closeUdp(aSocket.local_endpoint().port(), aError);
+
+			if (aError != asio::error::operation_aborted) {
+				closeUdp(aSocket.local_endpoint().port(), aError);
+			}
 		}
 	});
 }
