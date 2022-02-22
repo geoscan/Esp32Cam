@@ -44,7 +44,7 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 			ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d on port %d - no such socket was found, created",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 		} else {
-			it = container.udp.emplace(container.udp.end(), ioContext);
+			it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{aUdp, 0});
 			aLocalPort = it->local_endpoint(aErr).port();
 			ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d - no such socket was found, created on port %d",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
