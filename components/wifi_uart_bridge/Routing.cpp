@@ -12,8 +12,6 @@ using namespace Bdg;
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 {
-	return {Sub::Rout::Response::Type::Ignored};
-
 	switch (static_cast<Uart>(aUart.uartNum)) {
 		case Uart::Mavlink:
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
@@ -61,16 +59,8 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 				container.udpEndpoints.emplace_back(aUdp.remoteEndpoint);  // Remember the client
 			}
 
-			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
-				auto response = callable(aUdp.payload);
-
-				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward.
-					Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload,
-						static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
-				} else {
-					return response;
-				}
-			}
+			Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload,
+				static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
 
 			return {Sub::Rout::Response::Type::Ignored};
 		}
