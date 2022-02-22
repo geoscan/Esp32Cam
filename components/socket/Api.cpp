@@ -176,8 +176,7 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 		[this, buffer, endpoint, port, &aSocket] (asio::error_code aError, std::size_t anReceived) mutable {
 
 		if (!aError) {
-			buffer.get()[std::min<std::size_t>(kReceiveBufferSize, anReceived)] = 0;
-			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received %s", buffer.get());
+			ESP_LOGI(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) { // Notify subscribers
 				auto response = cb(Sub::Rout::Socket<asio::ip::udp>{
 					*endpoint.get(),
@@ -210,8 +209,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable {
 
 		if (!aErr) {
-			buffer.get()[std::min<std::size_t>(kReceiveBufferSize, anReceived)] = 0;
-			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received %s", buffer.get());
+			ESP_LOGI(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
 				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
 					aSocket.remote_endpoint(),
@@ -229,7 +227,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
 			asio::error::bad_descriptor))
 		{
-			ESP_LOGE(kDebugTag, "tcpAsyncreceiveFrom %s : %d on port %d - error, disconnecting...",
+			ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
 				aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
 				aSocket.local_endpoint().port());
 			disconnect(aSocket.remote_endpoint(), aSocket.local_endpoint().port(), aErr);
