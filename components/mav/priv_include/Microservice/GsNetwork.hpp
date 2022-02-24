@@ -31,6 +31,10 @@ public:
 	Ret process(mavlink_message_t &aMavlinkMessage) override;
 
 private:
+	template <class Tproto, class Tbuf>
+	std::size_t initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
+	const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer);
+
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
 	asio::const_buffer getBuffer(mavlink_mav_gs_network_t &);
 	Sub::Rout::MavlinkPackForward::Ret packForward(typename Sub::Rout::MavlinkPackForward::Arg<0>);
@@ -50,5 +54,6 @@ private:
 }  // namespace Mic
 }  // namespace Mav
 
+#include "GsNetwork.impl"
 
 #endif  // MAV_PRIV_INCLUDE_MICROSERVICE_GSNETWORK_HPP

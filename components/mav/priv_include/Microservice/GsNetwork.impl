@@ -1,0 +1,75 @@
+//
+// GsNetwork.impl
+//
+// Created on: Feb 24, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#ifndef MAV_PRIV_INCLUDE_MICROSERVICE_GSNETWORK_IMPL
+#define MAV_PRIV_INCLUDE_MICROSERVICE_GSNETWORK_IMPL
+
+#include "Mavlink.hpp"
+#include <type_traits>
+#include <algorithm>
+#include <utility/Buffer.hpp>
+
+namespace Mav {
+namespace Mic {
+
+///
+/// \brief Initializes mavlink_mav_gs_network_t's ::remote_port, ::host_port, ::payload_len, and ::payload fields
+///
+/// \tparam Tproto - `asio::ip::tcp` or `asio::ip::udp`
+/// \tparam Tbuf   - buffer of bytes defining `::data()` and `::size()` methods
+///
+/// \return Number of payload bytes packed into ::payload, excluding the IP address
+///
+template <class Tproto, class Tbuf>
+inline std::size_t GsNetwork::initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
+	const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer)
+{
+	mavGsNetwork.remote_port = aRemoteEndpoint.port();
+	mavGsNetwork.host_port = aLocalPort;
+	mavGsNetwork.payload_len = 0;
+
+	// Determine the (transport, IP version) pair
+	const auto kIp6 = aRemoteEndpoint.address().is_v6();
+	{
+		static_assert(std::is_same<asio::ip::tcp, Tproto>::value || std::is_same<asio::ip::udp, Tproto>::value, "");
+		constexpr auto kTcp = std::is_same<Tproto, asio::ip::tcp>::value;
+		constexpr MAV_GS_NETWORK_TRANSPORT kTransportMap[] = {MAV_GS_NETWORK_TRANSPORT_UDP4,
+			MAV_GS_NETWORK_TRANSPORT_UDP6, MAV_GS_NETWORK_TRANSPORT_TCP4, MAV_GS_NETWORK_TRANSPORT_TCP6};
+		mavGsNetwork.transport = kTransportMap[(kTcp << 1) & kIp6];
+	}
+
+	// Pack IP address into payload field
+	if (kIp6) {
+		static constexpr auto kIp6AddressLength = 16;
+		auto bytes = aRemoteEndpoint.address().to_v6().to_bytes();
+
+		std::copy_n(bytes.begin(), kIp6AddressLength, mavGsNetwork.payload);
+		mavGsNetwork.payload_len = kIp6AddressLength;
+	} else {
+		static constexpr auto kIp4AddressLength = 4;
+		auto bytes = aRemoteEndpoint.address().to_v4().to_bytes();
+
+		std::copy_n(bytes.begin(), kIp4AddressLength, mavGsNetwork.payload);
+		mavGsNetwork.payload_len = kIp4AddressLength;
+	}
+
+	// Pack the payload
+	constexpr auto kMaxPayloadLen = sizeof(mavlink_mav_gs_network_t::payload);
+
+	auto nWrite = static_cast<std::uint8_t>(std::min<std::size_t>(kMaxPayloadLen - mavGsNetwork.payload_len,
+		aBuffer.size()));
+	std::copy_n(reinterpret_cast<const std::uint8_t *>(aBuffer.data()), nWrite,
+		mavGsNetwork.payload + mavGsNetwork.payload_len);
+	mavGsNetwork.payload_len += nWrite;
+
+	return nWrite;
+}
+
+}  // namespace Mic
+}  // namespace Mav
+
+#endif // MAV_PRIV_INCLUDE_MICROSERVICE_GSNETWORK_IMPL
