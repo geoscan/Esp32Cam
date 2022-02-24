@@ -59,6 +59,23 @@ struct Response {
 	}
 };
 
+struct Nresponse : Response {
+	using Response::Response;
+	std::size_t nProcessed = 0;
+
+	template <class T1, class T2>
+	Nresponse(T1 &&aT1, T2 &&aT2, std::size_t anProcessed) :
+		Response{std::forward<T1>(aT1), std::forward<T2>(aT2)},
+		nProcessed{anProcessed}
+	{
+	}
+
+	Nresponse(const Nresponse &) = default;
+	Nresponse(Nresponse &&) = default;
+	Nresponse &operator=(const Nresponse &) = default;
+	Nresponse &operator=(Nresponse &&) = default;
+};
+
 namespace Topic {
 struct Generic;
 struct Mavlink;
@@ -67,7 +84,7 @@ struct MavlinkPackForward;
 
 using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart>;
 using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
-using MavlinkPackForward = Sub::NoLockKey<Response(Payload), Topic::MavlinkPackForward>;
+using MavlinkPackForward = Sub::NoLockKey<Nresponse(const Socket<asio::ip::tcp> &), Topic::MavlinkPackForward>;
 using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
