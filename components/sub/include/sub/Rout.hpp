@@ -62,10 +62,12 @@ struct Response {
 namespace Topic {
 struct Generic;
 struct Mavlink;
+struct MavlinkPackForward;
 }  // namespace Topic
 
 using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart>;
 using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
+using MavlinkPackForward = Sub::NoLockKey<Response(Payload), Topic::MavlinkPackForward>;
 using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
