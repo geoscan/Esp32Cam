@@ -17,6 +17,11 @@ namespace Mav {
 /// identifiers, etc.
 ///
 struct Globals {
+private:
+	static constexpr auto kMaxPayloadLength = 255;
+	static constexpr auto kMaxMavlinkMessageLength = 280;
+
+public:
 	static constexpr unsigned char getSysId()
 	{
 		return 1;
@@ -25,6 +30,25 @@ struct Globals {
 	static constexpr unsigned char getCompId()
 	{
 		return MAV_COMP_ID_UDP_BRIDGE;
+	}
+
+	template <class TmavlinkMessage>
+	static constexpr unsigned char getMaxMessageLength()
+	{
+		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage);
+	}
+
+	///
+	/// \brief Makes an assessment a Mavlink message's length, based on a presupposition that the latter has
+	/// :payload field
+	///
+	/// \tparam TmavlinkMessage - mavlink message to be packed into payload
+	///
+	template <class TmavlinkMessage>
+	static unsigned char getMaxMessageLength(decltype(sizeof(TmavlinkMessage::payload)) aPayloadLenHint)
+	{
+		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage) -
+			sizeof(TmavlinkMessage::payload) + aPayloadLenHint;
 	}
 };
 
