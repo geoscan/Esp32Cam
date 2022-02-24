@@ -19,6 +19,10 @@ using namespace Mav::Mic;
 using namespace Sub::Socket;
 using namespace asio::ip;
 
+GsNetwork::GsNetwork() : key{{&GsNetwork::packForward, this}}
+{
+}
+
 Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 {
 	if (aMavlinkMessage.msgid != MAVLINK_MSG_ID_MAV_GS_NETWORK) {
@@ -129,6 +133,11 @@ asio::const_buffer GsNetwork::getBuffer(mavlink_mav_gs_network_t &aMavlinkMavGsN
 			return {};
 	}
 
+}
+
+Sub::Rout::MavlinkPackForward::Ret GsNetwork::packForward(Sub::Rout::MavlinkPackForward::Arg<0>)
+{
+	return {Sub::Rout::MavlinkPackForward::Ret::Type::Ignored};
 }
 
 void GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
