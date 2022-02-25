@@ -32,5 +32,19 @@ menu "[wifi_uart_bridge]"
 		help
 			Baudrate of UART connecting AP board and ESP32 itself
 
+	menu "UDP MAVLink routing"
+		config WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
+			bool "Process MAVLink messages received on a dedicated MAVLink UDP port"
+			default n
+			help
+				Enable this option, if you want ESP32 to process and respond to incoming MAVLink messages from MAVLink UDP port
+
+		config WIFI_UART_BRIDGE_UDP_MAVLINK_FORWARD
+			bool "Forward MAVLink messages to a respective UART"
+			default y
+			help
+				Enable this option, if you want to forward the messages that were not addressed to ESP32
+	endmenu
+
 
 endmenu
