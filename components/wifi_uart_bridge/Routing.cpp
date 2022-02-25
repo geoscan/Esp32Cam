@@ -44,9 +44,27 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 	}
 }
 
-Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &)
+Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &aTcp)
 {
-	return {Sub::Rout::Response::Type::Ignored};
+	switch (static_cast<Tcp>(aTcp.localPort)) {
+		default: {
+			for (auto &callable : Sub::Rout::MavlinkPackForward<asio::ip::tcp>::getIterators()) {
+
+				// Forward MAVLink-wrapped payload iteratively
+				auto tcp = aTcp;
+				for (auto nRemaining = tcp.payload.size(); nRemaining; nRemaining = tcp.payload.size()) {
+					auto nresponse = callable(tcp);
+					Sub::Rout::UartSend::notify({nresponse.payload, static_cast<int>(Uart::Mavlink)});
+
+					// Slice payload
+					tcp.payload = Utility::makeAsioCb(
+						Utility::toBuffer<const void>(tcp.payload).slice(nresponse.nProcessed));
+				}
+			}
+
+			return {Sub::Rout::Response::Type::Consumed};
+		}
+	}
 }
 
 Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &aUdp)
