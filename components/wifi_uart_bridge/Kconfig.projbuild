@@ -43,7 +43,21 @@ menu "[wifi_uart_bridge]"
 			bool "Forward MAVLink messages to a respective UART"
 			default y
 			help
-				Enable this option, if you want to forward the messages that were not addressed to ESP32
+				Enable this option, if you want to forward the messages to UART (only if those messages are not addressed to ESP32)
+	endmenu
+
+	menu "UART MAVLink routing"
+		config WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
+			bool "Process MAVLink messages received on a dedicated UART"
+			default y
+			help
+				Enable this option, if you want ESP32 to process and respond to incoming MAVLink messages from MAVLink UART
+
+		config WIFI_UART_BRIDGE_UART_MAVLINK_FORWARD
+			bool "Forward MAVLink messages to UDP clients from the list"
+			default y
+			help
+				ESP32 maintains a list of UDP clients. Enable this option if you want to forward to them MAVLink messages (only if those messages are not addressed to ESP32)
 	endmenu
 
 
