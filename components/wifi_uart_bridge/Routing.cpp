@@ -7,6 +7,7 @@
 
 #include "Routing.hpp"
 #include "socket/Api.hpp"
+#include <sdkconfig.h>
 
 using namespace Bdg;
 
@@ -84,8 +85,20 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 				container.udpEndpoints.emplace_back(aUdp.remoteEndpoint);  // Remember the client
 			}
 
+#if CONFIG_WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
+			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
+				auto response = callable(aUdp.payload);
+
+				if (Sub::Rout::Response::Type::Ignored != response.getType()) {
+					return response;
+				}
+			}
+#endif
+
+#if CONFIG_WIFI_UART_BRIDGE_UDP_MAVLINK_FORWARD
 			Sub::Rout::UartSend::notify(Sub::Rout::Uart{aUdp.payload,
 				static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
+#endif
 
 			return {Sub::Rout::Response::Type::Ignored};
 		}
