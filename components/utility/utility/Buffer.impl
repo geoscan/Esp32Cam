@@ -77,6 +77,22 @@ inline Tbuffer<Tto> toBuffer(TdataTraitFrom &&aFrom)
 	return toBuffer<Tto>(aFrom.data(), aFrom.size());
 }
 
+template <class Tbuf>
+inline asio::mutable_buffer makeAsioMb(Tbuf &&aBuf)
+{
+	auto voidBuffer = toBuffer<void>(aBuf);
+
+	return {voidBuffer.data(), voidBuffer.size()};
+}
+
+template <class Tbuf>
+inline asio::const_buffer makeAsioCb(Tbuf &&aBuf)
+{
+	auto constVoidBuffer = toBuffer<const void>(aBuf);
+
+	return {constVoidBuffer.data(), constVoidBuffer.size()};
+}
+
 }  // namespace Utility
 
 #endif  // UTILITY_UTILITY_BUFFER_IMPL
