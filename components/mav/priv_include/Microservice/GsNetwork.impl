@@ -9,6 +9,8 @@
 #define MAV_PRIV_INCLUDE_MICROSERVICE_GSNETWORK_IMPL
 
 #include "Mavlink.hpp"
+#include "Globals.hpp"
+#include "Marshalling.hpp"
 #include <type_traits>
 #include <algorithm>
 #include <utility/Buffer.hpp>
@@ -67,6 +69,36 @@ inline std::size_t GsNetwork::initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &
 	mavGsNetwork.payload_len += nWrite;
 
 	return nWrite;
+}
+
+///
+/// \brief Packs a raw TCP or UDP payload into MAVLink message, so it can be forwarded to the autopilot.
+///
+/// \tparam Tproto `asio::ip::tcp` or `asio::ip::udp`
+///
+template <class Tproto>
+inline typename Sub::Rout::MavlinkPackForward<Tproto>::Ret
+GsNetwork::packForward(typename Sub::Rout::MavlinkPackForward<Tproto>::template Arg<0> aReceived)
+{
+	mavlink_mav_gs_network_t mavlinkMavGsNetwork;
+	mavlink_message_t mavlinkMessage;
+	typename Sub::Rout::MavlinkPackForward<Tproto>::Ret ret;
+
+	// Encode address-related info and payload into the message
+	mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
+	mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED;
+	auto nProcessed = initMavlinkMavGsNetwork(mavlinkMavGsNetwork, aReceived.remoteEndpoint, aReceived.localPort,
+		aReceived.payload);
+	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
+
+	// Pack the message into a buffer
+	const auto kMaxMessageLen = Globals::getMaxMessageLength<mavlink_mav_gs_network_t>(mavlinkMavGsNetwork.payload_len);
+	ret.payloadHold = decltype(ret.payloadHold){new std::uint8_t[kMaxMessageLen]};
+	auto nPacked = Marshalling::push(mavlinkMessage, {ret.payloadHold.get(), kMaxMessageLen});
+	ret.payload = {ret.payloadHold.get(), nPacked};
+	ret.nProcessed = nProcessed;
+
+	return ret;
 }
 
 }  // namespace Mic

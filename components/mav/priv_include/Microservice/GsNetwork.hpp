@@ -33,11 +33,14 @@ public:
 private:
 	template <class Tproto, class Tbuf>
 	std::size_t initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
-	const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer);
+		const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer);
+
+	template <class Tproto>
+	typename Sub::Rout::MavlinkPackForward<Tproto>::Ret packForward(
+		typename Sub::Rout::MavlinkPackForward<Tproto>::template Arg<0>);
 
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
 	asio::const_buffer getBuffer(mavlink_mav_gs_network_t &);
-	Sub::Rout::MavlinkPackForward::Ret packForward(typename Sub::Rout::MavlinkPackForward::Arg<0>);
 	void processConnect(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	void processDisconnect(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	void processOpen(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
@@ -47,7 +50,8 @@ private:
 
 private:
 	struct Key {
-		Sub::Rout::MavlinkPackForward packForward;
+		typename Sub::Rout::MavlinkPackForward<asio::ip::tcp> packForwardTcp;
+		typename Sub::Rout::MavlinkPackForward<asio::ip::udp> packForwardUdp;
 	} key;
 };
 
