@@ -59,6 +59,13 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 					// Slice payload
 					tcp.payload = Utility::makeAsioCb(
 						Utility::toBuffer<const void>(tcp.payload).slice(nresponse.nProcessed));
+
+					// Debug: echo from MAVLink UDP port
+					for (const auto &udpEnpoint : container.udpEndpoints) {
+						auto port = static_cast<std::uint16_t>(Udp::Mavlink);
+						asio::error_code err;
+						Sock::Api::getInstance().sendTo(udpEnpoint, port, nresponse.payload, err);
+					}
 				}
 			}
 
