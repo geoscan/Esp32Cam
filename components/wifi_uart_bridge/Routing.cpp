@@ -57,14 +57,18 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 				for (auto nRemaining = tcp.payload.size(); nRemaining; nRemaining = tcp.payload.size()) {
 
 					auto nresponse = callable(tcp);
-					Sub::Rout::UartSend::notify({nresponse.payload, static_cast<int>(Uart::Mavlink)});
 
-					// Debug: echo from MAVLink UDP port
+#if CONFIG_WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UART_MAVLINK
+					Sub::Rout::UartSend::notify({nresponse.payload, static_cast<int>(Uart::Mavlink)});
+#endif
+
+#if CONFIG_WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UDP_MAVLINK
 					for (const auto &udpEnpoint : container.udpEndpoints) {
 						auto port = static_cast<std::uint16_t>(Udp::Mavlink);
 						asio::error_code err;
 						Sock::Api::getInstance().sendTo(udpEnpoint, port, nresponse.payload, err);
 					}
+#endif
 
 					// Slice payload
 					tcp.payload = Utility::makeAsioCb(
