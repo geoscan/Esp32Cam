@@ -55,12 +55,9 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 				// Forward MAVLink-wrapped payload iteratively
 				auto tcp = aTcp;
 				for (auto nRemaining = tcp.payload.size(); nRemaining; nRemaining = tcp.payload.size()) {
+
 					auto nresponse = callable(tcp);
 					Sub::Rout::UartSend::notify({nresponse.payload, static_cast<int>(Uart::Mavlink)});
-
-					// Slice payload
-					tcp.payload = Utility::makeAsioCb(
-						Utility::toBuffer<const void>(tcp.payload).slice(nresponse.nProcessed));
 
 					// Debug: echo from MAVLink UDP port
 					for (const auto &udpEnpoint : container.udpEndpoints) {
@@ -68,6 +65,10 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 						asio::error_code err;
 						Sock::Api::getInstance().sendTo(udpEnpoint, port, nresponse.payload, err);
 					}
+
+					// Slice payload
+					tcp.payload = Utility::makeAsioCb(
+						Utility::toBuffer<const void>(tcp.payload).slice(nresponse.nProcessed));
 				}
 			}
 
