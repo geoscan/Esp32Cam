@@ -9,6 +9,7 @@
 #define MAV_PRIV_INCLUDE_GLOBALS_HPP
 
 #include "Mavlink.hpp"
+#include <cstdint>
 
 namespace Mav {
 
@@ -33,7 +34,7 @@ public:
 	}
 
 	template <class TmavlinkMessage>
-	static constexpr unsigned char getMaxMessageLength()
+	static constexpr std::size_t getMaxMessageLength()
 	{
 		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage);
 	}
@@ -45,7 +46,7 @@ public:
 	/// \tparam TmavlinkMessage - mavlink message to be packed into payload
 	///
 	template <class TmavlinkMessage>
-	static unsigned char getMaxMessageLength(decltype(sizeof(TmavlinkMessage::payload)) aPayloadLenHint)
+	static std::size_t getMaxMessageLength(decltype(sizeof(TmavlinkMessage::payload)) aPayloadLenHint)
 	{
 		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage) -
 			sizeof(TmavlinkMessage::payload) + aPayloadLenHint;
