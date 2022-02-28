@@ -30,9 +30,12 @@ template <class Tproto, class Tbuf>
 inline std::size_t GsNetwork::initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
 	const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer)
 {
+	constexpr auto kMaxPayloadLen = sizeof(mavlink_mav_gs_network_t::payload);
+
 	mavGsNetwork.remote_port = aRemoteEndpoint.port();
 	mavGsNetwork.host_port = aLocalPort;
 	mavGsNetwork.payload_len = 0;
+	std::fill_n(mavGsNetwork.payload, kMaxPayloadLen, 0);
 
 	// Determine the (transport, IP version) pair
 	const auto kIp6 = aRemoteEndpoint.address().is_v6();
@@ -60,8 +63,6 @@ inline std::size_t GsNetwork::initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &
 	}
 
 	// Pack the payload
-	constexpr auto kMaxPayloadLen = sizeof(mavlink_mav_gs_network_t::payload);
-
 	auto nWrite = static_cast<std::uint8_t>(std::min<std::size_t>(kMaxPayloadLen - mavGsNetwork.payload_len,
 		aBuffer.size()));
 	std::copy_n(reinterpret_cast<const std::uint8_t *>(aBuffer.data()), nWrite,
