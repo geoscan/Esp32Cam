@@ -39,6 +39,7 @@ private:
 	typename Sub::Rout::MavlinkPackForward<Tproto>::Ret packForward(
 		typename Sub::Rout::MavlinkPackForward<Tproto>::template Arg<0>);
 
+	static std::size_t mavGsNetworkGetMaxMessageLength(std::size_t aHintPayloadLength);
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
 	asio::const_buffer getBuffer(mavlink_mav_gs_network_t &);
 	void processConnect(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
