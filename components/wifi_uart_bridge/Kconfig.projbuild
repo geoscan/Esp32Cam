@@ -32,7 +32,7 @@ menu "[wifi_uart_bridge]"
 		help
 			Baudrate of UART connecting AP board and ESP32 itself
 
-	menu "UDP MAVLink routing"
+	menu "UDP routing"
 		config WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
 			bool "Process MAVLink messages received on a dedicated MAVLink UDP port"
 			default n
@@ -46,7 +46,7 @@ menu "[wifi_uart_bridge]"
 				Enable this option, if you want to forward the messages to UART (only if those messages are not addressed to ESP32)
 	endmenu
 
-	menu "UART MAVLink routing"
+	menu "UART routing"
 		config WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
 			bool "Process MAVLink messages received on a dedicated UART"
 			default y
@@ -58,6 +58,23 @@ menu "[wifi_uart_bridge]"
 			default y
 			help
 				ESP32 maintains a list of UDP clients. Enable this option if you want to forward to them MAVLink messages (only if those messages are not addressed to ESP32)
+	endmenu
+
+	menu "TCP routing"
+		config WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UART_MAVLINK
+			bool "Forward any sequence received at a non-named TCP port to MAVLink UART"
+			default y
+			help
+				ESP32 serves as a TCP/IP socket functionality provider communicating through MAVLink protocol.
+				Enable this field, if you want to pack and forward messages received at a non-named TCP port to the dedicated MAVLink UART
+
+		config WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UDP_MAVLINK
+			bool "Forward any sequence received at a non-named TCP port to MAVLink UDP clients"
+			default n
+			help
+				ESP32 serves as a TCP/IP socket functionality provider communicating through MAVLink protocol.
+				Enable this field, if you want to pack and forward messages received at a non-named TCP port to the clients of the dedicated MAVLink UDP port.
+
 	endmenu
 
 
