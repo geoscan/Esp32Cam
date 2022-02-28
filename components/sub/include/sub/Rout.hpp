@@ -24,6 +24,9 @@ using PayloadHold = std::unique_ptr<std::uint8_t[]>;
 using PayloadLock = std::unique_ptr<std::lock_guard<std::mutex>>;
 using Payload = asio::const_buffer;
 
+///
+/// \brief Identifies TCP or UDP request handlers
+///
 template <class Tproto>
 struct Socket {
 	const asio::ip::basic_endpoint<Tproto> &remoteEndpoint;
@@ -31,13 +34,19 @@ struct Socket {
 	Payload payload;
 };
 
+///
+/// \brief Identifies UART request handlers
+///
 struct Uart {
 	Payload payload;
 	int uartNum;
 };
 
+///
+/// \brief Provides message passing between interfaces and receive-event handlers.
+///
 struct Response {
-	Payload payload;
+	Payload payload;  ///< Response field
 	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a handler does not possess the buffer.
 	int nProcessed;  ///< Number of bytes that has been processed by a handler. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
 	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a handler. This field allows to protect the buffer until `payload` is processed by an invoker.
