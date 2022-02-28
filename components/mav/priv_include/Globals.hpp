@@ -38,19 +38,6 @@ public:
 	{
 		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage);
 	}
-
-	///
-	/// \brief Makes an assessment a Mavlink message's length, based on a presupposition that the latter has
-	/// :payload field
-	///
-	/// \tparam TmavlinkMessage - mavlink message to be packed into payload
-	///
-	template <class TmavlinkMessage>
-	static std::size_t getMaxMessageLength(decltype(sizeof(TmavlinkMessage::payload)) aPayloadLenHint)
-	{
-		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage) -
-			sizeof(TmavlinkMessage::payload) + aPayloadLenHint;
-	}
 };
 
 }  // namespace Mav
