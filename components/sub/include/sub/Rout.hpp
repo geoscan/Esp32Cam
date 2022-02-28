@@ -15,28 +15,44 @@
 #include <asio.hpp>
 #include <mapbox/variant.hpp>
 #include <memory>
+#include <mutex>
 
 namespace Sub {
 namespace Rout {
 
 using PayloadHold = std::unique_ptr<std::uint8_t[]>;
+using PayloadLock = std::unique_ptr<std::lock_guard<std::mutex>>;
 using Payload = asio::const_buffer;
 
+///
+/// \brief Identifies TCP or UDP request handlers
+///
 template <class Tproto>
 struct Socket {
+	static_assert(std::is_same<Tproto, asio::ip::tcp>::value
+		|| std::is_same<Tproto, asio::ip::udp>::value, "");
+
 	const asio::ip::basic_endpoint<Tproto> &remoteEndpoint;
 	std::uint16_t localPort;
 	Payload payload;
 };
 
+///
+/// \brief Identifies UART request handlers
+///
 struct Uart {
 	Payload payload;
 	int uartNum;
 };
 
+///
+/// \brief Provides message passing between interfaces and receive-event handlers.
+///
 struct Response {
-	Payload payload;
-	PayloadHold payloadHold;
+	Payload payload;  ///< Response field
+	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a handler does not possess the buffer.
+	int nProcessed;  ///< Number of bytes that has been processed by a handler. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
+	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a handler. This field allows to protect the buffer until `payload` is processed by an invoker.
 
 	enum class Type {
 		Ignored,  ///< The message has not been recognized as the one that was addressed to a receiver
@@ -53,27 +69,17 @@ struct Response {
 	Response(Type);
 	Response();
 
-	template <class T1, class T2>
-	Response(T1 &&aT1, T2 &&aT2) : payload{std::forward<T1>(aT1)}, payloadHold{std::forward<T2>(aT2)}
+	template <class Tpayload, class TpayloadHold, class TpayloadLock>
+	Response(Tpayload &&aTpayload,
+		TpayloadHold &&aTpayloadHold = {},
+		int anProcessed = -1,
+		TpayloadLock &&aTpayloadLock = {}) :
+		payload{std::forward<Tpayload>(aTpayload)},
+		payloadHold{std::forward<TpayloadHold>(aTpayloadHold)},
+		nProcessed{anProcessed},
+		payloadLock{std::forward<TpayloadLock>(aTpayloadLock)}
 	{
 	}
-};
-
-struct Nresponse : Response {
-	using Response::Response;
-	std::size_t nProcessed = 0;
-
-	template <class T1, class T2>
-	Nresponse(T1 &&aT1, T2 &&aT2, std::size_t anProcessed) :
-		Response{std::forward<T1>(aT1), std::forward<T2>(aT2)},
-		nProcessed{anProcessed}
-	{
-	}
-
-	Nresponse(const Nresponse &) = default;
-	Nresponse(Nresponse &&) = default;
-	Nresponse &operator=(const Nresponse &) = default;
-	Nresponse &operator=(Nresponse &&) = default;
 };
 
 namespace Topic {
@@ -88,7 +94,7 @@ using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
 template <class Tproto>
-using MavlinkPackForward = typename Sub::NoLockKey<Nresponse(const Socket<Tproto> &), Topic::MavlinkPackForward>;
+using MavlinkPackForward = typename Sub::NoLockKey<Response(const Socket<Tproto> &), Topic::MavlinkPackForward>;
 
 }  // namespace Rout
 }  // namespace Sub
