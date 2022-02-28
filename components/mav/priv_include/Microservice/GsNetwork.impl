@@ -93,7 +93,7 @@ GsNetwork::packForward(typename Sub::Rout::MavlinkPackForward<Tproto>::template 
 	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
 
 	// Pack the message into a buffer
-	const auto kMaxMessageLen = Globals::getMaxMessageLength<mavlink_mav_gs_network_t>(mavlinkMavGsNetwork.payload_len);
+	const auto kMaxMessageLen = mavGsNetworkGetMaxMessageLength(mavlinkMavGsNetwork.payload_len);
 	ret.payloadHold = decltype(ret.payloadHold){new std::uint8_t[kMaxMessageLen]};
 	auto nPacked = Marshalling::push(mavlinkMessage, {ret.payloadHold.get(), kMaxMessageLen});
 	ret.payload = {ret.payloadHold.get(), nPacked};
