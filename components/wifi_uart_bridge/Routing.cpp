@@ -15,27 +15,28 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 {
 	switch (static_cast<Uart>(aUart.uartNum)) {
 		case Uart::Mavlink:
+#if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
 			for (auto &callable : Sub::Rout::OnMavlinkReceived::getIterators()) {
-				auto response = callable(aUart.payload);  // Only 1 module serving MAVLink events is expected to be attached
+				auto response = callable(aUart.payload);
 
-				if (response.getType() == Sub::Rout::Response::Type::Ignored) {  // Message has not been claimed. Forward
-
-					if (!Sock::Api::checkInstance()) {
-						return {Sub::Rout::Response::Type::Ignored};
-					}
-
-					asio::error_code err;
-					auto &socketApi = Sock::Api::getInstance();
-
-					for (const auto &endpoint : container.udpEndpoints) {
-						std::uint16_t port = static_cast<std::uint16_t>(Udp::Mavlink);
-						socketApi.sendTo(endpoint, port, aUart.payload, err);
-					}
-				} else {
+				if (response.getType() != Sub::Rout::Response::Type::Ignored) {  // Message has been claimed.
 					return response;
 				}
-
 			}
+#endif
+
+#if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_FORWARD
+			// Message has not been claimed, and is required to be forwarded
+			if (Sock::Api::checkInstance()) {
+				asio::error_code err;
+				auto &socketApi = Sock::Api::getInstance();
+
+				for (const auto &endpoint : container.udpEndpoints) {
+					std::uint16_t port = static_cast<std::uint16_t>(Udp::Mavlink);
+					socketApi.sendTo(endpoint, port, aUart.payload, err);
+				}
+			}
+#endif
 
 			return {Sub::Rout::Response::Type::Ignored};
 
