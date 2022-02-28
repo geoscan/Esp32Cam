@@ -24,6 +24,9 @@ private:
 		Mavlink = 8001,
 	};
 
+	enum class Tcp {  ///< Named TCP ports
+	};
+
 public:
 	Sub::Rout::Response operator()(const Sub::Rout::Uart &);
 	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::tcp> &);

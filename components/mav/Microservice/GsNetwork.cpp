@@ -7,17 +7,27 @@
 
 #include "Mavlink.hpp"
 #include "Microservice/GsNetwork.hpp"
+#include "Marshalling.hpp"
 #include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "sub/Socket.hpp"
 #include "socket/Api.hpp"
 #include <algorithm>
 #include <utility/Algorithm.hpp>
+#include <memory>
 
 using namespace Mav;
 using namespace Mav::Mic;
 using namespace Sub::Socket;
 using namespace asio::ip;
+
+GsNetwork::GsNetwork() :
+	key{
+		{&GsNetwork::packForward<asio::ip::tcp>, this},
+		{&GsNetwork::packForward<asio::ip::udp>, this}
+	}
+{
+}
 
 Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 {
@@ -83,6 +93,21 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 		&mavlinkMavGsNetwork);
 
 	return ret;
+}
+
+///
+/// \brief GsNetwork::mavGsNetworkGetMaxMessageLength Calculates max. possible length of `mavlink_mav_gs_network_t`
+/// after serialization.
+///
+/// \pre `::payload` field is zeroed
+/// \pre In the original XML file defining the message, `::payload` field retains u8 type, and is defined the latest.
+///
+/// \param aHintPayloadLength Length of the message that is to be packed into `mavlink_mav_gs_network_t::payload`
+///
+std::size_t GsNetwork::mavGsNetworkGetMaxMessageLength(std::size_t aHintPayloadLength)
+{
+	return Globals::getMaxMessageLength<mavlink_mav_gs_network_t>() - sizeof(mavlink_mav_gs_network_t::payload)
+		+ aHintPayloadLength;
 }
 
 asio::ip::address GsNetwork::getAddress(mavlink_mav_gs_network_t & aMavlinkMavGsNetwork)  ///< Extract address from payload field

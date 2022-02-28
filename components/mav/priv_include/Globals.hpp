@@ -9,6 +9,7 @@
 #define MAV_PRIV_INCLUDE_GLOBALS_HPP
 
 #include "Mavlink.hpp"
+#include <cstdint>
 
 namespace Mav {
 
@@ -17,6 +18,11 @@ namespace Mav {
 /// identifiers, etc.
 ///
 struct Globals {
+private:
+	static constexpr auto kMaxPayloadLength = 255;
+	static constexpr auto kMaxMavlinkMessageLength = 280;
+
+public:
 	static constexpr unsigned char getSysId()
 	{
 		return 1;
@@ -25,6 +31,12 @@ struct Globals {
 	static constexpr unsigned char getCompId()
 	{
 		return MAV_COMP_ID_UDP_BRIDGE;
+	}
+
+	template <class TmavlinkMessage>
+	static constexpr std::size_t getMaxMessageLength()
+	{
+		return kMaxMavlinkMessageLength - kMaxPayloadLength + sizeof(TmavlinkMessage);
 	}
 };
 

@@ -74,18 +74,6 @@ using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDis
 using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, Topic::RecordStart>;
 using RecordStop       = Rr::Subscription::KeyVoid<Topic::RecordStop>;
 
-// As for 2021-12-23, a duplex 1-to-1 version of forwarding is used. No locking is required
-using MavlinkUartReceived = NoLockKey<MavReceiveResult(Message &), Topic::MavlinkUdpReceived>;
-using MavlinkUdpReceived = NoLockKey<MavReceiveResult(Message &), Topic::MavlinkUartReceived>;
-using MavlinkUdpSend = NoLockKey<IpSendResult(Message &), Topic::MavlinkUdpSend>;
-using MavlinkUartSend = NoLockKey<UartSendResult(Message &), Topic::MavlinkUartSend>;  /// Will be implemented as a wrapper over IpSend key
-
-using IpConnect = IndKey<IpResult(const Sub::IpConnect &)>;  ///< Fullfill a TCP connection request
-using IpSend = IndKey<IpSendResult(const IpDestMessage &)>;  ///< Send an IP package
-using IpReceived = IndKey<void(const IpDestMessage &)>;  ///< Handle IP received data
-
-using UartSend = IndKey<UartSendResult(const UartMessage &)>;  ///< Send a package over serial
-
 }  // namespace Key
 }  // namespace Sub
 

@@ -49,7 +49,7 @@ inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset) const
 template <class T>
 inline Tbuffer<T> Tbuffer<T>::slice(std::size_t aOffset, std::size_t aOffsetEnd) const
 {
-	assert(aOffset < size());
+	assert(aOffset <= size());
 	assert(aOffsetEnd <= size());
 	auto *d = reinterpret_cast<typename Tbuffer<T>::InterpType *>(data());  // void* in pointer arithmetics
 
@@ -75,6 +75,22 @@ inline Tbuffer<Tto> toBuffer(TdataTraitFrom &&aFrom)
 {
 	static_assert(std::is_pointer<decltype(aFrom.data())>::value, "TdataTraitFrom::data() should return pointer");
 	return toBuffer<Tto>(aFrom.data(), aFrom.size());
+}
+
+template <class Tbuf>
+inline asio::mutable_buffer makeAsioMb(Tbuf &&aBuf)
+{
+	auto voidBuffer = toBuffer<void>(aBuf);
+
+	return {voidBuffer.data(), voidBuffer.size()};
+}
+
+template <class Tbuf>
+inline asio::const_buffer makeAsioCb(Tbuf &&aBuf)
+{
+	auto constVoidBuffer = toBuffer<const void>(aBuf);
+
+	return {constVoidBuffer.data(), constVoidBuffer.size()};
 }
 
 }  // namespace Utility
