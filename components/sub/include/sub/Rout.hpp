@@ -29,6 +29,9 @@ using Payload = asio::const_buffer;
 ///
 template <class Tproto>
 struct Socket {
+	static_assert(std::is_same<Tproto, asio::ip::tcp>::value
+		|| std::is_same<Tproto, asio::ip::udp>::value, "");
+
 	const asio::ip::basic_endpoint<Tproto> &remoteEndpoint;
 	std::uint16_t localPort;
 	Payload payload;
