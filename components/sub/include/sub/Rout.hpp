@@ -15,11 +15,13 @@
 #include <asio.hpp>
 #include <mapbox/variant.hpp>
 #include <memory>
+#include <mutex>
 
 namespace Sub {
 namespace Rout {
 
 using PayloadHold = std::unique_ptr<std::uint8_t[]>;
+using PayloadLock = std::unique_ptr<std::lock_guard<std::mutex>>;
 using Payload = asio::const_buffer;
 
 template <class Tproto>
@@ -36,8 +38,9 @@ struct Uart {
 
 struct Response {
 	Payload payload;
-	PayloadHold payloadHold;
-	int nProcessed;  ///< Number of bytes that has been processed by a recepient. Contextual, may be unused (= -1 in that case)
+	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a handler does not possess the buffer.
+	int nProcessed;  ///< Number of bytes that has been processed by a handler. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
+	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a handler. This field allows to protect the buffer until `payload` is processed by an invoker.
 
 	enum class Type {
 		Ignored,  ///< The message has not been recognized as the one that was addressed to a receiver
@@ -54,11 +57,15 @@ struct Response {
 	Response(Type);
 	Response();
 
-	template <class T1, class T2>
-	Response(T1 &&aT1, T2 &&aT2, int anProcessed = -1) :
-		payload{std::forward<T1>(aT1)},
-		payloadHold{std::forward<T2>(aT2)},
-		nProcessed{anProcessed}
+	template <class Tpayload, class TpayloadHold, class TpayloadLock>
+	Response(Tpayload &&aTpayload,
+		TpayloadHold &&aTpayloadHold = {},
+		int anProcessed = -1,
+		TpayloadLock &&aTpayloadLock = {}) :
+		payload{std::forward<Tpayload>(aTpayload)},
+		payloadHold{std::forward<TpayloadHold>(aTpayloadHold)},
+		nProcessed{anProcessed},
+		payloadLock{std::forward<TpayloadLock>(aTpayloadLock)}
 	{
 	}
 };
