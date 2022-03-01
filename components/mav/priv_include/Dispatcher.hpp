@@ -47,8 +47,13 @@ private:
 
 	Marshalling marshalling;
 	Unmarshalling unmarshalling;
-	std::size_t marshallingSize = 0;
 	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
+
+	struct {
+		typename Marshalling::value_type buffer;
+		typename Sub::Rout::PayloadLock::element_type::mutex_type mutex;
+		std::size_t size = 0;
+	} resp;
 };
 
 }  // namespace Mav
