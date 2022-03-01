@@ -54,6 +54,11 @@ private:
 		typename Sub::Rout::MavlinkPackForward<asio::ip::tcp> packForwardTcp;
 		typename Sub::Rout::MavlinkPackForward<asio::ip::udp> packForwardUdp;
 	} key;
+
+	struct {
+		std::uint8_t buffer[sizeof(mavlink_message_t)];
+		std::mutex mutex;
+	} resp;
 };
 
 }  // namespace Mic
