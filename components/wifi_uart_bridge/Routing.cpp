@@ -119,6 +119,18 @@ Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVa
 	return mapbox::util::apply_visitor(*this, aVariant);
 }
 
-Routing::Routing() : key{{&Routing::onReceived, this}}
+Sub::Rout::OnTcpEvent::Ret Routing::onTcpEvent(Sub::Rout::OnTcpEvent::Arg<0> aTcpEventVariant)
+{
+	for (auto &callable : Sub::Rout::MavlinkPackTcpEvent::getIterators()) {
+		auto response = callable(aTcpEventVariant);
+
+		if (Sub::Rout::Response::Type::Ignored != response.getType()) {
+			Sub::Rout::UartSend::notify(Sub::Rout::Uart{response.payload,
+				static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
+		}
+	}
+}
+
+Routing::Routing() : key{{&Routing::onReceived, this}, {&Routing::onTcpEvent, this}}
 {
 }
