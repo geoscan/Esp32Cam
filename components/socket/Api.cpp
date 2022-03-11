@@ -114,6 +114,7 @@ void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLoca
 				container.tcpConnected.emplace_back(std::move(aSocket));
 				tcpAsyncReceiveFrom(container.tcpConnected.back());
 				tcpAsyncAccept(aAcceptor, aLocalPort);
+				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{aSocket.remote_endpoint(), aLocalPort});
 			}
 	});
 }
@@ -233,6 +234,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 			ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
 				aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
 				aSocket.local_endpoint().port());
+			Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{aSocket.remote_endpoint(),
+				aSocket.local_endpoint().port()});
 			disconnect(aSocket.remote_endpoint(), aSocket.local_endpoint().port(), aErr);
 		}
 	});
