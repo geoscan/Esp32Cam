@@ -124,7 +124,7 @@ Sub::Rout::Response GsNetwork::respPackLock(const mavlink_mav_gs_network_t &mavl
 {
 	mavlink_message_t mavlinkMessage;
 	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
-	Sub::Rout::Response ret;
+	Sub::Rout::Response ret{Sub::Rout::Response::Type::Response};
 
 	// Pack the message into a buffer
 	ret.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
