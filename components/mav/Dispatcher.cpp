@@ -28,7 +28,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 		ret = micAggregate.process(message);
 
 		if (ret == Microservice::Ret::Response) {
-			marshallingSize = marshalling.push(message);
+			resp.size = marshalling.push(message);
 		}
 		unmarshalling.pop();
 	}
@@ -59,7 +59,9 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 
 		case Microservice::Ret::Response:  // send response back
 			response.setType(Sub::Rout::Response::Type::Response);
-			response.payload = Sub::Rout::Payload{&marshalling.back(), marshallingSize};
+			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
+			resp.buffer = marshalling.back();
+			response.payload = Sub::Rout::Payload{&resp.buffer, resp.size};
 
 			break;
 

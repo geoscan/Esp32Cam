@@ -94,9 +94,9 @@ GsNetwork::packForward(typename Sub::Rout::MavlinkPackForward<Tproto>::template 
 
 	// Pack the message into a buffer
 	const auto kMaxMessageLen = mavGsNetworkGetMaxMessageLength(mavlinkMavGsNetwork.payload_len);
-	ret.payloadHold = decltype(ret.payloadHold){new std::uint8_t[kMaxMessageLen]};
-	auto nPacked = Marshalling::push(mavlinkMessage, {ret.payloadHold.get(), kMaxMessageLen});
-	ret.payload = {ret.payloadHold.get(), nPacked};
+	ret.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
+	auto nPacked = Marshalling::push(mavlinkMessage, {resp.buffer, kMaxMessageLen});
+	ret.payload = {resp.buffer, nPacked};
 	ret.nProcessed = nProcessed;
 
 	return ret;

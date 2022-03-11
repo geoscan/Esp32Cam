@@ -50,12 +50,12 @@ struct Uart {
 ///
 struct Response {
 	Payload payload;  ///< Response field
-	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a handler does not possess the buffer.
-	int nProcessed;  ///< Number of bytes that has been processed by a handler. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
-	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a handler. This field allows to protect the buffer until `payload` is processed by an invoker.
+	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a receiver does not possess the buffer.
+	int nProcessed;  ///< Number of bytes that has been processed by a receiver. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
+	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a receiver. This field allows to protect the buffer until `payload` is processed by an invoker.
 
 	enum class Type {
-		Ignored,  ///< The message has not been recognized as the one that was addressed to a receiver
+		Ignored,  ///< The message has not been recognized by a receiver
 		Consumed,  ///< The message was addressed to a receiver. No response is sent
 		Response,  ///< The message was addressed to a receiver. There is a response message ready to be sent
 	};
