@@ -64,6 +64,11 @@ struct TcpDisconnected {
 ///
 /// \brief Provides message passing between interfaces and receive-event handlers.
 ///
+/// Please note `payloadLock` and `payloadHold` fields.
+/// Enables 2 ways of providing thread safety of `payload` field
+/// 1. Allocate a chunk of memory and bind it to self-destructing RAII `std::unique_ptr<bytes[]>` (`payloadHold` field)
+/// 2. Use a buffer pre-allocated by the response producer, but lock it w/ `std::unique_ptr<mutex>` (`payloadLock` field)
+///
 struct Response {
 	Payload payload;  ///< Response field
 	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a receiver does not possess the buffer.
