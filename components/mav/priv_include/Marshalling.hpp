@@ -27,6 +27,7 @@ private:
 
 public:
 	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
+	static std::size_t push(const mavlink_message_t &, void *aBuffer);
 	std::size_t push(const mavlink_message_t &);
 };
 
