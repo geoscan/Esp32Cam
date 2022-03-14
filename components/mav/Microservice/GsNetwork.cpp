@@ -218,6 +218,10 @@ void GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
 	}
 
 	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
+
+	if (asio::error::already_connected == err) {
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	}
 }
 
 void GsNetwork::processDisconnect(mavlink_message_t &aMavlinkMessage,
@@ -227,6 +231,11 @@ void GsNetwork::processDisconnect(mavlink_message_t &aMavlinkMessage,
 	asio::error_code err;
 	Sock::Api::getInstance().disconnect({addr, aMavlinkMavGsNetwork.remote_port}, aMavlinkMavGsNetwork.host_port, err);
 	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
+
+	// Already disconnected
+	if (asio::error::not_connected == err) {
+		MAV_GS_NETWORK_ACK_SUCCESS;
+	}
 }
 
 void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
@@ -256,6 +265,10 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 			break;
 	}
 	aMavlinkMavGsNetwork.ack = errorCode ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
+
+	if (asio::error::already_open == errorCode) {
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	}
 }
 
 void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
@@ -277,6 +290,10 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 			break;
 	}
 	aMavlinkMavGsNetwork.ack = errorCode ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
+
+	if (asio::error::not_found == errorCode) {
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	}
 }
 
 void GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
