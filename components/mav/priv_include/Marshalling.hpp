@@ -19,11 +19,10 @@ namespace Mav {
 
 static constexpr unsigned kMarshallingQueueMaxSize = 1;
 using MarshallingHoldQueue = typename Utility::CircularBuffer<mavlink_message_t, kMarshallingQueueMaxSize, false>;
-using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
-class Marshalling : public std::queue<MarshallingHoldQueue> {
+class Marshalling : public std::queue<mavlink_message_t, MarshallingHoldQueue> {
 private:
-	using BaseType = typename std::queue<MarshallingHoldQueue>;
+	using BaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 	using BaseType::push;
 
 public:
