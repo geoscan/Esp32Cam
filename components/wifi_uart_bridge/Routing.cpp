@@ -128,6 +128,18 @@ Sub::Rout::OnTcpEvent::Ret Routing::onTcpEvent(Sub::Rout::OnTcpEvent::Arg<0> aTc
 			Sub::Rout::UartSend::notify(Sub::Rout::Uart{response.payload,
 				static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
 		}
+
+#if CONFIG_WIFI_UART_BRIDGE_TCP_CONNECTION_EVENT_FORWARD_UDP_MAVLINK
+		if (Sock::Api::checkInstance()) {
+			asio::error_code err;
+			auto &socketApi = Sock::Api::getInstance();
+
+			for (const auto &endpoint : container.udpEndpoints) {
+				std::uint16_t port = static_cast<std::uint16_t>(Udp::Mavlink);
+				socketApi.sendTo(endpoint, port, response.payload, err);
+			}
+		}
+#endif
 	}
 }
 
