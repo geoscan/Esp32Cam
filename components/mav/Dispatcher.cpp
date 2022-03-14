@@ -28,7 +28,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
 		ret = micAggregate.process(message);
 
 		if (ret == Microservice::Ret::Response) {
-			resp.size = marshalling.push(message);
+			resp.size = Marshalling::push(message, resp.buffer);
 		}
 		unmarshalling.pop();
 	}
@@ -42,10 +42,6 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
 
-	while (marshalling.size()) {
-		marshalling.pop();
-	}
-
 	switch (process(Utility::toBuffer<const void>(aMessage))) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			response.setType(Sub::Rout::Response::Type::Ignored);
@@ -58,9 +54,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 			break;
 
 		case Microservice::Ret::Response:  // send response back
-			response.setType(Sub::Rout::Response::Type::Response);
 			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
-			resp.buffer = marshalling.back();
 			response.payload = Sub::Rout::Payload{&resp.buffer, resp.size};
 
 			break;

@@ -11,6 +11,7 @@
 #ifndef MAV_PRIV_INCLUDE_DISPATCHER_HPP
 #define MAV_PRIV_INCLUDE_DISPATCHER_HPP
 
+#include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "sub/Rout.hpp"
 #include "Microservice.hpp"
@@ -50,7 +51,7 @@ private:
 	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
 
 	struct {
-		typename Marshalling::value_type buffer;
+		std::uint8_t buffer[sizeof(mavlink_message_t)];
 		typename Sub::Rout::PayloadLock::element_type::mutex_type mutex;
 		std::size_t size = 0;
 	} resp;

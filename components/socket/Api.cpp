@@ -98,19 +98,22 @@ void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLoca
 {
 	aAcceptor.async_accept(
 		[this, &aAcceptor, aLocalPort] (asio::error_code aError, asio::ip::tcp::socket aSocket) mutable {
-			std::lock_guard<std::mutex> lock{syncAsyncMutex};
-			(void)lock;
-
 			if (aError) {
 				ESP_LOGE(kDebugTag, "tcpAsyncAccept error(%d)", aError.value());
 
 				if (aError != asio::error::operation_aborted) {
+				 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
+					(void)lock;
+
 					closeTcp(aLocalPort, aError);
 				}
 			} else {
 				ESP_LOGI(kDebugTag, "tcpAsyncAccept accepted %s : %d on port %d",
 					aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
 					aLocalPort);
+				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{aSocket.remote_endpoint(), aLocalPort});
+				std::lock_guard<std::mutex> lock{syncAsyncMutex};
+				(void)lock;
 				container.tcpConnected.emplace_back(std::move(aSocket));
 				tcpAsyncReceiveFrom(container.tcpConnected.back());
 				tcpAsyncAccept(aAcceptor, aLocalPort);
@@ -233,6 +236,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 			ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
 				aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
 				aSocket.local_endpoint().port());
+			Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{aSocket.remote_endpoint(),
+				aSocket.local_endpoint().port()});
 			disconnect(aSocket.remote_endpoint(), aSocket.local_endpoint().port(), aErr);
 		}
 	});

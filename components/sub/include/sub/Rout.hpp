@@ -46,7 +46,28 @@ struct Uart {
 };
 
 ///
+/// \brief Used by Sock::Api
+///
+struct TcpConnected {
+	const asio::ip::tcp::endpoint remoteEndpoint;
+	std::uint16_t localPort;
+};
+
+///
+/// \brief Used by Sock::Api
+///
+struct TcpDisconnected {
+	const asio::ip::tcp::endpoint remoteEndpoint;
+	std::uint16_t localPort;
+};
+
+///
 /// \brief Provides message passing between interfaces and receive-event handlers.
+///
+/// Please note `payloadLock` and `payloadHold` fields.
+/// Enables 2 ways of providing thread safety of `payload` field
+/// 1. Allocate a chunk of memory and bind it to self-destructing RAII `std::unique_ptr<bytes[]>` (`payloadHold` field)
+/// 2. Use a buffer pre-allocated by the response producer, but lock it w/ `std::unique_ptr<mutex>` (`payloadLock` field)
 ///
 struct Response {
 	Payload payload;  ///< Response field
@@ -89,12 +110,17 @@ struct MavlinkPackForward;
 }  // namespace Topic
 
 using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart>;
+using TcpConnectionVariant = typename mapbox::util::variant<TcpConnected, TcpDisconnected>;  ///< Tcp connection events
+
 using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
 using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
+using OnTcpEvent = Sub::NoLockKey<void(const TcpConnectionVariant &), Topic::Generic>;  ///< Used by Routing. TODO: if number of users is extended, replace w/ Sub::IndKey!
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
 template <class Tproto>
 using MavlinkPackForward = typename Sub::NoLockKey<Response(const Socket<Tproto> &), Topic::MavlinkPackForward>;
+
+using MavlinkPackTcpEvent = typename Sub::NoLockKey<Response(const TcpConnectionVariant &), Topic::Mavlink>;
 
 }  // namespace Rout
 }  // namespace Sub
