@@ -234,7 +234,7 @@ void GsNetwork::processDisconnect(mavlink_message_t &aMavlinkMessage,
 
 	// Already disconnected
 	if (asio::error::not_connected == err) {
-		MAV_GS_NETWORK_ACK_SUCCESS;
+		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 	}
 }
 
