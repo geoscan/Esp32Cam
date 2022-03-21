@@ -92,13 +92,18 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 		aErr = asio::error::already_open;
 	} else {
 		container.tcpListening.emplace_back(ioContext);
-		container.tcpListening.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
+		container.tcpListening.back().open(aTcp, aErr);
+
+		if (!aErr) {
+			container.tcpListening.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
+		}
 
 		if (!aErr) {
 			ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
 			tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
 		} else {
 			ESP_LOGE(kDebugTag, "openTcp - open listening socket on port %d - error(%d)", aLocalPort, aErr.value());
+			container.tcpListening.back().close(aErr);
 		}
 	}
 }
