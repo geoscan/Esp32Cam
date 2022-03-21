@@ -147,6 +147,7 @@ void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
 		ESP_LOGW(kDebugTag, "closeUdp on port %d - no such socket was found", aPort);
 		aErr = asio::error::not_found;
 	} else {
+		it->shutdown(asio::ip::udp::socket::shutdown_type::shutdown_both, aErr);
 		it->close(aErr);
 		container.udp.erase(it);
 		ESP_LOGI(kDebugTag, "closeUdp on port %d - success", aPort);
