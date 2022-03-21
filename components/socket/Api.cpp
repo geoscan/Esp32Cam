@@ -141,7 +141,11 @@ void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUd
 		ESP_LOGW(kDebugTag, "openUdp on port %d - already opened", aLocalPort);
 	} else {
 		container.udp.emplace_back(ioContext);
-		container.udp.back().bind(asio::ip::udp::endpoint{aUdp, aLocalPort}, aErr);
+		container.udp.back().open(aUdp, aErr);
+
+		if (!aErr) {
+			container.udp.back().bind(asio::ip::udp::endpoint{aUdp, aLocalPort}, aErr);
+		}
 
 		if (!aErr) {
 			ESP_LOGI(kDebugTag, "openUdp on port %d - success", aLocalPort);
