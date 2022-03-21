@@ -148,6 +148,8 @@ void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUd
 			udpAsyncReceiveFrom(container.udp.back());
 		} else {
 			ESP_LOGE(kDebugTag, "openUdp on port %d - error(%d)", aLocalPort, aErr.value());
+			container.udp.back().shutdown(asio::ip::udp::socket::shutdown_type::shutdown_both, aErr);
+			container.udp.back().close(aErr);
 		}
 	}
 }
