@@ -36,18 +36,21 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 		ESP_LOGW(kDebugTag, "connect to %s : %d from port %d - already connected",
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
-		if (aLocalPort != 0) {
-			container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
-		} else {
-			container.tcpConnected.emplace_back(ioContext);
+		container.tcpConnected.emplace_back(ioContext);
+
+		if (0 != aLocalPort) {
+			container.tcpConnected.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
 		}
 
-		container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+		if (!aErr) {
+			container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+		}
 
 		if (aErr) {
 			ESP_LOGE(kDebugTag, "connect to %s : %d from port %d - error(%d)",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort, aErr.value());
-			container.tcpConnected.back().close();
+			container.tcpConnected.back().shutdown(asio::ip::tcp::socket::shutdown_type::shutdown_both, aErr);
+			container.tcpConnected.back().close(aErr);
 			container.tcpConnected.pop_back();
 		} else {
 			aLocalPort = container.tcpConnected.back().local_endpoint().port();
