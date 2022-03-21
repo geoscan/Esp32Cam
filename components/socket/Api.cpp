@@ -98,7 +98,7 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 			ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
 			tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
 		} else {
-			ESP_LOGE(kDebugTag, "openTcp - open listening socket on port %d - error", aLocalPort);
+			ESP_LOGE(kDebugTag, "openTcp - open listening socket on port %d - error(%d)", aLocalPort, aErr.value());
 		}
 	}
 }
