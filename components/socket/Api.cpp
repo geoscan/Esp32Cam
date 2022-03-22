@@ -36,18 +36,22 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 		ESP_LOGW(kDebugTag, "connect to %s : %d from port %d - already connected",
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
-		if (aLocalPort != 0) {
-			container.tcpConnected.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
-		} else {
-			container.tcpConnected.emplace_back(ioContext);
+		container.tcpConnected.emplace_back(ioContext);
+		container.tcpConnected.back().open(aTcp);
+
+		if (!aErr && 0 != aLocalPort) {
+			container.tcpConnected.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
 		}
 
-		container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+		if (!aErr) {
+			container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
+		}
 
 		if (aErr) {
 			ESP_LOGE(kDebugTag, "connect to %s : %d from port %d - error(%d)",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort, aErr.value());
-			container.tcpConnected.back().close();
+			container.tcpConnected.back().shutdown(asio::ip::tcp::socket::shutdown_type::shutdown_both, aErr);
+			container.tcpConnected.back().close(aErr);
 			container.tcpConnected.pop_back();
 		} else {
 			aLocalPort = container.tcpConnected.back().local_endpoint().port();
@@ -88,9 +92,25 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 		ESP_LOGW(kDebugTag, "openTcp - already opened on port %d, ignored", aLocalPort);
 		aErr = asio::error::already_open;
 	} else {
-		container.tcpListening.emplace_back(ioContext, asio::ip::tcp::endpoint{aTcp, aLocalPort});
-		ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
-		tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
+		container.tcpListening.emplace_back(ioContext);
+		container.tcpListening.back().open(aTcp, aErr);
+
+		if (!aErr) {
+			container.tcpListening.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
+		}
+
+		if (!aErr) {
+			static constexpr auto kBacklogSize = 4;
+			container.tcpListening.back().listen(kBacklogSize, aErr);
+		}
+
+		if (!aErr) {
+			ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
+			tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
+		} else {
+			ESP_LOGE(kDebugTag, "openTcp - open listening socket on port %d - error(%d)", aLocalPort, aErr.value());
+			container.tcpListening.back().close(aErr);
+		}
 	}
 }
 
@@ -131,9 +151,21 @@ void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUd
 		aErr = asio::error::already_open;
 		ESP_LOGW(kDebugTag, "openUdp on port %d - already opened", aLocalPort);
 	} else {
-		container.udp.emplace_back(ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
-		ESP_LOGI(kDebugTag, "openUdp on port %d - success", aLocalPort);
-		udpAsyncReceiveFrom(container.udp.back());
+		container.udp.emplace_back(ioContext);
+		container.udp.back().open(aUdp, aErr);
+
+		if (!aErr) {
+			container.udp.back().bind(asio::ip::udp::endpoint{aUdp, aLocalPort}, aErr);
+		}
+
+		if (!aErr) {
+			ESP_LOGI(kDebugTag, "openUdp on port %d - success", aLocalPort);
+			udpAsyncReceiveFrom(container.udp.back());
+		} else {
+			ESP_LOGE(kDebugTag, "openUdp on port %d - error(%d)", aLocalPort, aErr.value());
+			container.udp.back().shutdown(asio::ip::udp::socket::shutdown_type::shutdown_both, aErr);
+			container.udp.back().close(aErr);
+		}
 	}
 }
 
