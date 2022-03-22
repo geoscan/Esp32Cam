@@ -46,6 +46,11 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 	Ret ret;
 	mavlink_msg_mav_gs_network_decode(&aMavlinkMessage, &mavlinkMavGsNetwork);
 
+	ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: mavlink_mav_gs_network_t: host_port %d remote_port: %d "
+		"command %d ack %d transport %d payload_len %d", mavlinkMavGsNetwork.host_port, mavlinkMavGsNetwork.remote_port,
+		mavlinkMavGsNetwork.command, mavlinkMavGsNetwork.ack, mavlinkMavGsNetwork.transport,
+		mavlinkMavGsNetwork.payload_len);
+
 	switch (mavlinkMavGsNetwork.ack) {
 		case MAV_GS_NETWORK_ACK_NONE:
 			ret = Ret::Response;
