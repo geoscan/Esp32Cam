@@ -100,6 +100,11 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 		}
 
 		if (!aErr) {
+			static constexpr auto kBacklogSize = 4;
+			container.tcpListening.back().listen(kBacklogSize, aErr);
+		}
+
+		if (!aErr) {
 			ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
 			tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
 		} else {
