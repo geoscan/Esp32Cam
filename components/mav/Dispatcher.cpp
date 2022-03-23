@@ -18,10 +18,10 @@ Mav::Dispatcher::Dispatcher():
 {
 }
 
-Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer)
+Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
 {
 	auto ret = Microservice::Ret::Ignored;
-	unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
+	anProcessed = unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
 
 	if (unmarshalling.size()) {
 		auto &message = unmarshalling.front();
@@ -42,7 +42,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
 
-	switch (process(Utility::toBuffer<const void>(aMessage))) {
+	switch (process(Utility::toBuffer<const void>(aMessage), response.nProcessed)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			response.setType(Sub::Rout::Response::Type::Ignored);
 

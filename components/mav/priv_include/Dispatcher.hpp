@@ -36,7 +36,7 @@ public:
 	Dispatcher();
 
 protected:
-	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage);
+	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage, int &anProcessed);
 
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
