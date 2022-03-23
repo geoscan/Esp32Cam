@@ -22,10 +22,16 @@ void Uart::Task::operator()()
 
 			if (nRead) {
 				for (auto &callable : Sub::Rout::OnReceived::getIterators()) {
-					auto response = callable(Sub::Rout::Uart{{buffer.data(), nRead}, uartDevice->getNum()});
+					typename Sub::Rout::OnReceived::Ret response;
 
-					if (response.getType() == Sub::Rout::Response::Type::Response) {
-						uartDevice->write(response.payload);
+					for (auto buf = Utility::toBuffer<const std::uint8_t>(buffer.data(), nRead); buf.size();
+						buf = response.nProcessed ? buf.slice(response.nProcessed) : buf.slice(buf.size()))
+					{
+						response = callable(Sub::Rout::Uart{Utility::makeAsioCb(buf), uartDevice->getNum()});
+
+						if (Sub::Rout::Response::Type::Response == response.getType()) {
+							uartDevice->write(response.payload);
+						}
 					}
 				}
 			}
