@@ -8,6 +8,7 @@
 #ifndef SOCKET_INCLUDE_SOCKET_API_HPP
 #define SOCKET_INCLUDE_SOCKET_API_HPP
 
+#include "socket/socket.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "sub/Socket.hpp"
 #include "Container.hpp"
@@ -36,7 +37,7 @@ private:
 	} container;
 
 	static constexpr auto kReceiveBufferSize = 128;
-	static constexpr const char *kDebugTag = "Sock::Api";
+	static constexpr const char *kDebugTag = Sock::kDebugTag;
 
 public:
 	Api(asio::io_context &, std::mutex &aSyncAsyncMutex);
