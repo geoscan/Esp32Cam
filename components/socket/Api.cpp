@@ -5,6 +5,13 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
+#include <esp_log.h>
+
+#include "socket/socket.hpp"
+
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
@@ -36,13 +43,17 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 		ESP_LOGW(kDebugTag, "connect to %s : %d from port %d - already connected",
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
+		ESP_LOGD(Sock::kDebugTag, "Api::connect(TCP): opening socket");
 		container.tcpConnected.emplace_back(ioContext);
 		container.tcpConnected.back().open(aTcp, aErr);
 
+		ESP_LOGD(Sock::kDebugTag, "Api::connect(TCP): binding socket");
 		if (!aErr && 0 != aLocalPort) {
 			container.tcpConnected.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
 		}
 
+		ESP_LOGD(kDebugTag, "Api::connect(TCP): connecting to %s : %d from port %d", aRemoteEndpoint.address().to_string().c_str(),
+			aRemoteEndpoint.port(), aLocalPort);
 		if (!aErr) {
 			container.tcpConnected.back().connect(aRemoteEndpoint, aErr);
 		}
