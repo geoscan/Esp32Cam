@@ -59,10 +59,11 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 		}
 
 		if (aErr) {
+			asio::error_code errTemp;
 			ESP_LOGE(kDebugTag, "connect to %s : %d from port %d - error(%d)",
 				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort, aErr.value());
-			container.tcpConnected.back().shutdown(asio::ip::tcp::socket::shutdown_type::shutdown_both, aErr);
-			container.tcpConnected.back().close(aErr);
+			container.tcpConnected.back().shutdown(asio::ip::tcp::socket::shutdown_type::shutdown_both, errTemp);
+			container.tcpConnected.back().close(errTemp);
 			container.tcpConnected.pop_back();
 		} else {
 			aLocalPort = container.tcpConnected.back().local_endpoint().port();
@@ -119,8 +120,9 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 			ESP_LOGI(kDebugTag, "openTcp - opened listening socket on port %d", aLocalPort);
 			tcpAsyncAccept(container.tcpListening.back(), aLocalPort);
 		} else {
+			asio::error_code errTemp;
 			ESP_LOGE(kDebugTag, "openTcp - open listening socket on port %d - error(%d)", aLocalPort, aErr.value());
-			container.tcpListening.back().close(aErr);
+			container.tcpListening.back().close(errTemp);
 		}
 	}
 }
@@ -173,9 +175,10 @@ void Api::openUdp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::udp aUd
 			ESP_LOGI(kDebugTag, "openUdp on port %d - success", aLocalPort);
 			udpAsyncReceiveFrom(container.udp.back());
 		} else {
+			asio::error_code errTemp;
 			ESP_LOGE(kDebugTag, "openUdp on port %d - error(%d)", aLocalPort, aErr.value());
-			container.udp.back().shutdown(asio::ip::udp::socket::shutdown_type::shutdown_both, aErr);
-			container.udp.back().close(aErr);
+			container.udp.back().shutdown(asio::ip::udp::socket::shutdown_type::shutdown_both, errTemp);
+			container.udp.back().close(errTemp);
 		}
 	}
 }
