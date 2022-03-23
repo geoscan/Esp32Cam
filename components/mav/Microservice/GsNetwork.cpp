@@ -5,6 +5,11 @@
 //     Author: Dmitry Murashov (dmtrDOTmurashovATgmailDOTcom (gmail.com))
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "Mavlink.hpp"
 #include "Microservice/GsNetwork.hpp"
 #include "Marshalling.hpp"
@@ -15,6 +20,7 @@
 #include <algorithm>
 #include <utility/Algorithm.hpp>
 #include <memory>
+#include "mav/mav.hpp"
 
 using namespace Mav;
 using namespace Mav::Mic;
@@ -40,48 +46,63 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 	Ret ret;
 	mavlink_msg_mav_gs_network_decode(&aMavlinkMessage, &mavlinkMavGsNetwork);
 
+	ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: mavlink_mav_gs_network_t: host_port %d remote_port: %d "
+		"command %d ack %d transport %d payload_len %d, payload: %*.*s", mavlinkMavGsNetwork.host_port,
+		mavlinkMavGsNetwork.remote_port, mavlinkMavGsNetwork.command, mavlinkMavGsNetwork.ack,
+		mavlinkMavGsNetwork.transport, mavlinkMavGsNetwork.payload_len, mavlinkMavGsNetwork.payload_len,
+		mavlinkMavGsNetwork.payload_len, mavlinkMavGsNetwork.payload);
+
 	switch (mavlinkMavGsNetwork.ack) {
 		case MAV_GS_NETWORK_ACK_NONE:
 			ret = Ret::Response;
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: response required");
 
 			break;
 
 		case MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE:
 			ret = Ret::NoResponse;
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: No response required");
 
 			break;
 
 		default:  // Non-request message
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: Non-request message");
 			return Ret::NoResponse;
 	}
 
 	switch (mavlinkMavGsNetwork.command) {  // Command message
 		case MAV_GS_NETWORK_COMMAND_CONNECT:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process CONNECT");
 			processConnect(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_DISCONNECT:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process DISCONNECT");
 			processDisconnect(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_SEND:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process SEND");
 			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_OPEN:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process OPEN");
 			processOpen(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_CLOSE:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process CLOSE");
 			processClose(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED:
+			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process COMMAND_PROCESS_RECEIVED");
 			processReceived(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;

@@ -1,0 +1,33 @@
+menu "[mav]"
+
+	choice MAV_DEBUG_LEVEL
+		prompt "[mav] module debug level"
+		default MAV_DEBUG_LEVEL_INFO
+
+		config MAV_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config MAV_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config MAV_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config MAV_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config MAV_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config MAV_DEBUG_LEVEL
+        int
+        default 1 if MAV_DEBUG_LEVEL_ERROR
+        default 2 if MAV_DEBUG_LEVEL_WARN
+        default 3 if MAV_DEBUG_LEVEL_INFO
+        default 4 if MAV_DEBUG_LEVEL_DEBUG
+        default 5 if MAV_DEBUG_LEVEL_VERBOSE
+
+endmenu

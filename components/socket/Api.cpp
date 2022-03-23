@@ -37,7 +37,7 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
 		container.tcpConnected.emplace_back(ioContext);
-		container.tcpConnected.back().open(aTcp);
+		container.tcpConnected.back().open(aTcp, aErr);
 
 		if (!aErr && 0 != aLocalPort) {
 			container.tcpConnected.back().bind(asio::ip::tcp::endpoint{aTcp, aLocalPort}, aErr);
