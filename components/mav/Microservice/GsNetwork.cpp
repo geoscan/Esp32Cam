@@ -238,10 +238,13 @@ void GsNetwork::processConnect(mavlink_message_t &aMavlinkMessage,
 
 	}
 
-	aMavlinkMavGsNetwork.ack = err ? MAV_GS_NETWORK_ACK_FAIL : MAV_GS_NETWORK_ACK_SUCCESS;
+	aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_FAIL;
 
-	if (asio::error::already_connected == err) {
+	if (asio::error::already_connected == err || !err) {
+		ESP_LOGD(Mav::kDebugTag, "GsNetwork::processConnect()");
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	} else {
+		ESP_LOGD(Mav::kDebugTag, "GsNetwork::processConnect(): fail");
 	}
 }
 
