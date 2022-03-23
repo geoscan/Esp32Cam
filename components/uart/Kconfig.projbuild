@@ -1,0 +1,33 @@
+menu "[uart]"
+
+	choice UART_DEBUG_LEVEL
+		prompt "[uart] module debug level"
+		default UART_DEBUG_LEVEL_INFO
+
+		config UART_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config UART_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config UART_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config UART_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config UART_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config UART_DEBUG_LEVEL
+        int
+        default 1 if UART_DEBUG_LEVEL_ERROR
+        default 2 if UART_DEBUG_LEVEL_WARN
+        default 3 if UART_DEBUG_LEVEL_INFO
+        default 4 if UART_DEBUG_LEVEL_DEBUG
+        default 5 if UART_DEBUG_LEVEL_VERBOSE
+
+endmenu
