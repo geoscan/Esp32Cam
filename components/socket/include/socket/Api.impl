@@ -33,24 +33,39 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it{container.udp.end()};
+	aErr.clear();
 
 	if (0 != aLocalPort) {
 		it = container.udp.find(aLocalPort);
 	}
 
 	if (it == container.udp.end()) {
-		it = container.udp.emplace(container.udp.end(), ioContext, asio::ip::udp::endpoint{aUdp, aLocalPort});
+		it = container.udp.emplace(container.udp.end(), ioContext);
 
-		if (aLocalPort == 0) {
+		it->open(aUdp, aErr);
+
+		if (!aErr) {
+			it->bind(asio::ip::udp::endpoint{aUdp, aLocalPort}, aErr);
+		}
+
+		if (!aErr) {
 			aLocalPort = it->local_endpoint(aErr).port();
 		}
 
-		ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d - no such socket was found, created on port %d",
-			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
-		udpAsyncReceiveFrom(*it);
+		if (!aErr) {
+			ESP_LOGI(kDebugTag, "sendTo(UDP) %s : %d - no such socket was found, created on port %d",
+				aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
+			udpAsyncReceiveFrom(*it);
+		}
 	}
 
-	return it->send_to(std::forward<TbufferType>(aBuffer), aRemoteEndpoint, 0, aErr);
+	std::size_t ret = 0;
+
+	if (container.udp.end() != it) {
+		ret = it->send_to(std::forward<TbufferType>(aBuffer), aRemoteEndpoint, 0, aErr);
+	}
+
+	return ret;
 }
 
 }  // namespace Sock
