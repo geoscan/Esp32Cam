@@ -9,8 +9,7 @@
 
 namespace Sock {
 
-template <class TbufferType>
-std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t aLocalPort,  TbufferType &&aBuffer,
+inline std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr)
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
@@ -23,11 +22,10 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 		return asio::error::not_connected;
 	}
 
-	return it->write_some(std::forward<TbufferType>(aBuffer), aErr);
+	return it->write_some(aBuffer, aErr);
 }
 
-template <class TbufferType>
-std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort,  TbufferType &&aBuffer,
+inline std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr, asio::ip::udp aUdp)
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
@@ -62,7 +60,7 @@ std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uin
 	std::size_t ret = 0;
 
 	if (container.udp.end() != it) {
-		ret = it->send_to(std::forward<TbufferType>(aBuffer), aRemoteEndpoint, 0, aErr);
+		ret = it->send_to(aBuffer, aRemoteEndpoint, 0, aErr);
 	}
 
 	return ret;

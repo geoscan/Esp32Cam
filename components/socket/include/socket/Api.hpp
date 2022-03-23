@@ -49,12 +49,10 @@ public:
 	void closeTcp(std::uint16_t aPort, asio::error_code &aErr);
 	void closeUdp(std::uint16_t aPort, asio::error_code &aErr);
 
-	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&,
+	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, asio::const_buffer,
 		asio::error_code &aErr);
 
-	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, Tbuf &&,
+	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer,
 		asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 
 private:
