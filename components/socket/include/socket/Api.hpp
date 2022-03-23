@@ -63,6 +63,4 @@ private:
 
 }  // namespace Sock
 
-#include "Api.impl"
-
 #endif // SOCKET_INCLUDE_SOCKET_API_HPP
