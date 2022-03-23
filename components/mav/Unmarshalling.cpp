@@ -11,15 +11,20 @@
 
 using namespace Mav;
 
-void Mav::Unmarshalling::push(Utility::ConstBuffer aBuffer)
+std::size_t Mav::Unmarshalling::push(Utility::ConstBuffer aBuffer)
 {
 	auto buffer = aBuffer.as<const std::uint8_t>();
+	std::size_t counter = 0;
 
-	std::for_each(buffer.data(), buffer.data() + buffer.size(), [this](uint8_t ch) {
-		if (mavlink_frame_char_buffer(&input.rxMessage, &input.rxStatus, ch, &input.parsedMessage,
-			&input.parsedStatus) == MAVLINK_FRAMING_OK && size() < kUnmarshallingQueueMaxSize)
+	for (auto *ch = buffer.data(); ch < buffer.data() + buffer.size() && size() < kUnmarshallingQueueMaxSize;
+		++ch, ++counter)
+	{
+		if (mavlink_frame_char_buffer(&input.rxMessage, &input.rxStatus, *ch, &input.parsedMessage,
+			&input.parsedStatus) == MAVLINK_FRAMING_OK)
 		{
 			UnmarshallingBaseType::push(input.parsedMessage);
 		}
-	});
+	}
+
+	return counter;
 }

@@ -29,7 +29,7 @@ using UnmarshallingBaseType = typename std::queue<mavlink_message_t, Unmarshalli
 
 class Unmarshalling final : public UnmarshallingBaseType {
 public:
-	void push(Utility::ConstBuffer buffer);
+	std::size_t push(Utility::ConstBuffer buffer);
 
 private:
 	using UnmarshallingBaseType::push;
