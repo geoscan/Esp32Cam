@@ -13,6 +13,8 @@ namespace Uart {
 void init();
 void start();
 
+static constexpr const char *kDebugTag = "[uart]";
+
 }  // namespace Uart
 
 #endif  // UART_INCLUDE_UART_H
