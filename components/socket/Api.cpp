@@ -213,7 +213,27 @@ void Api::closeUdp(uint16_t aPort, asio::error_code &aErr)
 void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
-	(void)lock;
+	(void) lock;
+#if defined(CONFIG_SOCKET_SERVER_CLOSE_CLI_DISCONNECT)
+	{
+		asio::error_code err;
+		ESP_LOGI(kDebugTag, "closeTcp on port %d - disconnecting clients", aPort);
+		for (auto it = container.tcpConnected.begin(); container.tcpConnected.end() != it;) {
+			auto ep = it->local_endpoint(err);
+
+			if (!err && ep.port() == aPort) {
+				it->shutdown(asio::ip::tcp::socket::shutdown_type::shutdown_both, err);
+				it->close();
+				it = container.tcpConnected.erase(it);
+			} else {
+				++it;
+			}
+
+			err.clear();
+		}
+	}
+#endif  // defined(CONFIG_SOCKET_SERVER_CLOSE_CLI_DISCONNECT)
+
 	auto it = container.tcpListening.find(aPort);
 
 	if (it == container.tcpListening.end()) {
