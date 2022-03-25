@@ -290,12 +290,26 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 	});
 }
 
-std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t aLocalPort, asio::const_buffer aBuffer,
+///
+/// \brief            Send a TCP packet
+/// \param aEndpoint  Remote endpoint
+/// \param aLocalPort If 0, an attempt to reuse some existing connection with the specified endpoitn will be made.
+/// \param aBuffer    Data to send
+/// \param aErr       Retured error code
+/// \return           Number of bytes sent
+///
+std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr)
 {
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
-	auto it = container.tcpConnected.find(aEndpoint, aLocalPort);
+	auto it = container.tcpConnected.end();
+
+	if (0 == aLocalPort) {
+		it = container.tcpConnected.find(aEndpoint);
+	} else {
+		it = container.tcpConnected.find(aEndpoint, aLocalPort);
+	}
 
 	if (it == container.tcpConnected.end()) {
 		ESP_LOGW(kDebugTag, "sendTo(TCP) %s : %d on port %d - no such socket was found",
