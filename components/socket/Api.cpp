@@ -40,6 +40,16 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 
 	if (it != container.tcpConnected.end()) {
 		aErr = asio::error::already_connected;
+
+		{
+			std::error_code err;
+			auto remoteEndpoint = it->remote_endpoint(err);
+
+			if (!err) {
+				aLocalPort = remoteEndpoint.port();
+			}
+		}
+
 		ESP_LOGW(kDebugTag, "connect to %s : %d from port %d - already connected",
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
