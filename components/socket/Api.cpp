@@ -294,9 +294,9 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable {
 
 		if (!aErr) {
-			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
+			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
-				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - notifying subscribers");
+				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
 				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
 					aSocket.remote_endpoint(),
 					aSocket.local_endpoint().port(),
@@ -305,7 +305,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 
 				// If a subscriber provides a response, send it
 				if (response.getType() == Sub::Rout::Response::Type::Response) {
-					ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
+					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
 					asio::error_code err;
 					aSocket.write_some(response.payload, err);
 				}
