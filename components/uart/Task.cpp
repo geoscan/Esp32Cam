@@ -31,9 +31,10 @@ void Uart::Task::operator()()
 					typename Sub::Rout::OnReceived::Ret response;
 
 					for (auto buf = Utility::toBuffer<const std::uint8_t>(buffer.data(), nRead); buf.size();
-						buf = response.nProcessed ? buf.slice(response.nProcessed) : buf.slice(buf.size()))
+						buf = response.nProcessed > 0 && response.nProcessed < buf.size() ?
+						buf.slice(response.nProcessed) : buf.slice(buf.size()))
 					{
-						ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing...");
+						ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing (%d bytes remain)", buf.size());
 						response = callable(Sub::Rout::Uart{Utility::makeAsioCb(buf), uartDevice->getNum()});
 						ESP_LOGV(Uart::kDebugTag, "Task::operator(): chunk nProcessed %d", response.nProcessed);
 

@@ -5,12 +5,18 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "sub/Subscription.hpp"
 #include "Mavlink.hpp"
 #include "Marshalling.hpp"
 #include "Unmarshalling.hpp"
 #include "Microservice/GsNetwork.hpp"
 #include "Dispatcher.hpp"
+#include "mav/mav.hpp"
 
 Mav::Dispatcher::Dispatcher():
 	key{{&Dispatcher::onMavlinkReceived, this}},
@@ -62,6 +68,8 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 		default:  // Message has been processed by some Microservice instance, no actions required
 			break;
 	};
+
+	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", response.nProcessed);
 
 	return response;
 }
