@@ -26,7 +26,7 @@ void Response::setType(Type aType)
 	}
 }
 
-Response::Response(Response::Type aType) : payload{}, payloadHold{}
+Response::Response(Response::Type aType) : payload{}, payloadHold{}, nProcessed{-1}
 {
 	setType(aType);
 }
