@@ -14,14 +14,12 @@ namespace Utility {
 
 CriticalLock::CriticalLock(Critical &aLock) : lock{aLock}
 {
-	ESP_LOGI("Critical", "Enter");
 	vTaskEnterCritical(&lock.lock);
 }
 
 CriticalLock::~CriticalLock()
 {
 	vTaskExitCritical(&lock.lock);
-	ESP_LOGI("Critical", "Exit");
 }
 
 Critical::Critical() : lock(portMUX_INITIALIZER_UNLOCKED)
