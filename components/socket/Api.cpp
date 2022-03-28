@@ -10,6 +10,7 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_SOCKET_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "utility/LogSection.hpp"
 
 #include "socket/socket.hpp"
 #include "socket/Api.hpp"
@@ -335,6 +336,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr)
 {
+	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(TCP)");
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it = container.tcpConnected.end();
@@ -357,6 +359,7 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr, asio::ip::udp aUdp)
 {
+	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(UDP)");
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it{container.udp.end()};
