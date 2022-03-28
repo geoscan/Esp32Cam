@@ -43,6 +43,8 @@ void Uart::Task::operator()()
 								response.payload.size());
 							uartDevice->write(response.payload);
 						}
+
+						response.reset();
 					}
 				}
 			}
