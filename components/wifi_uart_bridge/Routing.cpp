@@ -5,9 +5,18 @@
 //     Author: Dmitry Murashov (dmtrDOTmurashovATgmailDOTcom (gmail.com))
 //
 
+#include <sdkconfig.h>
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL)
+#include <esp_log.h>
+#include "utility/LogSection.hpp"
+
 #include "Routing.hpp"
 #include "socket/Api.hpp"
 #include <sdkconfig.h>
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 
 using namespace Bdg;
 
@@ -116,11 +125,14 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 
 Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVariant)
 {
+	GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Routing:onReceived");
 	return mapbox::util::apply_visitor(*this, aVariant);
 }
 
 Sub::Rout::OnTcpEvent::Ret Routing::onTcpEvent(Sub::Rout::OnTcpEvent::Arg<0> aTcpEventVariant)
 {
+	GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Routing:onTcpEvent");
+
 	for (auto &callable : Sub::Rout::MavlinkPackTcpEvent::getIterators()) {
 		auto response = callable(aTcpEventVariant);
 

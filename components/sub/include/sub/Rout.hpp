@@ -89,6 +89,7 @@ struct Response {
 	Response &operator=(Response &&) = default;
 	Response(Type);
 	Response();
+	void reset();
 
 	template <class Tpayload, class TpayloadHold, class TpayloadLock>
 	Response(Tpayload &&aTpayload,

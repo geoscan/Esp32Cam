@@ -86,5 +86,34 @@ menu "[wifi_uart_bridge]"
 
 	endmenu
 
+	choice WIFI_UART_BRIDGE_DEBUG_LEVEL
+		prompt "[mav] module debug level"
+		default WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config WIFI_UART_BRIDGE_DEBUG_LEVEL
+		int
+		default 1 if WIFI_UART_BRIDGE_DEBUG_LEVEL_ERROR
+		default 2 if WIFI_UART_BRIDGE_DEBUG_LEVEL_WARN
+		default 3 if WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+		default 4 if WIFI_UART_BRIDGE_DEBUG_LEVEL_DEBUG
+		default 5 if WIFI_UART_BRIDGE_DEBUG_LEVEL_VERBOSE
 
 endmenu

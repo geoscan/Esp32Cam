@@ -5,13 +5,14 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <sdkconfig.h>
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
-#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_SOCKET_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "utility/LogSection.hpp"
 
 #include "socket/socket.hpp"
-
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
@@ -294,9 +295,9 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable {
 
 		if (!aErr) {
-			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
+			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
-				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - notifying subscribers");
+				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
 				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
 					aSocket.remote_endpoint(),
 					aSocket.local_endpoint().port(),
@@ -305,7 +306,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 
 				// If a subscriber provides a response, send it
 				if (response.getType() == Sub::Rout::Response::Type::Response) {
-					ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
+					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
 					asio::error_code err;
 					aSocket.write_some(response.payload, err);
 				}
@@ -335,6 +336,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr)
 {
+	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(TCP)");
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it = container.tcpConnected.end();
@@ -357,6 +359,7 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr, asio::ip::udp aUdp)
 {
+	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(UDP)");
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it{container.udp.end()};
