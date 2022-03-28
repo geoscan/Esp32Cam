@@ -22,7 +22,6 @@ CriticalLock::~CriticalLock()
 {
 	vTaskExitCritical(&lock.lock);
 	ESP_LOGI("Critical", "Exit");
-//	portEXIT_CRITICAL(&lock.lock);
 }
 
 Critical::Critical() : lock(portMUX_INITIALIZER_UNLOCKED)
