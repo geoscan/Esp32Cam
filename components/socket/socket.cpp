@@ -22,8 +22,6 @@ static void apiInit(Sock::Api &aApi)
 	for (auto port : kUdpOpen) {
 		aApi.openUdp(port, err);
 	}
-
-	aApi.openTcp(8889, err);
 }
 
 void start(asio::io_context &aIoContext)
