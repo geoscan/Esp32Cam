@@ -44,7 +44,8 @@ public:
 
 	int getNum() const;
 private:
-	static constexpr size_t kBufferSize{1024};
+	static constexpr size_t kRxBufferSize{1024};
+	static constexpr size_t kTxBufferSize{1024};
 
 	int uartNum;
 	int currentRate;
