@@ -1,16 +1,15 @@
-#include <cassert>
-#include <cstring>
-#include <sys/ioctl.h>
-#include <termios.h>
-#include <unistd.h>
-#include "UartDevice.hpp"
-
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
 #include <esp_log.h>
 #include "uart/uart.hpp"
 
+#include <cassert>
+#include <cstring>
+#include <sys/ioctl.h>
+#include <termios.h>
+#include <unistd.h>
+#include "UartDevice.hpp"
 
 UartDevice::UartDevice(int num, gpio_num_t rxPin, gpio_num_t txPin, int rate, uart_parity_t parity,
 					   uart_stop_bits_t stopBits):
