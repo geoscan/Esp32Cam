@@ -33,12 +33,12 @@ public:
 
 private:
 	struct Buf {
-		std::array<std::uint8_t, 256> buf;
+		std::array<std::uint8_t, 1024> buf;
 		std::size_t pos;
 		UartDevice *device;
 	};
 
-	using Swap = typename Utility::CircularSwap<Buf, 8>;
+	using Swap = typename Utility::CircularSwap<Buf, 3>;
 
 private:
 	const std::list<UartDevice *> uartDevices;
