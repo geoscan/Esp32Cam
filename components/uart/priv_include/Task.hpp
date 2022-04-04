@@ -41,10 +41,6 @@ private:
 	using Swap = typename Utility::CircularSwap<Buf, 8>;
 
 private:
-
-private:
-	static constexpr unsigned kBufferSize = 256;
-	std::array<std::uint8_t, kBufferSize> buffer;
 	const std::list<UartDevice *> uartDevices;
 
 	struct SyncedSwap {
