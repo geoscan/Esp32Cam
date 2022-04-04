@@ -10,8 +10,16 @@
 
 #include <list>
 #include <array>
+#include <mutex>
 
 class UartDevice;
+
+namespace Utility {
+
+template <class T, std::size_t N>
+class CircularSwap;
+
+}  // namespace Utility
 
 namespace Uart {
 
@@ -20,12 +28,34 @@ public:
 	template <class ...Tuarts>
 	Task(Tuarts &&...aArgs);
 
-	void operator()();
+	void taskRead();
+	void taskProcess();
+
+private:
+	struct Buf {
+		std::array<std::uint8_t, 256> buf;
+		std::size_t pos;
+		UartDevice *device;
+	};
+
+	using Swap = typename Utility::CircularSwap<Buf, 8>;
+
+private:
 
 private:
 	static constexpr unsigned kBufferSize = 256;
 	std::array<std::uint8_t, kBufferSize> buffer;
 	const std::list<UartDevice *> uartDevices;
+
+	struct SyncedSwap {
+		Swap swap;
+		std::mutex mutex;
+
+		Buf &getFree();
+		Buf *getFull();
+		void pushFree(Buf &);
+		void pushFull(Buf &);
+	} swap;
 };
 
 }  // namespace Uart

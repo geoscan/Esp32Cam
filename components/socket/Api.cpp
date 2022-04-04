@@ -152,10 +152,12 @@ void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLoca
 					closeTcp(aLocalPort, aError);
 				}
 			} else {
+				std::error_code err;
+				auto epRemote = aSocket.remote_endpoint(err);
 				ESP_LOGI(kDebugTag, "tcpAsyncAccept accepted %s : %d on port %d",
-					aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
+					epRemote.address().to_string().c_str(), epRemote.port(),
 					aLocalPort);
-				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{aSocket.remote_endpoint(), aLocalPort});
+				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{epRemote, aLocalPort});
 				std::lock_guard<std::mutex> lock{syncAsyncMutex};
 				(void)lock;
 				container.tcpConnected.emplace_back(std::move(aSocket));
@@ -296,10 +298,12 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 
 		if (!aErr) {
 			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
+			std::error_code err;
+			auto epRemote = aSocket.remote_endpoint(err);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
 				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
 				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
-					aSocket.remote_endpoint(),
+					epRemote,
 					aSocket.local_endpoint().port(),
 					asio::const_buffer(buffer.get(), anReceived)
 				});
@@ -315,12 +319,28 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 		} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
 			asio::error::bad_descriptor))
 		{
-			ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
-				aSocket.remote_endpoint().address().to_string().c_str(), aSocket.remote_endpoint().port(),
-				aSocket.local_endpoint().port());
-			Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{aSocket.remote_endpoint(),
-				aSocket.local_endpoint().port()});
-			disconnect(aSocket.remote_endpoint(), aSocket.local_endpoint().port(), aErr);
+			asio::error_code err;
+			auto epRemote = aSocket.remote_endpoint(err);
+			std::uint16_t portLocal = 0;
+
+			if (!err) {
+				auto epLocal = aSocket.local_endpoint(err);
+
+				if (!err) {
+					portLocal = epLocal.port();
+				}
+			}
+
+			if (!err) {
+				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
+					epRemote.address().to_string().c_str(), epRemote.port(),
+					portLocal);
+				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{epRemote,
+					portLocal});
+				disconnect(epRemote, portLocal, aErr);
+			} else {
+				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom - disconnect failure. Could not get the client's endpoint");
+			}
 		}
 	});
 }
