@@ -33,18 +33,14 @@ public:
 
 private:
 	struct Buf {
-		std::array<std::uint8_t, 256> buf;
+		std::array<std::uint8_t, 1024> buf;
 		std::size_t pos;
 		UartDevice *device;
 	};
 
-	using Swap = typename Utility::CircularSwap<Buf, 8>;
+	using Swap = typename Utility::CircularSwap<Buf, 3>;
 
 private:
-
-private:
-	static constexpr unsigned kBufferSize = 256;
-	std::array<std::uint8_t, kBufferSize> buffer;
 	const std::list<UartDevice *> uartDevices;
 
 	struct SyncedSwap {

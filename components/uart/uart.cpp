@@ -46,7 +46,7 @@ void start()
 	ESP_LOGD(Uart::kDebugTag, "Uart::start. started UART process task");
 
 	ESP_LOGD(Uart::kDebugTag, "Uart::start. starting UART read task");
-	Utility::Threading::Config(true).core(0);
+	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT - 1024);
 	static volatile std::thread threadRead{&Task::taskRead, task};
 	(void)threadRead;
 	ESP_LOGD(Uart::kDebugTag, "Uart::start. started UART read task");
