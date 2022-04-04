@@ -32,6 +32,8 @@ using namespace Utility;
 void Task::taskRead()
 {
 	ESP_LOGI(Uart::kDebugTag, "Task::taskRead - started");
+	unsigned logCounter = 0;
+
 	while (true) {
 		for (auto uart : uartDevices) {
 			auto &buffer = swap.getFree();
@@ -46,6 +48,10 @@ void Task::taskRead()
 				swap.pushFree(buffer);
 				Utility::waitMs(20);
 			}
+
+			if ((logCounter = (logCounter + 1) % 100) == 0) {
+				ESP_LOGD(Uart::kDebugTag, "Task::taskRead: free buffers %d", swap.swap.countFree());
+			}
 		}
 	}
 }
@@ -53,6 +59,7 @@ void Task::taskRead()
 void Task::taskProcess()
 {
 	ESP_LOGI(Uart::kDebugTag, "Task::taskProcess - started");
+
 	while (true) {
 		auto *buffer = swap.getFull();
 
@@ -85,7 +92,6 @@ void Task::taskProcess()
 		} else {
 			Utility::waitMs(20);  // To prevent resource starvation.
 		}
-
 	}
 }
 
