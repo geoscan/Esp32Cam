@@ -87,7 +87,7 @@ menu "[wifi_uart_bridge]"
 	endmenu
 
 	choice WIFI_UART_BRIDGE_DEBUG_LEVEL
-		prompt "[mav] module debug level"
+		prompt "[wifi_uart_bridge] module debug level"
 		default WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
 
 		config WIFI_UART_BRIDGE_DEBUG_LEVEL_ERROR
