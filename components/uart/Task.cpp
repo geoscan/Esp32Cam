@@ -9,9 +9,10 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "utility/LogSection.hpp"
 
 #if 0
-# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV
+# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV(tag, title)
 #else
 # define UART_SECTION_LOGV(tag, title)
 #endif  // #if 0
@@ -36,21 +37,26 @@ void Task::taskRead()
 
 	while (true) {
 		for (auto uart : uartDevices) {
-			auto &buffer = swap.getFree();
+			auto *buffer = swap.getFree();
 
-			buffer.device = uart;
-			buffer.pos = uart->read(buffer.buf.data(), buffer.buf.size());
+			if (nullptr != buffer) {
+				buffer->device = uart;
+				buffer->pos = uart->read(buffer->buf.data(), buffer->buf.size());
 
-			if (buffer.pos) {
-				ESP_LOGV(Uart::kDebugTag, "uart %d got %d bytes", uart->getNum(), buffer.pos);
-				swap.pushFull(buffer);
+				if (buffer->pos) {
+					ESP_LOGV(Uart::kDebugTag, "uart %d got %d bytes", uart->getNum(), buffer->pos);
+					swap.pushFull(buffer);
+				} else {
+					swap.pushFree(buffer);
+					Utility::waitMs(20);
+				}
+
+				if ((logCounter = (logCounter + 1) % 100) == 0) {
+					ESP_LOGD(Uart::kDebugTag, "Task::taskRead: free buffers %d", swap.swap.countFree());
+				}
 			} else {
-				swap.pushFree(buffer);
+				ESP_LOGW(Uart::kDebugTag, "taskRead(): Could not pop a free buffer");
 				Utility::waitMs(20);
-			}
-
-			if ((logCounter = (logCounter + 1) % 100) == 0) {
-				ESP_LOGD(Uart::kDebugTag, "Task::taskRead: free buffers %d", swap.swap.countFree());
 			}
 		}
 	}
@@ -88,24 +94,27 @@ void Task::taskProcess()
 				}
 			}
 
-			swap.pushFree(*buffer);  // The buffer has been processed
+			swap.pushFree(buffer);  // The buffer has been processed
 		} else {
 			Utility::waitMs(20);  // To prevent resource starvation.
 		}
 	}
 }
 
-Task::Buf &Task::SyncedSwap::getFree()
+Task::Buf *Task::SyncedSwap::getFree()
 {
 	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::getFree()");
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
+	Task::Buf *ret = nullptr;
 
 	if (swap.countFree()) {
-		return swap.popFree();
-	} else {
-		return swap.popFull();
+		ret = &swap.popFree();
+	} else if (swap.countFull()) {
+		ret = &swap.popFull();  // It's better to trash a stalled buffer than miss a new message
 	}
+
+	return ret;
 }
 
 Task::Buf *Task::SyncedSwap::getFull()
@@ -113,30 +122,33 @@ Task::Buf *Task::SyncedSwap::getFull()
 	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::getFull()");
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
+	Task::Buf *ret = nullptr;
 
 	if (swap.countFull()) {
-		return &swap.popFull();
+		ret = &swap.popFull();
 	}
 
-	return nullptr;
+	return ret;
 }
 
-void Task::SyncedSwap::pushFree(Task::Buf &aBuf)
+void Task::SyncedSwap::pushFree(Task::Buf *aBuf)
 {
+	assert(nullptr != aBuf);
 	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::pushFree()");
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 
-	swap.pushFree(aBuf);
+	swap.pushFree(*aBuf);
 }
 
-void Task::SyncedSwap::pushFull(Task::Buf &aBuf)
+void Task::SyncedSwap::pushFull(Task::Buf *aBuf)
 {
+	assert(nullptr != aBuf);
 	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::pushFull()");
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 
-	swap.pushFull(aBuf);
+	swap.pushFull(*aBuf);
 }
 
 #undef UART_SECTION_LOGV

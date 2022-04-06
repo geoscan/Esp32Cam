@@ -47,10 +47,10 @@ private:
 		Swap swap;
 		std::mutex mutex;
 
-		Buf &getFree();
+		Buf *getFree();
 		Buf *getFull();
-		void pushFree(Buf &);
-		void pushFull(Buf &);
+		void pushFree(Buf *);
+		void pushFull(Buf *);
 	} swap;
 };
 
