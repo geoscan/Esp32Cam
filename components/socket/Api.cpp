@@ -300,19 +300,34 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			std::error_code err;
 			auto epRemote = aSocket.remote_endpoint(err);
-			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
-				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
-				auto response = cb(Sub::Rout::Socket<asio::ip::tcp>{
-					epRemote,
-					aSocket.local_endpoint().port(),
-					asio::const_buffer(buffer.get(), anReceived)
-				});
+			typename Sub::Rout::OnReceived::Ret response;
 
-				// If a subscriber provides a response, send it
-				if (response.getType() == Sub::Rout::Response::Type::Response) {
-					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
-					asio::error_code err;
-					aSocket.write_some(response.payload, err);
+			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
+			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
+
+				for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer.get(), anReceived);
+					bufView.size();
+					bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
+					bufView.slice(response.nProcessed) :
+					bufView.slice(bufView.size()))
+				{
+
+					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
+					response = cb(Sub::Rout::Socket<asio::ip::tcp>{
+						epRemote,
+						aSocket.local_endpoint().port(),
+						asio::const_buffer(buffer.get(), anReceived)
+					});
+					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);
+
+					// If a subscriber provides a response, send it
+					if (response.getType() == Sub::Rout::Response::Type::Response) {
+						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
+						asio::error_code err;
+						aSocket.write_some(response.payload, err);
+					}
+
+					response.reset();
 				}
 			}
 			tcpAsyncReceiveFrom(aSocket);
