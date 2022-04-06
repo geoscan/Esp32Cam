@@ -9,9 +9,10 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "utility/LogSection.hpp"
 
 #if 0
-# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV
+# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV(tag, title)
 #else
 # define UART_SECTION_LOGV(tag, title)
 #endif  // #if 0
