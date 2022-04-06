@@ -347,9 +347,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 			}
 
 			if (!err) {
-				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error, disconnecting...",
-					epRemote.address().to_string().c_str(), epRemote.port(),
-					portLocal);
+				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error(%d), disconnecting...",
+					epRemote.address().to_string().c_str(), epRemote.port(), portLocal, aErr.value());
 				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{epRemote,
 					portLocal});
 				disconnect(epRemote, portLocal, aErr);
