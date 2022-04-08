@@ -1,3 +1,9 @@
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
+#include <esp_log.h>
+#include "uart/uart.hpp"
+
 #include <cassert>
 #include <cstring>
 #include <sys/ioctl.h>
@@ -21,8 +27,9 @@ UartDevice::UartDevice(int num, gpio_num_t rxPin, gpio_num_t txPin, int rate, ua
 	};
 	// We won't use a buffer for sending data.
 	if (!uart_is_driver_installed(num)) {
+		ESP_LOGI(Uart::kDebugTag, "configuring uart %d tx size %d rx size %d", num, kTxBufferSize, kRxBufferSize);
 		uart_set_pin(num, txPin, rxPin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-		uart_driver_install(num, kBufferSize * 2, kBufferSize * 2, 0, NULL, 0);
+		uart_driver_install(num, kRxBufferSize, kTxBufferSize, 0, NULL, 0);
 	}
 	uart_param_config(num, &uart_config);
 }

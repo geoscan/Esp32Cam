@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 #define COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 
+#include <asio.hpp>
 #include <tuple>
 #include <array>
 #include <type_traits>
@@ -80,6 +81,12 @@ Tbuffer<Tto> toBuffer(Tfrom *aFromPtr, std::size_t aBufferSize);
 ///
 template <typename Tto, typename TdataTraitFrom>
 Tbuffer<Tto> toBuffer(TdataTraitFrom &&);
+
+template <class Tbuf>
+asio::mutable_buffer makeAsioMb(Tbuf &&);
+
+template <class Tbuf>
+asio::const_buffer makeAsioCb(Tbuf &&);
 
 using Buffer = typename ::Utility::Tbuffer<void>;
 using ConstBuffer = typename ::Utility::Tbuffer<const void>;

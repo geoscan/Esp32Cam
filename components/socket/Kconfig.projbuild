@@ -1,0 +1,39 @@
+menu "[socket]"
+
+	config SOCKET_SERVER_CLOSE_CLI_DISCONNECT
+		bool "Disconnect clients on server port close"
+		default y
+		help
+			If set, when a server socket on a particular port gets closed, so do all the clients connected to the port.
+
+	choice SOCKET_DEBUG_LEVEL
+		prompt "[socket] module debug level"
+		default SOCKET_DEBUG_LEVEL_INFO
+
+		config SOCKET_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config SOCKET_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config SOCKET_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config SOCKET_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config SOCKET_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config SOCKET_DEBUG_LEVEL
+        int
+        default 1 if SOCKET_DEBUG_LEVEL_ERROR
+        default 2 if SOCKET_DEBUG_LEVEL_WARN
+        default 3 if SOCKET_DEBUG_LEVEL_INFO
+        default 4 if SOCKET_DEBUG_LEVEL_DEBUG
+        default 5 if SOCKET_DEBUG_LEVEL_VERBOSE
+
+endmenu

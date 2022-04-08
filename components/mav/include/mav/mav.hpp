@@ -11,6 +11,7 @@
 namespace Mav {
 
 void init();
+static constexpr const char *kDebugTag = "mav";
 
 }  // namespace Mav
 

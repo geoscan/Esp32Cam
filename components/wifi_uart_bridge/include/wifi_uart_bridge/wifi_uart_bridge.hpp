@@ -11,6 +11,7 @@
 namespace Bdg {
 
 void init();
+static constexpr const char *kDebugTag = "[wifi_uart_bridge]";
 
 }  // namespace Bdg
 

@@ -11,6 +11,7 @@
 #ifndef MAV_PRIV_INCLUDE_DISPATCHER_HPP
 #define MAV_PRIV_INCLUDE_DISPATCHER_HPP
 
+#include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "sub/Rout.hpp"
 #include "Microservice.hpp"
@@ -35,7 +36,7 @@ public:
 	Dispatcher();
 
 protected:
-	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage);
+	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage, int &anProcessed);
 
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
@@ -47,8 +48,13 @@ private:
 
 	Marshalling marshalling;
 	Unmarshalling unmarshalling;
-	std::size_t marshallingSize = 0;
 	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
+
+	struct {
+		std::uint8_t buffer[sizeof(mavlink_message_t)];
+		typename Sub::Rout::PayloadLock::element_type::mutex_type mutex;
+		std::size_t size = 0;
+	} resp;
 };
 
 }  // namespace Mav

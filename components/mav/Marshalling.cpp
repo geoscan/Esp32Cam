@@ -12,8 +12,12 @@
 
 std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Utility::Buffer aBuffer)
 {
-	assert(aBuffer.size() >= sizeof(mavlink_message_t));
 	return mavlink_msg_to_send_buffer(static_cast<std::uint8_t *>(aBuffer.data()), &aMavlinkMessage);
+}
+
+std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, void *aBuffer)
+{
+	return mavlink_msg_to_send_buffer(static_cast<uint8_t *>(aBuffer), &aMavlinkMessage);
 }
 
 std::size_t Mav::Marshalling::push(const mavlink_message_t &aMessage)

@@ -26,14 +26,25 @@ void Response::setType(Type aType)
 	}
 }
 
-Response::Response(Response::Type aType) : payload{}, payloadHold{}
+Response::Response(Response::Type aType) : payload{}, payloadHold{}, nProcessed{-1}
 {
 	setType(aType);
 }
 
 Response::Response() : Response(Type::Ignored)
 {
+}
 
+///
+/// Release the lock or the buffer, if either was acquired
+///
+/// \note If a `Response` object is reused, `reset()` shold be invoked on every iteration. Otherwise, it creates a
+/// possiblity for deadlocks to appear.
+///
+void Response::reset()
+{
+	payloadHold.reset();
+	payloadLock.reset();
 }
 
 }  // namespace Rout

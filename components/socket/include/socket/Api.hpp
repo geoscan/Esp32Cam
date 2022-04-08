@@ -8,6 +8,7 @@
 #ifndef SOCKET_INCLUDE_SOCKET_API_HPP
 #define SOCKET_INCLUDE_SOCKET_API_HPP
 
+#include "socket/socket.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "sub/Socket.hpp"
 #include "Container.hpp"
@@ -36,7 +37,7 @@ private:
 	} container;
 
 	static constexpr auto kReceiveBufferSize = 128;
-	static constexpr const char *kDebugTag = "Sock::Api";
+	static constexpr const char *kDebugTag = Sock::kDebugTag;
 
 public:
 	Api(asio::io_context &, std::mutex &aSyncAsyncMutex);
@@ -48,12 +49,10 @@ public:
 	void closeTcp(std::uint16_t aPort, asio::error_code &aErr);
 	void closeUdp(std::uint16_t aPort, asio::error_code &aErr);
 
-	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&,
+	std::size_t sendTo(const asio::ip::tcp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer,
 		asio::error_code &aErr);
 
-	template <class Tbuf>
-	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, Tbuf &&,
+	std::size_t sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer,
 		asio::error_code &aErr, asio::ip::udp = asio::ip::udp::v4());
 
 private:
@@ -63,7 +62,5 @@ private:
 };
 
 }  // namespace Sock
-
-#include "Api.impl"
 
 #endif // SOCKET_INCLUDE_SOCKET_API_HPP

@@ -32,5 +32,88 @@ menu "[wifi_uart_bridge]"
 		help
 			Baudrate of UART connecting AP board and ESP32 itself
 
+	menu "UDP routing"
+		config WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
+			bool "Process MAVLink messages received on a dedicated MAVLink UDP port"
+			default n
+			help
+				Enable this option, if you want ESP32 to process and respond to incoming MAVLink messages from MAVLink UDP port
+
+		config WIFI_UART_BRIDGE_UDP_MAVLINK_FORWARD
+			bool "Forward MAVLink messages to a respective UART"
+			default y
+			help
+				Enable this option, if you want to forward the messages to UART (only if those messages are not addressed to ESP32)
+	endmenu
+
+	menu "UART routing"
+		config WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
+			bool "Process MAVLink messages received on a dedicated UART"
+			default y
+			help
+				Enable this option, if you want ESP32 to process and respond to incoming MAVLink messages from MAVLink UART
+
+		config WIFI_UART_BRIDGE_UART_MAVLINK_FORWARD
+			bool "Forward MAVLink messages to UDP clients from the list"
+			default y
+			help
+				ESP32 maintains a list of UDP clients. Enable this option if you want to forward to them MAVLink messages (only if those messages are not addressed to ESP32)
+	endmenu
+
+	menu "TCP routing"
+		config WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UART_MAVLINK
+			bool "Forward any sequence received at a non-named TCP port to MAVLink UART"
+			default y
+			help
+				ESP32 serves as a TCP/IP socket functionality provider communicating through MAVLink protocol.
+				Enable this field, if you want to pack and forward messages received at a non-named TCP port to the dedicated MAVLink UART
+
+		config WIFI_UART_BRIDGE_TCP_UNNAMED_FORWARD_UDP_MAVLINK
+			bool "Forward any sequence received at a non-named TCP port to MAVLink UDP clients"
+			default n
+			help
+				ESP32 serves as a TCP/IP socket functionality provider communicating through MAVLink protocol.
+				Enable this field, if you want to pack and forward messages received at a non-named TCP port to the clients of the dedicated MAVLink UDP port.
+
+		config WIFI_UART_BRIDGE_TCP_CONNECTION_EVENT_FORWARD_UDP_MAVLINK
+			bool "On TCP connect/disconnect event, pack MAVLink Gs Network messages and send them to a dedicated UDP MAVLink port"
+			default n
+			help
+				MAVLink Gs Network subprotocol is used to notify clients upon TCP/IP events, including those regarding connection status.
+				By default, the routing module passes those to a dedicated MAVLink UART port.
+				This option enables an additional functionality: push those messages to UDP MAVLink port as well.
+				Useful for debugging purposes.
+
+	endmenu
+
+	choice WIFI_UART_BRIDGE_DEBUG_LEVEL
+		prompt "[wifi_uart_bridge] module debug level"
+		default WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config WIFI_UART_BRIDGE_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config WIFI_UART_BRIDGE_DEBUG_LEVEL
+		int
+		default 1 if WIFI_UART_BRIDGE_DEBUG_LEVEL_ERROR
+		default 2 if WIFI_UART_BRIDGE_DEBUG_LEVEL_WARN
+		default 3 if WIFI_UART_BRIDGE_DEBUG_LEVEL_INFO
+		default 4 if WIFI_UART_BRIDGE_DEBUG_LEVEL_DEBUG
+		default 5 if WIFI_UART_BRIDGE_DEBUG_LEVEL_VERBOSE
 
 endmenu
