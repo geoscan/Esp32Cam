@@ -46,7 +46,6 @@ private:
 		Sub::Rout::OnMavlinkReceived onMavlinkReceived;
 	} key;
 
-	Marshalling marshalling;
 	Unmarshalling unmarshalling;
 	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
 
