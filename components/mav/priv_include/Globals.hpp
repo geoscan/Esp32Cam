@@ -25,12 +25,17 @@ private:
 public:
 	static constexpr unsigned char getSysId()
 	{
-		return 1;
+		return 1;  // TODO: Acquire sys. ID from the AP board
 	}
 
 	static constexpr unsigned char getCompId()
 	{
 		return MAV_COMP_ID_UDP_BRIDGE;
+	}
+
+	static constexpr unsigned char getCompIdCamera()
+	{
+		return MAV_COMP_ID_CAMERA;
 	}
 
 	template <class TmavlinkMessage>
