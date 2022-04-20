@@ -21,7 +21,7 @@
 
 Mav::Dispatcher::Dispatcher():
 	key{{&Dispatcher::onMavlinkReceived, this}},
-	micAggregate{}
+	micAggregate{*this}
 {
 }
 
