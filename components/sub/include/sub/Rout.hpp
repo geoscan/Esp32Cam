@@ -45,6 +45,11 @@ struct Uart {
 	int uartNum;
 };
 
+/// \brief Mavlink output message. Most likely, it contains a telemetry message
+struct Mavlink {
+	Payload payload;
+};
+
 ///
 /// \brief Used by Sock::Api
 ///
@@ -110,7 +115,7 @@ struct Mavlink;
 struct MavlinkPackForward;
 }  // namespace Topic
 
-using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart>;
+using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart, Mavlink>;
 using TcpConnectionVariant = typename mapbox::util::variant<TcpConnected, TcpDisconnected>;  ///< Tcp connection events
 
 using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
