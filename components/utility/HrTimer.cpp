@@ -8,6 +8,7 @@
 #include "utility/HrTimer.hpp"
 
 namespace Utility {
+namespace Tim {
 
 HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName)
 {
@@ -31,4 +32,5 @@ void HrTimer::onTimerStaticCallback(void *aInstance)
 	static_cast<HrTimer *>(aInstance)->onHrTimer();
 }
 
+}  // namespace Tim
 }  // namespace Utility

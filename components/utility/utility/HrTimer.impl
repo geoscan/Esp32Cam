@@ -11,6 +11,7 @@
 #include "HrTimer.hpp"  // Makes no effect. Being used to enable syntax highlighting
 
 namespace Utility {
+namespace Tim {
 
 template <class Trep, class Tperiod>
 esp_err_t HrTimer::startOnce(const std::chrono::duration<Trep, Tperiod> &aDuration)
@@ -24,6 +25,7 @@ esp_err_t HrTimer::startPeriodic(const std::chrono::duration<Trep, Tperiod> &aDu
 	return esp_timer_start_periodic(&handle, std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count());
 }
 
+}  // namespace Tim
 }  // namespace Utility
 
 #endif // UTILITY_UTILITY_HRTIMER_HPP_
