@@ -1,0 +1,29 @@
+//
+// HrTimer.impl
+//
+// Created on: Apr 20, 2022
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+#ifndef UTILITY_UTILITY_HRTIMER_HPP_
+#define UTILITY_UTILITY_HRTIMER_HPP_
+
+#include "HrTimer.hpp"  // Makes no effect. Being used to enable syntax highlighting
+
+namespace Utility {
+
+template <class Trep, class Tperiod>
+void HrTimer::startOnce(const std::chrono::duration<Trep, Tperiod> &aDuration)
+{
+	return esp_timer_start_once(&handle, std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count());
+}
+
+template <class Trep, class Tperiod>
+void HrTimer::startPeriodic(const std::chrono::duration<Trep, Tperiod> &aDuration)
+{
+	return esp_timer_start_periodic(&handle, std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count());
+}
+
+}  // namespace Utility
+
+#endif // UTILITY_UTILITY_HRTIMER_HPP_

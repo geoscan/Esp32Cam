@@ -43,7 +43,6 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 	return ret;
 }
 
-
 Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0> aMessage)
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
