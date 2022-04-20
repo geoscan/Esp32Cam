@@ -60,7 +60,7 @@ private:
 	} key;
 
 	struct {
-		std::uint8_t buffer[sizeof(mavlink_message_t)];
+		std::uint8_t buffer[sizeof(mavlink_message_t)];  // Response buffer for TCP forward
 		std::mutex mutex;
 	} resp;
 };
