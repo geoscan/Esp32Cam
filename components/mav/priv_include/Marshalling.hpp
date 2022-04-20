@@ -18,12 +18,21 @@ typedef __mavlink_message mavlink_message_t;
 namespace Mav {
 
 static constexpr unsigned kMarshallingQueueMaxSize = 1;
-using MarshallingHoldQueue = typename Utility::CircularBuffer<mavlink_message_t, kMarshallingQueueMaxSize, false>;
 
-class Marshalling : public std::queue<mavlink_message_t, MarshallingHoldQueue> {
+///
+/// \brief Statically-allocated return buffer
+///
+struct Buf {
+	std::uint8_t buf[sizeof(mavlink_message_t)];
+	std::size_t len;
+};
+
+using MarshallingHoldQueue = typename Utility::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
+using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
+
+class Marshalling : public MarshallingBaseType {
 private:
-	using BaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
-	using BaseType::push;
+	using MarshallingBaseType::push;
 
 public:
 	static std::size_t push(const mavlink_message_t &, Utility::Buffer);

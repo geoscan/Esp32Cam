@@ -24,7 +24,7 @@ namespace Mic {
 template <class ...Tmics>
 struct Aggregate : Microservice {
 	Aggregate();
-	Ret process(mavlink_message_t &aMessage) override;
+	Ret process(mavlink_message_t &aMessage, OnResponseSignature) override;
 
 private:
 	std::array<std::unique_ptr<Microservice>, sizeof...(Tmics)> microservices;

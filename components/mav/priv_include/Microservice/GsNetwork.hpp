@@ -28,7 +28,7 @@ namespace Mic {
 class GsNetwork final : public Microservice {
 public:
 	GsNetwork();
-	Ret process(mavlink_message_t &aMavlinkMessage) override;
+	Ret process(mavlink_message_t &aMavlinkMessage, OnResponseSignature) override;
 
 private:
 	template <class Tproto, class Tbuf>
@@ -60,7 +60,7 @@ private:
 	} key;
 
 	struct {
-		std::uint8_t buffer[sizeof(mavlink_message_t)];
+		std::uint8_t buffer[sizeof(mavlink_message_t)];  // Response buffer for TCP forward
 		std::mutex mutex;
 	} resp;
 };
