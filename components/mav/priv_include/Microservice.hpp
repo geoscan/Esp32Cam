@@ -41,7 +41,7 @@ struct Microservice {
 	///
 	/// \return True, if the message has been accepted. False otherwise.
 	///
-	virtual Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse);
+	virtual Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) = 0;
 
 	virtual ~Microservice() = default;
 };
