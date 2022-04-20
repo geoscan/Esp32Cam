@@ -9,8 +9,12 @@
 #include "Aggregate.hpp"
 
 template <class ...Tmics>
-Mav::Mic::Aggregate<Tmics...>::Aggregate(): microservices{{std::unique_ptr<Microservice>{new Tmics}...}}
+Mav::Mic::Aggregate<Tmics...>::Aggregate(DelayedSendHandle &aHandle) :
+	microservices{{std::unique_ptr<Microservice>{new Tmics}...}}
 {
+	using List = int[];
+	int cnt = 0;
+	List{(void(delayedSendInit(&aHandle, static_cast<Tmics *>(microservices[cnt++].get()))), 0)...};
 }
 
 template <class ...Tmics>

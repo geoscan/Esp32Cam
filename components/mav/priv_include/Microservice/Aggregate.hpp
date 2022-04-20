@@ -11,6 +11,7 @@
 #include "Microservice.hpp"
 #include <array>
 #include <memory>
+#include "DelayedSend.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -23,10 +24,19 @@ namespace Mic {
 ///
 template <class ...Tmics>
 struct Aggregate : Microservice {
-	Aggregate();
+	Aggregate(DelayedSendHandle &);
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature) override;
 
 private:
+	static inline void delayedSendInit(DelayedSendHandle *aHandle, DelayedSend *aDs)
+	{
+		aDs->addSubscriber(*aHandle);
+	}
+
+	static inline void delayedSendInit(...)
+	{
+	}
+
 	std::array<std::unique_ptr<Microservice>, sizeof...(Tmics)> microservices;
 };
 
