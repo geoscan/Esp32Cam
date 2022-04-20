@@ -34,7 +34,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 
 		resp.size = 0;
 		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
-			resp.size += Marshalling::push(aMsg, {resp.buffer, sizeof(resp.buffer) - resp.size});
+			resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
 		});
 
 		unmarshalling.pop();
