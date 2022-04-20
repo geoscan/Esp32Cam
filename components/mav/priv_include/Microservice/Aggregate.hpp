@@ -40,9 +40,9 @@ private:
 	std::array<std::unique_ptr<Microservice>, sizeof...(Tmics)> microservices;
 };
 
-#include "Aggregate.impl"
-
 }  // namespace Mic
 }  // namespace Mav
+
+#include "Aggregate.impl"
 
 #endif  // MAV_MICROSERVICE_AGGREGATE_HPP
