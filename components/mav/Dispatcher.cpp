@@ -25,6 +25,15 @@ Mav::Dispatcher::Dispatcher():
 {
 }
 
+void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
+{
+	std::lock_guard<std::mutex> lock{resp.mutex};
+	(void)lock;
+	resp.size = Marshalling::push(aMavlinkMessage, resp.buffer);
+
+	Sub::Rout::OnReceived::notify(Sub::Rout::Mavlink{respAsPayload()});
+}
+
 Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
 {
 	auto ret = Microservice::Ret::Ignored;
@@ -73,4 +82,9 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", response.nProcessed);
 
 	return response;
+}
+
+Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
+{
+	return Sub::Rout::Payload{resp.buffer, resp.size};
 }

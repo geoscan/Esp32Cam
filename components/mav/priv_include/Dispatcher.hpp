@@ -37,15 +37,14 @@ class Dispatcher : public DelayedSendHandle {
 public:
 	Dispatcher();
 
-	void onSubscription(const mavlink_message_t &) override
-	{
-	}
+	void onSubscription(const mavlink_message_t &) override;
 
 protected:
 	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage, int &anProcessed);
 
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
+	Sub::Rout::Payload respAsPayload();
 
 private:
 	struct {
