@@ -31,7 +31,7 @@ public:
 	}
 
 protected:
-	void send(Targs ...aArgs)
+	void notify(Targs ...aArgs)
 	{
 		if (subscriber) {
 			subscriber->onSubscription(aArgs...);
