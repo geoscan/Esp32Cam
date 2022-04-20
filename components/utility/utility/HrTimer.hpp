@@ -14,6 +14,7 @@
 #include <chrono>
 
 namespace Utility {
+namespace Tim {
 
 ///
 /// \brief HrTimer is an OO wrapper over esp_timer API. Refer to
@@ -39,6 +40,7 @@ private:
 	esp_timer_handle_t handle;
 };
 
+}  // namespace Tim
 }  // namespace Utility
 
 #include "HrTimer.impl"
