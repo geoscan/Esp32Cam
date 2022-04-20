@@ -15,6 +15,7 @@
 #include "Marshalling.hpp"
 #include "Unmarshalling.hpp"
 #include "Microservice/GsNetwork.hpp"
+#include "Microservice/Camera.hpp"
 #include "Dispatcher.hpp"
 #include "mav/mav.hpp"
 

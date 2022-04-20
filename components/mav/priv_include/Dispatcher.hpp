@@ -29,6 +29,7 @@ class Unmarshalling;
 
 namespace Mic {
 class GsNetwork;
+class Camera;
 }
 
 class Dispatcher {
@@ -47,7 +48,7 @@ private:
 	} key;
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
+	Mav::Mic::Aggregate<Mic::GsNetwork, Mic::Camera> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];
