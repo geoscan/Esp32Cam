@@ -5,7 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "HrTimer.hpp"
+#include "utility/HrTimer.hpp"
 
 namespace Utility {
 
@@ -23,7 +23,7 @@ HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName)
 HrTimer::~HrTimer()
 {
 	esp_timer_stop(handle);
-	esp_timer_delete(&handle);
+	esp_timer_delete(handle);
 }
 
 void HrTimer::onTimerStaticCallback(void *aInstance)
