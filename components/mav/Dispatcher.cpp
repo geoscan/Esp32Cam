@@ -31,11 +31,12 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 
 	if (unmarshalling.size()) {
 		auto &message = unmarshalling.front();
-		ret = micAggregate.process(message);
 
-		if (ret == Microservice::Ret::Response) {
-			resp.size = Marshalling::push(message, resp.buffer);
-		}
+		resp.size = 0;
+		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
+			resp.size += Marshalling::push(aMsg, {resp.buffer, sizeof(resp.buffer) - resp.size});
+		});
+
 		unmarshalling.pop();
 	}
 

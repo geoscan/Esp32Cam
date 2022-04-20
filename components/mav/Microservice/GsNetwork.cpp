@@ -36,7 +36,7 @@ GsNetwork::GsNetwork() :
 {
 }
 
-Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
+Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnResponseSignature aOnResponse)
 {
 	if (aMavlinkMessage.msgid != MAVLINK_MSG_ID_MAV_GS_NETWORK) {
 		return Ret::Ignored;

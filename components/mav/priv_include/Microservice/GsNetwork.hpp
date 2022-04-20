@@ -28,7 +28,7 @@ namespace Mic {
 class GsNetwork final : public Microservice {
 public:
 	GsNetwork();
-	Ret process(mavlink_message_t &aMavlinkMessage) override;
+	Ret process(mavlink_message_t &aMavlinkMessage, OnResponseSignature) override;
 
 private:
 	template <class Tproto, class Tbuf>
