@@ -71,7 +71,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 
 		case Microservice::Ret::Response:  // send response back
 			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
-			response.payload = Sub::Rout::Payload{&resp.buffer, resp.size};
+			response.payload = respAsPayload();
 
 			break;
 
