@@ -113,6 +113,7 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnRespo
 
 	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
 		&mavlinkMavGsNetwork);
+	aOnResponse(aMavlinkMessage);
 
 	return ret;
 }
