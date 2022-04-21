@@ -27,6 +27,11 @@ void Camera::onHrTimer()
 	notify(mavlinkMessage);
 }
 
+Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat"}
+{
+	startPeriodic(std::chrono::seconds(1));   // 1 Hz, https://mavlink.io/en/services/camera.html#camera-connection
+}
+
 Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse)
 {
 	Microservice::Ret ret = Microservice::Ret::Ignored;
