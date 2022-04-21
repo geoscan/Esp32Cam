@@ -15,6 +15,7 @@ namespace Hlpr {
 
 struct MavlinkCommandLong : mavlink_command_long_t {
 	static mavlink_command_long_t makeFrom(const mavlink_command_int_t &);
+	static mavlink_command_long_t makeFrom(const mavlink_message_t &);
 };
 
 }  // namespace Hlpr
