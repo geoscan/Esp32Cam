@@ -33,6 +33,9 @@ public:
 	friend esp_err_t reg(const char *aName, Handler &, esp_event_base_t aEventBase, int32_t aEventId);
 	friend esp_err_t unreg(const char *aName, Handler &, esp_event_base_t aEventBase, int32_t aEventId);
 
+	template <class T>
+	friend esp_err_t post(const char *aName, T&&, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
+
 private:
 	static void eventStaticCallback(void *aHandlerArg, esp_event_base_t aEventBase, std::int32_t aEventId,
 		void *aEventData);
@@ -60,7 +63,12 @@ private:
 esp_err_t reg(const char *aName, Handler &, esp_event_base_t aEventBase, int32_t aEventId);
 esp_err_t unreg(const char *aName, Handler &, esp_event_base_t aEventBase, int32_t aEventId);
 
+template <class T>
+esp_err_t post(const char *aName, T&&, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
+
 }  // namespace Ev
 }  // namespace Utility
+
+#include "EventLoop.impl"
 
 #endif // UTILITY_UTILITY_EVENTLOOP_HPP_
