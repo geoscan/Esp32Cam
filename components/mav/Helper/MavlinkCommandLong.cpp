@@ -36,7 +36,7 @@ mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_message_t &aMe
 		mavlink_msg_command_long_decode(&aMessage, &ret);
 	} else if (MAVLINK_MSG_ID_COMMAND_INT == aMessage.msgid) {
 		mavlink_command_int_t mavlinkCommandInt;
-		mavlink_msg_command_int_decode(&aMessage, mavlinkCommandInt);
+		mavlink_msg_command_int_decode(&aMessage, &mavlinkCommandInt);
 		ret = makeFrom(mavlinkCommandInt);
 	}
 
