@@ -32,23 +32,26 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 	Microservice::Ret ret = Microservice::Ret::Ignored;
 
 	switch (aMessage.msgid) {
-		case MAVLINK_MSG_ID_COMMAND_LONG: {
-			mavlink_command_long_t mavlinkCommandLong;
-			(void)mavlinkCommandLong;
-			mavlink_msg_command_long_decode(&aMessage, &mavlinkCommandLong);
-			ret = processCommand(mavlinkCommandLong, aMessage, aOnResponse);
-
-			break;
-		}
-
+		case MAVLINK_MSG_ID_COMMAND_LONG:  // Falls through
 		case MAVLINK_MSG_ID_COMMAND_INT: {
-			mavlink_command_int_t mavlinkCommandInt;
-			(void)mavlinkCommandInt;
-			mavlink_msg_command_int_decode(&aMessage, &mavlinkCommandInt);
-			mavlink_command_long_t mavlinkCommandLong = Hlpr::MavlinkCommandLong::makeFrom(mavlinkCommandInt);
-			ret = processCommand(mavlinkCommandLong, aMessage, aOnResponse);
 
-			break;
+			mavlink_command_long_t commandLong = Hlpr::MavlinkCommandLong::makeFrom(aMessage);
+
+			switch (commandLong.command) {
+
+				case MAV_CMD_REQUEST_MESSAGE:
+					switch (static_cast<int>(commandLong.param1)) {
+						case MAVLINK_MSG_ID_CAMERA_INFORMATION:
+							ret = processRequestMessageCameraInformation(commandLong, aMessage, aOnResponse);
+
+							break;
+
+						default:
+							break;
+					}
+
+				break;
+			}
 		}
 
 		default:
@@ -59,9 +62,37 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 	return ret;
 }
 
-Microservice::Ret Camera::processCommand(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	return {};
+	assert(static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_CAMERA_INFORMATION);
+
+	struct {
+		int sysid;
+		int compid;
+	} sender {aMavlinkMessage.sysid, aMavlinkMessage.compid};
+
+	{
+		mavlink_command_ack_t mavlinkCommandAck;
+		mavlinkCommandAck.target_component = sender.compid;
+		mavlinkCommandAck.target_system = sender.sysid;
+		mavlinkCommandAck.result = MAV_CMD_ACK_OK;
+		mavlinkCommandAck.result_param2 = 0;
+		mavlinkCommandAck.progress = 0;
+		mavlinkCommandAck.command = aMavlinkCommandLong.command;
+
+		mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage, &mavlinkCommandAck);
+		aOnResponse(aMavlinkMessage);
+	}
+
+	{
+		mavlink_camera_information_t mavlinkCameraInformation {};
+		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
+			&mavlinkCameraInformation);
+		aOnResponse(aMavlinkMessage);
+	}
+
+	return Microservice::Ret::Response;
 }
 
 }  // namespace Mic

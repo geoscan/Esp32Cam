@@ -20,7 +20,7 @@ public:  // Microservice API
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override final;
 
 public:  // Utility::HrTimer API
-	Ret processCommand(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+	Ret processRequestMessageCameraInformation(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onHrTimer() override final;
 };
