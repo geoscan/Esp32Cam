@@ -36,6 +36,9 @@ public:
 	template <class T>
 	friend esp_err_t post(const char *aName, T&&, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
 
+	template <class T>
+	friend esp_err_t post(const char *aName, T*, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
+
 private:
 	static void eventStaticCallback(void *aHandlerArg, esp_event_base_t aEventBase, std::int32_t aEventId,
 		void *aEventData);
@@ -65,6 +68,9 @@ esp_err_t unreg(const char *aName, Handler &, esp_event_base_t aEventBase, int32
 
 template <class T>
 esp_err_t post(const char *aName, T&&, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
+
+template <class T>
+esp_err_t post(const char *aName, T*, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
 
 }  // namespace Ev
 }  // namespace Utility
