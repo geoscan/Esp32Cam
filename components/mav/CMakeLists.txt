@@ -6,6 +6,7 @@ idf_component_register(
 	SRC_DIRS
 		"./"
 		"Microservice/"
+		"Helper/"
 	PRIV_INCLUDE_DIRS
 		"priv_include"
 	INCLUDE_DIRS
