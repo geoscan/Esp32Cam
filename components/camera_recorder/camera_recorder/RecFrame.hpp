@@ -11,6 +11,7 @@
 #include <chrono>
 #include "Record.hpp"
 #include "utility/Semaphore.hpp"
+#include "sub/Cam.hpp"
 
 namespace CameraRecorder {
 
@@ -21,11 +22,17 @@ private:
 		Utility::Semaphore<1, 0> sem;
 		std::mutex mut;
 	} sync;
+
+	struct {
+		Sub::Cam::Shot shot;
+	} keys;
+
 protected:
 	void onNewFrame(Key::Type) override;
 	static constexpr std::chrono::seconds kFrameTimeout{1};
+
 public:
-	using CameraRecorder::Record::Record;
+	RecFrame();
 
 	bool start(const char *) override;
 	void stop() override;

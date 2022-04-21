@@ -13,11 +13,17 @@ namespace Ev {
 template <class T>
 inline esp_err_t post(const char *aName, T &&aData, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks)
 {
+	return post(aName, &aData, aEventBase, aEventId, aTicks);
+}
+
+template <class T>
+inline esp_err_t post(const char *aName, T *aData, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks)
+{
 	esp_err_t ret = ESP_FAIL;
 	auto *loopInstance = Loop::instanceRegistry.find(aName);
 
 	if (nullptr != loopInstance) {
-		ret = esp_event_post_to(loopInstance->espEventLoopHandle, aEventBase, aEventId, &aData, sizeof(T), aTicks);
+		ret = esp_event_post_to(loopInstance->espEventLoopHandle, aEventBase, aEventId, aData, sizeof(T), aTicks);
 	}
 
 	return ret;

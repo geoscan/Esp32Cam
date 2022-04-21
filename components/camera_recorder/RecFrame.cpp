@@ -23,6 +23,10 @@ void RecFrame::onNewFrame(Key::Type frame)
 	sync.sem.release();  // Notify that frame's been written
 }
 
+RecFrame::RecFrame() : keys{{&RecFrame::start, this}}
+{
+}
+
 bool RecFrame::start(const char *aFilename)
 {
 	{
