@@ -23,7 +23,7 @@ void Camera::onHrTimer()
 	mavlinkHeartbeat.system_status = MAV_STATE_STANDBY;
 
 	mavlink_message_t mavlinkMessage;
-	mavlink_msg_heartbeat_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkHeartbeat);
+	mavlink_msg_heartbeat_encode(Globals::getSysId(), Globals::getCompIdCamera(), &mavlinkMessage, &mavlinkHeartbeat);
 	notify(mavlinkMessage);
 }
 
