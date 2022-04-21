@@ -23,7 +23,7 @@ namespace Tim {
 ///
 class HrTimer {
 public:
-	HrTimer(esp_timer_dispatch_t = ESP_TIMER_TASK, const char *aName = "");
+	HrTimer(esp_timer_dispatch_t = ESP_TIMER_TASK, const char *aName = "", bool aSkipUnhandledEvents = false);
 	virtual ~HrTimer();
 	virtual void onHrTimer() = 0;
 

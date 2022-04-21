@@ -10,13 +10,14 @@
 namespace Utility {
 namespace Tim {
 
-HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName)
+HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName, bool aSkipUnhandledEvents)
 {
 	esp_timer_create_args_t args {
 		HrTimer::onTimerStaticCallback,
 		this,
 		aDispatchMethod,
-		aName
+		aName,
+		aSkipUnhandledEvents
 	};
 	esp_timer_create(&args, &handle);
 }

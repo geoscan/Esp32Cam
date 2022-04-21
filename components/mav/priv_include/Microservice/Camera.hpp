@@ -15,11 +15,16 @@
 namespace Mav {
 namespace Mic {
 
-class Camera : public Microservice, public Utility::Tim::HrTimer, public Mav::DelayedSend {
+class Camera final : public Microservice, public Utility::Tim::HrTimer, public Mav::DelayedSend {
+public:
+	Camera();
+
 public:  // Microservice API
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override final;
 
 public:  // Utility::HrTimer API
+	Ret processRequestMessageCameraInformation(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+		OnResponseSignature aOnResponse);
 	void onHrTimer() override final;
 };
 
