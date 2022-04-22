@@ -24,7 +24,7 @@ namespace Sys {
 
 enum class Module : std::uint8_t {
 	Camera,
-	Generic,
+	All,  ///< The request is addressed to every module
 };
 
 namespace Fld {
@@ -54,7 +54,7 @@ using StoreType = typename Rr::Trait::StoreType<T>;
 struct None {
 };
 
-template <Field, Module=Module::Generic> struct GetType : StoreType<None> {};
+template <Field, Module=Module::All> struct GetType : StoreType<None> {};
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
 
@@ -72,7 +72,7 @@ struct Resp {
 	{
 		bool ret = false;
 
-		if (Utility::Algorithm::in(module, Im, Module::Generic)) {
+		if (Utility::Algorithm::in(module, Im, Module::All)) {
 			responseVariant.match(
 				[&ret, &aOut](const typename GetType<If, Im>::Type &aVal) {
 					aOut = aVal;
