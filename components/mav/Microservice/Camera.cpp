@@ -95,6 +95,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	assert(static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_CAMERA_INFORMATION);
+	using namespace Sub::Sys;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
 	struct {
@@ -102,13 +103,20 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		int compid;
 	} sender {aMavlinkMessage.sysid, aMavlinkMessage.compid};
 
+	typename Fld::GetType<Fld::Field::Initialized, Module::Camera>::Type initialized = false;
+	typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type frameSize{};
+
+	for (auto &cb : Fld::ModuleGetField::getIterators()) {
+		if (cb({Module::Camera, Fld::Field::Initialized}).tryGet<Module::Camera, Fld::Field::Initialized>(initialized)) {
+			cb({Module::Camera, Fld::Field::FrameSize}).tryGet<Module::Camera, Fld::Field::FrameSize>(frameSize);
+		}
+	}
+
 	{
-		mavlink_command_ack_t mavlinkCommandAck;
+		mavlink_command_ack_t mavlinkCommandAck {};
 		mavlinkCommandAck.target_component = sender.compid;
 		mavlinkCommandAck.target_system = sender.sysid;
-		mavlinkCommandAck.result = MAV_CMD_ACK_OK;
-		mavlinkCommandAck.result_param2 = 0;
-		mavlinkCommandAck.progress = 0;
+		mavlinkCommandAck.result = initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
 		mavlinkCommandAck.command = aMavlinkCommandLong.command;
 
 		mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage, &mavlinkCommandAck);
@@ -116,8 +124,11 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		aOnResponse(aMavlinkMessage);
 	}
 
-	{
+	if (initialized) {
 		mavlink_camera_information_t mavlinkCameraInformation {};
+		mavlinkCameraInformation.resolution_h = frameSize.first;
+		mavlinkCameraInformation.resolution_v = frameSize.second;
+
 		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
 			&mavlinkCameraInformation);
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
