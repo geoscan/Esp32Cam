@@ -73,7 +73,7 @@ void Ov2640::init()
 #endif
 	};
 
-	status.initialized = ((&cameraConfig) == ESP_OK);
+	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
 
 	switch (cameraConfig.frame_size) {
 		case FRAMESIZE_96X96:
