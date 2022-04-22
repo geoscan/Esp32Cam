@@ -98,7 +98,14 @@ struct Req {
 	bool shouldRespond(Module aThisModule);
 };
 
-using ModuleGetField = Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleGetField = typename Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleCb = decltype(*ModuleGetField::getIterators().begin());
+
+template <Module Im, Field If, class Val>
+bool moduleCbTryGet(ModuleCb &aCb, Val &aOut)
+{
+	return aCb({Im, If}).tryGet<Im, If>(aOut);
+}
 
 }  // namespace Fld
 }  // namespace Sys
