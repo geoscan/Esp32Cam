@@ -10,6 +10,10 @@ using namespace std;
 static constexpr const char *kTag = "[OV2640]";
 
 
+Ov2640::Ov2640() : key{{&Ov2640::moduleGetField, this}}
+{
+}
+
 void Ov2640::init()
 {
 	// WARNING: The following only represents pinout of ESP32 Ai Thinker
@@ -69,7 +73,145 @@ void Ov2640::init()
 #endif
 	};
 
-	esp_camera_init(&cameraConfig);
+	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
+
+	switch (cameraConfig.frame_size) {
+		case FRAMESIZE_96X96:
+			status.frame.w = 96;
+			status.frame.h = 96;
+
+			break;
+
+		case FRAMESIZE_QQVGA:
+			status.frame.w = 160;
+			status.frame.h = 120;
+
+			break;
+
+		case FRAMESIZE_QCIF:
+			status.frame.w = 176;
+			status.frame.h = 144;
+
+			break;
+
+		case FRAMESIZE_HQVGA:
+			status.frame.w = 240;
+			status.frame.h = 176;
+
+			break;
+
+		case FRAMESIZE_240X240:
+			status.frame.w = 240;
+			status.frame.h = 240;
+
+			break;
+
+		case FRAMESIZE_QVGA:
+			status.frame.w = 320;
+			status.frame.h = 240;
+
+			break;
+
+		case FRAMESIZE_CIF:
+			status.frame.w = 400;
+			status.frame.h = 296;
+
+			break;
+
+		case FRAMESIZE_HVGA:
+			status.frame.w = 480;
+			status.frame.h = 320;
+
+			break;
+
+		case FRAMESIZE_VGA:
+			status.frame.w = 640;
+			status.frame.h = 480;
+
+			break;
+
+		case FRAMESIZE_SVGA:
+			status.frame.w = 800;
+			status.frame.h = 600;
+
+			break;
+
+		case FRAMESIZE_XGA:
+			status.frame.w = 1024;
+			status.frame.h = 768;
+
+			break;
+
+		case FRAMESIZE_HD:
+			status.frame.w = 1280;
+			status.frame.h = 720;
+
+			break;
+
+		case FRAMESIZE_SXGA:
+			status.frame.w = 1280;
+			status.frame.h = 1024;
+
+			break;
+
+		case FRAMESIZE_UXGA:
+			status.frame.w = 1600;
+			status.frame.h = 1200;
+
+			break;
+
+		case FRAMESIZE_FHD:
+			status.frame.w = 1920;
+			status.frame.h = 1080;
+
+			break;
+
+		case FRAMESIZE_P_HD:
+			status.frame.w = 720;
+			status.frame.h = 1280;
+
+			break;
+
+		case FRAMESIZE_P_3MP:
+			status.frame.w = 864;
+			status.frame.h = 1536;
+
+			break;
+
+		case FRAMESIZE_QXGA:
+			status.frame.w = 2048;
+			status.frame.h = 1536;
+
+			break;
+
+		case FRAMESIZE_QHD:
+			status.frame.w = 2560;
+			status.frame.h = 1440;
+
+			break;
+
+		case FRAMESIZE_WQXGA:
+			status.frame.w = 2560;
+			status.frame.h = 1600;
+
+			break;
+
+		case FRAMESIZE_P_FHD:
+			status.frame.w = 1080;
+			status.frame.h = 1920;
+
+			break;
+
+		case FRAMESIZE_QSXGA:
+			status.frame.w = 2560;
+			status.frame.h = 1920;
+
+			break;
+
+		default:
+
+			break;
+	}
 }
 
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
@@ -118,8 +260,34 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 
 	return std::shared_ptr<Cam::Frame>(new Ov2640::Frame(fb));
 }
+
 #endif
 
+typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> aRequest)
+{
+	using namespace Sub::Sys;
+	Sub::Sys::Fld::ModuleGetField::Ret ret {Fld::None{}, Module::Camera};
+
+	if (aRequest.shouldRespond(Module::Camera)) {
+		switch (aRequest.field) {
+			case Fld::Field::FrameSize:
+				ret.responseVariant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type {
+					status.frame.w, status.frame.h};
+
+				break;
+
+			case Fld::Field::Initialized:
+				ret.responseVariant = status.initialized;
+
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	return ret;
+}
 
 // ------------ Ov2640::Frame ------------ //
 
