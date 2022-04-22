@@ -31,13 +31,15 @@ namespace Fld {
 
 enum class Field : std::uint8_t {
 	FrameSize,
+	VendorName,
+	ModelName,
 	Initialized,
 };
 
 inline std::uint16_t asNumeric(Module module, Field field)
 {
 	std::uint16_t res = 0;
-	res = (static_cast<std::uint16_t>(module) << sizeof(Module)) | static_cast<std::uint16_t>(field);
+
 
 	return res;
 }
@@ -57,10 +59,14 @@ struct None {
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
+template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
+template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 
 struct Resp {
 	using ResponseVariant = mapbox::util::variant<
 		None,
+		typename GetType<Field::VendorName>::Type,
+		typename GetType<Field::ModelName>::Type,
 		typename GetType<Field::FrameSize, Module::Camera>::Type,
 		typename GetType<Field::Initialized>::Type>;
 
