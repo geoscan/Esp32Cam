@@ -16,6 +16,7 @@
 #include "sub/Rout.hpp"
 #include "mav/mav.hpp"
 #include "Globals.hpp"
+#include "sub/Sys.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -36,7 +37,18 @@ void Camera::onHrTimer()
 
 Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat"}
 {
-	startPeriodic(std::chrono::seconds(1));   // 1 Hz, https://mavlink.io/en/services/camera.html#camera-connection
+	using namespace Sub::Sys;
+
+	bool fCameraInitialized = false;
+
+	for (auto &cb : Fld::ModuleGetField::getIterators()) {
+		auto resp = cb(Fld::Req{Module::Camera, Fld::Field::Initialized});
+		resp.tryGet<Module::Camera, Fld::Field::Initialized>(fCameraInitialized);
+	}
+
+	if (fCameraInitialized) {
+		startPeriodic(std::chrono::seconds(1));   // 1 Hz, https://mavlink.io/en/services/camera.html#camera-connection
+	}
 }
 
 Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse)
