@@ -73,8 +73,8 @@ struct Resp {
 	ResponseVariant responseVariant;  ///< The actual response
 	Module module;  ///< Type of the module producing this response
 
-	template <Module Im, Field If>
-	bool tryGet(typename GetType<If, Im>::Type &aOut)
+	template <Module Im, Field If, class Val>
+	bool tryGet(Val &aOut)
 	{
 		bool ret = false;
 
