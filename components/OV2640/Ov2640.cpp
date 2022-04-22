@@ -281,6 +281,20 @@ typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub:
 
 				break;
 
+			case Fld::Field::VendorName: {
+				static constexpr const char *kVendorName = "OmniVision";
+				ret.responseVariant = kVendorName;
+
+				break;
+			}
+
+			case Fld::Field::ModelName: {
+				static constexpr const char *kModelName = "OV 2640"; // TODO: the driver supports multiple OV cameras. If the variants of physical configurations get extended beyond just OV2640, take that into account.
+				ret.responseVariant = kModelName;
+
+				break;
+			}
+
 			default:
 				break;
 		}
