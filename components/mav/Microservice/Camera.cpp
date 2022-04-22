@@ -5,9 +5,16 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <sdkconfig.h>
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "Microservice/Camera.hpp"
 #include "Helper/MavlinkCommandLong.hpp"
 #include "sub/Rout.hpp"
+#include "mav/mav.hpp"
 #include "Globals.hpp"
 
 namespace Mav {
@@ -71,6 +78,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	assert(static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_CAMERA_INFORMATION);
+	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
 	struct {
 		int sysid;
@@ -87,6 +95,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		mavlinkCommandAck.command = aMavlinkCommandLong.command;
 
 		mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage, &mavlinkCommandAck);
+		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `COMMAND_ACK`");
 		aOnResponse(aMavlinkMessage);
 	}
 
@@ -94,6 +103,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		mavlink_camera_information_t mavlinkCameraInformation {};
 		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
 			&mavlinkCameraInformation);
+		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
 		aOnResponse(aMavlinkMessage);
 	}
 
