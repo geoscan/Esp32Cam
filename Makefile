@@ -43,6 +43,10 @@ menuconfig: menuconfig_preconfigured
 menuconfig_:
 	idf.py menuconfig
 
+pyclean: pyclean_preconfigured
+pyclean_:
+	idf.py python-clean
+
 jlinkespconnect: jlinkespconnect_preconfigured 
 jlinkespconnect_:
 	$(EXE_PYTHON) $(PATH_JLINK_SCRIPTS)/jlinkesp32.py
