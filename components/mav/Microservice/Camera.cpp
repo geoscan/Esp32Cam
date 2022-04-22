@@ -17,6 +17,8 @@
 #include "mav/mav.hpp"
 #include "Globals.hpp"
 #include "sub/Sys.hpp"
+#include <cstring>
+#include <algorithm>
 
 namespace Mav {
 namespace Mic {
@@ -104,17 +106,9 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	} sender {aMavlinkMessage.sysid, aMavlinkMessage.compid};
 
 	typename Fld::GetType<Fld::Field::Initialized, Module::Camera>::Type initialized = false;
-	typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type frameSize{};
-	typename Fld::GetType<Fld::Field::VendorName, Module::Camera>::Type vendorName;
-	typename Fld::GetType<Fld::Field::ModelName, Module::Camera>::Type modelName;
-
 
 	for (auto &cb : Fld::ModuleGetField::getIterators()) {
-		if (cb({Module::Camera, Fld::Field::Initialized}).tryGet<Module::Camera, Fld::Field::Initialized>(initialized)) {
-			cb({Module::Camera, Fld::Field::FrameSize}).tryGet<Module::Camera, Fld::Field::FrameSize>(frameSize);
-			cb({Module::Camera, Fld::Field::VendorName}).tryGet<Module::Camera, Fld::Field::VendorName>(vendorName);
-			cb({Module::Camera, Fld::Field::ModelName}).tryGet<Module::Camera, Fld::Field::ModelName>(modelName);
-		}
+		Fld::moduleCbTryGet<Module::Camera, Fld::Field::Initialized>(cb, initialized);
 	}
 
 	{
@@ -131,8 +125,39 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 
 	if (initialized) {
 		mavlink_camera_information_t mavlinkCameraInformation {};
-		mavlinkCameraInformation.resolution_h = frameSize.first;
-		mavlinkCameraInformation.resolution_v = frameSize.second;
+		std::fill_n(reinterpret_cast<std::uint8_t *>(&mavlinkCameraInformation), sizeof(mavlinkCameraInformation), 0);
+
+		for (auto &cb : Fld::ModuleGetField::getIterators()) {
+
+			if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::Initialized>(cb, initialized)) {
+				{
+					typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type frameSize{};
+
+					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::FrameSize>(cb, frameSize)) {
+						mavlinkCameraInformation.resolution_h = frameSize.first;
+						mavlinkCameraInformation.resolution_v = frameSize.second;
+					}
+				}
+				{
+					typename Fld::GetType<Fld::Field::VendorName, Module::Camera>::Type vendorName;
+
+					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::VendorName>(cb, vendorName)) {
+						static constexpr auto kVendorNameFieldLen = sizeof(mavlinkCameraInformation.vendor_name);
+						std::copy_n(vendorName, std::min<int>(std::strlen(vendorName), kVendorNameFieldLen),
+							mavlinkCameraInformation.vendor_name);
+					}
+				}
+				{
+					typename Fld::GetType<Fld::Field::ModelName, Module::Camera>::Type modelName;
+
+					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::ModelName>(cb, modelName)) {
+						static constexpr auto kModelNameFieldLen = sizeof(mavlinkCameraInformation.model_name);
+						std::copy_n(modelName, std::min<int>(std::strlen(modelName), kModelNameFieldLen),
+							mavlinkCameraInformation.model_name);
+					}
+				}
+			}
+		}
 
 		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
 			&mavlinkCameraInformation);
