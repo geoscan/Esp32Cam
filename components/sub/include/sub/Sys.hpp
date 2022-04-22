@@ -36,20 +36,6 @@ enum class Field : std::uint8_t {
 	Initialized,
 };
 
-inline std::uint16_t asNumeric(Module module, Field field)
-{
-	std::uint16_t res = 0;
-
-
-	return res;
-}
-
-template <Module Im, Field If>
-constexpr std::uint16_t asNumeric()
-{
-	return static_cast<std::uint16_t>(Im) << sizeof(Module) | static_cast<std::uint16_t>(If);
-}
-
 template <class T>
 using StoreType = typename Rr::Trait::StoreType<T>;
 
