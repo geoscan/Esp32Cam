@@ -20,7 +20,7 @@
 #include <cstring>
 #include <algorithm>
 
-#define DEBUG_PRETEND_CAMERA_INITIALIZED 0
+#define DEBUG_PRETEND_CAMERA_INITIALIZED 1
 
 namespace Mav {
 namespace Mic {
