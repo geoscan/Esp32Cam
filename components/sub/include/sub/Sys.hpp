@@ -82,6 +82,7 @@ struct Resp {
 			responseVariant.match(
 				[&ret, &aOut](const typename GetType<If, Im>::Type &aVal) {
 					aOut = aVal;
+					ret = true;
 				},
 				[](...){}
 			);
