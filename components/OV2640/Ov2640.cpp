@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "Ov2640.hpp"
 #include "esp_camera.h"
+#include "utility/Algorithm.hpp"
 
 using namespace std;
 
@@ -268,20 +269,22 @@ typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub:
 	using namespace Sub::Sys;
 	Sub::Sys::Fld::ModuleGetField::Ret ret {Fld::None{}, Module::Camera};
 
-	switch (Fld::asNumeric(aRequest.module, aRequest.field)) {
-		case Fld::asNumeric<Module::Camera, Fld::Field::Initialized>():
-			ret.responseVariant = status.initialized;
+	if (Utility::Algorithm::in(aRequest.module, Module::Generic, Module::Camera)) {
+		switch (aRequest.field) {
+			case Fld::Field::FrameSize:
+				ret.responseVariant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type {
+					status.frame.w, status.frame.h};
 
-			break;
+				break;
 
-		case Fld::asNumeric<Module::Camera, Fld::Field::FrameSize>():
-			ret.responseVariant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type{
-				status.frame.w, status.frame.h};
+			case Fld::Field::Initialized:
+				ret.responseVariant = status.initialized;
 
-			break;
+				break;
 
-		default:
-			break;
+			default:
+				break;
+		}
 	}
 
 	return ret;
