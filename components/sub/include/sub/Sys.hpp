@@ -63,13 +63,13 @@ struct Resp {
 		typename GetType<Field::FrameSize, Module::Camera>::Type,
 		typename GetType<Field::Initialized>::Type>;
 
-	ResponseVariant responseVariant;
-	Module module;
+	ResponseVariant responseVariant;  ///< The actual response
+	Module module;  ///< Type of the module producing this response
 };
 
 struct Req {
-	Module module;
-	Field field;
+	Module module;  ///< Requested module
+	Field field;  ///< Requested field
 };
 
 using ModuleGetField = Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
