@@ -136,6 +136,8 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	if (initialized) {
 		mavlink_camera_information_t mavlinkCameraInformation {};
 		std::fill_n(reinterpret_cast<std::uint8_t *>(&mavlinkCameraInformation), sizeof(mavlinkCameraInformation), 0);
+		mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
+			CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
 
 		for (auto &cb : Fld::ModuleGetField::getIterators()) {
 #if DEBUG_PRETEND_CAMERA_INITIALIZED
