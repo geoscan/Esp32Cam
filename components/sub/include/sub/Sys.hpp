@@ -31,13 +31,15 @@ namespace Fld {
 
 enum class Field : std::uint8_t {
 	FrameSize,
+	VendorName,
+	ModelName,
 	Initialized,
 };
 
 inline std::uint16_t asNumeric(Module module, Field field)
 {
 	std::uint16_t res = 0;
-	res = (static_cast<std::uint16_t>(module) << sizeof(Module)) | static_cast<std::uint16_t>(field);
+
 
 	return res;
 }
@@ -57,25 +59,30 @@ struct None {
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
+template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
+template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 
 struct Resp {
 	using ResponseVariant = mapbox::util::variant<
 		None,
+		typename GetType<Field::VendorName>::Type,
+		typename GetType<Field::ModelName>::Type,
 		typename GetType<Field::FrameSize, Module::Camera>::Type,
 		typename GetType<Field::Initialized>::Type>;
 
 	ResponseVariant responseVariant;  ///< The actual response
 	Module module;  ///< Type of the module producing this response
 
-	template <Module Im, Field If>
-	bool tryGet(typename GetType<If, Im>::Type &aOut)
+	template <Module Im, Field If, class Val>
+	bool tryGet(Val &aOut)
 	{
 		bool ret = false;
 
-		if (Utility::Algorithm::in(module, Im, Module::All)) {
+		if (Utility::Algorithm::in(Im, module, Module::All)) {
 			responseVariant.match(
 				[&ret, &aOut](const typename GetType<If, Im>::Type &aVal) {
 					aOut = aVal;
+					ret = true;
 				},
 				[](...){}
 			);
@@ -92,7 +99,14 @@ struct Req {
 	bool shouldRespond(Module aThisModule);
 };
 
-using ModuleGetField = Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleGetField = typename Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleCb = decltype(*ModuleGetField::getIterators().begin());
+
+template <Module Im, Field If, class Val>
+bool moduleCbTryGet(ModuleCb &aCb, Val &aOut)
+{
+	return aCb({Im, If}).tryGet<Im, If>(aOut);
+}
 
 }  // namespace Fld
 }  // namespace Sys
