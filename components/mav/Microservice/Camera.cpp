@@ -48,6 +48,8 @@ Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat"}
 
 	if (fCameraInitialized) {
 		startPeriodic(std::chrono::seconds(1));   // 1 Hz, https://mavlink.io/en/services/camera.html#camera-connection
+	} else {
+		ESP_LOGW(Mav::kDebugTag, "Microservice::Camera: Heartbeat emit, camera module was not initialized");
 	}
 }
 
