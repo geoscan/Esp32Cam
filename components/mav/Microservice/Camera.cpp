@@ -105,10 +105,15 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 
 	typename Fld::GetType<Fld::Field::Initialized, Module::Camera>::Type initialized = false;
 	typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type frameSize{};
+	typename Fld::GetType<Fld::Field::VendorName, Module::Camera>::Type vendorName;
+	typename Fld::GetType<Fld::Field::ModelName, Module::Camera>::Type modelName;
+
 
 	for (auto &cb : Fld::ModuleGetField::getIterators()) {
 		if (cb({Module::Camera, Fld::Field::Initialized}).tryGet<Module::Camera, Fld::Field::Initialized>(initialized)) {
 			cb({Module::Camera, Fld::Field::FrameSize}).tryGet<Module::Camera, Fld::Field::FrameSize>(frameSize);
+			cb({Module::Camera, Fld::Field::VendorName}).tryGet<Module::Camera, Fld::Field::VendorName>(vendorName);
+			cb({Module::Camera, Fld::Field::ModelName}).tryGet<Module::Camera, Fld::Field::ModelName>(modelName);
 		}
 	}
 
