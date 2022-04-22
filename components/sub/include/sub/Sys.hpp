@@ -13,6 +13,7 @@
 #define SUB_INCLUDE_SUB_SYS_HPP_
 
 #include "sub/Subscription.hpp"
+#include "utility/Algorithm.hpp"
 #include <cstdint>
 #include <mapbox/variant.hpp>
 #include <Rr/Trait/StoreType.hpp>
@@ -65,6 +66,23 @@ struct Resp {
 
 	ResponseVariant responseVariant;  ///< The actual response
 	Module module;  ///< Type of the module producing this response
+
+	template <Module Im, Field If>
+	bool tryGet(typename GetType<If, Im>::Type &aOut)
+	{
+		bool ret = false;
+
+		if (Utility::Algorithm::in(module, Im, Module::Generic)) {
+			responseVariant.match(
+				[&ret, &aOut](const typename GetType<If, Im>::Type &aVal) {
+					aOut = aVal;
+				},
+				[](...){}
+			);
+		}
+
+		return ret;
+	}
 };
 
 struct Req {
