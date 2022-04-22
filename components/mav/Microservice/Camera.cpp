@@ -20,6 +20,8 @@
 #include <cstring>
 #include <algorithm>
 
+#define DEBUG_PRETEND_CAMERA_INITIALIZED 0
+
 namespace Mav {
 namespace Mic {
 
@@ -50,6 +52,10 @@ Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat"}
 			ESP_LOGI(Mav::kDebugTag, "Microservice::Camera: Heartbeat emit, found camera module");
 		}
 	}
+
+#if DEBUG_PRETEND_CAMERA_INITIALIZED
+	fCameraInitialized = true;
+#endif
 
 	if (fCameraInitialized) {
 		startPeriodic(std::chrono::seconds(1));   // 1 Hz, https://mavlink.io/en/services/camera.html#camera-connection
@@ -111,6 +117,10 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		Fld::moduleCbTryGet<Module::Camera, Fld::Field::Initialized>(cb, initialized);
 	}
 
+#if DEBUG_PRETEND_CAMERA_INITIALIZED
+	initialized = true;
+#endif
+
 	{
 		mavlink_command_ack_t mavlinkCommandAck {};
 		mavlinkCommandAck.target_component = sender.compid;
@@ -128,12 +138,17 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 		std::fill_n(reinterpret_cast<std::uint8_t *>(&mavlinkCameraInformation), sizeof(mavlinkCameraInformation), 0);
 
 		for (auto &cb : Fld::ModuleGetField::getIterators()) {
-
+#if DEBUG_PRETEND_CAMERA_INITIALIZED
+			if (true) {
+#else
 			if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::Initialized>(cb, initialized)) {
+#endif
+				ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation. Packing fields");
 				{
 					typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type frameSize{};
 
 					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::FrameSize>(cb, frameSize)) {
+						ESP_LOGI(Mav::kDebugTag, "Camera frame size %dx%d", frameSize.first, frameSize.second);
 						mavlinkCameraInformation.resolution_h = frameSize.first;
 						mavlinkCameraInformation.resolution_v = frameSize.second;
 					}
@@ -143,6 +158,8 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 
 					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::VendorName>(cb, vendorName)) {
 						static constexpr auto kVendorNameFieldLen = sizeof(mavlinkCameraInformation.vendor_name);
+						ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got vendor name : %s",
+							vendorName);
 						std::copy_n(vendorName, std::min<int>(std::strlen(vendorName), kVendorNameFieldLen),
 							mavlinkCameraInformation.vendor_name);
 					}
@@ -151,6 +168,8 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 					typename Fld::GetType<Fld::Field::ModelName, Module::Camera>::Type modelName;
 
 					if (Fld::moduleCbTryGet<Module::Camera, Fld::Field::ModelName>(cb, modelName)) {
+						ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got model name : %s",
+							modelName);
 						static constexpr auto kModelNameFieldLen = sizeof(mavlinkCameraInformation.model_name);
 						std::copy_n(modelName, std::min<int>(std::strlen(modelName), kModelNameFieldLen),
 							mavlinkCameraInformation.model_name);
