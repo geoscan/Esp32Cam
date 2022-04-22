@@ -88,6 +88,8 @@ struct Resp {
 struct Req {
 	Module module;  ///< Requested module
 	Field field;  ///< Requested field
+
+	bool shouldRespond(Module aThisModule);
 };
 
 using ModuleGetField = Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
