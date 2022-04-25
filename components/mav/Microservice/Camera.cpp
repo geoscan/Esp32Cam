@@ -139,7 +139,6 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 
 	if (initialized) {
 		mavlink_camera_information_t mavlinkCameraInformation {};
-		std::fill_n(reinterpret_cast<std::uint8_t *>(&mavlinkCameraInformation), sizeof(mavlinkCameraInformation), 0);
 		mavlinkCameraInformation.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::microseconds{Utility::bootTimeUs()}).count();
 		mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
