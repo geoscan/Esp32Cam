@@ -89,12 +89,14 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 							break;
 					}
 
-				break;
+					break;
+
+				default:
+					break;
 			}
 		}
 
 		default:
-
 			break;
 	}
 
