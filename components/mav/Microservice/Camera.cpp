@@ -226,8 +226,8 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		}
 	}
 
-	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, response code: %d",
-		mavResult);
+	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, frame name \"%s\""
+		"response code \"%d\"", filename, mavResult);
 
 	// Send ACK w/ value depending on whether or not the capture was successful
 	{
