@@ -33,12 +33,12 @@ template <class T>
 struct ModApi {
 	template <template <T, Module> class TgetResponseType, class ...TsResponseVariants>
 	struct Response {
-		using ResponseVariant = mapbox::util::variant< None, TsResponseVariants...>;
+		using Variant = mapbox::util::variant< None, TsResponseVariants...>;
 
 		template <T It, Module Im>
 		using Type = typename TgetResponseType<It, Im>::Type;
 
-		ResponseVariant responseVariant;  ///< The actual response
+		Variant variant;  ///< The actual response
 		Module module;  ///< Type of the module producing this response
 
 		template <Module Im, T If, class Val>
@@ -47,7 +47,7 @@ struct ModApi {
 			bool ret = false;
 
 			if (Utility::Algorithm::in(Im, module, Module::All)) {
-				responseVariant.match(
+				variant.match(
 					[&ret, &aOut](const typename TgetResponseType<If, Im>::Type &aVal) {
 						aOut = aVal;
 						ret = true;

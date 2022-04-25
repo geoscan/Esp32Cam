@@ -271,26 +271,26 @@ typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub:
 	if (aRequest.shouldRespond(Module::Camera)) {
 		switch (aRequest.field) {
 			case Fld::Field::FrameSize:
-				ret.responseVariant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type {
+				ret.variant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type {
 					status.frame.w, status.frame.h};
 
 				break;
 
 			case Fld::Field::Initialized:
-				ret.responseVariant = status.initialized;
+				ret.variant = status.initialized;
 
 				break;
 
 			case Fld::Field::VendorName: {
 				static constexpr const char *kVendorName = "OmniVision";
-				ret.responseVariant = kVendorName;
+				ret.variant = kVendorName;
 
 				break;
 			}
 
 			case Fld::Field::ModelName: {
 				static constexpr const char *kModelName = "OV 2640"; // TODO: the driver supports multiple OV cameras. If the variants of physical configurations get extended beyond just OV2640, take that into account.
-				ret.responseVariant = kModelName;
+				ret.variant = kModelName;
 
 				break;
 			}
