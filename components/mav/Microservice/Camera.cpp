@@ -232,12 +232,14 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Send ACK w/ value depending on whether or not the capture was successful
 	{
+		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing ACK");
 		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
 		mavlinkCommandAck.packInto(aMessage);
 		aOnResponse(aMessage);
 	}
 
 	if (MAV_RESULT_ACCEPTED == mavResult) {
+		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
 		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
 		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
 		mavlinkCameraImageCaptured.image_index = 0;
