@@ -58,6 +58,14 @@ struct ModApi {
 
 			return ret;
 		}
+
+		///
+		/// \return Check whether \arg aModule is addressed by `module` field
+		///
+		inline bool moduleMatch(Module aModule)
+		{
+			return Utility::Algorithm::in(module, aModule, Module::All);
+		}
 	};
 };
 
