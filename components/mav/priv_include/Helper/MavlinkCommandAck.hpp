@@ -14,8 +14,10 @@ namespace Mav {
 namespace Hlpr {
 
 struct MavlinkCommandAck : public mavlink_command_ack_t {
-	MavlinkCommandAck makeFrom(const mavlink_message_t &, decltype(mavlink_command_ack_t::command) aCommand,
-							   decltype(mavlink_command_ack_t::result) aResult = MAV_RESULT_ACCEPTED);
+	static MavlinkCommandAck makeFrom(const mavlink_message_t &aMessage,
+		decltype(mavlink_command_ack_t::command) aCommand,
+		decltype(mavlink_command_ack_t::result) aResult = MAV_RESULT_ACCEPTED);
+	void packInto(mavlink_message_t &aInto);
 };
 
 }  // namespace Hlpr
