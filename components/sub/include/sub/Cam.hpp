@@ -18,7 +18,7 @@ struct Shot;
 
 }  // namespace Topic
 
-using Shot = Sub::NoLockKey<bool(const char *), Topic::Shot>;
+using ShotFile = Sub::NoLockKey<bool(const char *), Topic::Shot>;
 using RecordStart = Sub::Key::RecordStart;
 using RecordStop = Sub::Key::RecordStop;
 

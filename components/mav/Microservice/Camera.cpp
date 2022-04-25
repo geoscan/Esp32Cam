@@ -212,8 +212,9 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	static constexpr std::size_t kNameMaxLen = 6;
 	char filename[kNameMaxLen] = {0};
 
-	if (static_cast<int>(aMavlinkCommandLong.param3) == 1) {  // Number of total images should be eq. 1
+	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of total images should be eq. 1
 		mavResult = MAV_RESULT_UNSUPPORTED;
+		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture Periodic shoots are not supported");
 	}
 
 	// Auto-generate name
@@ -221,22 +222,24 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
 		snprintf(filename, kNameMaxLen, "%d", stamp);
 
-		for (auto &cb : Sub::Cam::Shot::getIterators()) {
+		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
 			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
 		}
 	}
 
-	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, response code: %d",
-		mavResult);
+	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, frame name \"%s\" "
+		"response code \"%d\"", filename, mavResult);
 
 	// Send ACK w/ value depending on whether or not the capture was successful
 	{
+		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing ACK");
 		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
 		mavlinkCommandAck.packInto(aMessage);
 		aOnResponse(aMessage);
 	}
 
 	if (MAV_RESULT_ACCEPTED == mavResult) {
+		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
 		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
 		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
 		mavlinkCameraImageCaptured.image_index = 0;

@@ -23,6 +23,7 @@
 #include "wifi.h"
 #include "utility/time.hpp"
 #include "esp_wifi.h"
+#include "sub/Cam.hpp"
 
 using namespace std;
 
@@ -49,23 +50,6 @@ static constexpr const char *kDisconnect = "disconnect";  //value
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
 
-static struct {
-	bool videoRecRunning = false;
-} status;
-
-static struct {
-	CameraRecorder::RecMjpgAvi mjpgAvi;
-	CameraRecorder::RecFrame   frame;
-} rec;
-
-static void wifiDisconnectHandler(Sub::Key::WifiDisconnected::Type)
-{
-	rec.mjpgAvi.stop();
-	status.videoRecRunning = false;
-}
-
-static Sub::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
-
 enum Error : esp_err_t {
 	// Standard ESP's errors
 	Ok      = ESP_OK,
@@ -78,6 +62,35 @@ enum Error : esp_err_t {
 	ErrSd      = ESP_FAIL - 3,
 	ErrIpParse = ESP_FAIL - 4,
 };
+
+static bool shotFile(const char *);
+static Error processPhoto(string name);
+
+static struct {
+	bool videoRecRunning = false;
+} status;
+
+static struct {
+	CameraRecorder::RecMjpgAvi mjpgAvi;
+	CameraRecorder::RecFrame   frame;
+} rec;
+
+static struct {
+	Sub::Cam::ShotFile shotFile;
+} key {{shotFile}};
+
+static void wifiDisconnectHandler(Sub::Key::WifiDisconnected::Type)
+{
+	rec.mjpgAvi.stop();
+	status.videoRecRunning = false;
+}
+
+static Sub::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
+
+static bool shotFile(const char *aName)
+{
+	return Ok == processPhoto(aName);
+}
 
 ///
 /// \brief getArgValueByKey Parses GET request and extracts values corresponding to the key it is provided with
