@@ -222,7 +222,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
 		snprintf(filename, kNameMaxLen, "%d", stamp);
 
-		for (auto &cb : Sub::Cam::Shot::getIterators()) {
+		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
 			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
 		}
 	}
