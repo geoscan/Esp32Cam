@@ -35,6 +35,9 @@ struct ModApi {
 	struct Response {
 		using ResponseVariant = mapbox::util::variant< None, TsResponseVariants...>;
 
+		template <T It, Module Im>
+		using Type = typename TgetResponseType<It, Im>::Type;
+
 		ResponseVariant responseVariant;  ///< The actual response
 		Module module;  ///< Type of the module producing this response
 
