@@ -266,7 +266,7 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> aRequest)
 {
 	using namespace Sub::Sys;
-	Sub::Sys::Fld::ModuleGetField::Ret ret {Fld::None{}, Module::Camera};
+	Sub::Sys::Fld::ModuleGetField::Ret ret {None{}, Module::Camera};
 
 	if (aRequest.shouldRespond(Module::Camera)) {
 		switch (aRequest.field) {
