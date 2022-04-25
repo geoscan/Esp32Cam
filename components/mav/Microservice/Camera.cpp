@@ -208,7 +208,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	sdFatInit();
-	MAV_RESULT mavResult = MAV_RESULT_FAILED;
+	MAV_RESULT mavResult = MAV_RESULT_UNSUPPORTED;
 	static constexpr std::size_t kNameMaxLen = 6;
 	char filename[kNameMaxLen] = {0};
 
