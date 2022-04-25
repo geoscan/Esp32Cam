@@ -27,6 +27,40 @@ enum class Module : std::uint8_t {
 	All,  ///< The request is addressed to every module
 };
 
+struct None {};
+
+template <class T>
+struct ModApi {
+	template <template <T, Module> class TgetResponseType, class ...TsResponseVariants>
+	struct Response {
+		using ResponseVariant = mapbox::util::variant< None, TsResponseVariants...>;
+
+		template <T It, Module Im>
+		using Type = typename TgetResponseType<It, Im>::Type;
+
+		ResponseVariant responseVariant;  ///< The actual response
+		Module module;  ///< Type of the module producing this response
+
+		template <Module Im, T If, class Val>
+		bool tryGet(Val &aOut)
+		{
+			bool ret = false;
+
+			if (Utility::Algorithm::in(Im, module, Module::All)) {
+				responseVariant.match(
+					[&ret, &aOut](const typename TgetResponseType<If, Im>::Type &aVal) {
+						aOut = aVal;
+						ret = true;
+					},
+					[](...){}
+				);
+			}
+
+			return ret;
+		}
+	};
+};
+
 namespace Fld {
 
 enum class Field : std::uint8_t {
@@ -39,44 +73,17 @@ enum class Field : std::uint8_t {
 template <class T>
 using StoreType = typename Rr::Trait::StoreType<T>;
 
-struct None {
-};
-
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
 template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
 template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 
-struct Resp {
-	using ResponseVariant = mapbox::util::variant<
-		None,
-		typename GetType<Field::VendorName>::Type,
-		typename GetType<Field::ModelName>::Type,
-		typename GetType<Field::FrameSize, Module::Camera>::Type,
-		typename GetType<Field::Initialized>::Type>;
-
-	ResponseVariant responseVariant;  ///< The actual response
-	Module module;  ///< Type of the module producing this response
-
-	template <Module Im, Field If, class Val>
-	bool tryGet(Val &aOut)
-	{
-		bool ret = false;
-
-		if (Utility::Algorithm::in(Im, module, Module::All)) {
-			responseVariant.match(
-				[&ret, &aOut](const typename GetType<If, Im>::Type &aVal) {
-					aOut = aVal;
-					ret = true;
-				},
-				[](...){}
-			);
-		}
-
-		return ret;
-	}
-};
+using Resp = ModApi<Field>::Response<GetType,
+	typename GetType<Field::FrameSize, Module::Camera>::Type,
+	typename GetType<Field::Initialized>::Type,
+	typename GetType<Field::VendorName>::Type,
+	typename GetType<Field::ModelName>::Type>;
 
 struct Req {
 	Module module;  ///< Requested module
