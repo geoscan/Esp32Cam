@@ -3,6 +3,7 @@ idf_component_register(
 		sub
 		utility
 		mavlink
+		sd_fat
 	SRC_DIRS
 		"./"
 		"Microservice/"
