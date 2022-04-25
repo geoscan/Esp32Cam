@@ -13,11 +13,15 @@
 
 #include "Microservice/Camera.hpp"
 #include "Helper/MavlinkCommandLong.hpp"
+#include "Helper/MavlinkCommandAck.hpp"
+#include "Helper/Common.hpp"
 #include "sub/Rout.hpp"
+#include "sub/Cam.hpp"
 #include "mav/mav.hpp"
 #include "Globals.hpp"
 #include "sub/Sys.hpp"
 #include "utility/time.hpp"
+#include "sd_fat.h"
 #include <cstring>
 #include <algorithm>
 #include <chrono>
@@ -88,6 +92,12 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 						default:
 							break;
 					}
+
+					break;
+
+				case MAV_CMD_IMAGE_START_CAPTURE:
+
+					ret = processCmdImageStartCapture(commandLong, aMessage, aOnResponse);
 
 					break;
 
@@ -192,6 +202,53 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	}
 
 	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	sdFatInit();
+	MAV_RESULT mavResult = MAV_RESULT_FAILED;
+	static constexpr std::size_t kNameMaxLen = 6;
+	char filename[kNameMaxLen] = {0};
+
+	if (static_cast<int>(aMavlinkCommandLong.param3) == 1) {  // Number of total images should be eq. 1
+		mavResult = MAV_RESULT_UNSUPPORTED;
+	}
+
+	// Auto-generate name
+	if (MAV_RESULT_UNSUPPORTED != mavResult) {
+		std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
+		snprintf(filename, kNameMaxLen, "%d", stamp);
+
+		for (auto &cb : Sub::Cam::Shot::getIterators()) {
+			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
+		}
+	}
+
+	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, response code: %d",
+		mavResult);
+
+	// Send ACK w/ value depending on whether or not the capture was successful
+	{
+		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
+		mavlinkCommandAck.packInto(aMessage);
+		aOnResponse(aMessage);
+	}
+
+	if (MAV_RESULT_ACCEPTED == mavResult) {
+		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
+		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
+		mavlinkCameraImageCaptured.image_index = 0;
+		std::copy_n(filename, std::min<int>(kNameMaxLen, sizeof(mavlinkCameraImageCaptured.file_url)),
+			mavlinkCameraImageCaptured.file_url);
+
+		mavlink_msg_camera_image_captured_encode(Globals::getSysId(), Globals::getCompId(), &aMessage,
+			&mavlinkCameraImageCaptured);
+		aOnResponse(aMessage);
+	}
+
+	return Ret::Response;
 }
 
 }  // namespace Mic
