@@ -270,7 +270,7 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 		aOnResponse(aMessage);
 	}
 
-	return Ret::Ignored;
+	return Ret::Response;
 }
 
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
