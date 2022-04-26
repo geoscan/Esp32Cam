@@ -89,6 +89,11 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 
 							break;
 
+						case MAVLINK_MSG_ID_CAMERA_IMAGE_CAPTURED:
+							ret = processRequestMessageCameraImageCaptured(commandLong, aMessage, aOnResponse);
+
+							break;
+
 						default:
 							break;
 					}
@@ -202,6 +207,15 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	}
 
 	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	(void)aMavlinkCommandLong;
+	(void)aMessage;
+	(void)aOnResponse;
+	return Ret::Ignored;
 }
 
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
