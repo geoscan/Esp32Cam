@@ -218,10 +218,20 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 		[missingIndex](const ImageCapture &aIc) { return missingIndex == aIc.imageIndex; });
 
 	if (history.imageCaptureSequence.end() != it) {
-		auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
+		// Pack COMMAND_ACK
+		{
+			auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command,
+				MAV_RESULT_ACCEPTED);
+			msg.packInto(aMessage);
+			aOnResponse(aMessage);
+		}
+		// Pack CAMERA_IMAGE_CAPTURED
+		{
+			auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
 
-		msg.packInto(aMessage);
-		aOnResponse(aMessage);
+			msg.packInto(aMessage);
+			aOnResponse(aMessage);
+		}
 	} else {
 		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
 		msg.packInto(aMessage);
