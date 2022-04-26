@@ -40,6 +40,7 @@ private:
 		int sequence;
 		bool result;
 		ImageName imageName;
+		int imageIndex;
 	};
 
 	struct History {
