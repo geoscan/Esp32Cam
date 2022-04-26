@@ -245,6 +245,16 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 	return Ret::Response;
 }
 
+Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	(void)aMavlinkCommandLong;
+	(void)aMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
+}
+
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {

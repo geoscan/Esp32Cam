@@ -28,6 +28,8 @@ public:  // Utility::HrTimer API
 		OnResponseSignature aOnResponse);
 	Ret processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
+	Ret processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+		OnResponseSignature aOnResponse);
 	Ret processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onHrTimer() override final;
