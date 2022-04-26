@@ -58,23 +58,21 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 {
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
-	response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
 
 	switch (process(Utility::toBuffer<const void>(aMessage), response.nProcessed)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			response.setType(Sub::Rout::Response::Type::Ignored);
-			response.payloadLock.reset();
 
 			break;
 
 		case Microservice::Ret::NoResponse:
 			response.setType(Sub::Rout::Response::Type::Consumed);
-			response.payloadLock.reset();
 
 			break;
 
 		case Microservice::Ret::Response:  // send response back
 			ESP_LOGD(Mav::kDebugTag, "Dispatcher::onMavlinkReceived: sending response, size %d", resp.size);
+			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
 			response.payload = respAsPayload();
 
 			break;
