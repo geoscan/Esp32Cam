@@ -34,9 +34,12 @@ public:  // Utility::HrTimer API
 
 private:
 
+	using ImageName = std::uint16_t;
+
 	struct ImageCapture {
 		unsigned sequence;
 		bool result;
+		ImageName imageName;
 	};
 
 	struct History {

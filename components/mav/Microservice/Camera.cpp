@@ -225,6 +225,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	MAV_RESULT mavResult = MAV_RESULT_FAILED;
 	static constexpr std::size_t kNameMaxLen = 6;
 	char filename[kNameMaxLen] = {0};
+	std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
 
 	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of total images should be eq. 1
 		mavResult = MAV_RESULT_UNSUPPORTED;
@@ -233,7 +234,6 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
-		std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
 		snprintf(filename, kNameMaxLen, "%d", stamp);
 
 		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
@@ -268,7 +268,8 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		aOnResponse(aMessage);
 	}
 
-	history.imageCaptureSequence.push_back(ImageCapture{static_cast<unsigned>(aMavlinkCommandLong.param4), success});  // Push capture info into history
+	history.imageCaptureSequence.push_back(ImageCapture{static_cast<unsigned>(aMavlinkCommandLong.param4), success,
+		stamp});  // Push capture info into history
 	history.imageCaptureCount += success;
 
 	return Ret::Response;
