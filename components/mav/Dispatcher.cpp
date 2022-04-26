@@ -44,6 +44,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 
 		resp.size = 0;
 		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
+			ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
 			resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
 		});
 
@@ -70,6 +71,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 			break;
 
 		case Microservice::Ret::Response:  // send response back
+			ESP_LOGD(Mav::kDebugTag, "Dispatcher::onMavlinkReceived: sending response, size %d", resp.size);
 			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
 			response.payload = respAsPayload();
 
