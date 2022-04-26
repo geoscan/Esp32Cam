@@ -232,7 +232,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 			msg.packInto(aMessage);
 			aOnResponse(aMessage);
 		}
-	} else {
+	} else {  // `history` does not hold info on this capture. Probably, it never happened
 		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
 		msg.packInto(aMessage);
 		aOnResponse(aMessage);
