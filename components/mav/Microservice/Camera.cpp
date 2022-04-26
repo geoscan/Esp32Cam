@@ -15,6 +15,7 @@
 #include "Helper/MavlinkCommandLong.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
 #include "Helper/Common.hpp"
+#include "Helper/CameraImageCaptured.hpp"
 #include "sub/Rout.hpp"
 #include "sub/Cam.hpp"
 #include "mav/mav.hpp"
@@ -257,15 +258,9 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
-		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
-		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
-		mavlinkCameraImageCaptured.image_index = history.imageCaptureCount;
-		mavlinkCameraImageCaptured.capture_result = imageCapture.result;
-		std::copy_n(filename, std::min<int>(kNameMaxLen, sizeof(mavlinkCameraImageCaptured.file_url)),
-			mavlinkCameraImageCaptured.file_url);
-
-		mavlink_msg_camera_image_captured_encode(Globals::getSysId(), Globals::getCompId(), &aMessage,
-			&mavlinkCameraImageCaptured);
+		auto mavlinkCameraImageCaptured = Mav::Hlpr::CameraImageCaptured::make(imageCapture.imageIndex,
+			imageCapture.result, filename);
+		mavlinkCameraImageCaptured.packInto(aMessage);
 		aOnResponse(aMessage);
 	}
 
