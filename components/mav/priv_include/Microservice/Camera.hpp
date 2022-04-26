@@ -37,7 +37,7 @@ private:
 	using ImageName = std::uint16_t;
 
 	struct ImageCapture {
-		unsigned sequence;
+		int sequence;
 		bool result;
 		ImageName imageName;
 	};

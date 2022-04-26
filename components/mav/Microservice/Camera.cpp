@@ -225,7 +225,8 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	MAV_RESULT mavResult = MAV_RESULT_FAILED;
 	static constexpr std::size_t kNameMaxLen = 6;
 	char filename[kNameMaxLen] = {0};
-	std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
+	ImageCapture imageCapture {static_cast<int>(aMavlinkCommandLong.param4), false,
+		static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff)};
 
 	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of total images should be eq. 1
 		mavResult = MAV_RESULT_UNSUPPORTED;
@@ -234,7 +235,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
-		snprintf(filename, kNameMaxLen, "%d", stamp);
+		snprintf(filename, kNameMaxLen, "%d", imageCapture.imageName);
 
 		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
 			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
@@ -252,14 +253,14 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		aOnResponse(aMessage);
 	}
 
-	bool success = MAV_RESULT_ACCEPTED == mavResult;
+	imageCapture.result = MAV_RESULT_ACCEPTED == mavResult;
 
 	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
 		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
 		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
 		mavlinkCameraImageCaptured.image_index = history.imageCaptureCount;
-		mavlinkCameraImageCaptured.capture_result = success;
+		mavlinkCameraImageCaptured.capture_result = imageCapture.result;
 		std::copy_n(filename, std::min<int>(kNameMaxLen, sizeof(mavlinkCameraImageCaptured.file_url)),
 			mavlinkCameraImageCaptured.file_url);
 
@@ -268,9 +269,8 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		aOnResponse(aMessage);
 	}
 
-	history.imageCaptureSequence.push_back(ImageCapture{static_cast<unsigned>(aMavlinkCommandLong.param4), success,
-		stamp});  // Push capture info into history
-	history.imageCaptureCount += success;
+	history.imageCaptureSequence.push_back(imageCapture);  // Push capture info into history
+	history.imageCaptureCount += imageCapture.result;
 
 	return Ret::Response;
 }
