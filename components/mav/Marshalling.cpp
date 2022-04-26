@@ -23,10 +23,10 @@ std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, voi
 std::size_t Mav::Marshalling::push(const mavlink_message_t &aMessage)
 {
 	auto ret = 0;
-
 	if (size() < kMarshallingQueueMaxSize) {
-		BaseType::push({});
-		ret = push(aMessage, {&back(), sizeof(mavlink_message_t)});
+		MarshallingBaseType::push({});
+		ret = push(aMessage, {&back().buf, sizeof(mavlink_message_t)});
+		back().len = ret;
 	}
 
 	return ret;

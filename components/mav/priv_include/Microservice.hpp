@@ -13,6 +13,8 @@
 #ifndef MAV_PRIV_INCLUDEMICROSERVICE_HPP
 #define MAV_PRIV_INCLUDEMICROSERVICE_HPP
 
+#include <functional>
+
 struct __mavlink_message;
 using mavlink_message_t = __mavlink_message;
 
@@ -28,6 +30,8 @@ struct Microservice {
 		NoResponse,  ///< The message has been processed, no response required
 	};
 
+	using OnResponseSignature = std::function<void(mavlink_message_t &)>;
+
 	///
 	/// \brief  Processes a message it is given
 	///
@@ -37,7 +41,7 @@ struct Microservice {
 	///
 	/// \return True, if the message has been accepted. False otherwise.
 	///
-	virtual Ret process(mavlink_message_t &aMessage);
+	virtual Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) = 0;
 
 	virtual ~Microservice() = default;
 };

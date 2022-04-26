@@ -125,6 +125,29 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::udp> &
 	}
 }
 
+Sub::Rout::Response Routing::operator()(const Sub::Rout::Mavlink &aMavlinkMessage)
+{
+#if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_FORWARD  // TODO: change naming
+	if (Sock::Api::checkInstance()) {
+		for (auto &udpEndpoint : container.udpEndpoints) {
+			auto port = static_cast<std::uint16_t>(Udp::Mavlink);
+			asio::error_code err;
+			Sock::Api::getInstance().sendTo(udpEndpoint, port, aMavlinkMessage.payload, err, asio::ip::udp::v4());
+
+			if (err) {
+				ESP_LOGE(Bdg::kDebugTag, "Routing:onReceived(Mavlink) - could not send over UDP, error (%d)",
+					err.value());
+			}
+		}
+	}
+#endif
+
+	Sub::Rout::UartSend::notify(Sub::Rout::Uart{aMavlinkMessage.payload,
+		static_cast<decltype(Sub::Rout::Uart::uartNum)>(Uart::Mavlink)});
+
+	return {Sub::Rout::Response::Type::Consumed};
+}
+
 Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVariant)
 {
 	GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Routing:onReceived");

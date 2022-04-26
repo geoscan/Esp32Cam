@@ -36,7 +36,7 @@ GsNetwork::GsNetwork() :
 {
 }
 
-Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
+Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnResponseSignature aOnResponse)
 {
 	if (aMavlinkMessage.msgid != MAVLINK_MSG_ID_MAV_GS_NETWORK) {
 		return Ret::Ignored;
@@ -113,6 +113,7 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage)
 
 	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
 		&mavlinkMavGsNetwork);
+	aOnResponse(aMavlinkMessage);
 
 	return ret;
 }

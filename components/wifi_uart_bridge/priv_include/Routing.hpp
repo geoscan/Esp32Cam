@@ -31,6 +31,7 @@ public:
 	Sub::Rout::Response operator()(const Sub::Rout::Uart &);
 	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::tcp> &);
 	Sub::Rout::Response operator()(const Sub::Rout::Socket<asio::ip::udp> &);
+	Sub::Rout::Response operator()(const Sub::Rout::Mavlink &);
 	Sub::Rout::OnReceived::Ret onReceived(Sub::Rout::OnReceived::Arg<0>);
 	Sub::Rout::OnTcpEvent::Ret onTcpEvent(Sub::Rout::OnTcpEvent::Arg<0>);
 	Routing();

@@ -16,6 +16,7 @@
 #include "sub/Rout.hpp"
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
+#include "DelayedSend.hpp"
 #include <list>
 #include <memory>
 
@@ -29,26 +30,29 @@ class Unmarshalling;
 
 namespace Mic {
 class GsNetwork;
+class Camera;
 }
 
-class Dispatcher {
+class Dispatcher : public DelayedSendHandle {
 public:
 	Dispatcher();
+
+	void onSubscription(const mavlink_message_t &) override;
 
 protected:
 	Mav::Microservice::Ret process(Utility::ConstBuffer aMessage, int &anProcessed);
 
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
+	Sub::Rout::Payload respAsPayload();
 
 private:
 	struct {
 		Sub::Rout::OnMavlinkReceived onMavlinkReceived;
 	} key;
 
-	Marshalling marshalling;
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::GsNetwork> micAggregate;
+	Mav::Mic::Aggregate<Mic::GsNetwork, Mic::Camera> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];

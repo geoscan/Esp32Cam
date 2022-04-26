@@ -5,18 +5,28 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <Rr/Trait/TypeToIntegral.hpp>
+#include "Mavlink.hpp"
 #include "Aggregate.hpp"
 
+namespace Mav {
+namespace Mic {
+
 template <class ...Tmics>
-Mav::Mic::Aggregate<Tmics...>::Aggregate(): microservices{{std::unique_ptr<Microservice>{new Tmics}...}}
+Mav::Mic::Aggregate<Tmics...>::Aggregate(DelayedSendHandle &aHandle) :
+	microservices{{std::unique_ptr<Microservice>{new Tmics}...}}
 {
+	using namespace Rr::Trait;
+	using List = int[];
+	List{(void(delayedSendInit(&aHandle, static_cast<Tmics *>(microservices[TypeToInt<Tmics, Tmics...>::value].get()))), 0)...};
 }
 
 template <class ...Tmics>
-Mav::Microservice::Ret Mav::Mic::Aggregate<Tmics...>::process(mavlink_message_t &aMessage)
+Mav::Microservice::Ret Mav::Mic::Aggregate<Tmics...>::process(mavlink_message_t &aMessage,
+	OnResponseSignature aOnResponse)
 {
 	for (auto &ptrMicroservice : microservices) {
-		auto ret = ptrMicroservice->process(aMessage);
+		auto ret = ptrMicroservice->process(aMessage, aOnResponse);
 
 		if (ret != Ret::Ignored) {
 			return ret;
@@ -25,3 +35,6 @@ Mav::Microservice::Ret Mav::Mic::Aggregate<Tmics...>::process(mavlink_message_t 
 
 	return Ret::Ignored;
 }
+
+}  // namespace Mic
+}  // namespace Mav

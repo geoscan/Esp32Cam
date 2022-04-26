@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm -f *.bin
+rm -f *.bin *.zip

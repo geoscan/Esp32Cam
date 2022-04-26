@@ -15,13 +15,25 @@
 #include "Marshalling.hpp"
 #include "Unmarshalling.hpp"
 #include "Microservice/GsNetwork.hpp"
+#include "Microservice/Camera.hpp"
 #include "Dispatcher.hpp"
 #include "mav/mav.hpp"
 
 Mav::Dispatcher::Dispatcher():
 	key{{&Dispatcher::onMavlinkReceived, this}},
-	micAggregate{}
+	micAggregate{*this}
 {
+}
+
+void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
+{
+	// Warn. Do not replace iteration w/ RR's Key<...>::notify(), because locking order matters
+	for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Iterate over subscribers in a thread-safe way
+		std::lock_guard<std::mutex> lock{resp.mutex};  // Lock response buffer
+		(void)lock;
+		resp.size = Marshalling::push(aMavlinkMessage, resp.buffer);
+		cb(Sub::Rout::Mavlink{respAsPayload()});
+	}
 }
 
 Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
@@ -31,17 +43,18 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 
 	if (unmarshalling.size()) {
 		auto &message = unmarshalling.front();
-		ret = micAggregate.process(message);
 
-		if (ret == Microservice::Ret::Response) {
-			resp.size = Marshalling::push(message, resp.buffer);
-		}
+		resp.size = 0;
+		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
+			ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
+			resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
+		});
+
 		unmarshalling.pop();
 	}
 
 	return ret;
 }
-
 
 Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0> aMessage)
 {
@@ -60,8 +73,9 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 			break;
 
 		case Microservice::Ret::Response:  // send response back
+			ESP_LOGD(Mav::kDebugTag, "Dispatcher::onMavlinkReceived: sending response, size %d", resp.size);
 			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
-			response.payload = Sub::Rout::Payload{&resp.buffer, resp.size};
+			response.payload = respAsPayload();
 
 			break;
 
@@ -72,4 +86,9 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", response.nProcessed);
 
 	return response;
+}
+
+Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
+{
+	return Sub::Rout::Payload{resp.buffer, resp.size};
 }
