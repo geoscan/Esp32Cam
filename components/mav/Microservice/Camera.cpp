@@ -219,7 +219,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 	auto ret = Ret::Ignored;
 
 	if (history.imageCaptureSequence.end() != it) {
-		auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageIndex);
+		auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
 
 		msg.packInto(aMessage);
 		aOnResponse(aMessage);
