@@ -224,6 +224,10 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 		msg.packInto(aMessage);
 		aOnResponse(aMessage);
 		ret = Ret::Response;
+	} else {
+		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
+		msg.packInto(&aMessage);
+		aOnResponse(aMessage);
 	}
 
 	return ret;
