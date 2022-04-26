@@ -252,11 +252,12 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		aOnResponse(aMessage);
 	}
 
-	if (MAV_RESULT_ACCEPTED == mavResult) {
+	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
 		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
 		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
-		mavlinkCameraImageCaptured.image_index = 0;
+		mavlinkCameraImageCaptured.image_index = history.imageCaptureCount;
+		mavlinkCameraImageCaptured.capture_result = (MAV_RESULT_ACCEPTED == mavResult) ? 1 : 0;
 		std::copy_n(filename, std::min<int>(kNameMaxLen, sizeof(mavlinkCameraImageCaptured.file_url)),
 			mavlinkCameraImageCaptured.file_url);
 
