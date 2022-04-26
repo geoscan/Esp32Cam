@@ -33,8 +33,14 @@ public:  // Utility::HrTimer API
 	void onHrTimer() override final;
 
 private:
+
+	struct ImageCapture {
+		unsigned sequence;
+		bool result;
+	};
+
 	struct History {
-		Utility::CircularBuffer<unsigned, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
+		Utility::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
 		std::int32_t imageCaptureCount = 0;
 	} history;
 };
