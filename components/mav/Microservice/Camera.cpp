@@ -45,7 +45,7 @@ void Camera::onHrTimer()
 	notify(mavlinkMessage);
 }
 
-Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat"}
+Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat", true}
 {
 	using namespace Sub::Sys;
 
