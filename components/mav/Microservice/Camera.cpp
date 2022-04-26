@@ -216,21 +216,19 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 	const auto missingIndex = static_cast<int>(aMavlinkCommandLong.param2);
 	auto it = std::find_if(history.imageCaptureSequence.begin(), history.imageCaptureSequence.end(),
 		[missingIndex](const ImageCapture &aIc) { return missingIndex == aIc.imageIndex; });
-	auto ret = Ret::Ignored;
 
 	if (history.imageCaptureSequence.end() != it) {
 		auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
 
 		msg.packInto(aMessage);
 		aOnResponse(aMessage);
-		ret = Ret::Response;
 	} else {
 		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
-		msg.packInto(&aMessage);
+		msg.packInto(aMessage);
 		aOnResponse(aMessage);
 	}
 
-	return ret;
+	return Ret::Response;
 }
 
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
