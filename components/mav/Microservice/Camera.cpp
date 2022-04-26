@@ -253,9 +253,12 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	(void)aMavlinkCommandLong;
-	(void)aMessage;
-	(void)aOnResponse;
+	mavlink_camera_capture_status_t mavlinkCameraCaptureStatus {};
+	Mav::Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraCaptureStatus);
+	mavlinkCameraCaptureStatus.image_count = history.imageCaptureCount;
+	mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompId(), &aMessage,
+		&mavlinkCameraCaptureStatus);
+	aOnResponse(aMessage);
 
 	return Ret::Ignored;
 }
