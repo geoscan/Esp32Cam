@@ -253,6 +253,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraCaptureStatus");
 	// Pack and send `COMMAND_ACK`
 	{
 		auto ack = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
