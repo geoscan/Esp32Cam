@@ -251,6 +251,8 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		aOnResponse(aMessage);
 	}
 
+	history.imageCaptureSequence.push_back(aMavlinkCommandLong.param4);  // Push sequence number into history
+
 	return Ret::Response;
 }
 

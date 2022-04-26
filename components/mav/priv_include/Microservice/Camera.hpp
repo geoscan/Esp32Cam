@@ -11,6 +11,7 @@
 #include "Microservice.hpp"
 #include "DelayedSend.hpp"
 #include "utility/HrTimer.hpp"
+#include "utility/CircularBuffer.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -28,6 +29,11 @@ public:  // Utility::HrTimer API
 	Ret processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onHrTimer() override final;
+
+private:
+	struct History {
+		Utility::CircularBuffer<unsigned, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
+	} history;
 };
 
 }  // namespace Mic
