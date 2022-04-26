@@ -213,9 +213,9 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	const auto missingIndex = static_cast<int>(aMavlinkCommandLong.param2);
+	const auto requestedIndex = static_cast<int>(aMavlinkCommandLong.param2);
 	auto it = std::find_if(history.imageCaptureSequence.begin(), history.imageCaptureSequence.end(),
-		[missingIndex](const ImageCapture &aIc) { return missingIndex == aIc.imageIndex; });
+		[requestedIndex](const ImageCapture &aIc) { return requestedIndex == aIc.imageIndex; });
 
 	if (history.imageCaptureSequence.end() != it) {
 		// Pack COMMAND_ACK
