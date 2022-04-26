@@ -95,6 +95,11 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 
 							break;
 
+						case MAVLINK_MSG_ID_CAMERA_CAPTURE_STATUS:
+							ret = processRequestMessageCameraCaptureStatus(commandLong, aMessage, aOnResponse);
+
+							break;
+
 						default:
 							break;
 					}
