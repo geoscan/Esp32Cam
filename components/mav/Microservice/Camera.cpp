@@ -256,7 +256,7 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 		mavlink_camera_capture_status_t mavlinkCameraCaptureStatus {};
 		Mav::Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraCaptureStatus);
 		mavlinkCameraCaptureStatus.image_count = history.imageCaptureCount;
-		mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompId(), &aMessage,
+		mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMessage,
 			&mavlinkCameraCaptureStatus);
 		aOnResponse(aMessage);
 	}
