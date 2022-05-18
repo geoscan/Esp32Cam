@@ -10,10 +10,19 @@
 
 #include "utility/time.hpp"
 #include <chrono>
+#include "Mavlink.hpp"
+#include "Globals.hpp"
 
 namespace Mav {
 namespace Hlpr {
 namespace Cmn {
+namespace Impl {
+
+template <class T> struct CallbackEncode;
+template <> struct CallbackEncode<mavlink_command_long_t> { static constexpr auto call = mavlink_msg_command_long_encode; };
+template <> struct CallbackEncode<mavlink_command_ack_t> {static constexpr auto call = mavlink_msg_command_ack_encode; };
+
+}  // namespace Impl
 
 template <class T>
 void fieldTimeBootMsInit(T &aObj)
@@ -21,6 +30,22 @@ void fieldTimeBootMsInit(T &aObj)
 	aObj.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::microseconds{Utility::bootTimeUs()}).count();
 }
+
+template <class T>
+inline void msgPack(const T &aMsg, mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
+{
+	Impl::CallbackEncode<T>::call(Globals::getSysId(), aCompid, &aMsgOut, &aMsg);
+}
+
+template <class T>
+inline mavlink_message_t msgPack(const T &aMsg, std::uint8_t aCompid = Globals::getCompId())
+{
+	mavlink_message_t msgOut;
+	msgPack(aMsg, msgOut);
+
+	return msgOut;
+}
+
 
 }  // namespace Cmn
 }  // namespace Hlpr
