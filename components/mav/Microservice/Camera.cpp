@@ -131,11 +131,6 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	using namespace Sub::Sys;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
-	struct {
-		int sysid;
-		int compid;
-	} sender {aMavlinkMessage.sysid, aMavlinkMessage.compid};
-
 	typename Fld::GetType<Fld::Field::Initialized, Module::Camera>::Type initialized = false;
 
 	for (auto &cb : Fld::ModuleGetField::getIterators()) {
@@ -147,13 +142,9 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 #endif
 
 	{
-		mavlink_command_ack_t mavlinkCommandAck {};
-		mavlinkCommandAck.target_component = sender.compid;
-		mavlinkCommandAck.target_system = sender.sysid;
-		mavlinkCommandAck.result = initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
-		mavlinkCommandAck.command = aMavlinkCommandLong.command;
-
-		mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage, &mavlinkCommandAck);
+		auto mavlinkCommandAck = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, aMavlinkCommandLong.command,
+			initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED);
+		Mav::Hlpr::Cmn::msgPack<mavlink_command_ack_t>(mavlinkCommandAck, aMavlinkMessage, Globals::getCompIdCamera());
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `COMMAND_ACK`");
 		aOnResponse(aMavlinkMessage);
 	}
