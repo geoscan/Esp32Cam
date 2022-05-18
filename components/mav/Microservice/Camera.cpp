@@ -197,7 +197,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 			}
 		}
 
-		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
+		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMavlinkMessage,
 			&mavlinkCameraInformation);
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
 		aOnResponse(aMavlinkMessage);
