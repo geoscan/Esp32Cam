@@ -9,4 +9,5 @@ idf_component_register(
 		sub
 		utility
 		avilib
+		sd_fat
 )
