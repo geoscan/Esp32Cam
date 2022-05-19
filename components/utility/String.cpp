@@ -7,14 +7,15 @@
 
 #include "utility/String.hpp"
 #include <algorithm>
+#include <cstring>
 
 namespace Utility {
 namespace Str {
 
 bool checkEndswith(const char *aStr, const char *aSuffix)
 {
-	const auto *aStrLen = std::strlen(aStr);
-	const auto *aSuffixLen = std::strlen(aStr);
+	const auto aStrLen = std::strlen(aStr);
+	const auto aSuffixLen = std::strlen(aStr);
 	bool ret = false;
 
 	if (aStrLen > 0 && aSuffixLen > 0 && aStrLen >= aSuffixLen) {
