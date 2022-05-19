@@ -24,10 +24,5 @@ MavlinkCommandAck MavlinkCommandAck::makeFrom(const mavlink_message_t &aMessage,
 	return ret;
 }
 
-void MavlinkCommandAck::packInto(mavlink_message_t &aInto)
-{
-	mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aInto, this);
-}
-
 }  // namespace Hlpr
 }  // namespace Mav

@@ -18,7 +18,6 @@ struct MavlinkCommandAck : mavlink_command_ack_t, Cmn::Impl::Pack<mavlink_comman
 	static MavlinkCommandAck makeFrom(const mavlink_message_t &aMessage,
 		decltype(mavlink_command_ack_t::command) aCommand,
 		decltype(mavlink_command_ack_t::result) aResult = MAV_RESULT_ACCEPTED);
-	void packInto(mavlink_message_t &aInto);
 };
 
 }  // namespace Hlpr
