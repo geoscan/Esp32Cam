@@ -22,6 +22,7 @@
 #include "Globals.hpp"
 #include "sub/Sys.hpp"
 #include "utility/time.hpp"
+#include "utility/LogSection.hpp"
 #include "sd_fat.h"
 #include <cstring>
 #include <algorithm>
@@ -269,6 +270,7 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdImageStartCapture");
 	sdFatInit();
 	MAV_RESULT mavResult = MAV_RESULT_FAILED;
 	static constexpr std::size_t kNameMaxLen = 6;
