@@ -9,11 +9,12 @@
 #define MAV_PRIV_INCLUDE_HELPER_MAVLINKMESSAGECOMMAND_HPP_
 
 #include "Mavlink.hpp"
+#include "Common.hpp"
 
 namespace Mav {
 namespace Hlpr {
 
-struct MavlinkCommandLong : mavlink_command_long_t {
+struct MavlinkCommandLong : Cmn::Impl::Pack<mavlink_command_long_t> {
 	static mavlink_command_long_t makeFrom(const mavlink_command_int_t &);
 	static mavlink_command_long_t makeFrom(const mavlink_message_t &);
 };
