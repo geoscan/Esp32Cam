@@ -278,7 +278,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	ImageCapture imageCapture {static_cast<int>(aMavlinkCommandLong.param4), false,
 		static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff), history.imageCaptureCount};
 
-	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of total images should be eq. 1
+	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of images should be eq. 1
 		mavResult = MAV_RESULT_UNSUPPORTED;
 		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture Periodic shoots are not supported");
 	}
