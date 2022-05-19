@@ -230,12 +230,14 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 			msg.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		}
-		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured found the requested index.");
+		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured found the requested index. %d",
+			requestedIndex);
 	} else {  // `history` does not hold info on this capture. Probably, it never happened
 		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
 		msg.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
-		ESP_LOGW(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured could not find the requested index");
+		ESP_LOGW(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured could not find the requested"
+			"index %d", requestedIndex);
 	}
 
 	return Ret::Response;
