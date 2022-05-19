@@ -39,10 +39,5 @@ CameraImageCaptured CameraImageCaptured::make(decltype(mavlink_camera_image_capt
 	return make(aImageIndex, aCaptureResult, name);
 }
 
-void CameraImageCaptured::packInto(mavlink_message_t &aMessage)
-{
-	mavlink_msg_camera_image_captured_encode(Globals::getSysId(), Globals::getCompId(), &aMessage, this);
-}
-
 }  // namespace Hlpr
 }  // namespace Mav

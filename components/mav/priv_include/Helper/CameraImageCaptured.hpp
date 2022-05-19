@@ -19,8 +19,6 @@ struct CameraImageCaptured : mavlink_camera_image_captured_t, Cmn::Impl::Pack<ma
 		decltype(mavlink_camera_image_captured_t::capture_result) aCaptureResult, const char *fileName);
 	static CameraImageCaptured make(decltype(mavlink_camera_image_captured_t::image_index) aImageIndex,
 		decltype(mavlink_camera_image_captured_t::capture_result) aCaptureResult, int numericName);
-
-	void packInto(mavlink_message_t &aMessage);
 };
 
 }  // namespace Hlpr
