@@ -144,7 +144,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	{
 		auto mavlinkCommandAck = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, aMavlinkCommandLong.command,
 			initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED);
-		Mav::Hlpr::Cmn::msgPack<mavlink_command_ack_t>(mavlinkCommandAck, aMavlinkMessage, Globals::getCompIdCamera());
+		mavlinkCommandAck.pack(aMavlinkMessage, Globals::getCompIdCamera());
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `COMMAND_ACK`");
 		aOnResponse(aMavlinkMessage);
 	}
@@ -220,20 +220,20 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 		{
 			auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command,
 				MAV_RESULT_ACCEPTED);
-			msg.packInto(aMessage);
+			msg.pack(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		}
 		// Pack CAMERA_IMAGE_CAPTURED
 		{
 			auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
 
-			msg.packInto(aMessage);
+			msg.pack(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		}
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured found the requested index.");
 	} else {  // `history` does not hold info on this capture. Probably, it never happened
 		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
-		msg.packInto(aMessage);
+		msg.pack(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 		ESP_LOGW(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured could not find the requested index");
 	}
@@ -248,7 +248,7 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 	// Pack and send `COMMAND_ACK`
 	{
 		auto ack = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
-		ack.packInto(aMessage);
+		ack.pack(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 	// Pack and send `CAMERA_CAPTURE_STATUS`
@@ -295,7 +295,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing ACK");
 		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
-		mavlinkCommandAck.packInto(aMessage);
+		mavlinkCommandAck.pack(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 
@@ -305,7 +305,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
 		auto mavlinkCameraImageCaptured = Mav::Hlpr::CameraImageCaptured::make(imageCapture.imageIndex,
 			imageCapture.result, filename);
-		mavlinkCameraImageCaptured.packInto(aMessage);
+		mavlinkCameraImageCaptured.pack(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 
