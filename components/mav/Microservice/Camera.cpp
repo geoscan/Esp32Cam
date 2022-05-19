@@ -28,7 +28,7 @@
 #include <algorithm>
 #include <chrono>
 
-#define DEBUG_PRETEND_CAMERA_INITIALIZED 1
+#define DEBUG_PRETEND_CAMERA_INITIALIZED 0
 
 namespace Mav {
 namespace Mic {
