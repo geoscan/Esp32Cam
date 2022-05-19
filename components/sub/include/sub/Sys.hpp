@@ -111,6 +111,16 @@ bool moduleCbTryGet(ModuleCb &aCb, Val &aOut)
 	return aCb({Im, If}).tryGet<Im, If>(aOut);
 }
 
+template <class Tcb>
+inline void modulesVisitIterate(Req aReq, Tcb &&aCb)
+{
+	for (auto &cb : ModuleGetField::getIterators()) {
+		cb(aReq).variant.match(
+			[](...){},
+			std::forward<Tcb>(aCb));
+	}
+}
+
 }  // namespace Fld
 }  // namespace Sys
 }  // namespace Sub
