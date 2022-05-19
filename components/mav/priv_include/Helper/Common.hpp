@@ -22,6 +22,24 @@ template <class T> struct CallbackEncode;
 template <> struct CallbackEncode<mavlink_command_long_t> { static constexpr auto call = mavlink_msg_command_long_encode; };
 template <> struct CallbackEncode<mavlink_command_ack_t> {static constexpr auto call = mavlink_msg_command_ack_encode; };
 
+template <class T>
+struct Pack : T {
+	using T::T;
+
+	inline void pack(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
+	{
+		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &aMsgOut, static_cast<const T *>(this));
+	}
+
+	inline mavlink_message_t pack(std::uint8_t aCompid = Globals::getCompId())
+	{
+		mavlink_message_t msgOut;
+		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &msgOut, static_cast<const T *>(this));
+
+		return msgOut;
+	}
+};
+
 }  // namespace Impl
 
 template <class T>
@@ -45,7 +63,6 @@ inline mavlink_message_t msgPack(const T &aMsg, std::uint8_t aCompid = Globals::
 
 	return msgOut;
 }
-
 
 }  // namespace Cmn
 }  // namespace Hlpr
