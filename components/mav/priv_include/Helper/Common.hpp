@@ -25,7 +25,7 @@ template <> struct CallbackEncode<mavlink_camera_image_captured_t> {static const
 
 template <class T>
 struct Pack {
-	inline void pack(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
+	inline void packInto(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
 	{
 		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &aMsgOut, reinterpret_cast<const T *>(this));
 	}
