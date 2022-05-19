@@ -16,9 +16,9 @@ HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName, bool a
 		HrTimer::onTimerStaticCallback,
 		this,
 		aDispatchMethod,
-		aName
+		aName,
+		aSkipUnhandledEvents
 	};
-	(void)aSkipUnhandledEvents;
 	esp_timer_create(&args, &handle);
 }
 
