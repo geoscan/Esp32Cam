@@ -15,12 +15,14 @@
 #include "Helper/MavlinkCommandLong.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
 #include "Helper/Common.hpp"
+#include "Helper/CameraImageCaptured.hpp"
 #include "sub/Rout.hpp"
 #include "sub/Cam.hpp"
 #include "mav/mav.hpp"
 #include "Globals.hpp"
 #include "sub/Sys.hpp"
 #include "utility/time.hpp"
+#include "utility/LogSection.hpp"
 #include "sd_fat.h"
 #include <cstring>
 #include <algorithm>
@@ -89,6 +91,16 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 
 							break;
 
+						case MAVLINK_MSG_ID_CAMERA_IMAGE_CAPTURED:
+							ret = processRequestMessageCameraImageCaptured(commandLong, aMessage, aOnResponse);
+
+							break;
+
+						case MAVLINK_MSG_ID_CAMERA_CAPTURE_STATUS:
+							ret = processRequestMessageCameraCaptureStatus(commandLong, aMessage, aOnResponse);
+
+							break;
+
 						default:
 							break;
 					}
@@ -120,11 +132,6 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	using namespace Sub::Sys;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
-	struct {
-		int sysid;
-		int compid;
-	} sender {aMavlinkMessage.sysid, aMavlinkMessage.compid};
-
 	typename Fld::GetType<Fld::Field::Initialized, Module::Camera>::Type initialized = false;
 
 	for (auto &cb : Fld::ModuleGetField::getIterators()) {
@@ -136,13 +143,9 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 #endif
 
 	{
-		mavlink_command_ack_t mavlinkCommandAck {};
-		mavlinkCommandAck.target_component = sender.compid;
-		mavlinkCommandAck.target_system = sender.sysid;
-		mavlinkCommandAck.result = initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
-		mavlinkCommandAck.command = aMavlinkCommandLong.command;
-
-		mavlink_msg_command_ack_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage, &mavlinkCommandAck);
+		auto mavlinkCommandAck = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, aMavlinkCommandLong.command,
+			initialized ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED);
+		mavlinkCommandAck.packInto(aMavlinkMessage, Globals::getCompIdCamera());
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `COMMAND_ACK`");
 		aOnResponse(aMavlinkMessage);
 	}
@@ -195,7 +198,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 			}
 		}
 
-		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompId(), &aMavlinkMessage,
+		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMavlinkMessage,
 			&mavlinkCameraInformation);
 		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
 		aOnResponse(aMavlinkMessage);
@@ -204,13 +207,76 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	return Microservice::Ret::Response;
 }
 
+Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	const auto requestedIndex = static_cast<int>(aMavlinkCommandLong.param2);
+	auto it = std::find_if(history.imageCaptureSequence.begin(), history.imageCaptureSequence.end(),
+		[requestedIndex](const ImageCapture &aIc) { return requestedIndex == aIc.imageIndex; });
+
+	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured requestedIndex %d", requestedIndex);
+
+	if (history.imageCaptureSequence.end() != it) {
+		// Pack COMMAND_ACK
+		{
+			auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command,
+				MAV_RESULT_ACCEPTED);
+			msg.packInto(aMessage, Globals::getCompIdCamera());
+			aOnResponse(aMessage);
+		}
+		// Pack CAMERA_IMAGE_CAPTURED
+		{
+			auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
+
+			msg.packInto(aMessage, Globals::getCompIdCamera());
+			aOnResponse(aMessage);
+		}
+		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured found the requested index. %d",
+			requestedIndex);
+	} else {  // `history` does not hold info on this capture. Probably, it never happened
+		auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
+		msg.packInto(aMessage, Globals::getCompIdCamera());
+		aOnResponse(aMessage);
+		ESP_LOGW(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured could not find the requested"
+			"index %d", requestedIndex);
+	}
+
+	return Ret::Response;
+}
+
+Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraCaptureStatus");
+	// Pack and send `COMMAND_ACK`
+	{
+		auto ack = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
+		ack.packInto(aMessage, Globals::getCompIdCamera());
+		aOnResponse(aMessage);
+	}
+	// Pack and send `CAMERA_CAPTURE_STATUS`
+	{
+		mavlink_camera_capture_status_t mavlinkCameraCaptureStatus {};
+		Mav::Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraCaptureStatus);
+		mavlinkCameraCaptureStatus.image_count = history.imageCaptureCount;
+		mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMessage,
+			&mavlinkCameraCaptureStatus);
+		aOnResponse(aMessage);
+	}
+
+	return Ret::Response;
+}
+
 Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdImageStartCapture");
 	sdFatInit();
 	MAV_RESULT mavResult = MAV_RESULT_FAILED;
 	static constexpr std::size_t kNameMaxLen = 6;
 	char filename[kNameMaxLen] = {0};
+	ImageCapture imageCapture {static_cast<int>(aMavlinkCommandLong.param4), false,
+		static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff), history.imageCaptureCount};
 
 	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of total images should be eq. 1
 		mavResult = MAV_RESULT_UNSUPPORTED;
@@ -219,8 +285,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
-		std::uint16_t stamp = static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff);
-		snprintf(filename, kNameMaxLen, "%d", stamp);
+		snprintf(filename, kNameMaxLen, "%d", imageCapture.imageName);
 
 		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
 			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
@@ -234,22 +299,22 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing ACK");
 		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
-		mavlinkCommandAck.packInto(aMessage);
+		mavlinkCommandAck.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 
-	if (MAV_RESULT_ACCEPTED == mavResult) {
+	imageCapture.result = MAV_RESULT_ACCEPTED == mavResult;
+
+	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
-		mavlink_camera_image_captured_t mavlinkCameraImageCaptured {};
-		Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraImageCaptured);
-		mavlinkCameraImageCaptured.image_index = 0;
-		std::copy_n(filename, std::min<int>(kNameMaxLen, sizeof(mavlinkCameraImageCaptured.file_url)),
-			mavlinkCameraImageCaptured.file_url);
-
-		mavlink_msg_camera_image_captured_encode(Globals::getSysId(), Globals::getCompId(), &aMessage,
-			&mavlinkCameraImageCaptured);
+		auto mavlinkCameraImageCaptured = Mav::Hlpr::CameraImageCaptured::make(imageCapture.imageIndex,
+			imageCapture.result, filename);
+		mavlinkCameraImageCaptured.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
+
+	history.imageCaptureSequence.push_back(imageCapture);  // Push capture info into history
+	history.imageCaptureCount += imageCapture.result;
 
 	return Ret::Response;
 }
