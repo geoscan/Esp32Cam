@@ -21,6 +21,7 @@ namespace Impl {
 template <class T> struct CallbackEncode;
 template <> struct CallbackEncode<mavlink_command_long_t> { static constexpr auto call = mavlink_msg_command_long_encode; };
 template <> struct CallbackEncode<mavlink_command_ack_t> {static constexpr auto call = mavlink_msg_command_ack_encode; };
+template <> struct CallbackEncode<mavlink_camera_image_captured_t> {static constexpr auto call = mavlink_msg_camera_image_captured_encode; };
 
 template <class T>
 struct Pack {
