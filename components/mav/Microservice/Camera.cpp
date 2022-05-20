@@ -285,9 +285,9 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
-		Sub::Sys::Fld::modulesVisitIterate({Sub::Sys::Module::Camera, Sub::Sys::Fld::Field::CaptureCount},
-			[&filename](typename Sub::Sys::Fld::GetType<Sub::Sys::Fld::Field::CaptureCount,
-				Sub::Sys::Module::Camera>::Type aCnt)
+		Sub::Sys::ModuleBase::moduleFieldReadIter<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(
+			[&filename](Sub::Sys::ModuleBase::FieldType<Sub::Sys::Module::Camera, Sub::Sys::Fld::Field::CaptureCount>
+				aCnt)
 			{
 				snprintf(filename, kNameMaxLen, "%d", aCnt);
 			});
