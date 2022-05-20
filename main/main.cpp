@@ -17,6 +17,7 @@
 #include "camera_streamer.h"
 #include "cam/cam.hpp"
 #include "camera_thread/camera_thread.hpp"
+#include "camera_recorder/camera_recorder.hpp"
 #include "version.hpp"
 #include "sd_fat.h"
 #include "log_udp.h"
@@ -29,6 +30,7 @@ static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
+	CameraRecorder::init();
 	camInit();
 	versionInit();
 
