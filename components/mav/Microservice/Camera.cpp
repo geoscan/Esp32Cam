@@ -51,15 +51,13 @@ Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat", true}
 {
 	using namespace Sub::Sys;
 
-	bool fCameraInitialized = false;
+	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> fCameraInitialized;
 
-	for (auto &cb : Fld::ModuleGetField::getIterators()) {
-		auto resp = cb(Fld::Req{Module::Camera, Fld::Field::Initialized});
-
-		if (resp.tryGet<Module::Camera, Fld::Field::Initialized>(fCameraInitialized)) {
-			ESP_LOGI(Mav::kDebugTag, "Microservice::Camera: Heartbeat emit, found camera module");
-		}
-	}
+	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+		[&fCameraInitialized](bool aInit)
+		{
+			fCameraInitialized = aInit;
+		});
 
 #if DEBUG_PRETEND_CAMERA_INITIALIZED
 	fCameraInitialized = true;
