@@ -139,9 +139,22 @@ public:
 	virtual ~ModuleBase() = default;
 	ModuleType getModuleType() const;
 
+	template <ModuleType Im, Fld::FieldType If>
+	using FieldType = typename Fld::template GetType<If, Im>::Type;
 
 	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
+
+	template <ModuleType Im, Fld::FieldType If, class Tcb>
+	static void moduleFieldReadIter(Tcb &&aCb)
+	{
+		getFieldValue({Im, If},
+			[aCb](Fld::Resp aResp) {
+				if (aResp.moduleMatch(Im)) {
+					aResp.variant.match([](...){}, aCb);
+				}
+			});
+	}
 
 protected:
 	template <ModuleType Im, Fld::FieldType If, class ...Ts>
