@@ -10,7 +10,9 @@
 
 namespace CameraRecorder {
 
-static constexpr const char *kDebugTag = TARGET_DEBUG_TAG;
+extern const char *kDebugTag;
+
+void init();
 
 }  // namespace CameraRecorder
 
