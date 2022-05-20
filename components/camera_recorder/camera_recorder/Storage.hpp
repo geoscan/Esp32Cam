@@ -15,7 +15,11 @@ namespace CameraRecorder {
 
 /// \brief Encapsulates various aspects of working w/ a file system in the context of storing photo/video frames
 ///
-struct Storage {
+struct Storage : Sub::Sys::ModuleBase {
+	Storage();
+	virtual typename Sub::Sys::Fld::ModuleGetFieldMult::Ret getFieldValue(
+		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0>,
+		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1>) override;
 	static esp_err_t countFrames(unsigned &aCountOut);
 	static Sub::Sys::Fld::ModuleGetField::Ret moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> arg);
 };

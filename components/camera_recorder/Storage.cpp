@@ -18,6 +18,30 @@ static Sub::Sys::Fld::ModuleGetField keyModuleGetField{Storage::moduleGetField};
 /// \brief Counts frames stored on SD card
 /// \return `ESP_ERR_NOT_FOUND` if no storage is available
 ///
+Storage::Storage() : Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera}
+{
+}
+
+typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
+	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0> aRequest,
+	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+{
+	switch (aRequest.field) {
+		case Sub::Sys::Fld::FieldType::CaptureCount: {
+			unsigned count = 0;
+
+			if (ESP_OK == countFrames(count)) {
+				aOnResponse(makeResponse<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(count));
+			}
+
+			break;
+		}
+
+		default:
+			break;
+	}
+}
+
 esp_err_t Storage::countFrames(unsigned &aCountOut)
 {
 	esp_err_t ret = ESP_ERR_NOT_FOUND;
