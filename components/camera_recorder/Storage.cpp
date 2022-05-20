@@ -15,8 +15,6 @@
 
 namespace CameraRecorder {
 
-static Sub::Sys::Fld::ModuleGetField keyModuleGetField{Storage::moduleGetField};
-
 /// \brief Counts frames stored on SD card
 /// \return `ESP_ERR_NOT_FOUND` if no storage is available
 ///
