@@ -10,7 +10,9 @@ using namespace std;
 static constexpr const char *kTag = "[OV2640]";
 
 
-Ov2640::Ov2640() : key{{&Ov2640::moduleGetField, this}}
+Ov2640::Ov2640() :
+	Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera},
+	key{{&Ov2640::moduleGetField, this}}
 {
 }
 
@@ -262,6 +264,40 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 }
 
 #endif
+
+typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Ov2640::getFieldValue(
+	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0> aRequest,
+	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+{
+	using namespace Sub::Sys;
+
+	switch (aRequest.field) {
+		case Fld::Field::FrameSize:
+			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::FrameSize>(status.frame.w, status.frame.h));
+
+			break;
+
+		case Fld::Field::Initialized:
+			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::Initialized>(status.initialized));
+
+			break;
+
+		case Fld::Field::ModelName:
+			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::ModelName>("OV2640"));
+
+			break;
+
+		case Fld::Field::VendorName:
+			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::VendorName>("OmniVision"));
+
+			break;
+
+		default:
+			break;
+
+	}
+}
+
 
 typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> aRequest)
 {
