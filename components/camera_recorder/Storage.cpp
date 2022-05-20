@@ -68,27 +68,4 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 	return ret;
 }
 
-Sub::Sys::Fld::ModuleGetField::Ret Storage::moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> arg)
-{
-	Sub::Sys::Fld::ModuleGetField::Ret ret{Sub::Sys::None(), Sub::Sys::Module::Camera};
-
-	if (arg.shouldRespond(Sub::Sys::Module::Camera)) {
-		switch (arg.field) {
-			case Sub::Sys::Fld::Field::CaptureCount: {
-				unsigned count = 0;
-
-				if (ESP_OK == countFrames(count)) {
-					ret.variant = count;
-				}
-
-				break;
-			}
-			default:
-				break;
-		}
-	}
-
-	return ret;
-}
-
 }  // namespace CameraRecorder
