@@ -1,0 +1,33 @@
+menu "[sub]"
+
+	choice SUB_DEBUG_LEVEL
+		prompt "[sub] module debug level"
+		default SUB_DEBUG_LEVEL_INFO
+
+		config SUB_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config SUB_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config SUB_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config SUB_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config SUB_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config SUB_DEBUG_LEVEL
+        int
+        default 1 if SUB_DEBUG_LEVEL_ERROR
+        default 2 if SUB_DEBUG_LEVEL_WARN
+        default 3 if SUB_DEBUG_LEVEL_INFO
+        default 4 if SUB_DEBUG_LEVEL_DEBUG
+        default 5 if SUB_DEBUG_LEVEL_VERBOSE
+
+endmenu
