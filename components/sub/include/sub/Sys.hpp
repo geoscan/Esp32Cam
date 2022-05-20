@@ -48,9 +48,12 @@ struct ModApi {
 			bool ret = false;
 
 			if (Utility::Algorithm::in(Im, module, Module::All)) {
+				ret = true;
+				aOut = variant.template get_unchecked<Type<If, Im>>();
 				variant.match(
-					[&ret, &aOut](const typename TgetResponseType<If, Im>::Type &aVal) {
-						aOut = aVal;
+					[&ret, &aOut, this](const typename TgetResponseType<If, Im>::Type &aVal) {
+						aOut = variant.template get_unchecked<Type<If, Im>>();
+//						aOut = aVal;
 						ret = true;
 					},
 					[](...){}
@@ -91,6 +94,7 @@ template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
 
 using Resp = ModApi<Field>::Response<GetType,
+	typename GetType<Field::CaptureCount, Module::Camera>::Type,
 	typename GetType<Field::FrameSize, Module::Camera>::Type,
 	typename GetType<Field::Initialized>::Type,
 	typename GetType<Field::VendorName>::Type,
@@ -140,20 +144,24 @@ public:
 	ModuleType getModuleType() const;
 
 	template <ModuleType Im, Fld::FieldType If>
-	using FieldType = typename Fld::template GetType<If, Im>::Type;
+	using FieldType = typename Fld::GetType<If, Im>::Type;
 
 	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
 
-	template <ModuleType Im, Fld::FieldType If>
-	static void moduleFieldReadIter(std::function<void(FieldType<Im, If>)> aCb)
+	template <ModuleType Im, Fld::FieldType If, class Tcb>
+	static void moduleFieldReadIter(Tcb &&aCb)
 	{
-		ModuleBase::moduleFieldReadIter({Im, If},
-			[aCb](Fld::Resp aResp) {
-				if (aResp.moduleMatch(Im)) {
-					aResp.variant.match([](...){}, aCb);
-				}
-			});
+		for (auto &cb : Fld::ModuleGetFieldMult::getIterators()) {
+			cb({Im, If},
+				[aCb](typename Fld::Resp aResp)
+				{
+					using Ft = FieldType<Im, If>;
+					if (aResp.moduleMatch(Im)) {
+						aCb(aResp.variant.template get_unchecked<Ft>());
+					}
+				});
+		}
 	}
 
 protected:
