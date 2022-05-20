@@ -9,4 +9,7 @@ idf_component_register(
 		sub
 		utility
 		avilib
+		sd_fat
 )
+
+target_compile_definitions(${COMPONENT_LIB} PRIVATE TARGET_DEBUG_TAG="${COMPONENT_LIB}")
