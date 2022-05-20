@@ -56,25 +56,24 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::countFrames");
 	esp_err_t ret = ESP_ERR_NOT_FOUND;
 
-	if (sdFatInit()) {
-		auto *dp = opendir(CONFIG_SD_FAT_MOUNT_POINT);
-		dirent *ep;
-		aCountOut = 0;
+	auto *dp = opendir(CONFIG_SD_FAT_MOUNT_POINT);
+	dirent *ep;
+	aCountOut = 0;
 
-		if (nullptr != dp) {
-			while ((ep = readdir(dp))) {
-				ESP_LOGV(CameraRecorder::kDebugTag, "scanning a directory entry %s", ep->d_name);
+	if (nullptr != dp) {
+		while ((ep = readdir(dp))) {
+			ESP_LOGV(CameraRecorder::kDebugTag, "scanning a directory entry %s", ep->d_name);
 
-				aCountOut += Utility::Str::checkEndswith(ep->d_name, ".jpg") +
-					Utility::Str::checkEndswith(ep->d_name, ".jpeg") + Utility::Str::checkEndswith(ep->d_name, ".JPG") +
-					Utility::Str::checkEndswith(ep->d_name, ".JPEG");
-			}
-		} else {
-			ESP_LOGW(CameraRecorder::kDebugTag, "Storage::countFrames unable to open directory");
+			aCountOut += Utility::Str::checkEndswith(ep->d_name, ".jpg") +
+				Utility::Str::checkEndswith(ep->d_name, ".jpeg") + Utility::Str::checkEndswith(ep->d_name, ".JPG") +
+				Utility::Str::checkEndswith(ep->d_name, ".JPEG");
 		}
 
 		ret = ESP_OK;
+	} else {
+		ESP_LOGW(CameraRecorder::kDebugTag, "Storage::countFrames unable to open directory");
 	}
+
 
 	return ret;
 }
