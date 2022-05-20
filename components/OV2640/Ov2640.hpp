@@ -13,7 +13,7 @@
 
 // --------------------------- Ov2640 --------------------------- //
 
-class Ov2640 : public Cam::CameraBase {
+class Ov2640 : public Cam::CameraBase, public Sub::Sys::ModuleBase {
 public:
 	Ov2640();
 	void init() override;
@@ -35,13 +35,10 @@ private:
 		int height() override;
 	};
 
-public:
-	typename Sub::Sys::Fld::ModuleGetField::Ret moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0>);
-
-private:
-	struct {
-		Sub::Sys::Fld::ModuleGetField moduleGetState;
-	} key;
+protected:
+	virtual typename Sub::Sys::Fld::ModuleGetFieldMult::Ret getFieldValue(
+		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0>,
+		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1>) override;
 
 	struct {
 		bool initialized = false;

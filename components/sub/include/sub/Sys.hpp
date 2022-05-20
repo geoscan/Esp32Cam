@@ -49,11 +49,9 @@ struct ModApi {
 
 			if (Utility::Algorithm::in(Im, module, Module::All)) {
 				ret = true;
-				aOut = variant.template get_unchecked<Type<If, Im>>();
 				variant.match(
 					[&ret, &aOut, this](const typename TgetResponseType<If, Im>::Type &aVal) {
-						aOut = variant.template get_unchecked<Type<If, Im>>();
-//						aOut = aVal;
+						aOut = aVal;
 						ret = true;
 					},
 					[](...){}
@@ -107,25 +105,7 @@ struct Req {
 	bool shouldRespond(Module aThisModule);
 };
 
-using ModuleGetField = typename Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
-using ModuleGetFieldMult = typename Sub::NoLockKey<void(Req, std::function<void(Resp)>)>;
-using ModuleCb = decltype(*ModuleGetField::getIterators().begin());
-
-template <Module Im, Field If, class Val>
-bool moduleCbTryGet(ModuleCb &aCb, Val &aOut)
-{
-	return aCb({Im, If}).tryGet<Im, If>(aOut);
-}
-
-template <class Tcb>
-inline void modulesVisitIterate(Req aReq, Tcb &&aCb)
-{
-	for (auto &cb : ModuleGetField::getIterators()) {
-		cb(aReq).variant.match(
-			[](...){},
-			std::forward<Tcb>(aCb));
-	}
-}
+using ModuleGetFieldMult = typename Sub::NoLockKey<void(Req, std::function<void(Resp)>)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
 
 using FieldType = Field;  /// Temp. alias. `Field` will be subjected to refactoring
 
@@ -145,9 +125,6 @@ public:
 
 	template <ModuleType Im, Fld::FieldType If>
 	using FieldType = typename Fld::GetType<If, Im>::Type;
-
-	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
-		typename Fld::ModuleGetFieldMult::Arg<1>);
 
 	template <ModuleType Im, Fld::FieldType If, class Tcb>
 	static void moduleFieldReadIter(Tcb &&aCb)
