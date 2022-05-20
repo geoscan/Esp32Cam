@@ -49,11 +49,9 @@ struct ModApi {
 
 			if (Utility::Algorithm::in(Im, module, Module::All)) {
 				ret = true;
-				aOut = variant.template get_unchecked<Type<If, Im>>();
 				variant.match(
 					[&ret, &aOut, this](const typename TgetResponseType<If, Im>::Type &aVal) {
-						aOut = variant.template get_unchecked<Type<If, Im>>();
-//						aOut = aVal;
+						aOut = aVal;
 						ret = true;
 					},
 					[](...){}
