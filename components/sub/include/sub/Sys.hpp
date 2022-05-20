@@ -145,8 +145,8 @@ public:
 	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
 
-	template <ModuleType Im, Fld::FieldType If, class Tcb>
-	static void moduleFieldReadIter(Tcb &&aCb)
+	template <ModuleType Im, Fld::FieldType If>
+	static void moduleFieldReadIter(std::function<void(FieldType<Im, If>)> aCb)
 	{
 		ModuleBase::moduleFieldReadIter({Im, If},
 			[aCb](Fld::Resp aResp) {
