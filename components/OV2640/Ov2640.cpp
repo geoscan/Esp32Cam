@@ -11,8 +11,7 @@ static constexpr const char *kTag = "[OV2640]";
 
 
 Ov2640::Ov2640() :
-	Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera},
-	key{{&Ov2640::moduleGetField, this}}
+	Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera}
 {
 }
 
@@ -296,47 +295,6 @@ typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Ov2640::getFieldValue(
 			break;
 
 	}
-}
-
-
-typename Sub::Sys::Fld::ModuleGetField::Ret Ov2640::moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0> aRequest)
-{
-	using namespace Sub::Sys;
-	Sub::Sys::Fld::ModuleGetField::Ret ret {None{}, Module::Camera};
-
-	if (aRequest.shouldRespond(Module::Camera)) {
-		switch (aRequest.field) {
-			case Fld::Field::FrameSize:
-				ret.variant = typename Fld::GetType<Fld::Field::FrameSize, Module::Camera>::Type {
-					status.frame.w, status.frame.h};
-
-				break;
-
-			case Fld::Field::Initialized:
-				ret.variant = status.initialized;
-
-				break;
-
-			case Fld::Field::VendorName: {
-				static constexpr const char *kVendorName = "OmniVision";
-				ret.variant = kVendorName;
-
-				break;
-			}
-
-			case Fld::Field::ModelName: {
-				static constexpr const char *kModelName = "OV 2640"; // TODO: the driver supports multiple OV cameras. If the variants of physical configurations get extended beyond just OV2640, take that into account.
-				ret.variant = kModelName;
-
-				break;
-			}
-
-			default:
-				break;
-		}
-	}
-
-	return ret;
 }
 
 // ------------ Ov2640::Frame ------------ //

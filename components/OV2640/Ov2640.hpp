@@ -35,18 +35,10 @@ private:
 		int height() override;
 	};
 
-public:
-	typename Sub::Sys::Fld::ModuleGetField::Ret moduleGetField(typename Sub::Sys::Fld::ModuleGetField::Arg<0>);
-
 protected:
 	virtual typename Sub::Sys::Fld::ModuleGetFieldMult::Ret getFieldValue(
 		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0>,
 		typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1>) override;
-
-private:
-	struct {
-		Sub::Sys::Fld::ModuleGetField moduleGetState;
-	} key;
 
 	struct {
 		bool initialized = false;
