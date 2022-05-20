@@ -6,6 +6,7 @@
 //
 
 #include "camera_recorder/Storage.hpp"
+#include "camera_recorder/camera_recorder.hpp"
 #include "utility/String.hpp"
 #include "sd_fat.h"
 #include <dirent.h>
@@ -57,6 +58,8 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 					Utility::Str::checkEndswith(ep->d_name, ".jpeg") + Utility::Str::checkEndswith(ep->d_name, ".JPG") +
 					Utility::Str::checkEndswith(ep->d_name, ".JPEG");
 			}
+		} else {
+			ESP_LOGW(CameraRecorder::kDebugTag, "Storage::countFrames unable to open directory");
 		}
 
 		ret = ESP_OK;
