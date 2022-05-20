@@ -283,8 +283,10 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 				snprintf(filename, kNameMaxLen, "%d", aCnt);
 			});
 
-		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
-			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
+		if (0 == aMavlinkCommandLong.confirmation) {
+			for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
+				mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
+			}
 		}
 	}
 
