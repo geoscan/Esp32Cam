@@ -18,6 +18,7 @@
 #include <mapbox/variant.hpp>
 #include <Rr/Trait/StoreType.hpp>
 #include <utility>
+#include <functional>
 
 namespace Sub {
 namespace Sys {
@@ -103,6 +104,7 @@ struct Req {
 };
 
 using ModuleGetField = typename Sub::NoLockKey<Resp(Req)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleGetFieldMult = typename Sub::NoLockKey<void(Req, std::function<void(Resp)>)>;
 using ModuleCb = decltype(*ModuleGetField::getIterators().begin());
 
 template <Module Im, Field If, class Val>
@@ -121,7 +123,42 @@ inline void modulesVisitIterate(Req aReq, Tcb &&aCb)
 	}
 }
 
+using FieldType = Field;  /// Temp. alias. `Field` will be subjected to refactoring
+
 }  // namespace Fld
+
+using ModuleType = Module;  /// Temp. alias. `Module` will be subjected to refactoring.
+
+/// \brief A detachable entity that stores its state in the form of fields of various types.
+///
+/// A module may unify an entire set of CPP modules, even if those are scattered across the project.
+///
+class ModuleBase {
+public:
+	ModuleBase(ModuleType aModuleType);
+	virtual ~ModuleBase() = default;
+	ModuleType getModuleType() const;
+
+	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
+		typename Fld::ModuleGetFieldMult::Arg<1>);
+
+protected:
+	virtual typename Fld::ModuleGetFieldMult::Ret getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
+		typename Fld::ModuleGetFieldMult::Arg<1>);
+private:
+	typename Fld::ModuleGetFieldMult::Ret getFieldValueIpc(typename Fld::ModuleGetFieldMult::Arg<0>,
+		typename Fld::ModuleGetFieldMult::Arg<1>);
+
+private:
+	struct {
+		ModuleType type;
+	} identity;
+
+	struct {
+		Fld::ModuleGetFieldMult fldModuleGetField;
+	} key;
+};
+
 }  // namespace Sys
 }  // namespace Sub
 
