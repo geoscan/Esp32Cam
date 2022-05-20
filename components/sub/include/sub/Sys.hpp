@@ -148,7 +148,7 @@ public:
 	template <ModuleType Im, Fld::FieldType If, class Tcb>
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{
-		getFieldValue({Im, If},
+		ModuleBase::moduleFieldReadIter({Im, If},
 			[aCb](Fld::Resp aResp) {
 				if (aResp.moduleMatch(Im)) {
 					aResp.variant.match([](...){}, aCb);
