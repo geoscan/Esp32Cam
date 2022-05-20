@@ -286,8 +286,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
 		Sub::Sys::ModuleBase::moduleFieldReadIter<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(
-			[&filename](Sub::Sys::ModuleBase::FieldType<Sub::Sys::Module::Camera, Sub::Sys::Fld::Field::CaptureCount>
-				aCnt)
+			[&filename](unsigned aCnt)
 			{
 				ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d", aCnt);
 				snprintf(filename, kNameMaxLen, "%d", aCnt);
