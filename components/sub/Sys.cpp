@@ -13,7 +13,7 @@ namespace Fld {
 
 bool Req::shouldRespond(Module aThisModule)
 {
-	return Utility::Algorithm::in(aThisModule, module, Module::All);
+	return Utility::Algorithm::in(module, aThisModule, Module::All);
 }
 
 }  // namespace Fld
