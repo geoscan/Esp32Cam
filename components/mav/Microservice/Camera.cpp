@@ -285,6 +285,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 
 	// Auto-generate name
 	if (MAV_RESULT_UNSUPPORTED != mavResult) {
+		ESP_LOGD(Mav::kDebugTag, "Auto-generating name");
 		Sub::Sys::ModuleBase::moduleFieldReadIter<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(
 			[&filename](unsigned aCnt)
 			{
