@@ -126,9 +126,6 @@ public:
 	template <ModuleType Im, Fld::FieldType If>
 	using FieldType = typename Fld::GetType<If, Im>::Type;
 
-	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
-		typename Fld::ModuleGetFieldMult::Arg<1>);
-
 	template <ModuleType Im, Fld::FieldType If, class Tcb>
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{

@@ -24,14 +24,6 @@ ModuleBase::ModuleBase(ModuleType aModuleType) :
 {
 }
 
-typename Fld::ModuleGetFieldMult::Ret ModuleBase::moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0> aReq,
-	typename Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
-{
-	for (auto &cb : Fld::ModuleGetFieldMult::getIterators()) {
-		cb(aReq, aOnResponse);
-	}
-}
-
 typename Fld::ModuleGetFieldMult::Ret ModuleBase::getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
 	typename Fld::ModuleGetFieldMult::Arg<1>)
 {
