@@ -5,9 +5,16 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <sdkconfig.h>
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_CAMERA_RECORDER_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "camera_recorder/Storage.hpp"
 #include "camera_recorder/camera_recorder.hpp"
 #include "utility/String.hpp"
+#include "utility/LogSection.hpp"
 #include "sd_fat.h"
 #include <dirent.h>
 #include <sdkconfig.h>
@@ -27,6 +34,7 @@ typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
 	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0> aRequest,
 	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
 {
+	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::getFieldValue");
 	switch (aRequest.field) {
 		case Sub::Sys::Fld::FieldType::CaptureCount: {
 			unsigned count = 0;
@@ -45,6 +53,7 @@ typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
 
 esp_err_t Storage::countFrames(unsigned &aCountOut)
 {
+	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::countFrames");
 	esp_err_t ret = ESP_ERR_NOT_FOUND;
 
 	if (sdFatInit()) {
@@ -54,6 +63,8 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 
 		if (nullptr != dp) {
 			while ((ep = readdir(dp))) {
+				ESP_LOGV(CameraRecorder::kDebugTag, "scanning a directory entry %s", ep->d_name);
+
 				aCountOut += Utility::Str::checkEndswith(ep->d_name, ".jpg") +
 					Utility::Str::checkEndswith(ep->d_name, ".jpeg") + Utility::Str::checkEndswith(ep->d_name, ".JPG") +
 					Utility::Str::checkEndswith(ep->d_name, ".JPEG");
