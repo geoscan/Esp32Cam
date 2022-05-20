@@ -11,6 +11,7 @@
 #include "sd_fat.h"
 #include <dirent.h>
 #include <sdkconfig.h>
+#include <esp_log.h>
 
 namespace CameraRecorder {
 
@@ -21,6 +22,7 @@ static Sub::Sys::Fld::ModuleGetField keyModuleGetField{Storage::moduleGetField};
 ///
 Storage::Storage() : Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera}
 {
+	ESP_LOGI(CameraRecorder::kDebugTag, "initializing Storage");
 }
 
 typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
