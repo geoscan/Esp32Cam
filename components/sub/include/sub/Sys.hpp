@@ -139,10 +139,19 @@ public:
 	virtual ~ModuleBase() = default;
 	ModuleType getModuleType() const;
 
+
 	static void moduleFieldReadIter(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
 
 protected:
+	template <ModuleType Im, Fld::FieldType If, class ...Ts>
+	typename Fld::Resp makeResponse(Ts &&...aValue)
+	{
+		return typename Fld::Resp{
+			typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...},
+			Im};
+	}
+
 	virtual typename Fld::ModuleGetFieldMult::Ret getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
 private:
