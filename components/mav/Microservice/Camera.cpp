@@ -289,6 +289,7 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 			[&filename](Sub::Sys::ModuleBase::FieldType<Sub::Sys::Module::Camera, Sub::Sys::Fld::Field::CaptureCount>
 				aCnt)
 			{
+				ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d", aCnt);
 				snprintf(filename, kNameMaxLen, "%d", aCnt);
 			});
 
