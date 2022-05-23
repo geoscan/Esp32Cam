@@ -299,7 +299,11 @@ Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavl
 
 	if (1 == imageCapture.totalImages) {
 		const auto *prevCapture = history.findBySequence(imageCapture.sequence);
-		const bool shouldCapture = nullptr != prevCapture || 0 != aMavlinkCommandLong.confirmation;
+		const bool shouldCapture = nullptr != prevCapture || 0 == aMavlinkCommandLong.confirmation;
+
+		ESP_LOGD(Mav::kDebugTag, "Camera::processMakeShot, has prev. capture %s first request %s, confirmation %d",
+			nullptr == prevCapture ? "FALSE" : "TRUE", 0 == aMavlinkCommandLong.confirmation ? "TRUE" : "FALSE",
+			aMavlinkCommandLong.confirmation);
 
 		if (shouldCapture) {
 			static constexpr std::size_t kNameMaxLen = 6;
