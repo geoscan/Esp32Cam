@@ -17,13 +17,25 @@ namespace Mav {
 namespace Mic {
 
 class Camera final : public Microservice, public Utility::Tim::HrTimer, public Mav::DelayedSend {
+private:
+	using SequenceId = std::uint32_t;
+
+	struct ImageCapture {
+		SequenceId sequence;
+		unsigned totalImages;
+		MAV_RESULT result;
+		std::string imageName;
+	};
+
+	struct History {
+		Utility::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
+		std::int32_t imageCaptureCount = 0;
+		ImageCapture *findBySequence(SequenceId);
+	};
+
 public:
 	Camera();
-
-public:  // Microservice API
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override final;
-
-public:  // Utility::HrTimer API
 	Ret processRequestMessageCameraInformation(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	Ret processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
@@ -35,20 +47,10 @@ public:  // Utility::HrTimer API
 	void onHrTimer() override final;
 
 private:
+	ImageCapture processMakeShot(const mavlink_command_long_t &aMavlinkCommandLong);
 
-	using ImageName = std::uint16_t;
-
-	struct ImageCapture {
-		int sequence;
-		bool result;
-		ImageName imageName;
-		int imageIndex;
-	};
-
-	struct History {
-		Utility::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
-		std::int32_t imageCaptureCount = 0;
-	} history;
+private:
+	History history;
 };
 
 }  // namespace Mic
