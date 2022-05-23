@@ -201,6 +201,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	auto *prevCapture = history.findBySequence(static_cast<SequenceId>(aMavlinkCommandLong.param4));
+	const auto requestedIndex = static_cast<int>(aMavlinkCommandLong.param2);
 
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured requestedIndex %d", requestedIndex);
 
@@ -214,7 +215,8 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 		}
 		// Pack CAMERA_IMAGE_CAPTURED
 		{
-			auto msg = Mav::Hlpr::CameraImageCaptured::make(it->sequence, it->result, it->imageName.c_str());
+			auto msg = Mav::Hlpr::CameraImageCaptured::make(prevCapture->sequence, prevCapture->result,
+				prevCapture->imageName.c_str());
 
 			msg.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
