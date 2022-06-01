@@ -85,7 +85,7 @@ enum class Field : std::uint8_t {
 template <class T>
 using StoreType = typename Rr::Trait::StoreType<T>;
 
-template <Field, Module=Module::All> struct GetType : StoreType<None> {};
+template <Field, Module=Module::All> struct GetType : StoreType<None> {};  ///< Type selector
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
 template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
@@ -93,7 +93,11 @@ template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
 template <> struct GetType<Field::Recording, Module::Camera> : StoreType<bool> {};
 
-using Resp = ModApi<Field>::Response<GetType,
+/// \brief Response variant type.
+using Resp = ModApi<Field>::Response<
+	// Selector to use
+	GetType,
+	// Variant types
 	typename GetType<Field::CaptureCount, Module::Camera>::Type,
 	typename GetType<Field::FrameSize, Module::Camera>::Type,
 	typename GetType<Field::Initialized>::Type,
