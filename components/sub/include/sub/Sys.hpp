@@ -79,6 +79,7 @@ enum class Field : std::uint8_t {
 	ModelName,
 	Initialized,
 	CaptureCount,  ///< Number of frames captured by a camera
+	Recording,  ///< Whether a recording process is ongoing
 };
 
 template <class T>
@@ -90,13 +91,16 @@ template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
 template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
 template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
+template <> struct GetType<Field::Recording, Module::Camera> : StoreType<bool> {};
 
 using Resp = ModApi<Field>::Response<GetType,
 	typename GetType<Field::CaptureCount, Module::Camera>::Type,
 	typename GetType<Field::FrameSize, Module::Camera>::Type,
 	typename GetType<Field::Initialized>::Type,
 	typename GetType<Field::VendorName>::Type,
-	typename GetType<Field::ModelName>::Type>;
+	typename GetType<Field::ModelName>::Type,
+	typename GetType<Field::Recording, Module::Camera>::Type,
+>;
 
 struct Req {
 	Module module;  ///< Requested module
