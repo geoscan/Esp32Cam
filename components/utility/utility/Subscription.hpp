@@ -41,12 +41,6 @@ protected:
 		}
 	}
 
-	/// \brief Sfinae fallback
-	///
-	constexpr void notify(...)
-	{
-	}
-
 private:
 	Tsub *subscriber;
 };
