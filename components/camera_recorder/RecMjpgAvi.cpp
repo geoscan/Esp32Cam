@@ -25,6 +25,24 @@ void RecMjpgAvi::logWriting(Key::Type frame)
 	}
 }
 
+RecMjpgAvi::RecMjpgAvi() : Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera)
+{
+}
+
+void RecMjpgAvi::getFieldValue(Sub::Sys::Fld::Req aReq, Sub::Sys::Fld::OnResponseCallback aOnResponse)
+{
+	switch (aReq.field) {
+		case Sub::Sys::Fld::Field::Recording:
+			aOnResponse(makeResponse<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::Field::Recording>(
+				nullptr != stat.fd));
+
+			break;
+
+		default:
+			break;
+	}
+}
+
 void RecMjpgAvi::updateFps()
 {
 	if (stat.frames < kFrameRegCount) {
@@ -77,7 +95,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 		stat.started = std::chrono::microseconds(Utility::bootTimeUs());
 	    stat.frames  = 0;
 	    stat.fps     = NAN;
-		key.enableSubscribe(true);
+		Record::key.enableSubscribe(true);
 		return true;
 	}
 	return false;
@@ -85,7 +103,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 
 void RecMjpgAvi::stop()
 {
-	key.enableSubscribe(false);
+	Record::key.enableSubscribe(false);
 
 	calculateFps();
 	if (stat.fd) {
