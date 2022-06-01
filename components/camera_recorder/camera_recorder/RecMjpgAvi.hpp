@@ -10,6 +10,7 @@
 
 #include "Record.hpp"
 #include "utility/Semaphore.hpp"
+#include "sub/Cam.hpp"
 #include "sub/Sys.hpp"
 #include <type_traits>
 #include <chrono>
@@ -34,6 +35,12 @@ private:
 		float fps          = NAN;
 	} stat;
 
+	struct {
+		Sub::Cam::RecordStart recordStart;
+		Sub::Cam::RecordStop recordStop;
+	} sub;
+
+private:
 	void updateFps();
 	void calculateFps();
 	void onNewFrame(Key::Type) override;

@@ -25,7 +25,9 @@ void RecMjpgAvi::logWriting(Key::Type frame)
 	}
 }
 
-RecMjpgAvi::RecMjpgAvi() : Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera)
+RecMjpgAvi::RecMjpgAvi() :
+	Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera),
+	sub{{&RecMjpgAvi::start, this}, {&RecMjpgAvi::stop, this}}
 {
 }
 
