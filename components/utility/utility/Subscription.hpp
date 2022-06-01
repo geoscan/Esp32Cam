@@ -41,6 +41,8 @@ protected:
 		}
 	}
 
+	/// \brief Sfinae fallback
+	///
 	void notify(...)
 	{
 	}
