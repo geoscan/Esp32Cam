@@ -17,7 +17,6 @@ namespace Sub {
 
 ///
 /// \tparam Tsub  Subscriber class
-/// \tparam Targs Parameters a subscriber accepts
 /// \pre    Tsub  Must implement `onSubscription(Targs...)`
 ///
 template <class Tsub>
