@@ -346,6 +346,42 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 	return Ret::Response;
 }
 
+Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
+{
+	using namespace Sub::Sys;
+	bool initialized = false;
+
+#if DEBUG_PRETEND_CAMERA_INITIALIZED
+	initialized = true;
+#else
+	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+		[&initialized] (bool aInitialized){initialized = aInitialized; });
+#endif
+
+	if (initialized) {
+		bool recording = false;
+
+		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+			[&recording](bool aRecording) {recording = aRecording; });
+
+		if (recording) {
+			Sub::Cam::RecordStop::notify();
+			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_ACCEPTED)
+				.packInto(aMessage);
+			aOnResponse(aMessage);
+		} else {
+			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_DENIED)
+				.packInto(aMessage);
+			aOnResponse(aMessage);
+		}
+	} else {
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
+	}
+
+	return Ret::Response;
+}
+
 Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavlinkCommandLong)
 {
 	using namespace Sub::Sys;
