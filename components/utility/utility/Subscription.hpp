@@ -10,6 +10,8 @@
 #ifndef UTILITY_UTILITY_SUBSCRIBER_HPP_
 #define UTILITY_UTILITY_SUBSCRIBER_HPP_
 
+#include <type_traits>
+
 namespace Utility {
 namespace Sub {
 
@@ -18,7 +20,7 @@ namespace Sub {
 /// \tparam Targs Parameters a subscriber accepts
 /// \pre    Tsub  Must implement `onSubscription(Targs...)`
 ///
-template <class Tsub, class ...Targs>
+template <class Tsub>
 class Sender1to1 {
 public:
 	void addSubscriber(Tsub &aSub) {
@@ -31,11 +33,16 @@ public:
 	}
 
 protected:
-	void notify(Targs ...aArgs)
+	template <class ...Targs>
+	void notify(Targs &&...aArgs)
 	{
 		if (subscriber) {
-			subscriber->onSubscription(aArgs...);
+			subscriber->onSubscription(std::forward<Targs>(aArgs)...);
 		}
+	}
+
+	void notify(...)
+	{
 	}
 
 private:
