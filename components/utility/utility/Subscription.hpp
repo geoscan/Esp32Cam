@@ -43,7 +43,7 @@ protected:
 
 	/// \brief Sfinae fallback
 	///
-	void notify(...)
+	constexpr void notify(...)
 	{
 	}
 
