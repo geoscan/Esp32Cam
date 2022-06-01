@@ -103,7 +103,7 @@ using Resp = ModApi<Field>::Response<
 	typename GetType<Field::Initialized>::Type,
 	typename GetType<Field::VendorName>::Type,
 	typename GetType<Field::ModelName>::Type,
-	typename GetType<Field::Recording, Module::Camera>::Type,
+	typename GetType<Field::Recording, Module::Camera>::Type
 >;
 
 struct Req {
