@@ -67,6 +67,11 @@ void RecMjpgAvi::onNewFrame(Key::Type aFrame)
 
 bool RecMjpgAvi::start(const char *aFilename)
 {
+	// Process the "already started" case
+	if (nullptr != stat.fd) {
+		return false;
+	}
+
 	if ((stat.fd = AVI_open_output_file(const_cast<char *>(aFilename))) != nullptr) {
 		ESP_LOGI(kTag, "Record -- started: %s", aFilename);
 		stat.started = std::chrono::microseconds(Utility::bootTimeUs());
