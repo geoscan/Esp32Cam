@@ -155,43 +155,43 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 #else
 		if (initialized) {
 #endif
-		mavlink_camera_information_t mavlinkCameraInformation {};
-		mavlinkCameraInformation.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-			std::chrono::microseconds{Utility::bootTimeUs()}).count();
-		mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
-			CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
+			mavlink_camera_information_t mavlinkCameraInformation {};
+			mavlinkCameraInformation.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::microseconds{Utility::bootTimeUs()}).count();
+			mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
+				CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
 
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::FrameSize>(
-			[&mavlinkCameraInformation](ModuleBase::FieldType<ModuleType::Camera, Fld::Field::FrameSize> aFs)
-			{
-				mavlinkCameraInformation.resolution_h = aFs.first;
-				mavlinkCameraInformation.resolution_v = aFs.second;
-			});
+			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::FrameSize>(
+				[&mavlinkCameraInformation](ModuleBase::FieldType<ModuleType::Camera, Fld::Field::FrameSize> aFs)
+				{
+					mavlinkCameraInformation.resolution_h = aFs.first;
+					mavlinkCameraInformation.resolution_v = aFs.second;
+				});
 
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::VendorName>(
-			[&mavlinkCameraInformation](const char *aName)
-			{
-				static constexpr auto kVendorNameFieldLen = sizeof(mavlinkCameraInformation.vendor_name);
-				ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got vendor name : %s",
-					aName);
-				std::copy_n(aName, std::min<int>(std::strlen(aName), kVendorNameFieldLen),
-					mavlinkCameraInformation.vendor_name);
-			});
+			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::VendorName>(
+				[&mavlinkCameraInformation](const char *aName)
+				{
+					static constexpr auto kVendorNameFieldLen = sizeof(mavlinkCameraInformation.vendor_name);
+					ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got vendor name : %s",
+						aName);
+					std::copy_n(aName, std::min<int>(std::strlen(aName), kVendorNameFieldLen),
+						mavlinkCameraInformation.vendor_name);
+				});
 
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::ModelName>(
-			[&mavlinkCameraInformation](const char *modelName)
-			{
-				ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got model name : %s",
-					modelName);
-				static constexpr auto kModelNameFieldLen = sizeof(mavlinkCameraInformation.model_name);
-				std::copy_n(modelName, std::min<int>(std::strlen(modelName), kModelNameFieldLen),
-					mavlinkCameraInformation.model_name);
-			});
+			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::ModelName>(
+				[&mavlinkCameraInformation](const char *modelName)
+				{
+					ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got model name : %s",
+						modelName);
+					static constexpr auto kModelNameFieldLen = sizeof(mavlinkCameraInformation.model_name);
+					std::copy_n(modelName, std::min<int>(std::strlen(modelName), kModelNameFieldLen),
+						mavlinkCameraInformation.model_name);
+				});
 
-		mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMavlinkMessage,
-			&mavlinkCameraInformation);
-		ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
-		aOnResponse(aMavlinkMessage);
+			mavlink_msg_camera_information_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMavlinkMessage,
+				&mavlinkCameraInformation);
+			ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation - packing `CAMERA_INFORMATION`");
+			aOnResponse(aMavlinkMessage);
 	}
 
 	return Microservice::Ret::Response;
@@ -200,13 +200,12 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+	auto *prevCapture = history.findBySequence(static_cast<SequenceId>(aMavlinkCommandLong.param4));
 	const auto requestedIndex = static_cast<int>(aMavlinkCommandLong.param2);
-	auto it = std::find_if(history.imageCaptureSequence.begin(), history.imageCaptureSequence.end(),
-		[requestedIndex](const ImageCapture &aIc) { return requestedIndex == aIc.imageIndex; });
 
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraImageCaptured requestedIndex %d", requestedIndex);
 
-	if (history.imageCaptureSequence.end() != it) {
+	if (nullptr != prevCapture) {
 		// Pack COMMAND_ACK
 		{
 			auto msg = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command,
@@ -216,7 +215,8 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 		}
 		// Pack CAMERA_IMAGE_CAPTURED
 		{
-			auto msg = Mav::Hlpr::CameraImageCaptured::make(it->imageIndex, it->result, it->imageName);
+			auto msg = Mav::Hlpr::CameraImageCaptured::make(prevCapture->sequence, prevCapture->result,
+				prevCapture->imageName.c_str());
 
 			msg.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
@@ -261,50 +261,22 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdImageStartCapture");
-	sdFatInit();
-	MAV_RESULT mavResult = MAV_RESULT_FAILED;
-	static constexpr std::size_t kNameMaxLen = 6;
-	char filename[kNameMaxLen] = {0};
-	ImageCapture imageCapture {static_cast<int>(aMavlinkCommandLong.param4), false,
-		static_cast<uint16_t>(Utility::bootTimeUs() & 0xffff), history.imageCaptureCount};
 
-	if (static_cast<int>(aMavlinkCommandLong.param3) != 1) {  // Number of images should be eq. 1
-		mavResult = MAV_RESULT_UNSUPPORTED;
-		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture Periodic shoots are not supported");
-	}
-
-	// Auto-generate name
-	if (MAV_RESULT_UNSUPPORTED != mavResult) {
-		ESP_LOGD(Mav::kDebugTag, "Auto-generating name");
-		Sub::Sys::ModuleBase::moduleFieldReadIter<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(
-			[&filename](unsigned aCnt)
-			{
-				ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d", aCnt);
-				snprintf(filename, kNameMaxLen, "%d", aCnt);
-			});
-
-		for (auto &cb : Sub::Cam::ShotFile::getIterators()) {
-			mavResult = cb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_FAILED;
-		}
-	}
-
-	ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, frame name \"%s\" "
-		"response code \"%d\"", filename, mavResult);
+	auto imageCapture = processMakeShot(aMavlinkCommandLong);
 
 	// Send ACK w/ value depending on whether or not the capture was successful
 	{
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing ACK");
-		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, mavResult);
+		auto mavlinkCommandAck = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command,
+			imageCapture.result);
 		mavlinkCommandAck.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 
-	imageCapture.result = MAV_RESULT_ACCEPTED == mavResult;
-
-	{
+	if (MAV_RESULT_ACCEPTED == imageCapture.result) {
 		ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture, packing IMAGE_CAPTURED");
-		auto mavlinkCameraImageCaptured = Mav::Hlpr::CameraImageCaptured::make(imageCapture.imageIndex,
-			imageCapture.result, filename);
+		auto mavlinkCameraImageCaptured = Mav::Hlpr::CameraImageCaptured::make(imageCapture.sequence,
+			imageCapture.result, imageCapture.imageName.c_str());
 		mavlinkCameraImageCaptured.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
@@ -313,6 +285,63 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	history.imageCaptureCount += imageCapture.result;
 
 	return Ret::Response;
+}
+
+Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavlinkCommandLong)
+{
+	using namespace Sub::Sys;
+
+	ImageCapture imageCapture {static_cast<SequenceId>(aMavlinkCommandLong.param4),  // Sequence id. of the capture
+		static_cast<unsigned>(aMavlinkCommandLong.param3),  // Number of images, total
+		MAV_RESULT_DENIED,  // Result of the capture
+		""};
+	sdFatInit();
+
+	if (1 == imageCapture.totalImages) {
+		const auto *prevCapture = history.findBySequence(imageCapture.sequence);
+		const bool shouldCapture = nullptr != prevCapture || 0 == aMavlinkCommandLong.confirmation;
+
+		ESP_LOGD(Mav::kDebugTag, "Camera::processMakeShot, has prev. capture %s first request %s, confirmation %d",
+			nullptr == prevCapture ? "FALSE" : "TRUE", 0 == aMavlinkCommandLong.confirmation ? "TRUE" : "FALSE",
+			aMavlinkCommandLong.confirmation);
+
+		if (shouldCapture) {
+			static constexpr std::size_t kNameMaxLen = 6;
+			char filename[kNameMaxLen] = {0};
+			++history.imageCaptureCount;
+
+			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
+				[&filename](unsigned aCount)
+				{
+					ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d",
+						aCount);
+					snprintf(filename, kNameMaxLen, "%d", aCount);
+				});
+
+			for (auto &camCb : Sub::Cam::ShotFile::getIterators()) {
+				imageCapture.result = camCb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED;
+			}
+
+			ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, frame name \"%s\" "
+				"response code \"%d\"", filename, imageCapture.result);
+
+			history.imageCaptureSequence.push_back(imageCapture);
+		}
+	} else {
+		imageCapture.result = MAV_RESULT_UNSUPPORTED;
+
+		ESP_LOGW(Mav::kDebugTag, "Current implementation does not support periodic shots");
+	}
+
+	return imageCapture;
+}
+
+Camera::ImageCapture *Camera::History::findBySequence(Camera::SequenceId aSequence)
+{
+	auto it = std::find_if(imageCaptureSequence.begin(), imageCaptureSequence.end(),
+		[aSequence](const ImageCapture &aImageCapture) {return aImageCapture.sequence == aSequence;});
+
+	return imageCaptureSequence.end() == it ? nullptr : &*it;
 }
 
 }  // namespace Mic
