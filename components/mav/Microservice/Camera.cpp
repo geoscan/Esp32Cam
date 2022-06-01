@@ -287,6 +287,65 @@ Microservice::Ret Camera::processCmdImageStartCapture(mavlink_command_long_t &aM
 	return Ret::Response;
 }
 
+Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
+{
+	using namespace Sub::Sys;
+
+	if (static_cast<int>(aMavlinkCommandLong.param2) == 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_DENIED).packInto(aMessage);
+		aOnResponse(aMessage);
+	} else {
+		bool initialized = false;
+
+		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+			[&initialized] (bool aInitialized)
+			{
+				initialized = aInitialized;
+			});
+
+		if (initialized) {
+			bool recording = false;
+
+			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+				[&recording](bool aStatus)
+				{
+					recording = aStatus;
+				});
+
+			if (!recording) {
+				static constexpr std::size_t kNameMaxLen = 6;
+				char filename[kNameMaxLen] = {0};
+				++history.imageCaptureCount;
+
+				ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
+					[&filename](unsigned aCount)
+					{
+						ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d",
+							aCount);
+						snprintf(filename, kNameMaxLen, "%d", aCount);
+						filename[kNameMaxLen - 1] = 0;
+					});
+
+				Sub::Cam::RecordStart::notify(filename);
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_ACCEPTED)
+					.packInto(aMessage);
+				aOnResponse(aMessage);
+			} else {
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_DENIED)
+					.packInto(aMessage);
+				aOnResponse(aMessage);
+			}
+		} else {
+			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED)
+				.packInto(aMessage);
+			aOnResponse(aMessage);
+		}
+	}
+
+	return Ret::Response;
+}
+
 Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavlinkCommandLong)
 {
 	using namespace Sub::Sys;

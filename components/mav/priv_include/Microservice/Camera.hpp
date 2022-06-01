@@ -44,6 +44,8 @@ public:
 		OnResponseSignature aOnResponse);
 	Ret processCmdImageStartCapture(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
+	Ret processCmdVideoStartCapture(const mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+		OnResponseSignature &aOnResponse);
 	void onHrTimer() override final;
 
 private:
