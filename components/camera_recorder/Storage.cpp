@@ -66,7 +66,8 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 
 			aCountOut += Utility::Str::checkEndswith(ep->d_name, ".jpg") +
 				Utility::Str::checkEndswith(ep->d_name, ".jpeg") + Utility::Str::checkEndswith(ep->d_name, ".JPG") +
-				Utility::Str::checkEndswith(ep->d_name, ".JPEG");
+				Utility::Str::checkEndswith(ep->d_name, ".JPEG") + Utility::Str::checkEndswith(ep->d_name, ".avi") +
+				Utility::Str::checkEndswith(ep->d_name, ".AVI");
 		}
 
 		ret = ESP_OK;
