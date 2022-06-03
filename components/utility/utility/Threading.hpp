@@ -74,15 +74,15 @@ pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr, int coreAffi
 	return threadDescriptor;
 }
 
-struct Task {
+struct Thread {
 	virtual void run() = 0;
 };
 
 /// \brief Low-level wrapper around FreeRTOS's C API
 ///
-class FreertosTask {
+class FreertosTask : Thread {
 public:
-	enum CorePin : int {
+	enum class CorePin : int {
 		CoreNone = -1,
 		Core0,
 		Core1,
@@ -104,8 +104,10 @@ private:
 
 public:
 
-	constexpr FreertosTask(const char *aName, int aStack, int aPrio, int aCore = CoreNone) :
-		taskInfo{aName, aStack, aPrio, aCore, nullptr}
+	constexpr FreertosTask(const char *aName, int aStack, int aPrio = PriorityMedium,
+		CorePin aCore = CorePin::CoreNone) :
+		Thread(),
+		taskInfo{aName, aStack, aPrio, static_cast<int>(aCore), nullptr}
 	{
 	}
 
@@ -113,7 +115,6 @@ public:
 	FreertosTask(FreertosTask &&) = delete;
 	FreertosTask &operator=(const FreertosTask &) = delete;
 	FreertosTask &operator=(FreertosTask &&) = delete;
-private:
 	static void run(void *aInstance);
 	void start();
 	void suspend();
