@@ -23,8 +23,8 @@ namespace Wq {
 
 using Task = std::function<void()>;
 
-template <int Istack = CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, FreertosTask::Prioroty Iprio, FreertosTask::CorePin Icore>
-class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio>>, public FreertosTask {
+template <int Istack, int Iprio, FreertosTask::CorePin Icore>
+class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
 private:
 	struct Queue {
 		using QueueType = std::list<Task>;
@@ -45,7 +45,7 @@ private:
 			bool ret = queue.empty();
 
 			if (ret) {
-				aTask = std::move(queue.front());
+				aTask = queue.front();
 				queue.pop_front();
 			}
 
@@ -93,6 +93,7 @@ public:
 	{
 		while (true) {
 			Task task;
+
 			if (queue.pop(task)) {
 				task();
 			} else {
@@ -105,7 +106,11 @@ private:
 	static Queue queue;
 };
 
-using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, tskIDLE_PRIORITY, -1>;
+template <int Istack, int Iprio, FreertosTask::CorePin Icore>
+typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
+
+using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, FreertosTask::PriorityMedium,
+	FreertosTask::CorePin::CoreNone>;
 
 }  // namespace Wq
 }  // namespace Threading
