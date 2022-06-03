@@ -20,4 +20,5 @@ idf_component_register(
 		mav
 		uart
 		socket
+		wq
 )
