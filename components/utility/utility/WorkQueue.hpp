@@ -45,7 +45,7 @@ private:
 			bool ret = !queue.empty();
 
 			if (ret) {
-				aTask = queue.front();
+				aTask = std::move(queue.front());
 				queue.pop_front();
 			}
 
