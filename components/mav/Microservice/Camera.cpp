@@ -305,7 +305,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 
 	if (static_cast<int>(aMavlinkCommandLong.param2) != 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
 		static constexpr auto kResult = MAV_RESULT_DENIED;
-		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d "
+		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d "
 			"COMMAND_LONG.param2=%d", kResult, static_cast<int>(aMavlinkCommandLong.param2));
 		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 		aOnResponse(aMessage);
@@ -343,18 +343,18 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 
 				Sub::Cam::RecordStart::notify(filename);
 				static constexpr auto kResult = MAV_RESULT_ACCEPTED;
-				ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d", kResult);
+				ESP_LOGI(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d", kResult);
 				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 				aOnResponse(aMessage);
 			} else {
 				static constexpr auto kResult = MAV_RESULT_DENIED;
-				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d already recording", kResult);
+				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d already recording", kResult);
 				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 				aOnResponse(aMessage);
 			}
 		} else {
 			static constexpr auto kResult = MAV_RESULT_FAILED;
-			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d camera not initialized", kResult);
+			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d camera not initialized", kResult);
 
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
 				.packInto(aMessage);
@@ -388,20 +388,20 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 		if (recording) {
 			Sub::Cam::RecordStop::notify();
 			static constexpr auto kResult = MAV_RESULT_ACCEPTED;
-			ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStopCapture result %d", kResult);
+			ESP_LOGI(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d", kResult);
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
 				.packInto(aMessage);
 			aOnResponse(aMessage);
 		} else {
 			static constexpr auto kResult = MAV_RESULT_DENIED;
-			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdImageStopCapture result %d no ongoing recording", kResult);
+			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d no ongoing recording", kResult);
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
 				.packInto(aMessage);
 			aOnResponse(aMessage);
 		}
 	} else {
 		static constexpr auto kResult = MAV_RESULT_FAILED;
-		ESP_LOGE(Mav::kDebugTag, "Camera::processCmdImageStopCapture result %d camera not initialized", kResult);
+		ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d camera not initialized", kResult);
 		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 		aOnResponse(aMessage);
 	}
@@ -435,7 +435,7 @@ Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavl
 			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
 				[&filename](unsigned aCount)
 				{
-					ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d",
+					ESP_LOGD(Mav::kDebugTag, "Camera::processMakeShot got CaptureCount from camera %d",
 						aCount);
 					snprintf(filename, kNameMaxLen, "%d", aCount);
 				});
@@ -444,7 +444,7 @@ Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavl
 				imageCapture.result = camCb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED;
 			}
 
-			ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture, request to make a shot, frame name \"%s\" "
+			ESP_LOGI(Mav::kDebugTag, "Camera::processMakeShot, request to make a shot, frame name \"%s\" "
 				"response code \"%d\"", filename, imageCapture.result);
 
 			history.imageCaptureSequence.push_back(imageCapture);
