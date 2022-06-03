@@ -23,8 +23,7 @@ namespace Wq {
 
 using Task = std::function<void()>;
 
-template <int Istack = CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, int Iprio = CONFIG_PTHREAD_TASK_PRIO_DEFAULT,
-	FreertosTask::CorePin Icore>
+template <int Istack = CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, FreertosTask::Prioroty Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio>>, public FreertosTask {
 private:
 	struct Queue {
@@ -105,6 +104,8 @@ public:
 private:
 	static Queue queue;
 };
+
+using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT, tskIDLE_PRIORITY, -1>;
 
 }  // namespace Wq
 }  // namespace Threading
