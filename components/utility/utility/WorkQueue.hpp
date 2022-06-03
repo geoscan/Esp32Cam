@@ -42,7 +42,7 @@ private:
 		{
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
-			bool ret = queue.empty();
+			bool ret = !queue.empty();
 
 			if (ret) {
 				aTask = queue.front();
