@@ -359,6 +359,7 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
 {
 	using namespace Sub::Sys;
+	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdVideoStopCapture");
 	bool initialized = false;
 
 #if DEBUG_PRETEND_CAMERA_INITIALIZED
@@ -385,7 +386,8 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 			aOnResponse(aMessage);
 		}
 	} else {
-		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED);
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED).packInto(aMessage);
+		aOnResponse(aMessage);
 	}
 
 	return Ret::Response;
