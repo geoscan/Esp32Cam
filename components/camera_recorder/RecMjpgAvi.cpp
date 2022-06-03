@@ -89,6 +89,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 {
 	// Process the "already started" case
 	if (nullptr != stat.fd) {
+		ESP_LOGW(kTag, "RecMjpgAvi - record has already been started");
 		return false;
 	}
 
