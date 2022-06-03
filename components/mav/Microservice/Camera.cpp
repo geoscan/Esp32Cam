@@ -291,9 +291,13 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
 {
 	using namespace Sub::Sys;
+	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdVideoStartCapture");
 
 	if (static_cast<int>(aMavlinkCommandLong.param2) == 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
-		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_DENIED).packInto(aMessage);
+		static constexpr auto kResult = MAV_RESULT_DENIED;
+		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d"
+			"COMMAND_LONG.param2=%d", kResult, static_cast<int>(aMavlinkCommandLong.param2));
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 		aOnResponse(aMessage);
 	} else {
 		bool initialized = false;
@@ -332,12 +336,17 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 					.packInto(aMessage);
 				aOnResponse(aMessage);
 			} else {
-				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_DENIED)
-					.packInto(aMessage);
+				static constexpr auto kResult = MAV_RESULT_DENIED;
+				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d COMMAND_LONG.param2=%d",
+					kResult, static_cast<int>(aMavlinkCommandLong.param2));
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 				aOnResponse(aMessage);
 			}
 		} else {
-			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, MAV_RESULT_FAILED)
+			static constexpr auto kResult = MAV_RESULT_FAILED;
+			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d camera not initialized", kResult);
+
+			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
 				.packInto(aMessage);
 			aOnResponse(aMessage);
 		}
