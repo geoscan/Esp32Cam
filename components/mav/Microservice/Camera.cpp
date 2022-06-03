@@ -106,8 +106,17 @@ Microservice::Ret Camera::process(mavlink_message_t &aMessage, OnResponseSignatu
 					break;
 
 				case MAV_CMD_IMAGE_START_CAPTURE:
-
 					ret = processCmdImageStartCapture(commandLong, aMessage, aOnResponse);
+
+					break;
+
+				case MAV_CMD_VIDEO_START_CAPTURE:
+					ret = processCmdVideoStartCapture(commandLong, aMessage, aOnResponse);
+
+					break;
+
+				case MAV_CMD_VIDEO_STOP_CAPTURE:
+					ret = processCmdVideoStopCapture(commandLong, aMessage, aOnResponse);
 
 					break;
 
