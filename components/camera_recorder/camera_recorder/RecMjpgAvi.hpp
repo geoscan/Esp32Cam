@@ -45,6 +45,7 @@ private:
 	void calculateFps();
 	void onNewFrame(Key::Type) override;
 	void logWriting(Key::Type);
+	bool startWrap(const char *filename);
 public:
 	RecMjpgAvi();
 	void getFieldValue(Sub::Sys::Fld::Req, Sub::Sys::Fld::OnResponseCallback) override;

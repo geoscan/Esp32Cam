@@ -8,6 +8,7 @@
 #include <esp_log.h>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "utility/time.hpp"
+#include <sdkconfig.h>
 
 using namespace CameraRecorder;
 
@@ -25,9 +26,21 @@ void RecMjpgAvi::logWriting(Key::Type frame)
 	}
 }
 
+bool RecMjpgAvi::startWrap(const char *filename)
+{
+	std::string name;
+	name.reserve(strlen(CONFIG_SD_FAT_MOUNT_POINT) + strlen(filename) + strlen(".avi") + 1);
+	name.append(CONFIG_SD_FAT_MOUNT_POINT);
+	name.append("/");
+	name.append(filename);
+	name.append(".avi");
+
+	return start(name.c_str());
+}
+
 RecMjpgAvi::RecMjpgAvi() :
 	Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera),
-	sub{{&RecMjpgAvi::start, this}, {&RecMjpgAvi::stop, this}}
+	sub{{&RecMjpgAvi::startWrap, this}, {&RecMjpgAvi::stop, this}}
 {
 	ESP_LOGI(kTag, "RecMjpgAvi initialized");
 }
