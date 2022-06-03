@@ -335,7 +335,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 				ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
 					[&filename](unsigned aCount)
 					{
-						ESP_LOGD(Mav::kDebugTag, "Camera::processCmdImageStartCapture got CaptureCount from camera %d",
+						ESP_LOGD(Mav::kDebugTag, "Camera::processCmdVideoStartCapture got CaptureCount from camera %d",
 							aCount);
 						snprintf(filename, kNameMaxLen, "%d", aCount);
 						filename[kNameMaxLen - 1] = 0;
