@@ -16,6 +16,7 @@
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
+#include "utility/WorkQueue.hpp"
 
 namespace Sock {
 
@@ -251,6 +252,7 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 
 void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 {
+	using namespace Utility::Threading;
 	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
 	auto endpoint = std::make_shared<asio::ip::udp::endpoint>();
 	auto port = aSocket.local_endpoint().port();
@@ -261,20 +263,25 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 		if (!aError) {
 			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
 			for (auto &cb : Sub::Rout::OnReceived::getIterators()) { // Notify subscribers
-				auto response = cb(Sub::Rout::Socket<asio::ip::udp>{
-					*endpoint.get(),
-					port,
-					asio::const_buffer(buffer.get(), anReceived)
-				});
 
-				// If a subscriber provides a response, send it
-				if (response.getType() == Sub::Rout::Response::Type::Response) {
-					ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - sending respose (%d bytes)", response.payload.size());
-					std::lock_guard<std::mutex> lock{syncAsyncMutex};
-					(void)lock;
-					asio::error_code err;
-					aSocket.send_to(response.payload, *endpoint.get(), 0, err);
-				}
+				// Reduce memory expenses on stack memory allocation
+				Wq::MediumPriority::getInstance().pushWait(
+					[this, &cb, &endpoint, &port, &buffer, &anReceived, &aSocket]() mutable
+					{
+						auto response = cb(Sub::Rout::Socket<asio::ip::udp>{*endpoint.get(), port,
+							asio::const_buffer(buffer.get(), anReceived)
+						});
+
+						// If a subscriber provides a response, send it
+						if (response.getType() == Sub::Rout::Response::Type::Response) {
+							ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - sending respose (%d bytes)",
+								response.payload.size());
+							std::lock_guard<std::mutex> lock{syncAsyncMutex};
+							(void)lock;
+							asio::error_code err;
+							aSocket.send_to(response.payload, *endpoint.get(), 0, err);
+						}
+					});
 			}
 			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - next round");
 			udpAsyncReceiveFrom(aSocket);
@@ -291,6 +298,7 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 
 void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 {
+	using namespace Utility::Threading;
 	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
 
 	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
@@ -313,11 +321,16 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 				{
 
 					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
-					response = cb(Sub::Rout::Socket<asio::ip::tcp>{
-						epRemote,
-						aSocket.local_endpoint().port(),
-						asio::const_buffer(buffer.get(), anReceived)
-					});
+
+					// Reduce expenses on stack memory allocation
+					Wq::MediumPriority::getInstance().pushWait(
+						[&response, &epRemote, &aSocket, &anReceived, &buffer, &cb]()
+						{
+							response = cb(Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
+								asio::const_buffer(buffer.get(), anReceived)
+							});
+						});
+
 					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);
 
 					// If a subscriber provides a response, send it
