@@ -19,7 +19,7 @@ struct RecordStop;
 }  // namespace Topic
 
 using ShotFile = Sub::NoLockKey<bool(const char *), Topic::Shot>;
-using RecordStart = Sub::NoLockKey<bool(const char *), Topic::RecordStop>;
+using RecordStart = Sub::NoLockKey<bool(const char *), Topic::RecordStart>;
 using RecordStop = Sub::NoLockKey<void(), Topic::RecordStop>;
 
 }  // namespace Rout
