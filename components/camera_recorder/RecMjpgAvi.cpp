@@ -29,6 +29,7 @@ RecMjpgAvi::RecMjpgAvi() :
 	Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera),
 	sub{{&RecMjpgAvi::start, this}, {&RecMjpgAvi::stop, this}}
 {
+	ESP_LOGI(kTag, "RecMjpgAvi initialized");
 }
 
 void RecMjpgAvi::getFieldValue(Sub::Sys::Fld::Req aReq, Sub::Sys::Fld::OnResponseCallback aOnResponse)
@@ -100,6 +101,8 @@ bool RecMjpgAvi::start(const char *aFilename)
 	    stat.fps     = NAN;
 		Record::key.enableSubscribe(true);
 		return true;
+	} else {
+		ESP_LOGE(kTag, "Record - failed. Unable to open output file %s", aFilename);
 	}
 	return false;
 }
