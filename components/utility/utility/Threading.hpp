@@ -87,6 +87,12 @@ public:
 		Core0,
 		Core1,
 	};
+
+	enum Prioroty : int {
+		PriorityLowest = 0,
+		PriorityHighest = configMAX_PRIORITIES - 1,
+		PriorityMedium = PriorityHighest / 2,
+	};
 private:
 	struct TaskInfo {
 		const char *name;
