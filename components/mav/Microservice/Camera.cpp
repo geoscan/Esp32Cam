@@ -333,13 +333,12 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 
 				Sub::Cam::RecordStart::notify(filename);
 				static constexpr auto kResult = MAV_RESULT_ACCEPTED;
-				ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d", kResult)
-					.packInto(aMessage);
+				ESP_LOGI(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d", kResult);
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 				aOnResponse(aMessage);
 			} else {
 				static constexpr auto kResult = MAV_RESULT_DENIED;
-				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d already recording",
-					kResult, static_cast<int>(aMavlinkCommandLong.param2));
+				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d already recording", kResult);
 				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
 				aOnResponse(aMessage);
 			}
