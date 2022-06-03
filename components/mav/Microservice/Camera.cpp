@@ -302,7 +302,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 	using namespace Sub::Sys;
 	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdVideoStartCapture");
 
-	if (static_cast<int>(aMavlinkCommandLong.param2) == 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
+	if (static_cast<int>(aMavlinkCommandLong.param2) != 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
 		static constexpr auto kResult = MAV_RESULT_DENIED;
 		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdImageStartCapture result %d"
 			"COMMAND_LONG.param2=%d", kResult, static_cast<int>(aMavlinkCommandLong.param2));
