@@ -246,6 +246,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+	using namespace Sub::Sys;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraCaptureStatus");
 	// Pack and send `COMMAND_ACK`
 	{
@@ -258,6 +259,8 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 		mavlink_camera_capture_status_t mavlinkCameraCaptureStatus {};
 		Mav::Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraCaptureStatus);
 		mavlinkCameraCaptureStatus.image_count = history.imageCaptureCount;
+		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+			[&mavlinkCameraCaptureStatus](bool aRecording) { mavlinkCameraCaptureStatus.video_status = aRecording; });
 		mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMessage,
 			&mavlinkCameraCaptureStatus);
 		aOnResponse(aMessage);
