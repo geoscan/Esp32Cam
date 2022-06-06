@@ -310,7 +310,8 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 		static constexpr auto kResult = MAV_RESULT_DENIED;
 		ESP_LOGW(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d "
 			"COMMAND_LONG.param2=%d", kResult, static_cast<int>(aMavlinkCommandLong.param2));
-		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
+			.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	} else {
 		bool initialized = false;
@@ -347,12 +348,14 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 				Sub::Cam::RecordStart::notify(filename);
 				static constexpr auto kResult = MAV_RESULT_ACCEPTED;
 				ESP_LOGI(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d", kResult);
-				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
+					.packInto(aMessage, Globals::getCompIdCamera());
 				aOnResponse(aMessage);
 			} else {
 				static constexpr auto kResult = MAV_RESULT_DENIED;
 				ESP_LOGW(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d already recording", kResult);
-				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
+				Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
+					.packInto(aMessage, Globals::getCompIdCamera());
 				aOnResponse(aMessage);
 			}
 		} else {
@@ -360,7 +363,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStartCapture result %d camera not initialized", kResult);
 
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
-				.packInto(aMessage);
+				.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		}
 	}
@@ -393,19 +396,20 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 			static constexpr auto kResult = MAV_RESULT_ACCEPTED;
 			ESP_LOGI(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d", kResult);
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
-				.packInto(aMessage);
+				.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		} else {
 			static constexpr auto kResult = MAV_RESULT_DENIED;
 			ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d no ongoing recording", kResult);
 			Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
-				.packInto(aMessage);
+				.packInto(aMessage, Globals::getCompIdCamera());
 			aOnResponse(aMessage);
 		}
 	} else {
 		static constexpr auto kResult = MAV_RESULT_FAILED;
 		ESP_LOGE(Mav::kDebugTag, "Camera::processCmdVideoStopCapture result %d camera not initialized", kResult);
-		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult).packInto(aMessage);
+		Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, kResult)
+			.packInto(aMessage, Globals::getCompIdCamera());
 		aOnResponse(aMessage);
 	}
 
