@@ -26,6 +26,7 @@
 #include "UartDevice.hpp"
 #include "Task.hpp"
 #include "utility/time.hpp"
+#include "utility/WorkQueue.hpp"
 
 using namespace Uart;
 using namespace Utility;
@@ -72,25 +73,29 @@ void Task::taskProcess()
 		if (nullptr != buffer) {
 			ESP_LOGV(Uart::kDebugTag, "got buffer to process");
 			for (auto &callable : Sub::Rout::OnReceived::getIterators()) {
-				typename Sub::Rout::OnReceived::Ret response;
 
-				// Process buffer chunk-by-chunk
-				for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer->buf.data(), buffer->pos);
-					bufView.size();
-					bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
-						bufView.slice(response.nProcessed) : bufView.slice(bufView.size()))
-				{
-					ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing (%d bytes remain)", bufView.size());
-					response = callable(Sub::Rout::Uart{Utility::makeAsioCb(bufView), buffer->device->getNum()});
-					ESP_LOGV(Uart::kDebugTag, "Task::operator(): chunk nProcessed %d", response.nProcessed);
+				Utility::Threading::Wq::MediumPriority::getInstance().pushWait(
+					[this, &buffer, &callable]() mutable
+					{
+						typename Sub::Rout::OnReceived::Ret response;
+						// Process buffer chunk-by-chunk
+						for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer->buf.data(), buffer->pos);
+							bufView.size();
+							bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
+								bufView.slice(response.nProcessed) : bufView.slice(bufView.size()))
+						{
+							ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing (%d bytes remain)", bufView.size());
+							response = callable(Sub::Rout::Uart{Utility::makeAsioCb(bufView), buffer->device->getNum()});
+							ESP_LOGV(Uart::kDebugTag, "Task::operator(): chunk nProcessed %d", response.nProcessed);
 
-					if (Sub::Rout::Response::Type::Response == response.getType()) {  // Have something to return to the client
-						ESP_LOGV(Uart::kDebugTag, "Task::operator(): send response size %d", response.payload.size());
-						buffer->device->write(response.payload);
-					}
+							if (Sub::Rout::Response::Type::Response == response.getType()) {  // Have something to return to the client
+								ESP_LOGV(Uart::kDebugTag, "Task::operator(): send response size %d", response.payload.size());
+								buffer->device->write(response.payload);
+							}
 
-					response.reset();  // Free mutexes or buffers stored in the `Response` object
-				}
+							response.reset();  // Free mutexes or buffers stored in the `Response` object
+						}
+					});
 			}
 
 			swap.pushFree(buffer);  // The buffer has been processed
