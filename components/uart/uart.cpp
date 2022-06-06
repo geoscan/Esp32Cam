@@ -40,7 +40,7 @@ void start()
 	init();
 
 	ESP_LOGD(Uart::kDebugTag, "Uart::start. starting UART process task");
-	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT + 2048);
+	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT);
 	static std::thread threadProcess{&Task::taskProcess, task};
 	(void)threadProcess;
 	ESP_LOGD(Uart::kDebugTag, "Uart::start. started UART process task");
