@@ -141,6 +141,7 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 
 void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLocalPort)
 {
+	using namespace Utility::Threading;
 	aAcceptor.async_accept(
 		[this, &aAcceptor, aLocalPort] (asio::error_code aError, asio::ip::tcp::socket aSocket) mutable {
 			if (aError) {
@@ -158,7 +159,11 @@ void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLoca
 				ESP_LOGI(kDebugTag, "tcpAsyncAccept accepted %s : %d on port %d",
 					epRemote.address().to_string().c_str(), epRemote.port(),
 					aLocalPort);
-				Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{epRemote, aLocalPort});
+				Wq::MediumPriority::getInstance().push(
+					[&epRemote, &aLocalPort]()
+					{
+						Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpConnected{epRemote, aLocalPort});
+					});
 				std::lock_guard<std::mutex> lock{syncAsyncMutex};
 				(void)lock;
 				container.tcpConnected.emplace_back(std::move(aSocket));
