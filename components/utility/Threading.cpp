@@ -50,3 +50,29 @@ Utility::Threading::Config &Utility::Threading::Config::stack(int a)
 	config.stack_size = a;
 	return *this;
 }
+
+void Utility::Threading::FreertosTask::run(void *aInstance)
+{
+	auto &task = *reinterpret_cast<Thread *>(aInstance);
+	task.run();
+}
+
+void Utility::Threading::FreertosTask::start()
+{
+	if (static_cast<int>(CorePin::CoreNone) == taskInfo.core) {
+		xTaskCreate(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle);
+	} else {
+		xTaskCreatePinnedToCore(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle,
+			taskInfo.core);
+	}
+}
+
+void Utility::Threading::FreertosTask::suspend()
+{
+	vTaskSuspend(taskInfo.handle);
+}
+
+void Utility::Threading::FreertosTask::resume()
+{
+	vTaskResume(taskInfo.handle);
+}

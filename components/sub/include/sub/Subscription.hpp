@@ -71,8 +71,6 @@ using TcpConnected     = Rr::Subscription::KeyBase<Topic::TcpConnected, Rr::Subs
 using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Cam::Frame> &, Topic::NewFrame>;
 using TcpDisconnected  = Rr::Subscription::Key<asio::ip::address, Topic::TcpDisconnected>;
 using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
-using RecordStart      = Rr::Subscription::Key<const std::string &/*filename*/, Topic::RecordStart>;
-using RecordStop       = Rr::Subscription::KeyVoid<Topic::RecordStop>;
 
 }  // namespace Key
 }  // namespace Sub

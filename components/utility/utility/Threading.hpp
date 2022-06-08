@@ -8,6 +8,8 @@
 #ifndef COMPONENTS_UTILITY_RUN_HPP
 #define COMPONENTS_UTILITY_RUN_HPP
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <pthread.h>
 #include <esp_pthread.h>
 
@@ -71,6 +73,55 @@ pthread_t threadRun(Runnable &instance, const pthread_attr_t &attr, int coreAffi
 	pthread_create(&threadDescriptor, &attr, run<Runnable>, &instance);
 	return threadDescriptor;
 }
+
+struct Thread {
+	virtual void run() = 0;
+};
+
+/// \brief Low-level wrapper around FreeRTOS's C API
+///
+class FreertosTask : Thread {
+public:
+	enum class CorePin : int {
+		CoreNone = -1,
+		Core0,
+		Core1,
+	};
+
+	enum Prioroty : int {
+		PriorityLowest = 0,
+		PriorityHighest = configMAX_PRIORITIES - 1,
+		PriorityMedium = PriorityHighest / 2,
+	};
+private:
+	struct TaskInfo {
+		const char *name;
+		int stack;
+		int prio;
+		int core;
+		xTaskHandle handle;
+	};
+
+public:
+
+	constexpr FreertosTask(const char *aName, int aStack, int aPrio = PriorityMedium,
+		CorePin aCore = CorePin::CoreNone) :
+		Thread(),
+		taskInfo{aName, aStack, aPrio, static_cast<int>(aCore), nullptr}
+	{
+	}
+
+	FreertosTask(const FreertosTask &) = delete;
+	FreertosTask(FreertosTask &&) = delete;
+	FreertosTask &operator=(const FreertosTask &) = delete;
+	FreertosTask &operator=(FreertosTask &&) = delete;
+	static void run(void *aInstance);
+	void start();
+	void suspend();
+	void resume();
+private:
+	TaskInfo taskInfo;
+};
 
 }  // namespace Threading
 

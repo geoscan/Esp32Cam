@@ -13,14 +13,14 @@
 namespace Sub {
 namespace Cam {
 namespace Topic {
-
 struct Shot;
-
+struct RecordStart;
+struct RecordStop;
 }  // namespace Topic
 
 using ShotFile = Sub::NoLockKey<bool(const char *), Topic::Shot>;
-using RecordStart = Sub::Key::RecordStart;
-using RecordStop = Sub::Key::RecordStop;
+using RecordStart = Sub::NoLockKey<bool(const char *), Topic::RecordStart>;
+using RecordStop = Sub::NoLockKey<void(), Topic::RecordStop>;
 
 }  // namespace Rout
 }  // namespace Cam

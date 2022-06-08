@@ -32,7 +32,7 @@ void start(asio::io_context &aIoContext)
 
 	apiInit(api);
 
-	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT + 2048);
+	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT);
 	static std::thread thread{&Task::run, &task};
 	(void)api;
 	(void)thread;

@@ -22,11 +22,16 @@ protected:
 	MakeSingleton(MakeSingleton &&) = delete;
 	MakeSingleton &operator=(const MakeSingleton &) = delete;
 	MakeSingleton &operator=(MakeSingleton &&) = delete;
-	MakeSingleton() = delete;
 
 	MakeSingleton(T &aInstance)
 	{
 		setInstance(aInstance);
+	}
+
+	MakeSingleton()
+	{
+		assert(!checkInstance());
+		MakeSingleton<T>::setInstance(*static_cast<T *>(this));
 	}
 
 public:

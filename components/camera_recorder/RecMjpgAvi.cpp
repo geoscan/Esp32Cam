@@ -8,6 +8,7 @@
 #include <esp_log.h>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "utility/time.hpp"
+#include <sdkconfig.h>
 
 using namespace CameraRecorder;
 
@@ -22,6 +23,39 @@ void RecMjpgAvi::logWriting(Key::Type frame)
 		iter = 0;
 		ESP_LOGI(kTag, "Record -- writing frame, %dx%d, %dkb",
 			frame->width(), frame->height(), frame->size() / 1024);
+	}
+}
+
+bool RecMjpgAvi::startWrap(const char *filename)
+{
+	std::string name;
+	name.reserve(strlen(CONFIG_SD_FAT_MOUNT_POINT) + strlen(filename) + strlen(".avi") + 1);
+	name.append(CONFIG_SD_FAT_MOUNT_POINT);
+	name.append("/");
+	name.append(filename);
+	name.append(".avi");
+
+	return start(name.c_str());
+}
+
+RecMjpgAvi::RecMjpgAvi() :
+	Sub::Sys::ModuleBase(Sub::Sys::ModuleType::Camera),
+	sub{{&RecMjpgAvi::startWrap, this}, {&RecMjpgAvi::stop, this}}
+{
+	ESP_LOGI(kTag, "RecMjpgAvi initialized");
+}
+
+void RecMjpgAvi::getFieldValue(Sub::Sys::Fld::Req aReq, Sub::Sys::Fld::OnResponseCallback aOnResponse)
+{
+	switch (aReq.field) {
+		case Sub::Sys::Fld::Field::Recording:
+			aOnResponse(makeResponse<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::Field::Recording>(
+				nullptr != stat.fd));
+
+			break;
+
+		default:
+			break;
 	}
 }
 
@@ -67,20 +101,28 @@ void RecMjpgAvi::onNewFrame(Key::Type aFrame)
 
 bool RecMjpgAvi::start(const char *aFilename)
 {
+	// Process the "already started" case
+	if (nullptr != stat.fd) {
+		ESP_LOGW(kTag, "RecMjpgAvi - record has already been started");
+		return false;
+	}
+
 	if ((stat.fd = AVI_open_output_file(const_cast<char *>(aFilename))) != nullptr) {
 		ESP_LOGI(kTag, "Record -- started: %s", aFilename);
 		stat.started = std::chrono::microseconds(Utility::bootTimeUs());
 	    stat.frames  = 0;
 	    stat.fps     = NAN;
-		key.enableSubscribe(true);
+		Record::key.enableSubscribe(true);
 		return true;
+	} else {
+		ESP_LOGE(kTag, "Record - failed. Unable to open output file %s", aFilename);
 	}
 	return false;
 }
 
 void RecMjpgAvi::stop()
 {
-	key.enableSubscribe(false);
+	Record::key.enableSubscribe(false);
 
 	calculateFps();
 	if (stat.fd) {

@@ -8,11 +8,13 @@
 #ifndef CAMERA_RECORDER_CAMERA_RECORDER_RECMJPGAVI_H
 #define CAMERA_RECORDER_CAMERA_RECORDER_RECMJPGAVI_H
 
+#include "Record.hpp"
+#include "utility/Semaphore.hpp"
+#include "sub/Cam.hpp"
+#include "sub/Sys.hpp"
 #include <type_traits>
 #include <chrono>
 #include <cmath>
-#include "Record.hpp"
-#include "utility/Semaphore.hpp"
 
 extern "C" {
 #include "avilib/avilib.h"
@@ -20,7 +22,7 @@ extern "C" {
 
 namespace CameraRecorder {
 
-class RecMjpgAvi : public Record {
+class RecMjpgAvi : public Record, public Sub::Sys::ModuleBase {
 private:
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
@@ -33,12 +35,20 @@ private:
 		float fps          = NAN;
 	} stat;
 
+	struct {
+		Sub::Cam::RecordStart recordStart;
+		Sub::Cam::RecordStop recordStop;
+	} sub;
+
+private:
 	void updateFps();
 	void calculateFps();
 	void onNewFrame(Key::Type) override;
 	void logWriting(Key::Type);
+	bool startWrap(const char *filename);
 public:
-	using Record::Record;
+	RecMjpgAvi();
+	void getFieldValue(Sub::Sys::Fld::Req, Sub::Sys::Fld::OnResponseCallback) override;
 	bool start(const char *filename) override;
 	void stop() override;
 };
