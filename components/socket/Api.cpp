@@ -45,14 +45,14 @@ void Api::connect(const asio::ip::tcp::endpoint &aRemoteEndpoint, uint16_t &aLoc
 
 		{
 			std::error_code err;
-			auto remoteEndpoint = it->remote_endpoint(err);
+			auto localEndpoint = it->local_endpoint(err);
 
 			if (!err) {
-				aLocalPort = remoteEndpoint.port();
+				aLocalPort = localEndpoint.port();
 			}
 		}
 
-		ESP_LOGW(kDebugTag, "connect to %s : %d from port %d - already connected",
+		ESP_LOGW(kDebugTag, "connect to %s : %d already connected from port %d",
 			aRemoteEndpoint.address().to_string().c_str(), aRemoteEndpoint.port(), aLocalPort);
 	} else {
 		ESP_LOGD(Sock::kDebugTag, "Api::connect(TCP): opening socket");
