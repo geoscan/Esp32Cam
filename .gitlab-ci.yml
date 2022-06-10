@@ -1,34 +1,15 @@
-platformio_build:
-    image: ${CI_REGISTRY_IMAGE}:ubuntu 
-    script:
-        - platformio run
-    when: manual
+stages:
+    - build
 
-espidf_build:
-    image: ${CI_REGISTRY_IMAGE}:ubuntu
-    before_script:
-        - export PATH=/root/xtensa/bin:$PATH
+esp32:
+    image: "${CI_REGISTRY}/pioneermini/esp32cam/ubuntu20.04-deps:v4.4.1"
+    stage: build
     script:
-        - python /root/esp-idf/tools/idf.py build
-        - cd tools
-        - ./extract_binaries.sh
+        - git submodule | awk '{print $2}' | grep -v espidf | xargs -n 1 git submodule update --init --recursive
+        - rm -r espidf
+        - ln -s $IDF_PATH
+        - . $IDF_PATH/export.sh && idf.py build
+        - cd tools && ./extract_binaries.sh
     artifacts:
         paths:
             - "./tools/*.bin"
-    when: manual
-
-espidf_build_deps:
-    variables:
-        GIT_SUBMODULE_STRATEGY: recursive
-    image: ${CI_REGISTRY_IMAGE}:ubuntu
-    script:
-        - echo $PATH
-        - make configure
-        - source ./environment.sh
-        - idf.py build
-        - cd tools
-        - ./extract_binaries.sh
-    artifacts:
-        paths:
-            - "./tools/*.bin"
-    when: manual
