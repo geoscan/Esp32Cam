@@ -16,7 +16,7 @@
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
-#include "utility/WorkQueue.hpp"
+#include "utility/thr/WorkQueue.hpp"
 
 namespace Sock {
 
@@ -141,7 +141,7 @@ void Api::openTcp(uint16_t aLocalPort, asio::error_code &aErr, asio::ip::tcp aTc
 
 void Api::tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aLocalPort)
 {
-	using namespace Utility::Threading;
+	using namespace Utility::Thr;
 	aAcceptor.async_accept(
 		[this, &aAcceptor, aLocalPort] (asio::error_code aError, asio::ip::tcp::socket aSocket) mutable {
 			if (aError) {
@@ -257,7 +257,7 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 
 void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 {
-	using namespace Utility::Threading;
+	using namespace Utility::Thr;
 	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
 	auto endpoint = std::make_shared<asio::ip::udp::endpoint>();
 	auto port = aSocket.local_endpoint().port();
@@ -303,7 +303,7 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 
 void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 {
-	using namespace Utility::Threading;
+	using namespace Utility::Thr;
 	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
 
 	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),

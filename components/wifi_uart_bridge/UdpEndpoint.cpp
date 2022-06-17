@@ -6,7 +6,7 @@
 //
 
 #include <limits>
-#include "utility/LockGuard.hpp"
+#include "utility/thr/LockGuard.hpp"
 #include "UdpEndpoint.hpp"
 
 

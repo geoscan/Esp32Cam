@@ -14,8 +14,7 @@
 #include <esp_pthread.h>
 
 namespace Utility {
-
-namespace Threading {
+namespace Thr {
 
 //
 // Convenient wrapper which may be seamlessly passed to pthread_create(4)
@@ -123,8 +122,7 @@ private:
 	TaskInfo taskInfo;
 };
 
-}  // namespace Threading
-
+}  // namespace Thr
 }  // namespace Utility
 
 #endif  // COMPONENTS_UTILITY_RUN_HPP

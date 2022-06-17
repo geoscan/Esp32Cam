@@ -10,7 +10,7 @@
 #include "Task.hpp"
 #include <thread>
 #include <chrono>
-#include "utility/Threading.hpp"
+#include "utility/thr/Threading.hpp"
 
 namespace Sock {
 
@@ -32,7 +32,7 @@ void start(asio::io_context &aIoContext)
 
 	apiInit(api);
 
-	Utility::Threading::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT + 1024);
+	Utility::Thr::Config(true).core(0).stack(CONFIG_ESP32_PTHREAD_TASK_STACK_SIZE_DEFAULT + 1024);
 	static std::thread thread{&Task::run, &task};
 	(void)api;
 	(void)thread;

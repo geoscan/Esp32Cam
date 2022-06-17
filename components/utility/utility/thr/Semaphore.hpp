@@ -15,6 +15,7 @@
 #include <chrono>
 
 namespace Utility {
+namespace Thr {
 
 template <std::size_t Slots, std::size_t FreeSlots = Slots>
 class Semaphore final {
@@ -46,6 +47,7 @@ public:
 	Semaphore &operator=(Semaphore &&) = default;
 };
 
+}  // namespace Thr
 }  // namespace Utility
 
 #include "Semaphore.impl"

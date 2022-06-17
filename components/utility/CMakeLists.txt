@@ -1,4 +1,4 @@
-file(GLOB SOURCE_FILES
+file(GLOB_RECURSE SOURCE_FILES
 		"*.c"
 		"*.cpp")
 

@@ -12,7 +12,6 @@
 
 #include "CameraStream.hpp"
 #include "utility/time.hpp"
-#include "utility/LockGuard.hpp"
 #include "Ov2640.hpp"
 
 using asio::ip::udp;

@@ -6,7 +6,7 @@
 //
 
 #include <freertos/FreeRTOS.h>
-#include "utility/CriticalLock.hpp"
+#include "utility/thr/CriticalLock.hpp"
 #include <esp_log.h>
 
 

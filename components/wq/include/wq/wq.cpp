@@ -6,13 +6,13 @@
 //
 
 #include "wq.hpp"
-#include "utility/WorkQueue.hpp"
+#include "utility/thr/WorkQueue.hpp"
 
 namespace Wq {
 
 void start()
 {
-	static Utility::Threading::Wq::MediumPriority wqMediumPriority;
+	static Utility::Thr::Wq::MediumPriority wqMediumPriority;
 	wqMediumPriority.start();
 }
 

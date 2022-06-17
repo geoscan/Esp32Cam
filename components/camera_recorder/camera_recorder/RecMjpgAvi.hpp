@@ -9,7 +9,7 @@
 #define CAMERA_RECORDER_CAMERA_RECORDER_RECMJPGAVI_H
 
 #include "Record.hpp"
-#include "utility/Semaphore.hpp"
+#include "utility/thr/Semaphore.hpp"
 #include "sub/Cam.hpp"
 #include "sub/Sys.hpp"
 #include <type_traits>

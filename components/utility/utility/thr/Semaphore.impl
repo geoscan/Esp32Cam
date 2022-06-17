@@ -8,7 +8,7 @@
 #include "Semaphore.hpp"  // Makes no effect, being used to enable syntax highlighting
 
 namespace Utility {
-
+namespace Thr {
 template <std::size_t Slots, std::size_t FreeSlots>
 inline Semaphore<Slots, FreeSlots>::Semaphore() : sem(xSemaphoreCreateCounting(Slots, FreeSlots), [](void *handle) {vSemaphoreDelete(handle);})
 {
@@ -56,4 +56,5 @@ inline bool Semaphore<Slots, FreeSlots>::try_acquire_until(const std::chrono::ti
 	return try_acquire_for((time - std::chrono::system_clock::now()).time_since_epoch());
 }
 
+}  // namespace Thr
 }  // namespace Utility

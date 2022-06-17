@@ -8,9 +8,9 @@
 #if !defined(UTILITY_UTILITY_WORKQUEUE_HPP_)
 #define UTILITY_UTILITY_WORKQUEUE_HPP_
 
-#include "utility/Semaphore.hpp"
+#include "utility/thr/Semaphore.hpp"
 #include "utility/MakeSingleton.hpp"
-#include "utility/Threading.hpp"
+#include "utility/thr/Threading.hpp"
 #include <sdkconfig.h>
 #include <functional>
 #include <chrono>
@@ -18,7 +18,7 @@
 #include <list>
 
 namespace Utility {
-namespace Threading {
+namespace Thr {
 namespace Wq {
 
 using Task = std::function<void()>;
@@ -67,7 +67,7 @@ public:
 	template <class Trep, class Tper>
 	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
-		Utility::Semaphore<1, 0> sem{};
+		Utility::Thr::Semaphore<1, 0> sem{};
 		push([&sem, aTask]()
 			{
 				aTask();
@@ -79,7 +79,7 @@ public:
 
 	void pushWait(Task &&aTask)
 	{
-		Utility::Semaphore<1, 0> sem{};
+		Utility::Thr::Semaphore<1, 0> sem{};
 		push([&sem, aTask]()
 			{
 				aTask();
@@ -113,7 +113,7 @@ using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 4096, 
 	FreertosTask::CorePin::CoreNone>;
 
 }  // namespace Wq
-}  // namespace Threading
+}  // namespace Thr
 }  // namespace Utility
 
 #endif // UTILITY_UTILITY_WORKQUEUE_HPP_
