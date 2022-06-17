@@ -60,30 +60,8 @@ struct Resp {
 		typename GetType<Field::Recording, Module::Camera>::Type
 	>;
 
-	template <Field If, Module Im>
-	using Type = typename GetType<If, Im>::Type;
-
 	Variant variant;  ///< The actual response
 	Module module;  ///< Type of the module producing this response
-
-	template <Module Im, Field If, class Val>
-	bool tryGet(Val &aOut)
-	{
-		bool ret = false;
-
-		if (Utility::Algorithm::in(Im, module, Module::All)) {
-			ret = true;
-			variant.match(
-				[&ret, &aOut, this](const typename GetType<If, Im>::Type &aVal) {
-					aOut = aVal;
-					ret = true;
-				},
-				[](...){}
-			);
-		}
-
-		return ret;
-	}
 
 	///
 	/// \return Check whether \arg aModule is addressed by `module` field
