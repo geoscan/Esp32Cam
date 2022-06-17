@@ -22,7 +22,7 @@ extern "C" {
 
 namespace CameraRecorder {
 
-class RecMjpgAvi : public Record, public Sub::Sys::ModuleBase {
+class RecMjpgAvi : public Record, public Utility::Mod::ModuleBase {
 private:
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
@@ -48,7 +48,7 @@ private:
 	bool startWrap(const char *filename);
 public:
 	RecMjpgAvi();
-	void getFieldValue(Sub::Sys::Fld::Req, Sub::Sys::Fld::OnResponseCallback) override;
+	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
 	bool start(const char *filename) override;
 	void stop() override;
 };

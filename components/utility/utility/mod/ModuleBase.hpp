@@ -20,8 +20,8 @@
 #include <utility>
 #include <functional>
 
-namespace Sub {
-namespace Sys {
+namespace Utility {
+namespace Mod {
 
 enum class Module : std::uint8_t {
 	Camera,
@@ -114,7 +114,7 @@ struct Req {
 };
 
 using OnResponseCallback = typename std::function<void(Resp)>;
-using ModuleGetFieldMult = typename Sub::NoLockKey<void(Req, OnResponseCallback)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
+using ModuleGetFieldMult = typename ::Sub::NoLockKey<void(Req, OnResponseCallback)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
 using FieldType = Field;  /// Temp. alias. `Field` will be subjected to refactoring
 
 }  // namespace Fld
@@ -174,7 +174,7 @@ private:
 	} key;
 };
 
-}  // namespace Sys
-}  // namespace Sub
+}  // namespace Mod
+}  // namespace Utility
 
 #endif // SUB_INCLUDE_SUB_SYS_HPP_

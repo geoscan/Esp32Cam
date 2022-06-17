@@ -14,4 +14,5 @@ idf_component_register(
 		OV2640
 		freertos
 		rr
+		sub
 )
