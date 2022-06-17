@@ -7,7 +7,7 @@
 #include <memory>
 #include "asio.hpp"
 #include "cam/Camera.hpp"
-#include "sub/Sys.hpp"
+#include "utility/mod/ModuleBase.hpp"
 
 // Wrapper around C API for OV2640
 

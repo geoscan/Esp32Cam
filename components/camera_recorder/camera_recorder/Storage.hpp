@@ -8,7 +8,7 @@
 #if !defined(CAMERA_RECORDER_CAMERA_RECORDER_STORAGE_HPP_)
 #define CAMERA_RECORDER_CAMERA_RECORDER_STORAGE_HPP_
 
-#include "sub/Sys.hpp"
+#include "utility/mod/ModuleBase.hpp"
 #include <esp_err.h>
 
 namespace CameraRecorder {

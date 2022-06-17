@@ -20,7 +20,7 @@
 #include "sub/Cam.hpp"
 #include "mav/mav.hpp"
 #include "Globals.hpp"
-#include "sub/Sys.hpp"
+#include "utility/mod/ModuleBase.hpp"
 #include "utility/time.hpp"
 #include "utility/LogSection.hpp"
 #include "sd_fat.h"
