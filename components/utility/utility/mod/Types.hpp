@@ -26,47 +26,6 @@ enum class Module : std::uint8_t {
 
 struct None {};
 
-template <class T>
-struct ModApi {
-	template <template <T, Module> class TgetResponseType, class ...TsResponseVariants>
-	struct Response {
-		using Variant = mapbox::util::variant< None, TsResponseVariants...>;
-
-		template <T It, Module Im>
-		using Type = typename TgetResponseType<It, Im>::Type;
-
-		Variant variant;  ///< The actual response
-		Module module;  ///< Type of the module producing this response
-
-		template <Module Im, T If, class Val>
-		bool tryGet(Val &aOut)
-		{
-			bool ret = false;
-
-			if (Utility::Algorithm::in(Im, module, Module::All)) {
-				ret = true;
-				variant.match(
-					[&ret, &aOut, this](const typename TgetResponseType<If, Im>::Type &aVal) {
-						aOut = aVal;
-						ret = true;
-					},
-					[](...){}
-				);
-			}
-
-			return ret;
-		}
-
-		///
-		/// \return Check whether \arg aModule is addressed by `module` field
-		///
-		inline bool moduleMatch(Module aModule)
-		{
-			return Utility::Algorithm::in(module, aModule, Module::All);
-		}
-	};
-};
-
 namespace Fld {
 
 enum class Field : std::uint8_t {
@@ -89,18 +48,51 @@ template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
 template <> struct GetType<Field::Recording, Module::Camera> : StoreType<bool> {};
 
-/// \brief Response variant type.
-using Resp = ModApi<Field>::Response<
-	// Selector to use
-	GetType,
-	// Variant types
-	typename GetType<Field::CaptureCount, Module::Camera>::Type,
-	typename GetType<Field::FrameSize, Module::Camera>::Type,
-	typename GetType<Field::Initialized>::Type,
-	typename GetType<Field::VendorName>::Type,
-	typename GetType<Field::ModelName>::Type,
-	typename GetType<Field::Recording, Module::Camera>::Type
->;
+struct Resp {
+	/// \brief Response variant type.
+	///
+	using Variant = mapbox::util::variant< None,
+		typename GetType<Field::CaptureCount, Module::Camera>::Type,
+		typename GetType<Field::FrameSize, Module::Camera>::Type,
+		typename GetType<Field::Initialized>::Type,
+		typename GetType<Field::VendorName>::Type,
+		typename GetType<Field::ModelName>::Type,
+		typename GetType<Field::Recording, Module::Camera>::Type
+	>;
+
+	template <Field If, Module Im>
+	using Type = typename GetType<If, Im>::Type;
+
+	Variant variant;  ///< The actual response
+	Module module;  ///< Type of the module producing this response
+
+	template <Module Im, Field If, class Val>
+	bool tryGet(Val &aOut)
+	{
+		bool ret = false;
+
+		if (Utility::Algorithm::in(Im, module, Module::All)) {
+			ret = true;
+			variant.match(
+				[&ret, &aOut, this](const typename GetType<If, Im>::Type &aVal) {
+					aOut = aVal;
+					ret = true;
+				},
+				[](...){}
+			);
+		}
+
+		return ret;
+	}
+
+	///
+	/// \return Check whether \arg aModule is addressed by `module` field
+	///
+	inline bool moduleMatch(Module aModule)
+	{
+		return Utility::Algorithm::in(module, aModule, Module::All);
+	}
+};
 
 struct Req {
 	Module module;  ///< Requested module
