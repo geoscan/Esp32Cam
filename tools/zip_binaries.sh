@@ -1,3 +1,4 @@
 #!/bin/bash
 
-zip Esp32Firmware`date +%Y%m%d` *bin
+tag=`git describe`
+zip esp32-`date +%Y%m%d-%H%M`-$tag.zip *bin
