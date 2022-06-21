@@ -10,7 +10,7 @@
 
 #include <chrono>
 #include "Record.hpp"
-#include "utility/Semaphore.hpp"
+#include "utility/thr/Semaphore.hpp"
 
 namespace CameraRecorder {
 
@@ -18,7 +18,7 @@ class RecFrame : public Record {
 private:
 	FILE *file;
 	struct {
-		Utility::Semaphore<1, 0> sem;
+		Utility::Thr::Semaphore<1, 0> sem;
 		std::mutex mut;
 	} sync;
 protected:

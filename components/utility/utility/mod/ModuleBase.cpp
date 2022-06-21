@@ -5,10 +5,10 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "sub/Sys.hpp"
+#include "utility/mod/ModuleBase.hpp"
 
-namespace Sub {
-namespace Sys {
+namespace Utility {
+namespace Mod {
 namespace Fld {
 
 bool Req::shouldRespond(Module aThisModule)
@@ -46,5 +46,5 @@ typename Fld::ModuleGetFieldMult::Ret ModuleBase::getFieldValueIpc(typename Fld:
 	}
 }
 
-}  // namespace Sys
-}  // namespace Sub
+}  // namespace Mod
+}  // namespace Utility

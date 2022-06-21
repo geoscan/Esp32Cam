@@ -25,22 +25,22 @@ namespace CameraRecorder {
 /// \brief Counts frames stored on SD card
 /// \return `ESP_ERR_NOT_FOUND` if no storage is available
 ///
-Storage::Storage() : Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera}
+Storage::Storage() : Utility::Mod::ModuleBase{Utility::Mod::ModuleType::Camera}
 {
 	ESP_LOGI(CameraRecorder::kDebugTag, "initializing Storage");
 }
 
-typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
-	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0> aRequest,
-	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+typename Utility::Mod::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
+	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0> aRequest,
+	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
 {
 	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::getFieldValue");
 	switch (aRequest.field) {
-		case Sub::Sys::Fld::FieldType::CaptureCount: {
+		case Utility::Mod::Fld::FieldType::CaptureCount: {
 			unsigned count = 0;
 
 			if (ESP_OK == countFrames(count)) {
-				aOnResponse(makeResponse<Sub::Sys::ModuleType::Camera, Sub::Sys::Fld::FieldType::CaptureCount>(count));
+				aOnResponse(makeResponse<Utility::Mod::ModuleType::Camera, Utility::Mod::Fld::FieldType::CaptureCount>(count));
 			}
 
 			break;

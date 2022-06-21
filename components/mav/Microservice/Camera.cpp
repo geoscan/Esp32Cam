@@ -20,7 +20,7 @@
 #include "sub/Cam.hpp"
 #include "mav/mav.hpp"
 #include "Globals.hpp"
-#include "sub/Sys.hpp"
+#include "utility/mod/ModuleBase.hpp"
 #include "utility/time.hpp"
 #include "utility/LogSection.hpp"
 #include "sd_fat.h"
@@ -49,7 +49,7 @@ void Camera::onHrTimer()
 
 Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat", true}
 {
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 
 	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> fCameraInitialized;
 
@@ -136,7 +136,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	assert(static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_CAMERA_INFORMATION);
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
 	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> initialized;
@@ -246,7 +246,7 @@ Microservice::Ret Camera::processRequestMessageCameraImageCaptured(mavlink_comma
 Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraCaptureStatus");
 	// Pack and send `COMMAND_ACK`
 	{
@@ -303,7 +303,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
 {
 	sdFatInit();
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdVideoStartCapture");
 
 	if (static_cast<int>(aMavlinkCommandLong.param2) != 0) {  // Current implementation does not support sending periodic CAMERA_CAPTURE_STATUS during capture
@@ -374,7 +374,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature &aOnResponse)
 {
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 	GS_UTILITY_LOG_SECTIOND(Mav::kDebugTag, "Camera::processCmdVideoStopCapture");
 	bool initialized = false;
 
@@ -418,7 +418,7 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 
 Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavlinkCommandLong)
 {
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 
 	ImageCapture imageCapture {static_cast<SequenceId>(aMavlinkCommandLong.param4),  // Sequence id. of the capture
 		static_cast<unsigned>(aMavlinkCommandLong.param3),  // Number of images, total

@@ -11,7 +11,7 @@
 #include <memory>
 #include <thread>
 
-#include "utility/Threading.hpp"
+#include "utility/thr/Threading.hpp"
 #include "camera_streamer.h"
 #include "CameraStreamTcpControl.hpp"
 #include "FrameSender.hpp"
@@ -27,6 +27,6 @@ void cameraStreamerStart(asio::io_context &context)
 	static CameraStreamTcpControl cameraStreamTcpControl(acceptor, tcpSocket);
 	static FrameSender frameSender(udpSocket);
 
-	Utility::Threading::setThreadCoreAffinity(0);
+	Utility::Thr::setThreadCoreAffinity(0);
 	static std::thread threadCameraStreamTcpControl(&CameraStreamTcpControl::operator(), &cameraStreamTcpControl);
 }

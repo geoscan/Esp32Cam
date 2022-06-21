@@ -26,7 +26,7 @@
 #include "UartDevice.hpp"
 #include "Task.hpp"
 #include "utility/time.hpp"
-#include "utility/WorkQueue.hpp"
+#include "utility/thr/WorkQueue.hpp"
 
 using namespace Uart;
 using namespace Utility;
@@ -74,7 +74,7 @@ void Task::taskProcess()
 			ESP_LOGV(Uart::kDebugTag, "got buffer to process");
 			for (auto &callable : Sub::Rout::OnReceived::getIterators()) {
 
-				Utility::Threading::Wq::MediumPriority::getInstance().pushWait(
+				Utility::Thr::Wq::MediumPriority::getInstance().pushWait(
 					[this, &buffer, &callable]() mutable
 					{
 						typename Sub::Rout::OnReceived::Ret response;

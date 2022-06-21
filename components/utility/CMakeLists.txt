@@ -1,4 +1,4 @@
-file(GLOB SOURCE_FILES
+file(GLOB_RECURSE SOURCE_FILES
 		"*.c"
 		"*.cpp")
 
@@ -14,4 +14,5 @@ idf_component_register(
 		OV2640
 		freertos
 		rr
+		sub
 )

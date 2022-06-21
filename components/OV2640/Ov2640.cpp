@@ -11,7 +11,7 @@ static constexpr const char *kTag = "[OV2640]";
 
 
 Ov2640::Ov2640() :
-	Sub::Sys::ModuleBase{Sub::Sys::ModuleType::Camera}
+	Utility::Mod::ModuleBase{Utility::Mod::ModuleType::Camera}
 {
 }
 
@@ -264,11 +264,11 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 
 #endif
 
-typename Sub::Sys::Fld::ModuleGetFieldMult::Ret Ov2640::getFieldValue(
-	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<0> aRequest,
-	typename Sub::Sys::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+typename Utility::Mod::Fld::ModuleGetFieldMult::Ret Ov2640::getFieldValue(
+	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0> aRequest,
+	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
 {
-	using namespace Sub::Sys;
+	using namespace Utility::Mod;
 
 	switch (aRequest.field) {
 		case Fld::Field::FrameSize:

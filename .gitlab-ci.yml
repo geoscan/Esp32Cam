@@ -11,5 +11,6 @@ esp32:
         - . $IDF_PATH/export.sh && idf.py build
         - cd tools && ./extract_binaries.sh
     artifacts:
+        name: $(echo $CI_JOB_NAME | sed 's~/~_~;s~esp32:~~;')_$CI_COMMIT_SHORT_SHA
         paths:
             - "./tools/*.bin"
