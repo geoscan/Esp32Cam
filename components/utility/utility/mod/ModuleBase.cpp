@@ -19,8 +19,7 @@ bool Req::shouldRespond(Module aThisModule)
 }  // namespace Fld
 
 ModuleBase::ModuleBase(ModuleType aModuleType) :
-	identity{aModuleType},
-	key{{&ModuleBase::getFieldValueIpc, this}}
+	identity{aModuleType}
 {
 }
 
