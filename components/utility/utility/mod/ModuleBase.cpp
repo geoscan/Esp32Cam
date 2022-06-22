@@ -19,31 +19,18 @@ bool Req::shouldRespond(Module aThisModule)
 }  // namespace Fld
 
 ModuleBase::ModuleBase(ModuleType aModuleType) :
-	identity{aModuleType},
-	key{{&ModuleBase::getFieldValueIpc, this}}
+	identity{aModuleType}
 {
+}
+
+ModuleType ModuleBase::getModuleType() const
+{
+	return identity.type;
 }
 
 typename Fld::ModuleGetFieldMult::Ret ModuleBase::getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
 	typename Fld::ModuleGetFieldMult::Arg<1>)
 {
-}
-
-/// \brief Wraps `getFieldValue`
-///
-/// \param aReq - request info
-/// \param aCb  - callback receiving a result. A callback is used for the case of multiple, or delayed returns
-///               (multiple fields)
-///
-/// A wrapper is used, because there is no guarantee of portability for the underlying IPC mechanism which would
-/// reinterpret-cast a pointer to a virtual method of `ModuleBase` class to that of type `Rr::Object`.
-///
-typename Fld::ModuleGetFieldMult::Ret ModuleBase::getFieldValueIpc(typename Fld::ModuleGetFieldMult::Arg<0> aReq,
-	typename Fld::ModuleGetFieldMult::Arg<1> aCb)
-{
-	if (aReq.shouldRespond(identity.type)) {
-		getFieldValue(aReq, aCb);
-	}
 }
 
 }  // namespace Mod
