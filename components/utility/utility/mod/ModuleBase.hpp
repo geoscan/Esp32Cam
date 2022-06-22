@@ -56,17 +56,19 @@ public:
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
-			mod.getFieldValue(
-				{Im, If},
-				[aCb](typename Fld::Resp aResp)
-				{
-					using Ft = FieldType<Im, If>;
+			if (Algorithm::in(Im, Module::All, mod.getModuleType())) {
+				mod.getFieldValue(
+					{Im, If},
+					[aCb](typename Fld::Resp aResp)
+					{
+						using Ft = FieldType<Im, If>;
 
-					if (aResp.moduleMatch(Im)) {
-						aCb(aResp.variant.template get_unchecked<Ft>());
+						if (aResp.moduleMatch(Im)) {
+							aCb(aResp.variant.template get_unchecked<Ft>());
+						}
 					}
-				}
-			);
+				);
+			}
 		}
 	}
 
@@ -80,9 +82,6 @@ protected:
 	}
 
 	virtual typename Fld::ModuleGetFieldMult::Ret getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
-		typename Fld::ModuleGetFieldMult::Arg<1>);
-private:
-	typename Fld::ModuleGetFieldMult::Ret getFieldValueIpc(typename Fld::ModuleGetFieldMult::Arg<0>,
 		typename Fld::ModuleGetFieldMult::Arg<1>);
 
 private:
