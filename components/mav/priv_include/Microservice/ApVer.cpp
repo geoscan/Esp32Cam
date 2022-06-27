@@ -5,10 +5,17 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <sdkconfig.h>
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "ApVer.hpp"
 #include "Mavlink.hpp"
 #include "Globals.hpp"
 #include "Helper/MavlinkCommandLong.hpp"
+#include "mav/mav.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -23,11 +30,24 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 {
 	auto ret = Microservice::Ret::Ignored;
 
+#if CONFIG_MAV_DEBUG_LEVEL >= 4
+	if (MAVLINK_MSG_ID_HEARTBEAT == aMessage.msgid) {
+		ESP_LOGD(Mav::kDebugTag, "ApVer::process() got HEARTBEAT");
+	} else if (MAVLINK_MSG_ID_AUTOPILOT_VERSION == aMessage.msgid) {
+		ESP_LOGD(Mav::kDebugTag, "ApVer::process() got AUTOPILOT_VERSION");
+	}
+#endif
+
 	if (Globals::getCompidAutopilot() == aMessage.compid) {
 
 		switch (aMessage.msgid) {
 			case MAVLINK_MSG_ID_HEARTBEAT: {
+				ESP_LOGD(Mav::kDebugTag, "ApVer::process() got heartbeat from compid %d", aMessage.compid);
+
 				if (!updated.version) {
+					ESP_LOGD(Mav::kDebugTag, "ApVer::process() requesting message version from compid %d",
+						aMessage.compid);
+
 					Hlpr::MavlinkCommandLong().initTargetFromRequest(aMessage)
 						.initRequestMessage(MAVLINK_MSG_ID_AUTOPILOT_VERSION).packInto(aMessage);
 					aOnResponse(aMessage);
@@ -38,6 +58,9 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 				break;
 			}
 			case MAVLINK_MSG_ID_AUTOPILOT_VERSION: {
+				ESP_LOGI(Mav::kDebugTag, "ApVer::process() got AUTOPILOT_VERSION message from compid %d",
+					aMessage.compid);
+
 				updated.version = true;
 				mavlink_autopilot_version_t mavlinkAutopilotVersion{};
 				mavlink_msg_autopilot_version_decode(&aMessage, &mavlinkAutopilotVersion);
