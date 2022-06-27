@@ -30,9 +30,7 @@ Storage::Storage() : Utility::Mod::ModuleBase{Utility::Mod::ModuleType::Camera}
 	ESP_LOGI(CameraRecorder::kDebugTag, "initializing Storage");
 }
 
-typename Utility::Mod::Fld::ModuleGetFieldMult::Ret Storage::getFieldValue(
-	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0> aRequest,
-	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+void Storage::getFieldValue(Utility::Mod::Fld::Req aRequest, Utility::Mod::Fld::OnResponseCallback aOnResponse)
 {
 	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::getFieldValue");
 	switch (aRequest.field) {
