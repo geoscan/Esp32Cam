@@ -23,7 +23,7 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 {
 	auto ret = Microservice::Ret::Ignored;
 
-	if (Globals::getCompidAutopilot() == aMessage.msgid) {
+	if (Globals::getCompidAutopilot() == aMessage.compid) {
 
 		switch (aMessage.msgid) {
 			case MAVLINK_MSG_ID_HEARTBEAT: {
