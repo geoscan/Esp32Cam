@@ -36,9 +36,7 @@ private:
 	};
 
 protected:
-	virtual typename Utility::Mod::Fld::ModuleGetFieldMult::Ret getFieldValue(
-		typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0>,
-		typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1>) override;
+	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
 
 	struct {
 		bool initialized = false;
