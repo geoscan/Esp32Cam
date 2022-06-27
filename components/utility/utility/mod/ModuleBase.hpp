@@ -59,11 +59,11 @@ public:
 			if (Algorithm::in(Im, Module::All, mod.getModuleType())) {
 				mod.getFieldValue(
 					{Im, If},
-					[aCb](typename Fld::Resp aResp)
+					[aCb, &mod](typename Fld::Resp aResp)
 					{
 						using Ft = FieldType<Im, If>;
 
-						if (aResp.moduleMatch(Im)) {
+						if (Im == Module::All || mod.getModuleType() == Im) {
 							aCb(aResp.variant.template get_unchecked<Ft>());
 						}
 					}
