@@ -43,5 +43,18 @@ mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_message_t &aMe
 	return ret;
 }
 
+MavlinkCommandLong &MavlinkCommandLong::initRequestMessage(unsigned aMsgid, float aParam2, float aParam3, float aParam4,
+	float aParam5)
+{
+	command = MAV_CMD_REQUEST_MESSAGE;
+	param1 = static_cast<float>(aMsgid);
+	param2 = aParam2;
+	param3 = aParam3;
+	param4 = aParam4;
+	param5 = aParam5;
+
+	return *this;
+}
+
 }  // namespace Hlpr
 }  // namespace Mav
