@@ -76,9 +76,6 @@ using ModuleGetFieldMult = typename ::Sub::NoLockKey<void(Req, OnResponseCallbac
 
 }  // namespace Fld
 
-using ModuleType = Module;  /// Temp. alias. `Module` will be subjected to refactoring.
-
-
 }  // namespace Mod
 }  // namespace Utility
 

@@ -11,7 +11,7 @@ static constexpr const char *kTag = "[OV2640]";
 
 
 Ov2640::Ov2640() :
-	Utility::Mod::ModuleBase{Utility::Mod::ModuleType::Camera}
+	Utility::Mod::ModuleBase{Utility::Mod::Module::Camera}
 {
 }
 
@@ -270,22 +270,22 @@ void Ov2640::getFieldValue(Utility::Mod::Fld::Req aRequest, Utility::Mod::Fld::O
 
 	switch (aRequest.field) {
 		case Fld::Field::FrameSize:
-			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::FrameSize>(status.frame.w, status.frame.h));
+			aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameSize>(status.frame.w, status.frame.h));
 
 			break;
 
 		case Fld::Field::Initialized:
-			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::Initialized>(status.initialized));
+			aOnResponse(makeResponse<Module::Camera, Fld::Field::Initialized>(status.initialized));
 
 			break;
 
 		case Fld::Field::ModelName:
-			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::ModelName>("OV2640"));
+			aOnResponse(makeResponse<Module::Camera, Fld::Field::ModelName>("OV2640"));
 
 			break;
 
 		case Fld::Field::VendorName:
-			aOnResponse(makeResponse<ModuleType::Camera, Fld::Field::VendorName>("OmniVision"));
+			aOnResponse(makeResponse<Module::Camera, Fld::Field::VendorName>("OmniVision"));
 
 			break;
 
