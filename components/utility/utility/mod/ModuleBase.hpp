@@ -58,7 +58,7 @@ public:
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (Algorithm::in(Im, Module::All, mod.getModuleType())) {
 				mod.getFieldValue(
-					{Im, If},
+					{If},
 					[aCb, &mod](typename Fld::Resp aResp)
 					{
 						using Ft = FieldType<Im, If>;
@@ -76,9 +76,7 @@ protected:
 	template <ModuleType Im, Fld::FieldType If, class ...Ts>
 	typename Fld::Resp makeResponse(Ts &&...aValue)
 	{
-		return typename Fld::Resp{
-			typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...},
-			Im};
+		return typename Fld::Resp{typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...}};
 	}
 
 	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);

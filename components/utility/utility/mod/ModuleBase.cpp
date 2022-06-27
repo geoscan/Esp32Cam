@@ -11,11 +11,6 @@ namespace Utility {
 namespace Mod {
 namespace Fld {
 
-bool Req::shouldRespond(Module aThisModule)
-{
-	return Utility::Algorithm::in(module, aThisModule, Module::All);
-}
-
 }  // namespace Fld
 
 ModuleBase::ModuleBase(ModuleType aModuleType) :
