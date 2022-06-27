@@ -61,14 +61,10 @@ struct Resp {
 	>;
 
 	Variant variant;  ///< The actual response
-	Module module;  ///< Type of the module producing this response
 };
 
 struct Req {
-	Module module;  ///< Requested module
 	Field field;  ///< Requested field
-
-	bool shouldRespond(Module aThisModule);
 };
 
 using OnResponseCallback = typename std::function<void(Resp)>;
