@@ -16,6 +16,7 @@
 #include "sub/Rout.hpp"
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
+#include "Microservice/ApVer.hpp"
 #include "DelayedSend.hpp"
 #include <list>
 #include <memory>
@@ -52,7 +53,7 @@ private:
 	} key;
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::GsNetwork, Mic::Camera> micAggregate;
+	Mav::Mic::Aggregate<Mic::GsNetwork, Mic::Camera, Mic::ApVer> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];
