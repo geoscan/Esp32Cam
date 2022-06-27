@@ -13,12 +13,12 @@ namespace Fld {
 
 }  // namespace Fld
 
-ModuleBase::ModuleBase(ModuleType aModuleType) :
-	identity{aModuleType}
+ModuleBase::ModuleBase(Module aModule) :
+	identity{aModule}
 {
 }
 
-ModuleType ModuleBase::getModuleType() const
+Module ModuleBase::getModule() const
 {
 	return identity.type;
 }

@@ -51,9 +51,9 @@ Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat", true}
 {
 	using namespace Utility::Mod;
 
-	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> fCameraInitialized;
+	ModuleBase::Field<Module::Camera, Fld::Field::Initialized> fCameraInitialized;
 
-	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+	ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Initialized>(
 		[&fCameraInitialized](bool aInit)
 		{
 			fCameraInitialized = aInit;
@@ -139,9 +139,9 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	using namespace Utility::Mod;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
-	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> initialized;
+	ModuleBase::Field<Module::Camera, Fld::Field::Initialized> initialized;
 
-	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+	ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Initialized>(
 		[&initialized](bool aInit)
 		{
 			initialized = aInit;
@@ -170,14 +170,14 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 			mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
 				CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
 
-			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::FrameSize>(
-				[&mavlinkCameraInformation](ModuleBase::FieldType<ModuleType::Camera, Fld::Field::FrameSize> aFs)
+			ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::FrameSize>(
+				[&mavlinkCameraInformation](ModuleBase::Field<Module::Camera, Fld::Field::FrameSize> aFs)
 				{
 					mavlinkCameraInformation.resolution_h = aFs.first;
 					mavlinkCameraInformation.resolution_v = aFs.second;
 				});
 
-			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::VendorName>(
+			ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::VendorName>(
 				[&mavlinkCameraInformation](const char *aName)
 				{
 					static constexpr auto kVendorNameFieldLen = sizeof(mavlinkCameraInformation.vendor_name);
@@ -187,7 +187,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 						mavlinkCameraInformation.vendor_name);
 				});
 
-			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::ModelName>(
+			ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::ModelName>(
 				[&mavlinkCameraInformation](const char *modelName)
 				{
 					ESP_LOGI(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation, got model name : %s",
@@ -259,7 +259,7 @@ Microservice::Ret Camera::processRequestMessageCameraCaptureStatus(mavlink_comma
 		mavlink_camera_capture_status_t mavlinkCameraCaptureStatus {};
 		Mav::Hlpr::Cmn::fieldTimeBootMsInit(mavlinkCameraCaptureStatus);
 		mavlinkCameraCaptureStatus.image_count = history.imageCaptureCount;
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+		ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Recording>(
 			[&mavlinkCameraCaptureStatus](bool aRecording) { mavlinkCameraCaptureStatus.video_status = aRecording; });
 		mavlink_msg_camera_capture_status_encode(Globals::getSysId(), Globals::getCompIdCamera(), &aMessage,
 			&mavlinkCameraCaptureStatus);
@@ -316,7 +316,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 	} else {
 		bool initialized = false;
 
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+		ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Initialized>(
 			[&initialized] (bool aInitialized)
 			{
 				initialized = aInitialized;
@@ -325,7 +325,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 		if (initialized) {
 			bool recording = false;
 
-			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+			ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Recording>(
 				[&recording](bool aStatus)
 				{
 					recording = aStatus;
@@ -336,7 +336,7 @@ Microservice::Ret Camera::processCmdVideoStartCapture(const mavlink_command_long
 				char filename[kNameMaxLen] = {0};
 				++history.imageCaptureCount;
 
-				ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
+				ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::CaptureCount>(
 					[&filename](unsigned aCount)
 					{
 						ESP_LOGD(Mav::kDebugTag, "Camera::processCmdVideoStartCapture got CaptureCount from camera %d",
@@ -381,14 +381,14 @@ Microservice::Ret Camera::processCmdVideoStopCapture(const mavlink_command_long_
 #if DEBUG_PRETEND_CAMERA_INITIALIZED
 	initialized = true;
 #else
-	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
+	ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Initialized>(
 		[&initialized](bool aInitialized) {initialized = aInitialized; });
 #endif
 
 	if (initialized) {
 		bool recording = false;
 
-		ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Recording>(
+		ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::Recording>(
 			[&recording](bool aRecording) {recording = aRecording; });
 
 		if (recording) {
@@ -439,7 +439,7 @@ Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavl
 			char filename[kNameMaxLen] = {0};
 			++history.imageCaptureCount;
 
-			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::CaptureCount>(
+			ModuleBase::moduleFieldReadIter<Module::Camera, Fld::Field::CaptureCount>(
 				[&filename](unsigned aCount)
 				{
 					ESP_LOGD(Mav::kDebugTag, "Camera::processMakeShot got CaptureCount from camera %d",

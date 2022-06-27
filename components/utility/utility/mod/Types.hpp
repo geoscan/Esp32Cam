@@ -40,6 +40,8 @@ enum class Field : std::uint8_t {
 template <class T>
 using StoreType = typename Rr::Trait::StoreType<T>;
 
+/// \brief Compile-time selector of respective field types
+///
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};  ///< Type selector
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
 template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
@@ -48,6 +50,8 @@ template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
 template <> struct GetType<Field::Recording, Module::Camera> : StoreType<bool> {};
 
+/// \brief Encapsulates responses produced by a module.
+///
 struct Resp {
 	/// \brief Response variant type.
 	///
@@ -69,12 +73,8 @@ struct Req {
 
 using OnResponseCallback = typename std::function<void(Resp)>;
 using ModuleGetFieldMult = typename ::Sub::NoLockKey<void(Req, OnResponseCallback)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
-using FieldType = Field;  /// Temp. alias. `Field` will be subjected to refactoring
 
 }  // namespace Fld
-
-using ModuleType = Module;  /// Temp. alias. `Module` will be subjected to refactoring.
-
 
 }  // namespace Mod
 }  // namespace Utility

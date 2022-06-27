@@ -45,23 +45,23 @@ class ModuleBase :
 	public Rr::Util::MakeModule<typename ModuleBaseImpl::ModuleRegistry>
 {
 public:
-	ModuleBase(ModuleType aModuleType);
+	ModuleBase(Module aModule);
 	virtual ~ModuleBase() = default;
-	ModuleType getModuleType() const;
+	Module getModule() const;
 
-	template <ModuleType Im, Fld::FieldType If>
-	using FieldType = typename Fld::GetType<If, Im>::Type;
+	template <Module Im, Fld::Field If>
+	using Field = typename Fld::GetType<If, Im>::Type;
 
-	template <ModuleType Im, Fld::FieldType If, class Tcb>
+	template <Module Im, Fld::Field If, class Tcb>
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
-			if (mod.getModuleType() == Im || Im == Module::All) {
+			if (mod.getModule() == Im || Im == Module::All) {
 				mod.getFieldValue(
 					{If},
 					[aCb](typename Fld::Resp aResp)
 					{
-						using Ft = FieldType<Im, If>;
+						using Ft = Field<Im, If>;
 						aCb(aResp.variant.template get_unchecked<Ft>());
 					}
 				);
@@ -70,7 +70,7 @@ public:
 	}
 
 protected:
-	template <ModuleType Im, Fld::FieldType If, class ...Ts>
+	template <Module Im, Fld::Field If, class ...Ts>
 	typename Fld::Resp makeResponse(Ts &&...aValue)
 	{
 		return typename Fld::Resp{typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...}};
@@ -80,7 +80,7 @@ protected:
 
 private:
 	struct {
-		ModuleType type;
+		Module type;
 	} identity;
 };
 
