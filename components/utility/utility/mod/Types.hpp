@@ -73,7 +73,6 @@ struct Req {
 
 using OnResponseCallback = typename std::function<void(Resp)>;
 using ModuleGetFieldMult = typename ::Sub::NoLockKey<void(Req, OnResponseCallback)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
-using FieldType = Field;  /// Temp. alias. `Field` will be subjected to refactoring
 
 }  // namespace Fld
 

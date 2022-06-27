@@ -51,7 +51,7 @@ Camera::Camera() : HrTimer{ESP_TIMER_TASK, "MavHbeat", true}
 {
 	using namespace Utility::Mod;
 
-	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> fCameraInitialized;
+	ModuleBase::Field<ModuleType::Camera, Fld::Field::Initialized> fCameraInitialized;
 
 	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
 		[&fCameraInitialized](bool aInit)
@@ -139,7 +139,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 	using namespace Utility::Mod;
 	ESP_LOGD(Mav::kDebugTag, "Camera::processRequestMessageCameraInformation");
 
-	ModuleBase::FieldType<ModuleType::Camera, Fld::Field::Initialized> initialized;
+	ModuleBase::Field<ModuleType::Camera, Fld::Field::Initialized> initialized;
 
 	ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::Initialized>(
 		[&initialized](bool aInit)
@@ -171,7 +171,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 				CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
 
 			ModuleBase::moduleFieldReadIter<ModuleType::Camera, Fld::Field::FrameSize>(
-				[&mavlinkCameraInformation](ModuleBase::FieldType<ModuleType::Camera, Fld::Field::FrameSize> aFs)
+				[&mavlinkCameraInformation](ModuleBase::Field<ModuleType::Camera, Fld::Field::FrameSize> aFs)
 				{
 					mavlinkCameraInformation.resolution_h = aFs.first;
 					mavlinkCameraInformation.resolution_v = aFs.second;
