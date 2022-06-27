@@ -61,22 +61,10 @@ struct Resp {
 	>;
 
 	Variant variant;  ///< The actual response
-	Module module;  ///< Type of the module producing this response
-
-	///
-	/// \return Check whether \arg aModule is addressed by `module` field
-	///
-	inline bool moduleMatch(Module aModule)
-	{
-		return Utility::Algorithm::in(module, aModule, Module::All);
-	}
 };
 
 struct Req {
-	Module module;  ///< Requested module
 	Field field;  ///< Requested field
-
-	bool shouldRespond(Module aThisModule);
 };
 
 using OnResponseCallback = typename std::function<void(Resp)>;

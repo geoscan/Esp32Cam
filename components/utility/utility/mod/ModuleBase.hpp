@@ -56,16 +56,13 @@ public:
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
-			if (Algorithm::in(Im, Module::All, mod.getModuleType())) {
+			if (mod.getModuleType() == Im || Im == Module::All) {
 				mod.getFieldValue(
-					{Im, If},
+					{If},
 					[aCb](typename Fld::Resp aResp)
 					{
 						using Ft = FieldType<Im, If>;
-
-						if (aResp.moduleMatch(Im)) {
-							aCb(aResp.variant.template get_unchecked<Ft>());
-						}
+						aCb(aResp.variant.template get_unchecked<Ft>());
 					}
 				);
 			}
@@ -76,13 +73,10 @@ protected:
 	template <ModuleType Im, Fld::FieldType If, class ...Ts>
 	typename Fld::Resp makeResponse(Ts &&...aValue)
 	{
-		return typename Fld::Resp{
-			typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...},
-			Im};
+		return typename Fld::Resp{typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...}};
 	}
 
-	virtual typename Fld::ModuleGetFieldMult::Ret getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
-		typename Fld::ModuleGetFieldMult::Arg<1>);
+	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);
 
 private:
 	struct {

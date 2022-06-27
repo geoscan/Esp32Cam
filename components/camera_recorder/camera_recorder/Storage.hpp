@@ -17,9 +17,7 @@ namespace CameraRecorder {
 ///
 struct Storage : Utility::Mod::ModuleBase {
 	Storage();
-	virtual typename Utility::Mod::Fld::ModuleGetFieldMult::Ret getFieldValue(
-		typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0>,
-		typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1>) override;
+	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
 	static esp_err_t countFrames(unsigned &aCountOut);
 };
 

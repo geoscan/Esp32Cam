@@ -33,6 +33,11 @@ public:
 		return MAV_COMP_ID_UDP_BRIDGE;
 	}
 
+	static constexpr unsigned char getCompidAutopilot()
+	{
+		return MAV_COMP_ID_AUTOPILOT1;
+	}
+
 	static constexpr unsigned char getCompIdCamera()
 	{
 		return MAV_COMP_ID_CAMERA;

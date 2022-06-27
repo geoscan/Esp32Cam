@@ -264,9 +264,7 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 
 #endif
 
-typename Utility::Mod::Fld::ModuleGetFieldMult::Ret Ov2640::getFieldValue(
-	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<0> aRequest,
-	typename Utility::Mod::Fld::ModuleGetFieldMult::Arg<1> aOnResponse)
+void Ov2640::getFieldValue(Utility::Mod::Fld::Req aRequest, Utility::Mod::Fld::OnResponseCallback aOnResponse)
 {
 	using namespace Utility::Mod;
 
