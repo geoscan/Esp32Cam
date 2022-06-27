@@ -81,8 +81,7 @@ protected:
 			Im};
 	}
 
-	virtual typename Fld::ModuleGetFieldMult::Ret getFieldValue(typename Fld::ModuleGetFieldMult::Arg<0>,
-		typename Fld::ModuleGetFieldMult::Arg<1>);
+	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);
 
 private:
 	struct {
