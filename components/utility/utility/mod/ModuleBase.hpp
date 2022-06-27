@@ -56,16 +56,13 @@ public:
 	static void moduleFieldReadIter(Tcb &&aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
-			if (Algorithm::in(Im, Module::All, mod.getModuleType())) {
+			if (mod.getModuleType() == Im || Im == Module::All) {
 				mod.getFieldValue(
 					{If},
-					[aCb, &mod](typename Fld::Resp aResp)
+					[aCb](typename Fld::Resp aResp)
 					{
 						using Ft = FieldType<Im, If>;
-
-						if (Im == Module::All || mod.getModuleType() == Im) {
-							aCb(aResp.variant.template get_unchecked<Ft>());
-						}
+						aCb(aResp.variant.template get_unchecked<Ft>());
 					}
 				);
 			}
