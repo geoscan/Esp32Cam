@@ -17,4 +17,5 @@ idf_component_register(
         version
 		camera_recorder
 		sd_fat
+		utility
 )
