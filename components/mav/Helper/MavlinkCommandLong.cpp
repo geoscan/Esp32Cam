@@ -43,6 +43,14 @@ mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_message_t &aMe
 	return ret;
 }
 
+MavlinkCommandLong &MavlinkCommandLong::initTargetFromRequest(const mavlink_message_t &aRequest)
+{
+	target_system = aRequest.sysid;
+	target_component = aRequest.compid;
+
+	return *this;
+}
+
 MavlinkCommandLong &MavlinkCommandLong::initRequestMessage(unsigned aMsgid, float aParam2, float aParam3, float aParam4,
 	float aParam5)
 {

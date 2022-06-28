@@ -21,6 +21,7 @@ namespace Mod {
 
 enum class Module : std::uint8_t {
 	Camera,
+	Autopilot,  ///< The main (autopilot) board
 	All,  ///< The request is addressed to every module
 };
 
@@ -35,6 +36,10 @@ enum class Field : std::uint8_t {
 	Initialized,
 	CaptureCount,  ///< Number of frames captured by a camera
 	Recording,  ///< Whether a recording process is ongoing
+	VersionSoftwareMajor,  ///< Software version, major revision
+	VersionSoftwareMinor,  ///< Software version, minor revision
+	VersionSoftwarePatch,  ///< Software version, patch revision, or the number of commits from the latest revision,
+	VersionCommitHash,  ///< Git commit hash
 };
 
 template <class T>
@@ -49,19 +54,22 @@ template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char 
 template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
 template <> struct GetType<Field::Recording, Module::Camera> : StoreType<bool> {};
+template <Module I> struct GetType<Field::VersionSoftwareMajor, I> : StoreType<unsigned> {};
+template <Module I> struct GetType<Field::VersionSoftwareMinor, I> : StoreType<unsigned> {};
+template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<unsigned> {};
+template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
 
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
 	/// \brief Response variant type.
 	///
-	using Variant = mapbox::util::variant< None,
-		typename GetType<Field::CaptureCount, Module::Camera>::Type,
-		typename GetType<Field::FrameSize, Module::Camera>::Type,
-		typename GetType<Field::Initialized>::Type,
-		typename GetType<Field::VendorName>::Type,
-		typename GetType<Field::ModelName>::Type,
-		typename GetType<Field::Recording, Module::Camera>::Type
+	using Variant = mapbox::util::variant<
+		None,
+		unsigned,
+		std::pair<int, int>,
+		bool,
+		const char *
 	>;
 
 	Variant variant;  ///< The actual response

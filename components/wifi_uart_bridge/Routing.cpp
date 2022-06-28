@@ -29,7 +29,12 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Uart &aUart)
 				auto response = callable(aUart.payload);
 
 				if (response.getType() != Sub::Rout::Response::Type::Ignored) {  // Message has been claimed.
+					ESP_LOGV(Bdg::kDebugTag, "Routing::operator()(UART) got response; processed %d",
+						response.nProcessed);
+
 					return response;
+				} else {
+					ESP_LOGV(Bdg::kDebugTag, "Routing::operator()(UART) response ignored");
 				}
 			}
 #endif

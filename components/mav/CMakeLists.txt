@@ -5,7 +5,8 @@ idf_component_register(
 		mavlink
 		sd_fat
 	SRC_DIRS
-		"./"
+		"."
+		"priv_include/Microservice/"
 		"Microservice/"
 		"Helper/"
 	PRIV_INCLUDE_DIRS
