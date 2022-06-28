@@ -32,7 +32,7 @@ void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 		std::lock_guard<std::mutex> lock{resp.mutex};  // Lock response buffer
 		(void)lock;
 		resp.size = Marshalling::push(aMavlinkMessage, resp.buffer);
-		cb(Sub::Rout::Mavlink{respAsPayload()});
+		cb({Sub::Rout::Mavlink{respAsPayload()}});
 	}
 }
 
