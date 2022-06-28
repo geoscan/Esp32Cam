@@ -10,7 +10,6 @@
 
 #include "socket/socket.hpp"
 #include "utility/MakeSingleton.hpp"
-#include "sub/Socket.hpp"
 #include "Container.hpp"
 #include <mutex>
 #include <cstdint>
