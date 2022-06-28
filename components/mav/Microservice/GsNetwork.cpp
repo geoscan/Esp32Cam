@@ -15,7 +15,6 @@
 #include "Marshalling.hpp"
 #include "Globals.hpp"
 #include "sub/Subscription.hpp"
-#include "sub/Socket.hpp"
 #include "socket/Api.hpp"
 #include <algorithm>
 #include <utility/Algorithm.hpp>
@@ -24,7 +23,6 @@
 
 using namespace Mav;
 using namespace Mav::Mic;
-using namespace Sub::Socket;
 using namespace asio::ip;
 
 GsNetwork::GsNetwork() :
