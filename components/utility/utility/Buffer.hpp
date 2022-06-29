@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 #define COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 
+#include "utility/thr/Semaphore.hpp"
 #include <asio.hpp>
 #include <tuple>
 #include <array>
@@ -17,6 +18,7 @@
 #include <memory>
 #include <type_traits>
 #include <algorithm>
+#include <utility>
 
 namespace Utility {
 
@@ -90,6 +92,43 @@ asio::const_buffer makeAsioCb(Tbuf &&);
 
 using Buffer = typename ::Utility::Tbuffer<void>;
 using ConstBuffer = typename ::Utility::Tbuffer<const void>;
+
+/// \brief Enables synchronization w/ the stored object's lifetime through use of a semaphore.
+/// \details The object does not have to be a buffer.
+///
+template <class T>
+class SemHold final {
+public:
+	template <class ...Ts>
+	SemHold(Ts &&...aArgs) : instance{std::forward<Ts>(aArgs)...}, sem{}
+	{
+		sem.acquire();
+	}
+
+	~SemHold()
+	{
+		sem.release();
+	}
+
+	Utility::Thr::Semaphore<1> getSem()
+	{
+		return sem;
+	}
+
+	T &getInst()
+	{
+		return instance;
+	}
+
+	SemHold(const SemHold &) = default;
+	SemHold(SemHold &&) = default;
+	SemHold &operator=(const SemHold &) = default;
+	SemHold &operator=(SemHold &&) = default;
+
+private:
+	T instance;
+	Utility::Thr::Semaphore<1> sem;
+};
 
 }  // namespace Utility
 
