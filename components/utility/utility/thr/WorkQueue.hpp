@@ -69,7 +69,7 @@ public:
 	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
 		Utility::Thr::Semaphore<1, 0> sem{};
-		push([&sem, aTask]()
+		push([sem, aTask]() mutable
 			{
 				aTask();
 				sem.release();
