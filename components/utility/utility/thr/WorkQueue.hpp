@@ -22,6 +22,7 @@ namespace Thr {
 namespace Wq {
 
 using Task = std::function<void()>;
+using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept invoked iteratively for as long as they return true
 
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
@@ -87,6 +88,51 @@ public:
 			});
 		resume();
 		sem.acquire();
+	}
+
+	void pushContinuous(ContinuousTask &&aTask)
+	{
+		push([aTask]()
+			{
+				if (aTask()) {
+					pushContinuous(aTask);
+				}
+			});
+	}
+
+	void pushContinuousWait(ContinuousTask &&aTask)
+	{
+		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
+		pushContinuous([&sem, &aTask]()
+			{
+				bool f = aTask();
+
+				if (!f) {
+					sem.release();
+				}
+
+				return f;
+			});
+
+		sem.acquire();
+	}
+
+	template <class Trep, class Tper>
+	bool pushContinuousWaitFor(ContinuousTask &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
+	{
+		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
+		pushContinuous([sem, aTask]() mutable
+			{
+				bool f = aTask();
+
+				if (!f) {
+					sem.release();
+				}
+
+				return f;
+			});
+
+		return sem.try_acquire_for(aTimeout);
 	}
 
 	void run() override
