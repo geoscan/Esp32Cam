@@ -110,12 +110,17 @@ public:
 		sem.release();
 	}
 
-	Utility::Thr::Semaphore<1> getSem()
+	Utility::Thr::Semaphore<1> getSem() const
 	{
 		return sem;
 	}
 
 	T &getInst()
+	{
+		return instance;
+	}
+
+	T &getInst() const
 	{
 		return instance;
 	}
