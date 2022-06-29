@@ -120,6 +120,7 @@ public:
 					pushContinuous(aTask);
 				}
 			});
+		resume();
 	}
 
 	/// \brief Push a continuous task into the queue and wait for it to finish
@@ -137,7 +138,7 @@ public:
 
 				return f;
 			});
-
+		resume();
 		sem.acquire();
 	}
 
@@ -157,6 +158,7 @@ public:
 
 				return f;
 			});
+		resume();
 
 		return sem.try_acquire_for(aTimeout);
 	}
