@@ -81,7 +81,7 @@ public:
 	void pushWait(Task &&aTask)
 	{
 		Utility::Thr::Semaphore<1, 0> sem{};
-		push([&sem, aTask]()
+		push([&sem, &aTask]()
 			{
 				aTask();
 				sem.release();
