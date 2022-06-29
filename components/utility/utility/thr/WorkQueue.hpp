@@ -21,9 +21,20 @@ namespace Utility {
 namespace Thr {
 namespace Wq {
 
-using Task = std::function<void()>;
+using Task = std::function<void()>;  ///< Regular tasks are removed from the queue after they are invoked.
 using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept invoked iteratively for as long as they return true
 
+/// \brief Work queue is a separate thread that receives functor objects, enqueues them for execution, picks them from the
+/// queue and invokes.
+///
+/// \details Work queue solves the problem of overflowing stacks. Instead of allocating huge stacks for several tasks,
+/// it is more efficient to run one thread with a gargantuan stack size and queue heavy-load operations from other
+/// threads into it. That other threads, therefore, may possess modest or even tiny stack sizes.
+///
+/// Another use case for it is queueing operations which cannot be executed from a current context (e.g. when
+/// interrupts are disabled, and so are some peripheral interfaces that rely on, for example UART configured for being
+/// used w/ DMA, which in turn relies on interrupts being enabled).
+///
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
 private:
@@ -59,12 +70,17 @@ public:
 	{
 	}
 
+	/// \brief Push task into the queue
+	///
 	void push(Task &&aTask)
 	{
 		queue.push(std::move(aTask));
 		resume();
 	}
 
+	/// \brief Push task into the queue and wait for it to finish for a given timespan. Returns true, if the semaphore has
+	/// been released in the given time.
+	///
 	template <class Trep, class Tper>
 	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
@@ -78,6 +94,8 @@ public:
 		return sem.try_acquire_for(aTimeout);
 	}
 
+	/// \brief Push task into the queue and wait for it to finish. Enables synchronized execution of tasks.
+	///
 	void pushWait(Task &&aTask)
 	{
 		Utility::Thr::Semaphore<1, 0> sem{};
@@ -90,6 +108,10 @@ public:
 		sem.acquire();
 	}
 
+	/// \brief Push a continuous task into the queue.
+	///
+	/// \details The task will be continuously polled and rescheduled for as long as it returns true
+	///
 	void pushContinuous(ContinuousTask &&aTask)
 	{
 		push([aTask]()
@@ -100,6 +122,8 @@ public:
 			});
 	}
 
+	/// \brief Push a continuous task into the queue and wait for it to finish
+	///
 	void pushContinuousWait(ContinuousTask &&aTask)
 	{
 		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
@@ -117,6 +141,8 @@ public:
 		sem.acquire();
 	}
 
+	/// \brief Push a continuous task into the queue and wait for it to finish for a given timespan.
+	///
 	template <class Trep, class Tper>
 	bool pushContinuousWaitFor(ContinuousTask &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
@@ -135,6 +161,8 @@ public:
 		return sem.try_acquire_for(aTimeout);
 	}
 
+	/// \brief Run the queue
+	///
 	void run() override
 	{
 		while (true) {
@@ -149,7 +177,7 @@ public:
 	}
 
 private:
-	static Queue queue;
+	static Queue queue;  ///< Task storage
 };
 
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
