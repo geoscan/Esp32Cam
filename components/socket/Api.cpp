@@ -273,9 +273,8 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 				Wq::MediumPriority::getInstance().pushWait(
 					[this, &cb, &endpoint, &port, &buffer, &anReceived, &aSocket]() mutable
 					{
-						auto response = cb(Sub::Rout::Socket<asio::ip::udp>{*endpoint.get(), port,
-							asio::const_buffer(buffer.get(), anReceived)
-						});
+						auto response = cb({Sub::Rout::Socket<asio::ip::udp>{*endpoint.get(), port,
+							asio::const_buffer(buffer.get(), anReceived)}});
 
 						// If a subscriber provides a response, send it
 						if (response.getType() == Sub::Rout::Response::Type::Response) {
@@ -331,9 +330,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 					Wq::MediumPriority::getInstance().pushWait(
 						[&response, &epRemote, &aSocket, &anReceived, &buffer, &cb]()
 						{
-							response = cb(Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
-								asio::const_buffer(buffer.get(), anReceived)
-							});
+							response = cb({Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
+								asio::const_buffer(buffer.get(), anReceived) }});
 						});
 
 					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);

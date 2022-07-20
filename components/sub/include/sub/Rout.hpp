@@ -115,8 +115,13 @@ struct Mavlink;
 struct MavlinkPackForward;
 }  // namespace Topic
 
-using ReceivedVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart, Mavlink>;
 using TcpConnectionVariant = typename mapbox::util::variant<TcpConnected, TcpDisconnected>;  ///< Tcp connection events
+
+struct ReceivedVariant {
+	using SenderInfoVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart, Mavlink>;  ///< Stores info on whoever produced the request
+
+	SenderInfoVariant variant;
+};
 
 using OnMavlinkReceived = Sub::NoLockKey<Response(Payload), Topic::Mavlink>;
 using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received

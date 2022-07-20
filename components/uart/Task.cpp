@@ -85,7 +85,7 @@ void Task::taskProcess()
 								bufView.slice(response.nProcessed) : bufView.slice(bufView.size()))
 						{
 							ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing (%d bytes remain)", bufView.size());
-							response = callable(Sub::Rout::Uart{Utility::makeAsioCb(bufView), buffer->device->getNum()});
+							response = callable({Sub::Rout::Uart{Utility::makeAsioCb(bufView), buffer->device->getNum()}});
 							ESP_LOGV(Uart::kDebugTag, "Task::operator(): chunk nProcessed %d", response.nProcessed);
 
 							if (Sub::Rout::Response::Type::Response == response.getType()) {  // Have something to return to the client

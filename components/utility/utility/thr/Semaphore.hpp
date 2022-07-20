@@ -47,6 +47,27 @@ public:
 	Semaphore &operator=(Semaphore &&) = default;
 };
 
+template <class T>
+class SemaphoreLock final {
+public:
+	SemaphoreLock(T &aSem) : sem{aSem}
+	{
+		sem.acquire();
+	}
+
+	~SemaphoreLock()
+	{
+		sem.release();
+	}
+
+	SemaphoreLock(const SemaphoreLock &) = delete;
+	SemaphoreLock(SemaphoreLock &&) = delete;
+	SemaphoreLock &operator=(const SemaphoreLock &) = delete;
+	SemaphoreLock &operator=(SemaphoreLock &&) = delete;
+private:
+	T& sem;
+};
+
 }  // namespace Thr
 }  // namespace Utility
 

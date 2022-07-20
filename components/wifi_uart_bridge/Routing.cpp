@@ -156,7 +156,7 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Mavlink &aMavlinkMessag
 Sub::Rout::OnReceived::Ret Routing::onReceived(Sub::Rout::OnReceived::Arg<0> aVariant)
 {
 	GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Routing:onReceived");
-	return mapbox::util::apply_visitor(*this, aVariant);
+	return mapbox::util::apply_visitor(*this, aVariant.variant);
 }
 
 Sub::Rout::OnTcpEvent::Ret Routing::onTcpEvent(Sub::Rout::OnTcpEvent::Arg<0> aTcpEventVariant)

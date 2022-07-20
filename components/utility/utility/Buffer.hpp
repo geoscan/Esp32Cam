@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 #define COMPONENTS_UTILITY_UTILITY_BUFFER_HPP
 
+#include "utility/thr/Semaphore.hpp"
 #include <asio.hpp>
 #include <tuple>
 #include <array>
@@ -17,6 +18,7 @@
 #include <memory>
 #include <type_traits>
 #include <algorithm>
+#include <utility>
 
 namespace Utility {
 
