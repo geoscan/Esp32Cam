@@ -25,7 +25,7 @@ using ReductionRule = typename std::array<EndpointVariant, 3>;  ///< (Rule A, En
 /// forwarding.
 ///
 /// Say, we have a set of rules {(A, B, R1), (R1, C, NONE), (A, D, NONE)}.
-/// If A is the originator, then the produced sequence is passed to B and C.
+/// If A is the originator, then the produced sequence is passed to B and D.
 /// If B forwards (or transforms) the sequence, the reductioned endpoint is R1, and the potential receiver of the
 /// sequence is C.
 ///
