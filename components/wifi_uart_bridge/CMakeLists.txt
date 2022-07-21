@@ -1,6 +1,7 @@
 file(GLOB SOURCE_FILES
 		"*.c"
-		"*.cpp")
+		"*.cpp"
+		"wifi_uart_bridge/*.cpp")
 
 idf_component_register(
 	SRCS ${SOURCE_FILES}
