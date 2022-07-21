@@ -29,7 +29,7 @@ using ReductionRule = typename std::array<EndpointVariant, 3>;  ///< (Rule A, En
 /// If B forwards (or transforms) the sequence, the reductioned endpoint is R1, and the potential receiver of the
 /// sequence is C.
 ///
-class RoutingRules : public std::vector<ReductionRule>, Utility::MakeSingleton<RoutingRules> {
+class RoutingRules : public std::vector<ReductionRule>, public Utility::MakeSingleton<RoutingRules> {
 public:
 	RoutingRules();
 	bool add(const ReductionRule &);
