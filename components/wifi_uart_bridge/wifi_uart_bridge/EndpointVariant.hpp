@@ -20,31 +20,13 @@ enum class NamedEndpoint {
 	None,
 };
 
-namespace EndpointVariantImpl {
-
-struct TcpPort;
-struct UdpPort;
-
-/// \brief Stub<T> enables differentiation b/w tuples of similar content which is important during comparison
-///
-template <class T>
-struct Stub {};
-
-template <class T>
-constexpr bool operator==(const Stub<T> &, const Stub<T> &)
-{
-	return true;
-}
-
-}  // namespace EndpointVariantImpl
-
 using TcpEndpoint = typename std::tuple<asio::ip::tcp::endpoint, std::uint16_t /* Port */>;
 using UdpEndpoint = typename std::tuple<asio::ip::udp::endpoint, std::uint16_t /* Port */>;
 using UartEndpoint = typename std::tuple<std::uint8_t /* UART num */>;
-using TcpPort = typename std::tuple<std::uint16_t /* port */,
-	typename EndpointVariantImpl::Stub<EndpointVariantImpl::TcpPort>>;
-using UdpPort = typename std::tuple<std::uint16_t /* port */,
-	typename EndpointVariantImpl::Stub<EndpointVariantImpl::UdpPort>>;
+struct TcpPort : std::tuple<std::uint16_t> {  // Inheritance from `std::tuple` is used to differentiate b/w types while retaining comparison operators implemented for `std::tuple`.
+};
+struct UdpPort : std::tuple<std::uint16_t> {
+};
 
 using EndpointVariant = mapbox::util::variant<NamedEndpoint, TcpEndpoint, UdpEndpoint, UartEndpoint>;
 
