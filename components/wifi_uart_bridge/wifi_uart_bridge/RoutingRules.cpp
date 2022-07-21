@@ -39,6 +39,8 @@ bool RoutingRules::add(const ReductionRule &aReductionRule)
 ///
 void RoutingRules::remove(const ReductionRule &aReductionRule)
 {
+	std::lock_guard<std::mutex> lock{mutex};
+	(void)lock;
 	auto del = 0;
 
 	for (auto &reductionRule : *this) {
@@ -65,6 +67,8 @@ void RoutingRules::remove(const ReductionRule &aReductionRule)
 ///
 bool RoutingRules::reduce(EndpointVariant &aSrc, const EndpointVariant &aCandidate) const
 {
+	std::lock_guard<std::mutex> lock{mutex};
+	(void)lock;
 	const ReductionRule rule{{{aSrc}, {aCandidate}, EndpointVariant{}}};
 	const auto it = find(rule);
 	const bool res = cend() != it;
