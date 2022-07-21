@@ -40,7 +40,7 @@ private:
 	RoutingRules::const_iterator find(const ReductionRule &) const;
 
 private:
-	std::mutex mutex;
+	mutable std::mutex mutex;
 };
 
 }  // namespace Bdg
