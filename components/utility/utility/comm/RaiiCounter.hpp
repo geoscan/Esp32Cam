@@ -13,12 +13,11 @@ namespace Comm {
 
 struct RaiiCounter final {
 public:
-	RaiiCounter clone();
 	RaiiCounter(unsigned &aOwners);
 	~RaiiCounter();
-	RaiiCounter(const RaiiCounter &) = delete;
+	RaiiCounter(const RaiiCounter &);
 	RaiiCounter(RaiiCounter &&);
-	RaiiCounter &operator=(const RaiiCounter &) = delete;
+	RaiiCounter &operator=(const RaiiCounter &);
 	RaiiCounter &operator=(RaiiCounter &&);
 private:
 	unsigned *owners;

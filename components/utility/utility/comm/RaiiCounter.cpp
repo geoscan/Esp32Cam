@@ -11,11 +11,6 @@
 namespace Utility {
 namespace Comm {
 
-RaiiCounter RaiiCounter::clone()
-{
-	return RaiiCounter{*owners};
-}
-
 RaiiCounter::RaiiCounter(unsigned &aOwners) : owners{&aOwners}
 {
 	++owners;
@@ -28,9 +23,31 @@ RaiiCounter::~RaiiCounter()
 	}
 }
 
+RaiiCounter::RaiiCounter(const RaiiCounter &aRaiiCounter) : owners{const_cast<unsigned *>(aRaiiCounter.owners)}
+{
+	if (nullptr != owners) {
+		++(*owners);
+	}
+}
+
 RaiiCounter::RaiiCounter(RaiiCounter &&aRaiiCounter) : owners{nullptr}
 {
 	std::swap(owners, aRaiiCounter.owners);
+}
+
+RaiiCounter &RaiiCounter::operator=(const RaiiCounter &aRaiiCounter)
+{
+	if (nullptr != owners) {
+		--(*owners);
+	}
+
+	owners = const_cast<unsigned *>(aRaiiCounter.owners);
+
+	if (nullptr != owners) {
+		++(*owners);
+	}
+
+	return *this;
 }
 
 RaiiCounter &RaiiCounter::operator=(RaiiCounter &&aRaiiCounter)
