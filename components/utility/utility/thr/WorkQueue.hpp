@@ -11,6 +11,7 @@
 #include "utility/thr/Semaphore.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "utility/thr/Threading.hpp"
+#include "utility/time.hpp"
 #include <sdkconfig.h>
 #include <functional>
 #include <chrono>
@@ -66,6 +67,17 @@ private:
 	};
 
 public:
+	template <class Trep, class Tper>
+	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
+	{
+		const auto start{Utility::bootTimeUs()};
+		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
+		return [aTask, start, timeout]()
+			{
+				return aTask() && !Utility::expired(start, timeout);
+			};
+	}
+
 	WorkQueue() : FreertosTask("WorkQueue", Istack, Iprio, Icore)
 	{
 	}
