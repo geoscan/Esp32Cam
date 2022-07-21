@@ -126,10 +126,10 @@ public:
 	///
 	void pushContinuous(ContinuousTask &&aTask)
 	{
-		push([aTask]()
+		push([this, aTask]() mutable
 			{
 				if (aTask()) {
-					pushContinuous(aTask);
+					pushContinuous(std::move(aTask));
 				}
 			});
 		resume();
