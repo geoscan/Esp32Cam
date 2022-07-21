@@ -37,7 +37,7 @@ public:
 	bool reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandidate) const;
 
 private:
-	RoutingRules::const_iterator find(const ReductionRule &);
+	RoutingRules::const_iterator find(const ReductionRule &) const;
 
 private:
 	std::mutex mutex;

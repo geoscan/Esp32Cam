@@ -12,7 +12,7 @@ namespace Bdg {
 
 RoutingRules::RoutingRules() :
 	std::vector<ReductionRule>{8},
-	Utility::MakeSingleton<RoutingRules>{this}
+	Utility::MakeSingleton<RoutingRules>{*this}
 {
 }
 
@@ -45,7 +45,7 @@ void RoutingRules::remove(const ReductionRule &aReductionRule)
 		if (std::equal(aReductionRule.begin(), aReductionRule.end(), reductionRule.begin()),
 			[](const EndpointVariant &aLhs, const EndpointVariant &aRhs)
 			{
-				constexpr EndpointVariant kStub{};
+				const EndpointVariant kStub{};
 				aLhs == aRhs || aLhs == kStub;
 			})
 		{
@@ -65,12 +65,12 @@ void RoutingRules::remove(const ReductionRule &aReductionRule)
 ///
 bool RoutingRules::reduce(EndpointVariant &aSrc, const EndpointVariant &aCandidate) const
 {
-	const ReductionRule rule{{aSrc, aCandidate, EndpointVariant{}}};
+	const ReductionRule rule{{{aSrc}, {aCandidate}, EndpointVariant{}}};
 	const auto it = find(rule);
 	const bool res = cend() != it;
 
 	if (res) {
-		aSrc = *it;
+		aSrc = {(*it)[2]};
 	}
 
 	return res;
@@ -78,7 +78,7 @@ bool RoutingRules::reduce(EndpointVariant &aSrc, const EndpointVariant &aCandida
 
 /// \brief Searches for the rule comparing the first two positions
 ///
-RoutingRules::const_iterator RoutingRules::find(const ReductionRule &aRoutingRule)
+RoutingRules::const_iterator RoutingRules::find(const ReductionRule &aRoutingRule) const
 {
 	auto it = cbegin();
 
