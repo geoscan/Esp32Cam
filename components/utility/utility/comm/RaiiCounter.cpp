@@ -62,5 +62,19 @@ RaiiCounter &RaiiCounter::operator=(RaiiCounter &&aRaiiCounter)
 	return *this;
 }
 
+void RaiiCounter::reset()
+{
+	owners = nullptr;
+}
+
+unsigned RaiiCounter::getValue() const
+{
+	if (nullptr == owners) {
+		return kInvalidValue;
+	} else {
+		return *owners;
+	}
+}
+
 }  // namespace Comm
 }  // namespace Utility
