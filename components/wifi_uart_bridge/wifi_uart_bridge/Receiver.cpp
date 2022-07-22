@@ -53,7 +53,7 @@ void Receiver::notifyAsAsync(unsigned &aCounter, const EndpointVariant &aEndpoin
 		auto reducedEndpointVariant = aEndpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reducedEndpointVariant, receiver.endpointVariant)) {  // Check if this particular receiver should accept the request
-			receiver.notify(aEndpointVariant, reducedEndpointVariant, aCounter, std::move(aRespondCb), aBuffer);
+			receiver.notify(aEndpointVariant, reducedEndpointVariant, aCounter, aRespondCb, aBuffer);
 		}
 	}
 }
