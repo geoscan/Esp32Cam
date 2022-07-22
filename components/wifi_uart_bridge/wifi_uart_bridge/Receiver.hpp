@@ -63,6 +63,7 @@ struct Route {
 	void lock();
 	bool tryLock();
 	void unlock();
+	bool checkDone();
 };
 
 }  // namespace ReceiverImpl

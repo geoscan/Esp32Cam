@@ -146,4 +146,14 @@ bool ReceiverImpl::Route::tryLock()
 	return ret;
 }
 
+void ReceiverImpl::Route::unlock()
+{
+	sRouteDetails.counter = 0;
+}
+
+bool ReceiverImpl::Route::checkDone()
+{
+	return 1 == sRouteDetails.counter;
+}
+
 }  // namespace Bdg
