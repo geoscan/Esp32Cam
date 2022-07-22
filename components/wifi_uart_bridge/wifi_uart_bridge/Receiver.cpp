@@ -59,7 +59,7 @@ void Receiver::notifyAsAsync(unsigned &aCounter, const EndpointVariant &aEndpoin
 }
 
 /// \brief Notify a receiver, and forward the message to the next receivers in an asynchronous manner.
-/// `aBusyCounter` is a cross-process counter which should be increased with every pending notification sequence.
+/// `aBusyCounter` is a cross-process counter which should be increased with every pending notification task.
 ///
 void Receiver::notify(const EndpointVariant &aSenderEndpointVariant, const EndpointVariant &aReducedEndpointVariant,
 	unsigned &aBusyCounter, RespondCb aRespondCb, Utility::ConstBuffer aBuffer)

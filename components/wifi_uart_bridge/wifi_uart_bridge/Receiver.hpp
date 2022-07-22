@@ -79,11 +79,11 @@ using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility
 /// or forward it further. An observer is only aware of its identity and the identitity of a sender from which it
 /// receives a message.
 ///
-/// ONE NOTIFICATION AT A TIME. At a time, a Receiver can only partake in only one notification sequence. If it should
-/// be notified upon an incoming message, the request will be queued in a work queue, and will reside there.
+/// ONE NOTIFICATION AT A TIME. At a time, only one notification sequence is active: `notifyAs` in an entry point, and
+/// it is synchronized w/ a static mutex.
 ///
 /// RECEIVER HOLDS ITS OWN BUFFER. If a Receiver initiates a new notification sequence (processes a received buffer and
-/// composes a new message), it is expected to use its own buffer.for as long as Receiver's `busyCounter > 0`.
+/// composes a new message), it is expected to use its own buffer.
 ///
 /// SYNC. This entire scheme with (1) busy counter and (2) use of a shared work queue (a) protects Receiver's buffers
 /// from being modified while in use, and (b) prevent deadlocks upon Receiver instances.
