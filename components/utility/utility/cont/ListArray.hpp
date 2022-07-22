@@ -29,7 +29,7 @@ public:
 private:
 	using Base = typename std::list<Utility::PosArray<T, N>>;
 public:
-	ListArray() : sz{0}, std::list<Utility::PosArray<T, N>>{}
+	ListArray() : std::list<Utility::PosArray<T, N>>{}
 	{
 	}
 public:
@@ -48,7 +48,7 @@ public:
 		if (prevSize % N == 0) {
 			Base::emplace_back();
 		}
-		Base::back().push_back(a);
+		return Base::back().push_back(a);
 	}
 
 	reference back()
