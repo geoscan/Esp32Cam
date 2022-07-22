@@ -59,48 +59,6 @@ void Receiver::notifyAsAsync(unsigned &aCounter, const EndpointVariant &aEndpoin
 	}
 }
 
-/// \brief Builds an expected route based on a starting point.
-///
-/// \details MEMORY OVERHEAD. The routing solves the problem of maintaining buffers' consistency across receivers.
-/// There is an alternative that is to just copy the content that is being passed b/w endpoints, and maintain those
-/// buffers instead of implementing synchronization mechanism. However, this approach is not acceptible due to the time
-/// and memory overhead it entails.
-///
-/// Other options are: (1) synchronize buffers, or (2) accept drops and content corruption. It's been decided to use
-/// the first one
-///
-/// SYNCHRONIZATION. Therefore, the remaining solution is to ensure buffer consistency through synchronization. It
-/// leaves the following options to that would solve this problem:
-///
-/// 1. Common lock: lock the entire synchronization process, so only one synchronization sequence may be active at a
-/// moment;
-///
-/// 2. Group lock (generalization over common lock): divide endpoints into groups, determine which group will
-/// participate in the process, and lock it;
-///
-/// 3. Route lock (more tailored group lock - only lock those that we want to use): determine which endpoints will
-/// participate in routing based on first endpoint, lock them in a pre-determined sequence (thus avoiding
-/// deadlocks), and execute the notification process.
-///
-/// The benefits of each of those are unclear at the moment. However, mocking the third one encompasses all of them. So
-/// it has been decided to use the first one, considering that it proved itself viable in practice, while leaving the
-/// room for improvement by adopting an extendable architectural approach allowing implementing 2nd or 3rd option
-/// later.
-///
-Receiver::ExpectedRoute Receiver::buildRoute(const EndpointVariant &)
-{
-	return nullptr;
-}
-
-void Receiver::lockRoute(const ExpectedRoute &)
-{
-}
-
-bool Receiver::tryLockRoute(const ExpectedRoute &)
-{
-	return false;
-}
-
 /// \brief A Receiver's `busyCounter = 0`, so it should be notified right away.
 ///
 void Receiver::notify(const EndpointVariant &aSenderEndpointVariant, const EndpointVariant &aReducedEndpointVariant,
@@ -156,7 +114,36 @@ void Receiver::notifyDelayed(const EndpointVariant &aSender, const EndpointVaria
 			}
 
 			return ret;
-		});
+	});
+}
+
+static struct RouteDetails {
+	std::mutex mutex;
+	unsigned counter;
+} sRouteDetails {{}, 0};
+
+ReceiverImpl::Route::Route(const EndpointVariant &)
+{
+}
+
+void ReceiverImpl::Route::lock()
+{
+	while (!tryLock()) {
+		Utility::Tim::taskDelay(std::chrono::milliseconds(20));
+	}
+}
+
+bool ReceiverImpl::Route::tryLock()
+{
+	std::lock_guard<std::mutex> lock{sRouteDetails.mutex};
+	(void)lock;
+	bool ret = (0 == sRouteDetails.counter);
+
+	if (ret) {
+		sRouteDetails.counter = 1;
+	}
+
+	return ret;
 }
 
 }  // namespace Bdg

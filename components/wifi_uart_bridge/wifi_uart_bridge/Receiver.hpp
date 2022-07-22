@@ -30,6 +30,41 @@ struct SyncTrait {
 
 using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list>;
 
+/// \brief Builds an expected route based on a starting point.
+///
+/// \details MEMORY OVERHEAD. The routing solves the problem of maintaining buffers' consistency across receivers.
+/// There is an alternative that is to just copy the content that is being passed b/w endpoints, and maintain those
+/// buffers instead of implementing synchronization mechanism. However, this approach is not acceptible due to the time
+/// and memory overhead it entails.
+///
+/// Other options are: (1) synchronize buffers, or (2) accept drops and content corruption. It's been decided to use
+/// the first one
+///
+/// SYNCHRONIZATION. Therefore, the remaining solution is to ensure buffer consistency through synchronization. It
+/// leaves the following options to that would solve this problem:
+///
+/// 1. Common lock: lock the entire synchronization process, so only one synchronization sequence may be active at a
+/// moment;
+///
+/// 2. Group lock (generalization over common lock): divide endpoints into groups, determine which group will
+/// participate in the process, and lock it;
+///
+/// 3. Route lock (more tailored group lock - only lock those that we want to use): determine which endpoints will
+/// participate in routing based on first endpoint, lock them in a pre-determined sequence (thus avoiding
+/// deadlocks), and execute the notification process.
+///
+/// The benefits of each of those are unclear at the moment. However, mocking the third one encompasses all of them. So
+/// it has been decided to use the first one, considering that it proved itself viable in practice, while leaving the
+/// room for improvement by adopting an extendable architectural approach allowing implementing 2nd or 3rd option
+/// later.
+///
+struct Route {
+	Route(const EndpointVariant &);
+	void lock();
+	bool tryLock();
+	void unlock();
+};
+
 }  // namespace ReceiverImpl
 
 using RespondCb = std::function<void(Utility::ConstBuffer)>;
@@ -60,9 +95,6 @@ private:
 	using ExpectedRoute = void *;  // See description for `buildRoute`
 private:
 	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
-	static ExpectedRoute buildRoute(const EndpointVariant &);
-	static void lockRoute(const ExpectedRoute &);
-	static bool tryLockRoute(const ExpectedRoute &);
 	void notify(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
 		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
 	void notifyDelayed(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
