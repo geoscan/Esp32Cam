@@ -35,6 +35,8 @@ struct InstanceRegistry {
 	}
 };
 
+/// \brief Relies on presence of `push_back` in Tc
+///
 template <class T, template <class ...> class Tc>
 struct SyncedStorage {
 private:
@@ -51,16 +53,9 @@ public:
 	{
 		std::lock_guard<std::mutex> lock{mutex};
 		(void)lock;
+		storage.push_back(T{std::forward<Ts>(aArgs)...});
 
-		T t{std::forward<Ts>(aArgs)...};
-
-		auto it = std::find(std::begin(storage), std::end(storage), t);
-
-		if (std::end(storage) != it) {
-			return (*std::inserter(storage, it) = std::move(t));
-		} else {
-			return *it;
-		}
+		return storage.back();
 	}
 };
 
