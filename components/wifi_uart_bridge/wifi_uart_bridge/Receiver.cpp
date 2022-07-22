@@ -15,6 +15,11 @@
 
 namespace Bdg {
 
+static struct RouteDetails {
+	std::mutex mutex;
+	unsigned counter;
+} sRouteDetails {{}, 0};
+
 constexpr std::chrono::milliseconds kNotifyWait{20};
 
 template <class T>
@@ -117,11 +122,6 @@ void Receiver::notifyDelayed(const EndpointVariant &aSender, const EndpointVaria
 	});
 }
 
-static struct RouteDetails {
-	std::mutex mutex;
-	unsigned counter;
-} sRouteDetails {{}, 0};
-
 ReceiverImpl::Route::Route(const EndpointVariant &)
 {
 }
@@ -129,7 +129,7 @@ ReceiverImpl::Route::Route(const EndpointVariant &)
 void ReceiverImpl::Route::lock()
 {
 	while (!tryLock()) {
-		Utility::Tim::taskDelay(std::chrono::milliseconds(20));
+		Utility::Tim::taskDelay(kNotifyWait);
 	}
 }
 
