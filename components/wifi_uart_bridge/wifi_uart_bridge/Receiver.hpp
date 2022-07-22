@@ -92,12 +92,12 @@ class Receiver : public Rr::Util::MakeModule<typename ReceiverImpl::ReceiverRegi
 public:
 	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb);
-private:
-	using ExpectedRoute = void *;  // See description for `buildRoute`
+
 private:
 	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	void notify(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
 		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
+
 private:
 	ReceiveCb receiveCb;
 	EndpointVariant endpointVariant;
