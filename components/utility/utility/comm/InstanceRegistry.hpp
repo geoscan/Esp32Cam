@@ -5,12 +5,13 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#ifndef UTILITY_UTILITY_INSTANCEREGISTRY_HPP_
-#define UTILITY_UTILITY_INSTANCEREGISTRY_HPP_
+#ifndef UTILITY_UTILITY_COMM_INSTANCEREGISTRY_HPP_
+#define UTILITY_UTILITY_COMM_INSTANCEREGISTRY_HPP_
 
 #include <algorithm>
 
 namespace Utility {
+namespace Comm {
 
 template <class T, template <class ...> class Tcontainer>
 struct InstanceRegistry {
@@ -33,6 +34,7 @@ struct InstanceRegistry {
 	}
 };
 
+}  // namespace Comm
 }  // namespace Utility
 
-#endif // UTILITY_UTILITY_INSTANCEREGISTRY_HPP_
+#endif // UTILITY_UTILITY_COMM_INSTANCEREGISTRY_HPP_
