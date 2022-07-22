@@ -50,7 +50,7 @@ using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list
 /// participate in the process, and lock it;
 ///
 /// 3. Route lock (more tailored group lock - only lock those that we want to use): determine which endpoints will
-/// participate in routing based on first endpoint, lock them in a pre-determined sequence (thus avoiding
+/// participate in routing based on starting endpoint, lock them in a pre-determined sequence (thus avoiding
 /// deadlocks), and execute the notification process.
 ///
 /// The benefits of each of those are unclear at the moment. However, mocking the third one encompasses all of them. So
@@ -98,12 +98,9 @@ private:
 	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	void notify(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
 		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
-	void notifyDelayed(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
-		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
 private:
 	ReceiveCb receiveCb;
 	EndpointVariant endpointVariant;
-	unsigned &busyCounter;  ///< `busyCounter > 0` denotes that some notification processes are ongoing. `busyCounter` serves as a buffer protection mechanism.
 };
 
 }  // namespace Bdg
