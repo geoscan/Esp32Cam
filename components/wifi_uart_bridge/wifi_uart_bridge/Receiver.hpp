@@ -57,7 +57,12 @@ public:
 	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb);
 private:
+	using ExpectedRoute = void *;  // See description for `buildRoute`
+private:
 	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
+	static ExpectedRoute buildRoute(const EndpointVariant &);
+	static void lockRoute(const ExpectedRoute &);
+	static bool tryLockRoute(const ExpectedRoute &);
 	void notify(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
 		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
 	void notifyDelayed(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
