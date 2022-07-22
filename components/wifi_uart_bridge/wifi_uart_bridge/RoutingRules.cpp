@@ -8,91 +8,98 @@
 #include "RoutingRules.hpp"
 #include <algorithm>
 
+using namespace Bdg::RoutingRulesImpl;
+static constexpr unsigned kRulesReserved = 16;
+
 namespace Bdg {
+namespace RoutingRulesImpl {
 
-RoutingRules::RoutingRules() :
-	std::vector<ReductionRule>{8},
-	Utility::MakeSingleton<RoutingRules>{*this}
+bool operator<(const Bdg::RoutingRulesImpl::ReductionRule &aLhs, const Bdg::RoutingRulesImpl::ReductionRule &aRhs)
+{
+	return aLhs.ruleTrigger < aRhs.ruleTrigger;
+}
+
+bool operator<(const Bdg::RoutingRulesImpl::ReductionRule &aLhs, const Bdg::RoutingRulesImpl::RuleTrigger &aRhs)
+{
+	return aLhs.ruleTrigger < aRhs;
+}
+
+}  // namespace RoutingRulesImpl
+
+RoutingRules::RoutingRules() : mutex{}, reductionRules{kRulesReserved}
 {
 }
 
-bool RoutingRules::add(const ReductionRule &aReductionRule)
+bool RoutingRules::addStatic(const EndpointVariant &aOrigin, const EndpointVariant &aIntermediary,
+	const EndpointVariant &aReduce)
+{
+	std::lock_guard<std::mutex> lock{mutex};
+	(void)lock;
+	RoutingRulesImpl::ReductionRule reductionRule{{aOrigin, aIntermediary}, {aReduce}};
+
+	auto it = find(aOrigin, aIntermediary);
+	const bool ret = (std::end(reductionRules) == it);
+
+	if (ret) {
+		reductionRules.insert(std::lower_bound(std::begin(reductionRules), std::end(reductionRules), reductionRule),
+			reductionRule);
+	}
+
+	return ret;
+}
+
+void RoutingRules::remove(const EndpointVariant &aOrigin, const EndpointVariant &aIntermediary)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 
-	const auto it = find(aReductionRule);
-	const auto res = cend() != it;
+	auto it = find(aOrigin, aIntermediary);
 
-	if (res) {
-		push_back(aReductionRule);
-	}
-
-	return res;
-}
-
-/// \brief Removes rules selecting those to be deleted using the provided pattern.
-///
-/// \details The pattern is formed in the following way: (RULE|STUB, RULE|STUB, RULE|STUB). STUB is a placeholder
-/// signifying that any endpoint may be placed at this position. Stub is initiated w/ the default constructor of
-/// `EndpointVariant`.
-///
-void RoutingRules::remove(const ReductionRule &aReductionRule)
-{
-	std::lock_guard<std::mutex> lock{mutex};
-	(void)lock;
-	auto del = 0;
-
-	for (auto &reductionRule : *this) {
-		if (std::equal(aReductionRule.begin(), aReductionRule.end(), reductionRule.begin()),
-			[](const EndpointVariant &aLhs, const EndpointVariant &aRhs)
-			{
-				const EndpointVariant kStub{};
-				aLhs == aRhs || aLhs == kStub;
-			})
-		{
-			++del;
-			std::swap((*this)[size() - del], reductionRule);
-		}
-	}
-
-	while (del > 0) {
-		pop_back();
-		--del;
+	if (std::end(reductionRules) != it) {
+		reductionRules.erase(it);
 	}
 }
+
 
 /// \brief Searches for a rule to be applied using a (FROM, TO) pair. If there is any, returns true, and assigns
-/// `aSrc` w/ the found rule
+/// `aoSrc` w/ the found rule
 ///
-bool RoutingRules::reduce(EndpointVariant &aSrc, const EndpointVariant &aCandidate) const
+bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandidate)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
-	const ReductionRule rule{{{aSrc}, {aCandidate}, EndpointVariant{}}};
-	const auto it = find(rule);
-	const bool res = cend() != it;
+	auto it = find(aoSrc, aCandidate);
+	const bool ret = (std::end(reductionRules) != it);
 
-	if (res) {
-		aSrc = {(*it)[2]};
+	if (ret) {
+		aoSrc = it->reductionVariant.match(
+			[&aoSrc, &aCandidate](DynamicReduction &a) {return a(aoSrc, aCandidate); },
+			[](const EndpointVariant &a) {return a; }
+		);
 	}
 
-	return res;
+	return ret;
 }
 
-/// \brief Searches for the rule comparing the first two positions
-///
-RoutingRules::const_iterator RoutingRules::find(const ReductionRule &aRoutingRule) const
+typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::find(const EndpointVariant &aOrigin,
+	const EndpointVariant &aIntermediary)
 {
-	auto it = cbegin();
+	std::lock_guard<std::mutex> lock{mutex};
+	(void)lock;
+	const RuleTrigger ruleTrigger{aOrigin, aIntermediary};
+	auto end = std::end(reductionRules);
+	auto it = std::lower_bound(std::begin(reductionRules), end, ruleTrigger);
 
-	for (; it != cend(); ++it) {
-		if ((*it)[0] == aRoutingRule[0] && (*it)[1] == aRoutingRule[1]) {
-			break;
+	if (it != end) {
+		if (it->ruleTrigger != ruleTrigger) {
+			it = end;
 		}
 	}
 
 	return it;
 }
+
+/// \brief Searches for the rule comparing the first two positions
+///
 
 }  // namespace Bdg

@@ -12,11 +12,28 @@
 #include "wifi_uart_bridge/EndpointVariant.hpp"
 #include <array>
 #include <list>
+#include <vector>
 #include <mutex>
+#include <functional>
 
 namespace Bdg {
 
-using ReductionRule = typename std::array<EndpointVariant, 3>;  ///< (Rule A, Endpoint candidate, Rule B on forwarding). The first two positions constitute a unique identifier of a rule.
+using DynamicReduction = std::function<EndpointVariant(const EndpointVariant &, const EndpointVariant &)>;
+
+namespace RoutingRulesImpl {
+
+using RuleTrigger = std::tuple<EndpointVariant, EndpointVariant>;  ///< Unique identifier of a rule
+using ReductionVariant = typename mapbox::util::variant<DynamicReduction, EndpointVariant>;
+
+struct ReductionRule {
+	RuleTrigger ruleTrigger;
+	ReductionVariant reductionVariant;
+};
+
+bool operator<(const RoutingRulesImpl::ReductionRule &aLhs, const RoutingRulesImpl::ReductionRule &aRhs);
+bool operator<(const RoutingRulesImpl::ReductionRule &aLhs, const RuleTrigger &aRhs);
+
+}  // namespace RoutingRulesImpl
 
 /// \brief Stores routing sequences.
 ///
@@ -30,18 +47,19 @@ using ReductionRule = typename std::array<EndpointVariant, 3>;  ///< (Rule A, En
 /// sequence is C.
 /// In this example, R1 is a virtual originator, since we have no endpoint called R1.
 ///
-class RoutingRules : public std::vector<ReductionRule>, public Utility::MakeSingleton<RoutingRules> {
+class RoutingRules : public Utility::MakeSingleton<RoutingRules> {
 public:
 	RoutingRules();
-	bool add(const ReductionRule &);
-	void remove(const ReductionRule &);
-	bool reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandidate) const;
+	bool addStatic(const EndpointVariant &, const EndpointVariant&, const EndpointVariant &);
+	void remove(const EndpointVariant &, const EndpointVariant &);
+	bool reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandidate);
 
 private:
-	RoutingRules::const_iterator find(const ReductionRule &) const;
+	typename std::vector<RoutingRulesImpl::ReductionRule>::iterator find(const EndpointVariant &, const EndpointVariant &);
 
 private:
 	mutable std::mutex mutex;
+	std::vector<RoutingRulesImpl::ReductionRule> reductionRules;
 };
 
 }  // namespace Bdg
