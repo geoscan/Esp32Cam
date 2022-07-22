@@ -84,8 +84,6 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::find(const EndpointVariant &aOrigin,
 	const EndpointVariant &aIntermediary)
 {
-	std::lock_guard<std::mutex> lock{mutex};
-	(void)lock;
 	const RuleTrigger ruleTrigger{aOrigin, aIntermediary};
 	auto end = std::end(reductionRules);
 	auto it = std::lower_bound(std::begin(reductionRules), end, ruleTrigger);
