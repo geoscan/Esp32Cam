@@ -34,8 +34,8 @@ using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list
 ///
 /// \details MEMORY OVERHEAD. The routing solves the problem of maintaining buffers' consistency across receivers.
 /// There is an alternative that is to just copy the content that is being passed b/w endpoints, and maintain those
-/// buffers instead of implementing synchronization mechanism. However, this approach is not acceptible due to the time
-/// and memory overhead it entails.
+/// buffers instead of implementing a synchronization mechanism. However, this approach is not acceptible due to the
+/// time and memory overhead it entails.
 ///
 /// Other options are: (1) synchronize buffers, or (2) accept drops and content corruption. It's been decided to use
 /// the first one
@@ -56,7 +56,7 @@ using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list
 /// The benefits of each of those are unclear at the moment. However, mocking the third one encompasses all of them. So
 /// it has been decided to use the first one, considering that it proved itself viable in practice, while leaving the
 /// room for improvement by adopting an extendable architectural approach allowing implementing 2nd or 3rd option
-/// later.
+/// later, IF it becomes necessary.
 ///
 struct Route {
 	Route(const EndpointVariant &);
@@ -76,8 +76,8 @@ using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility
 /// identity, and then notified according to a list of "request-reponse-reduce" rules defined by `Bdg::RoutingRules`.
 ///
 /// \details The work of an observer is to receive a sequence (if one is addressed to it), and either ignore, modify,
-/// or forward it further. An observer is only aware of its identity and the identitity of a sender from which it
-/// receives a message.
+/// or forward it further. An observer is only aware of its identity and the identitity of a sender which it receives a
+/// message from .
 ///
 /// ONE NOTIFICATION AT A TIME. At a time, only one notification sequence is active: `notifyAs` in an entry point, and
 /// it is synchronized w/ a static mutex.
@@ -85,8 +85,8 @@ using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility
 /// RECEIVER HOLDS ITS OWN BUFFER. If a Receiver initiates a new notification sequence (processes a received buffer and
 /// composes a new message), it is expected to use its own buffer.
 ///
-/// SYNC. This entire scheme with (1) busy counter and (2) use of a shared work queue (a) protects Receiver's buffers
-/// from being modified while in use, and (b) prevent deadlocks upon Receiver instances.
+/// SYNC. This entire scheme with (1) busy counter (see `notifyAsAsync`) and (2) use of a shared work queue (a)
+/// protects Receiver's buffers from being modified while in use, and (b) prevent deadlocks on Receiver instances.
 ///
 class Receiver : public Rr::Util::MakeModule<typename ReceiverImpl::ReceiverRegistry> {
 public:
