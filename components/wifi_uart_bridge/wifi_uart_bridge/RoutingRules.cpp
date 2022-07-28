@@ -97,7 +97,4 @@ typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::fi
 	return it;
 }
 
-/// \brief Searches for the rule comparing the first two positions
-///
-
 }  // namespace Bdg
