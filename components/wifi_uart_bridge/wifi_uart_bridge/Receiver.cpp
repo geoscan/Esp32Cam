@@ -71,7 +71,7 @@ void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferC
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), aRespondCb);
+				notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), std::move(aRespondCb));
 				ongoing = true;
 			}
 
@@ -114,7 +114,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 					outRespondCb = aRespondCb;
 				};
 			receiver->receiveCb(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
-			notifyAsImpl(aRoute, reduced, outBuffer, outRespondCb);
+			notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
 		}
 	}
 }
