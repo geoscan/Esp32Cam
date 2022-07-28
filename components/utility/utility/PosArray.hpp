@@ -110,6 +110,13 @@ public:
 		return at(pos - 1);
 	}
 
+	template <class ...Ts>
+	typename Base::reference emplace_back(Ts &&...aArgs)
+	{
+		new(&at(pos)) T{std::forward<Ts>(aArgs)...};
+		return at(pos++);
+	}
+
 	typename Base::reference push_back(const T &aInstance)
 	{
 		new(&at(pos)) T{aInstance};
