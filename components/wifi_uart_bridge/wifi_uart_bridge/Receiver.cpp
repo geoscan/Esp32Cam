@@ -34,14 +34,25 @@ constexpr std::chrono::milliseconds kNotifyWait{20};
 void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
 {
 	ReceiverImpl::Route route{aEndpointVariant};
-	route.lock();
-	notifyAsImpl(route, aEndpointVariant, aBuffer, aRespondCb);
+	bool ongoing = false;
 
-	do {
-		Utility::Tim::taskDelay(kNotifyWait);
-	} while (!route.checkDone());
+	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
+		[&route, &ongoing, &aEndpointVariant, &aBuffer, &aRespondCb]()
+		{
+			bool ret = true;
 
-	route.unlock();
+			if (ongoing) {
+				if (route.checkDone()) {
+					route.unlock();
+					ret = false;
+				}
+			} else if (route.tryLock()) {
+				notifyAsImpl(route, aEndpointVariant, aBuffer, aRespondCb);
+				ongoing = true;
+			}
+
+			return ret;
+		});
 }
 
 void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb)
