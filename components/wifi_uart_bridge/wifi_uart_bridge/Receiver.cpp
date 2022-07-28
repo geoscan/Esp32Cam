@@ -15,6 +15,13 @@
 
 namespace Bdg {
 
+static constexpr std::size_t kReceiverStorageCapacity = 16;
+
+static struct ReceiverRegistry {
+	Utility::Comm::OrderedInstanceRegistry<Receiver> instances;
+	std::mutex mutex;
+} sReceiverRegistry{{16}, {}};
+
 static struct RouteDetails {
 	std::mutex mutex;
 	unsigned counter;
@@ -41,6 +48,14 @@ Receiver::Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb) :
 	receiveCb{aReceiveCb},
 	endpointVariant{aIdentity}
 {
+	std::lock_guard<std::mutex> lock{sReceiverRegistry.mutex};
+	sReceiverRegistry.instances.add(*this);
+}
+
+Receiver::~Receiver()
+{
+	std::lock_guard<std::mutex> lock{sReceiverRegistry.mutex};
+	sReceiverRegistry.instances.remove(*this);
 }
 
 /// \brief Determine which receivers are eligible for being notified upon an incoming message based on `RoutingRules`.
@@ -116,6 +131,21 @@ void ReceiverImpl::Route::unlock()
 bool ReceiverImpl::Route::checkDone()
 {
 	return 1 == sRouteDetails.counter;
+}
+
+bool operator<(const Receiver &aLhs, const Receiver &aRhs)
+{
+	return aLhs.endpointVariant < aRhs.endpointVariant;
+}
+
+bool operator<(const Receiver &aLhs, const EndpointVariant &aRhs)
+{
+	return aLhs.endpointVariant < aRhs;
+}
+
+bool operator==(const Receiver &aLhs, const EndpointVariant &aRhs)
+{
+	return aLhs.endpointVariant == aRhs;
 }
 
 }  // namespace Bdg

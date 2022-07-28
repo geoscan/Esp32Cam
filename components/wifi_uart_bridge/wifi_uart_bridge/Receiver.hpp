@@ -10,6 +10,7 @@
 
 #include "wifi_uart_bridge/EndpointVariant.hpp"
 #include "utility/Buffer.hpp"
+#include "utility/comm/InstanceRegistry.hpp"
 #include <Rr/Util/Module.hpp>
 #include <list>
 #include <functional>
@@ -88,10 +89,15 @@ using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility
 /// SYNC. This entire scheme with (1) busy counter (see `notifyAsAsync`) and (2) use of a shared work queue (a)
 /// protects Receiver's buffers from being modified while in use, and (b) prevent deadlocks on Receiver instances.
 ///
-class Receiver : public Rr::Util::MakeModule<typename ReceiverImpl::ReceiverRegistry> {
+class Receiver final : public Rr::Util::MakeModule<typename ReceiverImpl::ReceiverRegistry> {
 public:
+	friend bool operator<(const Receiver &, const Receiver &);
+	friend bool operator<(const Receiver &, const EndpointVariant &);
+	friend bool operator==(const Receiver &, const EndpointVariant &);
+
 	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb);
+	~Receiver();
 
 private:
 	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
@@ -102,6 +108,10 @@ private:
 	ReceiveCb receiveCb;
 	EndpointVariant endpointVariant;
 };
+
+bool operator<(const Receiver &, const Receiver &);
+bool operator<(const Receiver &, const EndpointVariant &);
+bool operator==(const Receiver &, const EndpointVariant &);
 
 }  // namespace Bdg
 
