@@ -11,9 +11,10 @@ namespace Bdg {
 
 /// \brief Enables additional interpretation of an identity
 ///
-/// \details In some cases, we only need to compare rules by target ports or remote senders' identities. E.g. (Sender
-/// endpoint, Port) pairs may also be interpreted as (Sender endpoint) or (Port). `asAlternative` generalizes this
-/// feature.
+/// \details In some cases, we only need to apply rules based on targets' ports or remote senders' identities. E.g.
+/// (Sender endpoint, Port) pairs may also be interpreted as (Sender endpoint) or (Port). `asAlternative` performs
+/// match against entities that can be decomposed or re-interpreted, and fills the return vector w/ the results of that
+/// decomposition.
 ///
 std::vector<EndpointVariant> EndpointVariant::asAlternative()
 {
