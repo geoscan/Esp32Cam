@@ -52,21 +52,19 @@ void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferC
 	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuous(
 		[ongoing, route, aEndpointVariant, aGetBufferCb, aRespondCb]() mutable
 		{
+			bool ret = true;
+
 			if (ongoing) {
 				if (route.checkDone()) {
 					route.unlock();
-					return false;
+					ret = false;
 				}
+			} else if (route.tryLock()) {
+				notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), aRespondCb);
+				ongoing = true;
 			}
 
-			if (!route.tryLock()) {
-				return true;
-			}
-
-			notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), aRespondCb);
-			ongoing = true;
-
-			return true;
+			return ret;
 		});
 }
 
