@@ -132,12 +132,23 @@ void ReceiverImpl::Route::lock()
 
 bool ReceiverImpl::Route::tryLock()
 {
-	return sRouteDetails.turn.load() == turn;
+	bool ret = sRouteDetails.turn.load() == turn;
+
+	if (ret) {
+		sReceiverRegistry.mutex.lock();
+	}
+
+	return ret;
 }
 
 void ReceiverImpl::Route::unlock()
 {
-	sRouteDetails.turn.compare_exchange_weak(turn, turn + 1);
+	auto turnExpected = turn;
+	sRouteDetails.turn.compare_exchange_weak(turnExpected, turn + 1);
+
+	if (turnExpected == turn) {
+		sReceiverRegistry.mutex.unlock();
+	}
 }
 
 bool ReceiverImpl::Route::checkDone()
