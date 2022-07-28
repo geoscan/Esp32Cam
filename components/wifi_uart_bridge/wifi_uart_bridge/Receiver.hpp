@@ -66,7 +66,7 @@ private:
 
 using RespondCb = std::function<void(Utility::ConstBuffer)>;
 using ForwardCb = std::function<void(Utility::ConstBuffer, RespondCb)>;
-using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb)>;
+using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
 using GetBufferCb = std::function<Utility::ConstBuffer()>;
 
 /// \brief The purpose of Receiver class is to (1) spare buffer copying and (2) ensure thread-safe and deadlock-free

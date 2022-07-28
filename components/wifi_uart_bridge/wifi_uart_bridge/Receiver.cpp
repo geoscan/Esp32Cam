@@ -107,14 +107,19 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
 			Utility::ConstBuffer outBuffer = aBuffer;
 			RespondCb outRespondCb = aRespondCb;
+			bool forwarded = false;
 			auto forwardCb =
-				[&outBuffer, &outRespondCb](Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
+				[&forwarded, &outBuffer, &outRespondCb](Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
 				{
+					forwarded = true;
 					outBuffer = aBuffer;
 					outRespondCb = aRespondCb;
 				};
 			receiver->receiveCb(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
-			notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
+
+			if (forwarded) {
+				notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
+			}
 		}
 	}
 }
