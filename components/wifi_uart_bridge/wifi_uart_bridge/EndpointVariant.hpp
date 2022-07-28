@@ -8,7 +8,7 @@
 #include <mapbox/variant.hpp>
 #include <asio.hpp>
 #include <tuple>
-#include <vector>
+#include "utility/PosArray.hpp"
 
 #if !defined(WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_ENDPOINTVARIANT_HPP_)
 #define WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_ENDPOINTVARIANT_HPP_
@@ -40,8 +40,9 @@ using EndpointVariantBase = mapbox::util::variant<NamedEndpoint, TcpEndpoint, Ud
 
 struct EndpointVariant : EndpointVariantBase
 {
+	static constexpr auto kPosArraySize = 2;
 	using EndpointVariantBase::EndpointVariantBase;
-	std::vector<EndpointVariant> asAlternative();
+	Utility::PosArray<EndpointVariant, kPosArraySize> asAlternative();
 };
 
 }  // namespace Bdg

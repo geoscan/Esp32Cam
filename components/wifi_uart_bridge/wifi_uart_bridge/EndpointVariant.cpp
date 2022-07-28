@@ -16,10 +16,9 @@ namespace Bdg {
 /// match against entities that can be decomposed or re-interpreted, and fills the return vector w/ the results of that
 /// decomposition.
 ///
-std::vector<EndpointVariant> EndpointVariant::asAlternative()
+Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVariant::asAlternative()
 {
-	constexpr std::size_t kSizeHint = 2;
-	std::vector<EndpointVariant> ret{kSizeHint};
+	Utility::PosArray<EndpointVariant, kPosArraySize> ret{};
 	match(
 		[&ret](const UdpEndpoint &aUdpEndpoint)
 		{
