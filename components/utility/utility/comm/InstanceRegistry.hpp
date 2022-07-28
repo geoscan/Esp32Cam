@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <mutex>
+#include <vector>
 
 namespace Utility {
 namespace Comm {
@@ -31,6 +32,51 @@ struct InstanceRegistry {
 
 		if (std::end(instances) != it) {
 			instances.erase(it);
+		}
+	}
+};
+
+template <class T>
+struct OrderedInstanceRegistry : std::vector<T *> {
+public:
+	OrderedInstanceRegistry(std::size_t aSizeHint) : std::vector<T *>{aSizeHint}
+	{
+	}
+
+	/// \brief Order-preserving modifier
+	///
+	void add(T &aInstance)
+	{
+		if (std::find(std::begin(*this), std::end(*this), &aInstance) == std::end(*this)) {
+			this->insert(std::lower_bound(std::begin(*this), std::end(*this), aInstance,
+				[](const T *aStored, const T &aCandidate) {return *aStored < aCandidate; }), &aInstance);
+		}
+	}
+
+	void remove(T &aInstance)
+	{
+		this->erase(std::find(std::begin(*this), std::end(*this), &aInstance));
+	}
+
+	/// \brief Iterates over a range of instances that are equal to the key.
+	///
+	/// \details The target instance is searched w/ binary search, so the operation is time efficient.
+	///
+	/// \pre operator==(const C &, const K &) and operator<(const C &, const K &) must be defined.
+	///
+	template <class C, class K>
+	void foreach(C &&aCallable, const K &aKey)
+	{
+		auto it = std::lower_bound(std::begin(*this), std::end(*this), aKey,
+			[](const T *aStored, const K &aCandidate) {return *aStored < aCandidate; });
+
+		while (it != std::end(*this)) {
+			if (*it == aKey) {
+				aCallable(it);
+				++it;
+			} else {
+				break;
+			}
 		}
 	}
 };
