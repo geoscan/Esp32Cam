@@ -23,9 +23,9 @@ static struct ReceiverRegistry {
 } sReceiverRegistry{{16}, {}};
 
 static struct RouteDetails {
-	std::mutex mutex;
-	unsigned counter;
-} sRouteDetails {{}, 0};
+	std::atomic_size_t turnBoundary;
+	std::atomic_size_t turn;
+} sRouteDetails {{0}, {}};
 
 constexpr std::chrono::milliseconds kNotifyWait{20};
 
@@ -35,13 +35,39 @@ void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstB
 {
 	ReceiverImpl::Route route{aEndpointVariant};
 	route.lock();
-	notifyAsAsync(sRouteDetails.counter, aEndpointVariant, aBuffer, std::move(aRespondCb));
+	notifyAsImpl(route, aEndpointVariant, aBuffer, aRespondCb);
 
-	while (!route.checkDone()) {
+	do {
 		Utility::Tim::taskDelay(kNotifyWait);
-	}
+	} while (!route.checkDone());
 
 	route.unlock();
+}
+
+void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb)
+{
+	ReceiverImpl::Route route{aEndpointVariant};
+	bool ongoing = false;
+
+	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuous(
+		[ongoing, route, aEndpointVariant, aGetBufferCb, aRespondCb]() mutable
+		{
+			if (ongoing) {
+				if (route.checkDone()) {
+					route.unlock();
+					return false;
+				}
+			}
+
+			if (!route.tryLock()) {
+				return true;
+			}
+
+			notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), aRespondCb);
+			ongoing = true;
+
+			return true;
+		});
 }
 
 Receiver::Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb) :
@@ -59,47 +85,32 @@ Receiver::~Receiver()
 }
 
 /// \brief Determine which receivers are eligible for being notified upon an incoming message based on `RoutingRules`.
-/// Notify each of them. If forwarding is required, push the next notification chain in a work queue.
+/// Notify each of them
 ///
-void Receiver::notifyAsAsync(unsigned &aCounter, const EndpointVariant &aEndpointVariant, Utility::ConstBuffer aBuffer,
-	RespondCb aRespondCb)
+void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
+	Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
 {
-	for (auto &receiver : ReceiverImpl::ReceiverRegistry::getIterators()) {
-		auto reducedEndpointVariant = aEndpointVariant;
+	assert(RoutingRules::checkInstance());
 
-		if (RoutingRules::getInstance().reduce(reducedEndpointVariant, receiver.endpointVariant)) {  // Check if this particular receiver should accept the request
-			receiver.notify(aEndpointVariant, reducedEndpointVariant, aCounter, aRespondCb, aBuffer);
+	for (auto receiver : sReceiverRegistry.instances) {
+		auto reduced = aEndpointVariant;
+
+		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
+			Utility::ConstBuffer outBuffer = aBuffer;
+			RespondCb outRespondCb = aRespondCb;
+			auto forwardCb =
+				[&outBuffer, &outRespondCb](Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
+				{
+					outBuffer = aBuffer;
+					outRespondCb = aRespondCb;
+				};
+			receiver->receiveCb(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
+			notifyAsImpl(aRoute, reduced, outBuffer, outRespondCb);
 		}
 	}
 }
 
-/// \brief Notify a receiver, and forward the message to the next receivers in an asynchronous manner.
-/// `aBusyCounter` is a cross-process counter which should be increased with every pending notification task.
-///
-void Receiver::notify(const EndpointVariant &aSenderEndpointVariant, const EndpointVariant &aReducedEndpointVariant,
-	unsigned &aBusyCounter, RespondCb aRespondCb, Utility::ConstBuffer aBuffer)
-{
-	Utility::ConstBuffer outBuffer = aBuffer;
-	RespondCb outRespondCb{};
-
-	// A stub wrapper which is used to replace the forwarded buffer, if a receiver pushes one of its own
-	auto forwardCb =
-		[&outBuffer, &outRespondCb](Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
-		{
-			outBuffer = aBuffer;
-			outRespondCb = aRespondCb;
-		};
-
-	receiveCb(aSenderEndpointVariant, aBuffer, aRespondCb, forwardCb);  // Perform notification, set buffers to forward
-	Utility::Comm::RaiiCounter raiiCounter{aBusyCounter};  // Increase the used busyCounter, since a new request is being queued
-	Utility::Thr::Wq::MediumPriority::getInstance().push(
-		[&aBusyCounter, aReducedEndpointVariant, raiiCounter, outBuffer, outRespondCb]() mutable
-		{
-			notifyAsAsync(aBusyCounter, aReducedEndpointVariant, outBuffer, std::move(outRespondCb));
-		});
-}
-
-ReceiverImpl::Route::Route(const EndpointVariant &)
+ReceiverImpl::Route::Route(const EndpointVariant &) : turn{sRouteDetails.turnBoundary.fetch_add(1) + 1}
 {
 }
 
@@ -112,25 +123,17 @@ void ReceiverImpl::Route::lock()
 
 bool ReceiverImpl::Route::tryLock()
 {
-	std::lock_guard<std::mutex> lock{sRouteDetails.mutex};
-	(void)lock;
-	bool ret = (0 == sRouteDetails.counter);
-
-	if (ret) {
-		sRouteDetails.counter = 1;
-	}
-
-	return ret;
+	return sRouteDetails.turn.load() == turn;
 }
 
 void ReceiverImpl::Route::unlock()
 {
-	sRouteDetails.counter = 0;
+	sRouteDetails.turn.compare_exchange_weak(turn, turn + 1);
 }
 
 bool ReceiverImpl::Route::checkDone()
 {
-	return 1 == sRouteDetails.counter;
+	return true;
 }
 
 bool operator<(const Receiver &aLhs, const Receiver &aRhs)

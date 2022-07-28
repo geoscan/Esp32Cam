@@ -14,6 +14,7 @@
 #include <Rr/Util/Module.hpp>
 #include <list>
 #include <functional>
+#include <atomic>
 
 namespace Bdg {
 
@@ -21,17 +22,7 @@ class Receiver;
 
 namespace ReceiverImpl {
 
-/// \brief Defines access policy
-///
-struct SyncTrait {
-	using Mutex = std::mutex;
-	static constexpr auto kStoragePolicy = Rr::Sync::Policy::Type::Mutex;  ///< Static storage of `Receiver` instances is synchronized w/ a mutex
-	static constexpr auto kSharedAccessPolicy = Rr::Sync::Policy::Type::Mutex;  ///< Access to a particular instance of `Receiver` is synchronized w/ a mutex
-};
-
-using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list>;
-
-/// \brief Builds an expected route based on a starting point.
+/// \brief Locks an expected route based on a starting point.
 ///
 /// \details MEMORY OVERHEAD. The routing solves the problem of maintaining buffers' consistency across receivers.
 /// There is an alternative that is to just copy the content that is being passed b/w endpoints, and maintain those
@@ -59,12 +50,16 @@ using ReceiverRegistry = Rr::Util::ModuleRegistry<Receiver, SyncTrait, std::list
 /// room for improvement by adopting an extendable architectural approach allowing implementing 2nd or 3rd option
 /// later, IF it becomes necessary.
 ///
-struct Route {
+struct Route final {
 	Route(const EndpointVariant &);
+	Route(const Route &aOther) = default;
+	Route(Route &&aOther) = default;
 	void lock();
 	bool tryLock();
 	void unlock();
 	bool checkDone();
+private:
+	std::size_t turn;
 };
 
 }  // namespace ReceiverImpl
@@ -72,37 +67,34 @@ struct Route {
 using RespondCb = std::function<void(Utility::ConstBuffer)>;
 using ForwardCb = std::function<void(Utility::ConstBuffer, RespondCb)>;
 using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb)>;
+using GetBufferCb = std::function<Utility::ConstBuffer()>;
 
-/// \brief A receiver is an "observer" in Observer pattern. On creation, it gets registered in a queue under an
+/// \brief The purpose of Receiver class is to (1) spare buffer copying and (2) ensure thread-safe and deadlock-free
+/// notification with the minimum code on the side of a receiver.
+///
+/// \details A receiver is an "observer" in Observer pattern. On creation, it gets registered in a queue under an
 /// identity, and then notified according to a list of "request-reponse-reduce" rules defined by `Bdg::RoutingRules`.
 ///
-/// \details The work of an observer is to receive a sequence (if one is addressed to it), and either ignore, modify,
+/// The work of an observer is to receive a sequence (if one is addressed to it), and either ignore, modify,
 /// or forward it further. An observer is only aware of its identity and the identitity of a sender which it receives a
-/// message from .
-///
-/// ONE NOTIFICATION AT A TIME. At a time, only one notification sequence is active: `notifyAs` in an entry point, and
-/// it is synchronized w/ a static mutex.
+/// message from.
 ///
 /// RECEIVER HOLDS ITS OWN BUFFER. If a Receiver initiates a new notification sequence (processes a received buffer and
 /// composes a new message), it is expected to use its own buffer.
 ///
-/// SYNC. This entire scheme with (1) busy counter (see `notifyAsAsync`) and (2) use of a shared work queue (a)
-/// protects Receiver's buffers from being modified while in use, and (b) prevent deadlocks on Receiver instances.
-///
-class Receiver final : public Rr::Util::MakeModule<typename ReceiverImpl::ReceiverRegistry> {
+class Receiver final {
 public:
 	friend bool operator<(const Receiver &, const Receiver &);
 	friend bool operator<(const Receiver &, const EndpointVariant &);
 	friend bool operator==(const Receiver &, const EndpointVariant &);
-
 	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
+	static void notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb);
 	Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb);
 	~Receiver();
 
 private:
-	static void notifyAsAsync(unsigned &counter, const EndpointVariant &, Utility::ConstBuffer, RespondCb);
-	void notify(const EndpointVariant &aSender, const EndpointVariant &aReducedEndpointVariant, unsigned &busyCounter,
-		RespondCb aRespondCb, Utility::ConstBuffer aBuffer);
+	static void notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
+		Utility::ConstBuffer aBuffer, RespondCb aRespond);
 
 private:
 	ReceiveCb receiveCb;
