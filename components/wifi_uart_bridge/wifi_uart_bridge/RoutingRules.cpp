@@ -69,13 +69,22 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 	auto it = find(aoSrc, aCandidate);
-	const bool ret = (std::end(reductionRules) != it);
+	bool ret = (std::end(reductionRules) != it);
 
 	if (ret) {
 		aoSrc = it->reductionVariant.match(
 			[&aoSrc, &aCandidate](DynamicReduction &a) {return a(aoSrc, aCandidate); },
 			[](const EndpointVariant &a) {return a; }
 		);
+	} else {
+		for (auto &alternative : aoSrc.asAlternative()) {
+			ret = reduce(alternative, aCandidate);
+
+			if (ret) {
+				aoSrc = alternative;
+				break;
+			}
+		}
 	}
 
 	return ret;
