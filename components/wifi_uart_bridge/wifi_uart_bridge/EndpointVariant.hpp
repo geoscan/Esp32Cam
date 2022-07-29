@@ -22,7 +22,8 @@ enum class NamedEndpoint {
 	MavlinkIpPack,  ///< Pack and forward data received over IP
 	UartMavlinkForwarded,  ///< Mavlink packets forwarded from a dedicated UART
 	UdpMavlinkForwarded,  ///< Mavlink packets forwarded from a dedicated UDP port
-	None,
+	MavlinkIpPackForwarded,  ///< IP packets, wrapped and forwarded to UART
+	None,  ///< Stub meaning that no further reduction is required
 };
 
 using TcpEndpoint = typename std::tuple<asio::ip::tcp::endpoint, std::uint16_t /* Port */>;
