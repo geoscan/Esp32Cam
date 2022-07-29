@@ -22,11 +22,13 @@ Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVaria
 	match(
 		[&ret](const UdpEndpoint &aUdpEndpoint)
 		{
+			static_assert(kPosArraySize >= 2, "Insufficient array size");
 			ret.emplace_back(std::get<0>(aUdpEndpoint));
 			ret.emplace_back(UdpPort{std::get<1>(aUdpEndpoint)});
 		},
 		[&ret](const TcpEndpoint &aTcpEndpoint)
 		{
+			static_assert(kPosArraySize >= 2, "Insufficient array size");
 			ret.emplace_back(std::get<0>(aTcpEndpoint));
 			ret.emplace_back(TcpPort{std::get<1>(aTcpEndpoint)});
 		},
