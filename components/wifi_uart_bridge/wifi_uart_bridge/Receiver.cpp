@@ -70,8 +70,7 @@ void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferC
 		});
 }
 
-Receiver::Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb) :
-	receiveCb{aReceiveCb},
+Receiver::Receiver(const EndpointVariant &aIdentity) :
 	endpointVariant{aIdentity}
 {
 	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
@@ -106,7 +105,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 					outBuffer = aBuffer;
 					outRespondCb = aRespondCb;
 				};
-			receiver->receiveCb(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
+			receiver->onReceive(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
 
 			if (forwarded) {
 				notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
@@ -121,6 +120,10 @@ Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
 	static ReceiverRegistry receiverRegistry{{kReceiverStorageCapacity}, {}};
 
 	return receiverRegistry;
+}
+
+void Receiver::onReceive(const EndpointVariant &, Utility::ConstBuffer, RespondCb, ForwardCb)
+{
 }
 
 ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1) + 1}
@@ -169,17 +172,28 @@ ReceiverImpl::Route::RouteDetails &ReceiverImpl::Route::getRouteDetails()
 
 bool operator<(const Receiver &aLhs, const Receiver &aRhs)
 {
-	return aLhs.endpointVariant < aRhs.endpointVariant;
+	return aLhs.endpointVariant.operator<(aRhs.endpointVariant);
 }
 
 bool operator<(const Receiver &aLhs, const EndpointVariant &aRhs)
 {
-	return aLhs.endpointVariant < aRhs;
+	return aLhs.endpointVariant.operator<(aRhs);
 }
 
 bool operator==(const Receiver &aLhs, const EndpointVariant &aRhs)
 {
-	return aLhs.endpointVariant == aRhs;
+	return aLhs.endpointVariant.operator==(aRhs);
+}
+
+LambdaReceiver::LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb) :
+	Receiver{aEndpointVariant}, receiveCb{aReceiveCb}
+{
+}
+
+void LambdaReceiver::onReceive(const EndpointVariant &aEndpointVariant, Utility::ConstBuffer aBuffer,
+	RespondCb aRespondCb, ForwardCb aForwardCb)
+{
+	receiveCb(aEndpointVariant, aBuffer, aRespondCb, aForwardCb);
 }
 
 }  // namespace Bdg

@@ -95,7 +95,7 @@ using GetBufferCb = std::function<Utility::ConstBuffer()>;
 /// RECEIVER HOLDS ITS OWN BUFFER. If a Receiver initiates a new notification sequence (processes a received buffer and
 /// composes a new message), it is expected to use its own buffer.
 ///
-class Receiver final {
+class Receiver {
 private:
 	friend class ReceiverImpl::Route;
 
@@ -112,17 +112,30 @@ public:
 	friend bool operator==(const Receiver &, const EndpointVariant &);
 	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
 	static void notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb);
-	Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb);
-	~Receiver();
+	Receiver(const EndpointVariant &aIdentity);
+	virtual ~Receiver();
 
 private:
 	static void notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
 		Utility::ConstBuffer aBuffer, RespondCb aRespond);
 	static ReceiverRegistry &getReceiverRegistry();
+	virtual void onReceive(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb);
+
+private:
+	EndpointVariant endpointVariant;
+};
+
+/// \brief Enables creating receivers using lambda expressions instead of overriding `onReceive` method
+///
+class LambdaReceiver : Receiver {
+public:
+	LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb);
+
+private:
+	void onReceive(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb) override;
 
 private:
 	ReceiveCb receiveCb;
-	EndpointVariant endpointVariant;
 };
 
 bool operator<(const Receiver &, const Receiver &);
