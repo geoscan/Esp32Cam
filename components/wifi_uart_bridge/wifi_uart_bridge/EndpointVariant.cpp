@@ -16,7 +16,7 @@ namespace Bdg {
 /// match against entities that can be decomposed or re-interpreted, and fills the return vector w/ the results of that
 /// decomposition.
 ///
-Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVariant::asAlternative()
+Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVariant::asAlternative() const
 {
 	Utility::PosArray<EndpointVariant, kPosArraySize> ret{};
 	match(
