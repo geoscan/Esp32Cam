@@ -77,9 +77,10 @@ private:
 
 }  // namespace ReceiverImpl
 
+using Buffer = Utility::ConstBuffer &;
 using RespondCb = std::function<void(Utility::ConstBuffer)>;
 using ForwardCb = std::function<void(Utility::ConstBuffer, RespondCb)>;
-using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
+using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
 using GetBufferCb = std::function<Utility::ConstBuffer()>;
 
 /// \brief The purpose of Receiver class is to (1) spare buffer copying and (2) ensure thread-safe and deadlock-free
@@ -119,7 +120,7 @@ private:
 	static void notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
 		Utility::ConstBuffer aBuffer, RespondCb aRespond);
 	static ReceiverRegistry &getReceiverRegistry();
-	virtual void onReceive(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb);
+	virtual void onReceive(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb);
 
 private:
 	EndpointVariant endpointVariant;
@@ -132,7 +133,7 @@ public:
 	LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb);
 
 private:
-	void onReceive(const EndpointVariant & /*sender*/, Utility::ConstBuffer, RespondCb, ForwardCb) override;
+	void onReceive(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb) override;
 
 private:
 	ReceiveCb receiveCb;

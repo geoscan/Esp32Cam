@@ -95,7 +95,7 @@ Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
 	return Sub::Rout::Payload{resp.buffer, resp.size};
 }
 
-void Mav::Dispatcher::onReceive(const Bdg::EndpointVariant &aSender, Utility::ConstBuffer aBuffer,
+void Mav::Dispatcher::onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer,
 	Bdg::RespondCb aRespondCb, Bdg::ForwardCb aForwardCb)
 {
 	(void)aSender;

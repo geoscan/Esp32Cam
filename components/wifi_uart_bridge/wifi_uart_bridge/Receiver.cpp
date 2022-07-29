@@ -122,7 +122,7 @@ Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
 	return receiverRegistry;
 }
 
-void Receiver::onReceive(const EndpointVariant &, Utility::ConstBuffer, RespondCb, ForwardCb)
+void Receiver::onReceive(const EndpointVariant &, Buffer, RespondCb, ForwardCb)
 {
 }
 
@@ -190,7 +190,7 @@ LambdaReceiver::LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveC
 {
 }
 
-void LambdaReceiver::onReceive(const EndpointVariant &aEndpointVariant, Utility::ConstBuffer aBuffer,
+void LambdaReceiver::onReceive(const EndpointVariant &aEndpointVariant, Buffer aBuffer,
 	RespondCb aRespondCb, ForwardCb aForwardCb)
 {
 	receiveCb(aEndpointVariant, aBuffer, aRespondCb, aForwardCb);

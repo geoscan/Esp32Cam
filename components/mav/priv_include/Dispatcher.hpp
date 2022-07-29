@@ -46,7 +46,7 @@ protected:
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
 	Sub::Rout::Payload respAsPayload();
-	void onReceive(const Bdg::EndpointVariant &aSender, Utility::ConstBuffer aBuffer, Bdg::RespondCb aRespondCb,
+	void onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer, Bdg::RespondCb aRespondCb,
 		Bdg::ForwardCb aForwardCb) override;
 
 private:
