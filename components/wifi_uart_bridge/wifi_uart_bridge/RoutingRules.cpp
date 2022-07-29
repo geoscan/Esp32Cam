@@ -78,15 +78,6 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 			[&aoSrc, &aCandidate](DynamicReduction &a) {return a(aoSrc, aCandidate); },
 			[](const EndpointVariant &a) {return a; }
 		);
-	} else {
-		for (auto &alternative : aoSrc.asAlternative()) {  // The provided rule has not been found among the rules. However, the source endpoint may have different representations, and here we try to match against those, if there are any
-			ret = reduce(alternative, aCandidate);
-
-			if (ret) {
-				aoSrc = alternative;
-				break;
-			}
-		}
 	}
 
 	return ret;
@@ -96,12 +87,20 @@ typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::fi
 	const EndpointVariant &aIntermediary)
 {
 	const RuleTrigger ruleTrigger{aOrigin, aIntermediary};
-	auto end = std::end(reductionRules);
+	const auto end = std::end(reductionRules);
 	auto it = std::lower_bound(std::begin(reductionRules), end, ruleTrigger);
 
 	if (it != end) {
 		if (it->ruleTrigger != ruleTrigger) {
 			it = end;
+		}
+	} else {
+		for (auto &alternative : aOrigin.asAlternative()) {
+			it = find(alternative, aIntermediary);
+
+			if (std::end(reductionRules) != it) {
+				break;
+			}
 		}
 	}
 
