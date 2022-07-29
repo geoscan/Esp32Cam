@@ -122,6 +122,20 @@ Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
 	return receiverRegistry;
 }
 
+/// \brief API for data processing. A receiver is expected to show a certain behavior:
+/// 1) `ForwardCb` callback should only be forwarded when `Receiver` instance does not consume the buffer.
+/// 2) `Buffer` reference is a mutable buffer. The instance may (A) leave it unscathed, or (B) `slice` the buffer. If
+///    (B) option is chosen, the instance will be revisited until it consumes the entire buffer.
+///
+/// \details Effectively, 1) provides a leverage over a notification process enabling the instance to define whether
+/// the chain will be continued or terminated, although this way of using the notification chain is discouraged,
+/// because it is to difficult to reach the agreement between the participants of a notification process, when this
+/// way of forwarding the messages is used.
+///
+/// 2) is used, because there are cases (see MAVLink) when `Receiver` has to process input buffer chunk-by-chunk. Take
+/// `mav` module as an example: there may be 2 messages in a single buffer, and without this revisiting technique the
+/// parser is rendered unable to process both of them.
+///
 void Receiver::onReceive(const EndpointVariant &, Buffer, RespondCb, ForwardCb)
 {
 }
