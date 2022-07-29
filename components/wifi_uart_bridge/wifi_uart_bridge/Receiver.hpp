@@ -41,7 +41,7 @@ namespace ReceiverImpl {
 /// 2. Group lock (generalization over common lock): divide endpoints into groups, determine which group will
 /// participate in the process, and lock it;
 ///
-/// 3. Route lock (more tailored group lock - only lock those that we want to use): determine which endpoints will
+/// 3. Route lock, more tailored group lock - only lock those that we want to use. Determine which endpoints will
 /// participate in routing based on starting endpoint, lock them in a pre-determined sequence (thus avoiding
 /// deadlocks), and execute the notification process.
 ///
@@ -75,9 +75,9 @@ using GetBufferCb = std::function<Utility::ConstBuffer()>;
 /// \details A receiver is an "observer" in Observer pattern. On creation, it gets registered in a queue under an
 /// identity, and then notified according to a list of "request-reponse-reduce" rules defined by `Bdg::RoutingRules`.
 ///
-/// The work of an observer is to receive a sequence (if one is addressed to it), and either ignore, modify,
-/// or forward it further. An observer is only aware of its identity and the identitity of a sender which it receives a
-/// message from.
+/// The work of an observer is to receive a sequence (if one is addressed to it), and either ignore, modify, or forward
+/// it further. An observer is only aware of its identity and the identitity of its immediate predecessor which it
+/// receives a message from.
 ///
 /// RECEIVER HOLDS ITS OWN BUFFER. If a Receiver initiates a new notification sequence (processes a received buffer and
 /// composes a new message), it is expected to use its own buffer.

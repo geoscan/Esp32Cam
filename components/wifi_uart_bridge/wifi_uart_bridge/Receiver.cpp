@@ -55,6 +55,9 @@ void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstB
 		});
 }
 
+/// \brief Same as `notifyAs`, but without waiting. When the caller's turn comes, `aGetBufferCb` will be called, and
+/// it is expected to produce a message.
+///
 void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb)
 {
 	ReceiverImpl::Route route{aEndpointVariant};
