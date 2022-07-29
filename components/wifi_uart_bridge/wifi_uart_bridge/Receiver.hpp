@@ -50,7 +50,16 @@ namespace ReceiverImpl {
 /// room for improvement by adopting an extendable architectural approach allowing implementing 2nd or 3rd option
 /// later, IF it becomes necessary.
 ///
-struct Route final {
+class Route final {
+private:
+	/// \brief Stores shared (static) info on the state of the errands pertaining to route locking
+	///
+	struct RouteDetails {
+		std::atomic_size_t turnBoundary;  ///< Instance creation counter. For assigning a newly created entities w/ a turn number
+		std::atomic_size_t turn;  ///< \brief Current turn. \details Take a look at the locking mechanism for an insight into the internals
+	};
+
+public:
 	Route(const EndpointVariant &);
 	Route(const Route &aOther) = default;
 	Route(Route &&aOther) = default;
@@ -58,6 +67,10 @@ struct Route final {
 	bool tryLock();
 	void unlock();
 	bool checkDone();
+
+private:
+	static RouteDetails &getRouteDetails();
+
 private:
 	std::size_t turn;
 };
@@ -83,6 +96,16 @@ using GetBufferCb = std::function<Utility::ConstBuffer()>;
 /// composes a new message), it is expected to use its own buffer.
 ///
 class Receiver final {
+private:
+	friend class ReceiverImpl::Route;
+
+	/// \brief Receiver instances are stored in a static registry, so they can be enumerated
+	///
+	struct ReceiverRegistry {
+		Utility::Comm::OrderedInstanceRegistry<Receiver> instances;
+		std::mutex mutex;
+	};
+
 public:
 	friend bool operator<(const Receiver &, const Receiver &);
 	friend bool operator<(const Receiver &, const EndpointVariant &);
@@ -95,6 +118,7 @@ public:
 private:
 	static void notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
 		Utility::ConstBuffer aBuffer, RespondCb aRespond);
+	static ReceiverRegistry &getReceiverRegistry();
 
 private:
 	ReceiveCb receiveCb;

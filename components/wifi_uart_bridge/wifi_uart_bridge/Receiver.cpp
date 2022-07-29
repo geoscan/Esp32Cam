@@ -15,18 +15,6 @@
 
 namespace Bdg {
 
-static constexpr std::size_t kReceiverStorageCapacity = 16;
-
-static struct ReceiverRegistry {
-	Utility::Comm::OrderedInstanceRegistry<Receiver> instances;
-	std::mutex mutex;
-} sReceiverRegistry{{16}, {}};
-
-static struct RouteDetails {
-	std::atomic_size_t turnBoundary;
-	std::atomic_size_t turn;
-} sRouteDetails {{0}, {}};
-
 constexpr std::chrono::milliseconds kNotifyWait{20};
 
 /// \brief Instantiate a notification chain and wait for it to get finished.
@@ -86,14 +74,14 @@ Receiver::Receiver(const EndpointVariant &aIdentity, ReceiveCb &&aReceiveCb) :
 	receiveCb{aReceiveCb},
 	endpointVariant{aIdentity}
 {
-	std::lock_guard<std::mutex> lock{sReceiverRegistry.mutex};
-	sReceiverRegistry.instances.add(*this);
+	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
+	Receiver::getReceiverRegistry().instances.add(*this);
 }
 
 Receiver::~Receiver()
 {
-	std::lock_guard<std::mutex> lock{sReceiverRegistry.mutex};
-	sReceiverRegistry.instances.remove(*this);
+	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
+	Receiver::getReceiverRegistry().instances.remove(*this);
 }
 
 /// \brief Determine which receivers are eligible for being notified upon an incoming message based on `RoutingRules`.
@@ -104,7 +92,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 {
 	assert(RoutingRules::checkInstance());
 
-	for (auto receiver : sReceiverRegistry.instances) {
+	for (auto receiver : Receiver::getReceiverRegistry().instances) {
 		auto reduced = aEndpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
@@ -127,7 +115,15 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 	}
 }
 
-ReceiverImpl::Route::Route(const EndpointVariant &) : turn{sRouteDetails.turnBoundary.fetch_add(1) + 1}
+Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
+{
+	static constexpr std::size_t kReceiverStorageCapacity = 16;
+	static ReceiverRegistry receiverRegistry{{kReceiverStorageCapacity}, {}};
+
+	return receiverRegistry;
+}
+
+ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1) + 1}
 {
 }
 
@@ -140,10 +136,10 @@ void ReceiverImpl::Route::lock()
 
 bool ReceiverImpl::Route::tryLock()
 {
-	bool ret = sRouteDetails.turn.load() == turn;
+	bool ret = Route::getRouteDetails().turn.load() == turn;
 
 	if (ret) {
-		sReceiverRegistry.mutex.lock();
+		Receiver::getReceiverRegistry().mutex.lock();
 	}
 
 	return ret;
@@ -152,16 +148,23 @@ bool ReceiverImpl::Route::tryLock()
 void ReceiverImpl::Route::unlock()
 {
 	auto turnExpected = turn;
-	sRouteDetails.turn.compare_exchange_weak(turnExpected, turn + 1);
+	Route::getRouteDetails().turn.compare_exchange_weak(turnExpected, turn + 1);
 
 	if (turnExpected == turn) {
-		sReceiverRegistry.mutex.unlock();
+		Receiver::getReceiverRegistry().mutex.unlock();
 	}
 }
 
 bool ReceiverImpl::Route::checkDone()
 {
 	return true;
+}
+
+ReceiverImpl::Route::RouteDetails &ReceiverImpl::Route::getRouteDetails()
+{
+	static RouteDetails routeDetails {{0}, {0}};
+
+	return routeDetails;
 }
 
 bool operator<(const Receiver &aLhs, const Receiver &aRhs)
