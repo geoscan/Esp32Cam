@@ -105,11 +105,16 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &a
 					outBuffer = aBuffer;
 					outRespondCb = aRespondCb;
 				};
-			receiver->onReceive(aEndpointVariant, aBuffer, aRespondCb, forwardCb);
+			auto bufferSlice = aBuffer;
 
-			if (forwarded) {
-				notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
-			}
+			// Notify the receiver, and, depending on whether it performs chunk-by-chunk or batch processing, re-notify it w/ a sliced buffer
+			do {
+				receiver->onReceive(aEndpointVariant, bufferSlice, aRespondCb, forwardCb);
+
+				if (forwarded) {
+					notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
+				}
+			} while (bufferSlice.size() > 0 && bufferSlice.data() != aBuffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
 		}
 	}
 }
