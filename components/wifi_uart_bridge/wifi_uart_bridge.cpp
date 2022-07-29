@@ -41,6 +41,7 @@ static void routingRulesInit(Bdg::RoutingRules &aRoutingRules)
 			Bdg::RoutingRules::getInstance().addStatic({Bdg::NamedEndpoint::UartMavlinkForwarded},
 				aEndpointVariant, {Bdg::NamedEndpoint::None});
 		}};  ///< Enqueues MAVLink UDP clients
+	(void)mavlinkUdpClientsRegisterer;
 
 #if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
 	Bdg::RoutingRules::getInstance().addStatic({kUartMavlink}, {Bdg::NamedEndpoint::Mavlink},
