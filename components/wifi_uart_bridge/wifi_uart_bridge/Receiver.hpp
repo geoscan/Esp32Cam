@@ -111,7 +111,7 @@ struct NotifyCtx {
 	RespondCb respondCb;
 };
 
-/// \brief Boilerplate-reducing quirk. Encapsulates context required for the notification process.
+/// \brief Boilerplate-reducing arglist. Encapsulates context required for the notification process.
 ///
 /// \details Using encapsulation instead of conventional argument sequences reduces workload required for further
 /// modifications. Justification for using this approach comes from the previously observed developmend dynamic
