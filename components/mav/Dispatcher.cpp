@@ -45,10 +45,11 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 		auto &message = unmarshalling.front();
 
 		resp.size = 0;
-		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
-			ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
-			resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
-		});
+		ret = micAggregate.process(message,
+			[this](mavlink_message_t &aMsg) mutable {
+				ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
+				resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
+			});
 
 		unmarshalling.pop();
 	}
