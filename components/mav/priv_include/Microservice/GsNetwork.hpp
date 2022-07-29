@@ -10,6 +10,7 @@
 
 #include "Microservice.hpp"
 #include "sub/Rout.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 
 struct __mavlink_mav_gs_network_t;
 using mavlink_mav_gs_network_t = __mavlink_mav_gs_network_t;
@@ -25,7 +26,7 @@ struct IpEndpointCommand;
 namespace Mav {
 namespace Mic {
 
-class GsNetwork final : public Microservice {
+class GsNetwork final : public Microservice, public Bdg::Receiver {
 public:
 	GsNetwork();
 	Ret process(mavlink_message_t &aMavlinkMessage, OnResponseSignature) override;
@@ -41,7 +42,6 @@ private:
 
 	typename Sub::Rout::MavlinkPackTcpEvent::Ret packTcpEvent(typename Sub::Rout::MavlinkPackTcpEvent::Arg<0>);
 	Sub::Rout::Response respPackLock(const mavlink_mav_gs_network_t &);
-
 	static std::size_t mavGsNetworkGetMaxMessageLength(std::size_t aHintPayloadLength);
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
 	asio::const_buffer getBuffer(mavlink_mav_gs_network_t &);
@@ -51,6 +51,10 @@ private:
 	void processClose(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	void processSend(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 	void processReceived(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
+
+private:
+	void onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer, Bdg::RespondCb aRespondCb,
+		Bdg::ForwardCb aForwardCb) override;
 
 private:
 	struct Key {
