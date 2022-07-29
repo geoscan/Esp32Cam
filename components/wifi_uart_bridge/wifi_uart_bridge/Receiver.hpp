@@ -77,38 +77,49 @@ private:
 
 }  // namespace ReceiverImpl
 
-using ExternalBuffer = Utility::ConstBuffer;
-using Buffer = Utility::ConstBuffer &;
-
+/// \brief Context encapsulation. See `OnReceiveCtx` for details.
+///
 struct RespondCtx {
-	ExternalBuffer buffer;
+	Utility::ConstBuffer buffer;
 };
 
 using RespondCb = std::function<void(RespondCtx)>;
 
+/// \brief Context encapsulation. See `OnReceiveCtx` for details.
+///
 struct ForwardCtx {
-	ExternalBuffer buffer;
+	Utility::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
 using ForwardCb = std::function<void(ForwardCtx)>;
 using GetBufferCb = std::function<Utility::ConstBuffer()>;
 
+/// \brief Context encapsulation. See `OnReceiveCtx` for details.
+///
 struct AsyncNotifyCtx {
 	const EndpointVariant &endpointVariant;
 	GetBufferCb getBufferCb;
 	RespondCb respondCb;
 };
 
+/// \brief Context encapsulation. See `OnReceiveCtx` for details.
+///
 struct NotifyCtx {
 	const EndpointVariant &endpointVariant;
-	ExternalBuffer buffer;
+	Utility::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
+/// \brief Boilerplate-reducing quirk. Encapsulates context required for the notification process.
+///
+/// \details Using encapsulation instead of conventional argument sequences reduces workload required for further
+/// modifications. Justification for using this approach comes from the previously observed developmend dynamic
+/// characterized by ever increasing number of arguments on each modification of the communication mechanism.
+///
 struct OnReceiveCtx {
 	const EndpointVariant &endpointVariant;
-	Buffer buffer;
+	Utility::ConstBuffer &buffer;
 	RespondCb respondCb;
 	ForwardCb forwardCb;
 };
