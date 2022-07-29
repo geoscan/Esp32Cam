@@ -48,6 +48,8 @@ bool RoutingRules::addStatic(const EndpointVariant &aOrigin, const EndpointVaria
 	return ret;
 }
 
+/// \brief Remove a rule using (source, destination) pair
+///
 void RoutingRules::remove(const EndpointVariant &aOrigin, const EndpointVariant &aIntermediary)
 {
 	std::lock_guard<std::mutex> lock{mutex};
@@ -62,7 +64,7 @@ void RoutingRules::remove(const EndpointVariant &aOrigin, const EndpointVariant 
 
 
 /// \brief Searches for a rule to be applied using a (FROM, TO) pair. If there is any, returns true, and assigns
-/// `aoSrc` w/ the found rule
+/// `aoSrc` w/ the found endpoint (it's called reducing)
 ///
 bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandidate)
 {
@@ -71,13 +73,13 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 	auto it = find(aoSrc, aCandidate);
 	bool ret = (std::end(reductionRules) != it);
 
-	if (ret) {
+	if (ret) {  // The rule has been found, perform reduction
 		aoSrc = it->reductionVariant.match(
 			[&aoSrc, &aCandidate](DynamicReduction &a) {return a(aoSrc, aCandidate); },
 			[](const EndpointVariant &a) {return a; }
 		);
 	} else {
-		for (auto &alternative : aoSrc.asAlternative()) {
+		for (auto &alternative : aoSrc.asAlternative()) {  // The provided rule has not been found among the rules. However, the source endpoint may have different representations, and here we try to match against those, if there are any
 			ret = reduce(alternative, aCandidate);
 
 			if (ret) {
