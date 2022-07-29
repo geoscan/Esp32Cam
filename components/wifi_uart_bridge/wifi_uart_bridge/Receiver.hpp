@@ -84,31 +84,36 @@ struct RespondCtx {
 	ExternalBuffer buffer;
 };
 
-using RespondCb = std::function<void(Utility::ConstBuffer)>;
+using RespondCb = std::function<void(RespondCtx)>;
 
 struct ForwardCtx {
 	ExternalBuffer buffer;
 	RespondCb respondCb;
 };
 
-using ForwardCb = std::function<void(Utility::ConstBuffer, RespondCb)>;
+using ForwardCb = std::function<void(ForwardCtx)>;
 using GetBufferCb = std::function<Utility::ConstBuffer()>;
 
 struct AsyncNotifyCtx {
-	const EndpointVariant &aEndpointVariant;
-	GetBufferCb buffer;
+	const EndpointVariant &endpointVariant;
+	GetBufferCb getBufferCb;
 	RespondCb respondCb;
-	ForwardCb forwardCb;
 };
 
 struct NotifyCtx {
-	const EndpointVariant &aEndpointVariant;
+	const EndpointVariant &endpointVariant;
 	ExternalBuffer buffer;
+	RespondCb respondCb;
+};
+
+struct OnReceiveCtx {
+	const EndpointVariant &endpointVariant;
+	Buffer buffer;
 	RespondCb respondCb;
 	ForwardCb forwardCb;
 };
 
-using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
+using ReceiveCb = std::function<void(OnReceiveCtx)>;  ///< If a receiver does not consume a message, it must forward it
 
 /// \brief The purpose of Receiver class is to (1) spare buffer copying and (2) ensure thread-safe and deadlock-free
 /// notification with the minimum code on the side of a receiver.
@@ -138,16 +143,15 @@ public:
 	friend bool operator<(const Receiver &, const Receiver &);
 	friend bool operator<(const Receiver &, const EndpointVariant &);
 	friend bool operator==(const Receiver &, const EndpointVariant &);
-	static void notifyAs(const EndpointVariant &, Utility::ConstBuffer, RespondCb);
-	static void notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb);
+	static void notifyAs(NotifyCtx aNotifyCtx);
+	static void notifyAsAsync(AsyncNotifyCtx aAsyncNotifyCtx);
 	Receiver(const EndpointVariant &aIdentity);
 	virtual ~Receiver();
 
 private:
-	static void notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
-		Utility::ConstBuffer aBuffer, RespondCb aRespond);
+	static void notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aNotifyCtx);
 	static ReceiverRegistry &getReceiverRegistry();
-	virtual void onReceive(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb);
+	virtual void onReceive(OnReceiveCtx aOnReceiveCtx);
 
 private:
 	EndpointVariant endpointVariant;
@@ -160,7 +164,7 @@ public:
 	LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb);
 
 private:
-	void onReceive(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb) override;
+	void onReceive(OnReceiveCtx aOnReceiveCtx) override;
 
 private:
 	ReceiveCb receiveCb;

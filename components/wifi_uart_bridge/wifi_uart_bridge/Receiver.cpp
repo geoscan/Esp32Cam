@@ -19,13 +19,13 @@ constexpr std::chrono::milliseconds kNotifyWait{20};
 
 /// \brief Instantiate a notification chain and wait for it to get finished.
 ///
-void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
+void Receiver::notifyAs(NotifyCtx aCtx)
 {
-	ReceiverImpl::Route route{aEndpointVariant};
+	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
 	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
-		[&route, &ongoing, &aEndpointVariant, &aBuffer, &aRespondCb]()
+		[&route, &ongoing, &aCtx]()
 		{
 			bool ret = true;
 
@@ -35,7 +35,7 @@ void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstB
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				notifyAsImpl(route, aEndpointVariant, aBuffer, aRespondCb);
+				notifyAsImpl(route, aCtx);
 				ongoing = true;
 			}
 
@@ -46,13 +46,13 @@ void Receiver::notifyAs(const EndpointVariant &aEndpointVariant, Utility::ConstB
 /// \brief Same as `notifyAs`, but without waiting. When the caller's turn comes, `aGetBufferCb` will be called, and
 /// it is expected to produce a message.
 ///
-void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferCb aGetBufferCb, RespondCb aRespondCb)
+void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 {
-	ReceiverImpl::Route route{aEndpointVariant};
+	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
 	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuous(
-		[ongoing, route, aEndpointVariant, aGetBufferCb, aRespondCb]() mutable
+		[ongoing, route, aCtx]() mutable
 		{
 			bool ret = true;
 
@@ -62,7 +62,7 @@ void Receiver::notifyAsAsync(const EndpointVariant &aEndpointVariant, GetBufferC
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				notifyAsImpl(route, aEndpointVariant, aGetBufferCb(), std::move(aRespondCb));
+				notifyAsImpl(route, {aCtx.endpointVariant, aCtx.getBufferCb(), std::move(aCtx.respondCb)});
 				ongoing = true;
 			}
 
@@ -86,35 +86,35 @@ Receiver::~Receiver()
 /// \brief Determine which receivers are eligible for being notified upon an incoming message based on `RoutingRules`.
 /// Notify each of them
 ///
-void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, const EndpointVariant &aEndpointVariant,
-	Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
+void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 {
 	assert(RoutingRules::checkInstance());
 
 	for (auto receiver : Receiver::getReceiverRegistry().instances) {
-		auto reduced = aEndpointVariant;
+		auto reduced = aCtx.endpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
-			Utility::ConstBuffer outBuffer = aBuffer;
-			RespondCb outRespondCb = aRespondCb;
+			Utility::ConstBuffer outBuffer = aCtx.buffer;
+			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
 			auto forwardCb =
-				[&forwarded, &outBuffer, &outRespondCb](Utility::ConstBuffer aBuffer, RespondCb aRespondCb)
+				[&forwarded, &outBuffer, &outRespondCb](Bdg::ForwardCtx aCtx)
 				{
 					forwarded = true;
-					outBuffer = aBuffer;
-					outRespondCb = aRespondCb;
+					outBuffer = aCtx.buffer;
+					outRespondCb = aCtx.respondCb;
 				};
-			auto bufferSlice = aBuffer;
+			auto bufferSlice = aCtx.buffer;
 
 			// Notify the receiver, and, depending on whether it performs chunk-by-chunk or batch processing, re-notify it w/ a sliced buffer
 			do {
-				receiver->onReceive(aEndpointVariant, bufferSlice, aRespondCb, forwardCb);
+				receiver->onReceive(OnReceiveCtx{aCtx.endpointVariant, bufferSlice, aCtx.respondCb,
+					std::move(forwardCb)});
 
 				if (forwarded) {
-					notifyAsImpl(aRoute, reduced, outBuffer, std::move(aRespondCb));
+					notifyAsImpl(aRoute, {reduced, outBuffer, std::move(aCtx.respondCb)});
 				}
-			} while (bufferSlice.size() > 0 && bufferSlice.data() != aBuffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
+			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
 		}
 	}
 }
@@ -141,7 +141,7 @@ Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
 /// `mav` module as an example: there may be 2 messages in a single buffer, and without this revisiting technique the
 /// parser is rendered unable to process both of them.
 ///
-void Receiver::onReceive(const EndpointVariant &, Buffer, RespondCb, ForwardCb)
+void Receiver::onReceive(OnReceiveCtx)
 {
 }
 
@@ -209,10 +209,9 @@ LambdaReceiver::LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveC
 {
 }
 
-void LambdaReceiver::onReceive(const EndpointVariant &aEndpointVariant, Buffer aBuffer,
-	RespondCb aRespondCb, ForwardCb aForwardCb)
+void LambdaReceiver::onReceive(OnReceiveCtx aCtx)
 {
-	receiveCb(aEndpointVariant, aBuffer, aRespondCb, aForwardCb);
+	receiveCb(std::forward<OnReceiveCtx>(aCtx));
 }
 
 }  // namespace Bdg

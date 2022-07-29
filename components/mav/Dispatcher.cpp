@@ -95,13 +95,12 @@ Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
 	return Sub::Rout::Payload{resp.buffer, resp.size};
 }
 
-void Mav::Dispatcher::onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer,
-	Bdg::RespondCb aRespondCb, Bdg::ForwardCb aForwardCb)
+void Mav::Dispatcher::onReceive(Bdg::OnReceiveCtx aCtx)
 {
 	int nprocessed = 0;
-	switch (process(aBuffer, nprocessed)) {
+	switch (process(aCtx.buffer, nprocessed)) {
 		case Microservice::Ret::Ignored:
-			aForwardCb(aBuffer, aRespondCb);
+			aCtx.forwardCb({aCtx.buffer, aCtx.respondCb});
 
 			break;
 
@@ -109,11 +108,11 @@ void Mav::Dispatcher::onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer
 			break;
 
 		case Microservice::Ret::Response:
-			aRespondCb({static_cast<void *>(resp.buffer), resp.size});
+			aCtx.respondCb({{static_cast<void *>(resp.buffer), resp.size}});
 
 			break;
 	}
 
 	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", nprocessed);
-	aBuffer.slice(nprocessed);  // Change the size of the buffer, so `Dispatcher` will be re-notified
+	aCtx.buffer.slice(nprocessed);  // Change the size of the buffer, so `Dispatcher` will be re-notified
 }

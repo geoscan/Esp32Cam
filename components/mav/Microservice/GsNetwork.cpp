@@ -354,12 +354,11 @@ void GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage,
 {
 }
 
-void GsNetwork::onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer, Bdg::RespondCb aRespondCb,
-	Bdg::ForwardCb aForwardCb)
+void GsNetwork::onReceive(Bdg::OnReceiveCtx aCtx)
 {
 	asio::ip::tcp::endpoint tcpEndpoint{};
 	std::uint16_t localPort = 0;
-	aSender.match(
+	aCtx.endpointVariant.match(
 		[&tcpEndpoint, &localPort](const Bdg::TcpEndpoint &aEndpoint)
 		{
 			tcpEndpoint = std::get<0>(aEndpoint);
@@ -372,13 +371,13 @@ void GsNetwork::onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuff
 	// Encode address-related info and payload into the message
 	mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
 	mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED;
-	auto nProcessed = initMavlinkMavGsNetwork(mavlinkMavGsNetwork, tcpEndpoint, localPort, aBuffer);
+	auto nProcessed = initMavlinkMavGsNetwork(mavlinkMavGsNetwork, tcpEndpoint, localPort, aCtx.buffer);
 	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
 
 	// Pack the message into a buffer
 	const auto kMaxMessageLen = mavGsNetworkGetMaxMessageLength(mavlinkMavGsNetwork.payload_len);
 	auto nPacked = Marshalling::push(mavlinkMessage, {resp.buffer, kMaxMessageLen});
-	aForwardCb({resp.buffer, nPacked}, [](Bdg::ExternalBuffer){});
+	aCtx.forwardCb({{resp.buffer, nPacked}, [](Bdg::RespondCtx){}});
 
-	aBuffer.slice(nProcessed);
+	aCtx.buffer.slice(nProcessed);
 }

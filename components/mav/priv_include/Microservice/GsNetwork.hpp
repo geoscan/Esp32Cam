@@ -53,8 +53,7 @@ private:
 	void processReceived(mavlink_message_t &aMavlinkMessage, mavlink_mav_gs_network_t &aMavlinkMavGsNetwork);
 
 private:
-	void onReceive(const Bdg::EndpointVariant &aSender, Bdg::Buffer aBuffer, Bdg::RespondCb aRespondCb,
-		Bdg::ForwardCb aForwardCb) override;
+	void onReceive(Bdg::OnReceiveCtx aCtx) override;
 
 private:
 	struct Key {

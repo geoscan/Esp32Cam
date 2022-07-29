@@ -36,10 +36,10 @@ static void routingRulesInit(Bdg::RoutingRules &aRoutingRules)
 	static const Bdg::UartEndpoint kUartMavlink{0};
 	static const Bdg::UdpPort kUdpMavlink{8001};
 	static Bdg::LambdaReceiver mavlinkUdpClientsRegisterer{{Bdg::NamedEndpoint::Mavlink},
-		[](const EndpointVariant &aEndpointVariant, Utility::ConstBuffer, RespondCb, ForwardCb)
+		[](Bdg::OnReceiveCtx aCtx)
 		{
 			Bdg::RoutingRules::getInstance().addStatic({Bdg::NamedEndpoint::UartMavlinkForwarded},
-				aEndpointVariant, {Bdg::NamedEndpoint::None});
+				aCtx.endpointVariant, {Bdg::NamedEndpoint::None});
 		} };  ///< Enqueues MAVLink UDP clients
 	(void)mavlinkUdpClientsRegisterer;
 
