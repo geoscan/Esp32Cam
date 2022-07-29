@@ -30,6 +30,9 @@ RoutingRules::RoutingRules() : mutex{}, reductionRules{kRulesReserved}
 {
 }
 
+/// \brief So-called "static" routing rules do not require functor-based inference, which is the case with relation
+/// to dynamic ones.
+///
 bool RoutingRules::addStatic(const EndpointVariant &aOrigin, const EndpointVariant &aIntermediary,
 	const EndpointVariant &aReduce)
 {
