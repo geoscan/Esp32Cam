@@ -14,6 +14,7 @@
 #include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "sub/Rout.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
 #include "Microservice/ApVer.hpp"
@@ -34,10 +35,9 @@ class GsNetwork;
 class Camera;
 }
 
-class Dispatcher : public DelayedSendHandle {
+class Dispatcher : public DelayedSendHandle, public Bdg::Receiver {
 public:
 	Dispatcher();
-
 	void onSubscription(const mavlink_message_t &) override;
 
 protected:
@@ -46,6 +46,8 @@ protected:
 private:
 	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
 	Sub::Rout::Payload respAsPayload();
+	void onReceive(const Bdg::EndpointVariant &aSender, Utility::ConstBuffer aBuffer, Bdg::RespondCb aRespondCb,
+		Bdg::ForwardCb aForwardCb) override;
 
 private:
 	struct {

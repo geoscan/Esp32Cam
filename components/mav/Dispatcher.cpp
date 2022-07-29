@@ -19,7 +19,8 @@
 #include "Dispatcher.hpp"
 #include "mav/mav.hpp"
 
-Mav::Dispatcher::Dispatcher():
+Mav::Dispatcher::Dispatcher() :
+	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink},
 	key{{&Dispatcher::onMavlinkReceived, this}},
 	micAggregate{*this}
 {
@@ -92,4 +93,13 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
 {
 	return Sub::Rout::Payload{resp.buffer, resp.size};
+}
+
+void Mav::Dispatcher::onReceive(const Bdg::EndpointVariant &aSender, Utility::ConstBuffer aBuffer,
+	Bdg::RespondCb aRespondCb, Bdg::ForwardCb aForwardCb)
+{
+	(void)aSender;
+	(void)aBuffer;
+	(void)aRespondCb;
+	(void)aForwardCb;
 }
