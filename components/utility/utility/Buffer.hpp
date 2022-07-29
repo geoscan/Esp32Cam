@@ -65,8 +65,8 @@ struct Tbuffer : std::tuple<T *, std::size_t> {
 	template <typename TypeTo>
 	Tbuffer<TypeTo> as();  ///< Reinterpret the buffer for another type. The type's sizeof() is taken into consideration, so size() of the newly constructed instance may differ
 
-	Tbuffer<T> slice(std::size_t aOffset) const;  ///< Constructs a slice from a given offset
-	Tbuffer<T> slice(std::size_t aOffsetBegin, std::size_t aOffsetEnd) const;  /// Constructs a slice satisfying the given range [aOffsetBegin; aOffsetEnd)
+	Tbuffer<T> asSlice(std::size_t aOffset) const;  ///< Constructs a slice from a given offset
+	Tbuffer<T> asSlice(std::size_t aOffsetBegin, std::size_t aOffsetEnd) const;  /// Constructs a slice satisfying the given range [aOffsetBegin; aOffsetEnd)
 };
 
 template <typename Tto, typename Tfrom>

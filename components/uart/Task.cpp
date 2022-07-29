@@ -82,7 +82,7 @@ void Task::taskProcess()
 						for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer->buf.data(), buffer->pos);
 							bufView.size();
 							bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
-								bufView.slice(response.nProcessed) : bufView.slice(bufView.size()))
+								bufView.asSlice(response.nProcessed) : bufView.asSlice(bufView.size()))
 						{
 							ESP_LOGV(Uart::kDebugTag, "Task::operator(): processing (%d bytes remain)", bufView.size());
 							response = callable({Sub::Rout::Uart{Utility::makeAsioCb(bufView), buffer->device->getNum()}});

@@ -320,8 +320,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 				for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer.get(), anReceived);
 					bufView.size();
 					bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
-					bufView.slice(response.nProcessed) :
-					bufView.slice(bufView.size()))
+					bufView.asSlice(response.nProcessed) :
+					bufView.asSlice(bufView.size()))
 				{
 
 					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
