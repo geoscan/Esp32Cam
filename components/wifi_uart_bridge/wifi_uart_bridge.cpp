@@ -13,6 +13,8 @@
 #include "UartEndpoint.hpp"
 #include "UdpEndpoint.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "wifi_uart_bridge/RoutingRules.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 #include "socket/Api.hpp"
 #include "Routing.hpp"
 
@@ -29,11 +31,39 @@ void wifiUartBridgeStart(asio::io_context &context)
 
 namespace Bdg {
 
+static void routingRulesInit(Bdg::RoutingRules &aRoutingRules)
+{
+	static const Bdg::UartEndpoint kUartMavlink{0};
+	static const Bdg::UdpPort kUdpMavlink{8001};
+	static Bdg::Receiver mavlinkUdpClientsRegisterer{{Bdg::NamedEndpoint::Mavlink},
+		[](const EndpointVariant &aEndpointVariant, Utility::ConstBuffer, RespondCb, ForwardCb)
+		{
+			Bdg::RoutingRules::getInstance().addStatic({Bdg::NamedEndpoint::UartMavlinkForwarded},
+				aEndpointVariant, {Bdg::NamedEndpoint::None});
+		}};  ///< Enqueues MAVLink UDP clients
+
+#if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
+	Bdg::RoutingRules::getInstance().addStatic({kUartMavlink}, {Bdg::NamedEndpoint::Mavlink},
+		{Bdg::NamedEndpoint::UartMavlinkForwarded});
+#endif
+
+#if CONFIG_WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
+	Bdg::RoutingRules::getInstance().addStatic({kUdpMavlink}, {Bdg::NamedEndpoint::Mavlink},
+		{Bdg::NamedEndpoint::UdpMavlinkForwarded});
+#else
+	Bdg::RoutingRules::getInstance().addStatic({kUdpMavlink}, {kUartMavlink}, {Bdg::NamedEndpoint::None});
+#endif
+	Bdg::RoutingRules::getInstance().addStatic({Bdg::NamedEndpoint::MavlinkIpPackForwarded}, {kUartMavlink},
+		{Bdg::NamedEndpoint::None});
+}
+
 void init()
 {
 	esp_log_level_set(Bdg::kDebugTag, LOG_LOCAL_LEVEL);
 	static Routing routing;
 	(void)routing;
+	static Bdg::RoutingRules routingRules{};
+	routingRulesInit(routingRules);
 }
 
 }  // namespace Bdg
