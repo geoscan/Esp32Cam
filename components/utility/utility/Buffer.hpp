@@ -63,13 +63,17 @@ struct Tbuffer : std::tuple<T *, std::size_t> {
 	InterpType &at(std::uint8_t aPos);
 	Tbuffer<T> asSlice(std::size_t aOffset) const;  ///< Constructs a slice from a given offset
 	Tbuffer<T> asSlice(std::size_t aOffsetBegin, std::size_t aOffsetEnd) const;  /// Constructs a slice satisfying the given range [aOffsetBegin; aOffsetEnd)
-	Tbuffer<T> slice(std::size_t aOffset)
+	Tbuffer<T> &slice(std::size_t aOffset)
 	{
 		*this = asSlice(aOffset);
+
+		return *this;
 	}
-	Tbuffer<T> slice(std::size_t aOffsetBegin, std::size_t aOffsetEnd)
+	Tbuffer<T> &slice(std::size_t aOffsetBegin, std::size_t aOffsetEnd)
 	{
 		*this = asSlice(aOffsetBegin, aOffsetEnd);
+
+		return *this;
 	}
 
 	template <typename TypeTo>
