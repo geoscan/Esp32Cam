@@ -35,12 +35,12 @@ static void routingRulesInit(Bdg::RoutingRules &aRoutingRules)
 {
 	static const Bdg::UartEndpoint kUartMavlink{0};
 	static const Bdg::UdpPort kUdpMavlink{8001};
-	static Bdg::Receiver mavlinkUdpClientsRegisterer{{Bdg::NamedEndpoint::Mavlink},
+	static Bdg::LambdaReceiver mavlinkUdpClientsRegisterer{{Bdg::NamedEndpoint::Mavlink},
 		[](const EndpointVariant &aEndpointVariant, Utility::ConstBuffer, RespondCb, ForwardCb)
 		{
 			Bdg::RoutingRules::getInstance().addStatic({Bdg::NamedEndpoint::UartMavlinkForwarded},
 				aEndpointVariant, {Bdg::NamedEndpoint::None});
-		}};  ///< Enqueues MAVLink UDP clients
+		} };  ///< Enqueues MAVLink UDP clients
 	(void)mavlinkUdpClientsRegisterer;
 
 #if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
