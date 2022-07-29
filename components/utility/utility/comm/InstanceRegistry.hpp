@@ -39,8 +39,12 @@ struct InstanceRegistry {
 template <class T>
 struct OrderedInstanceRegistry : std::vector<T *> {
 public:
-	OrderedInstanceRegistry(std::size_t aSizeHint) : std::vector<T *>{aSizeHint}
+	using std::vector<T *>::insert;
+	using std::vector<T *>::clear;
+
+	OrderedInstanceRegistry(std::size_t aSizeHint) : std::vector<T *>(aSizeHint)
 	{
+		clear();
 	}
 
 	/// \brief Order-preserving modifier
@@ -48,7 +52,7 @@ public:
 	void add(T &aInstance)
 	{
 		if (std::find(std::begin(*this), std::end(*this), &aInstance) == std::end(*this)) {
-			this->insert(std::lower_bound(std::begin(*this), std::end(*this), aInstance,
+			insert(std::lower_bound(std::begin(*this), std::end(*this), aInstance,
 				[](const T *aStored, const T &aCandidate) {return *aStored < aCandidate; }), &aInstance);
 		}
 	}
