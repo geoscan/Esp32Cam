@@ -77,11 +77,38 @@ private:
 
 }  // namespace ReceiverImpl
 
+using ExternalBuffer = Utility::ConstBuffer;
 using Buffer = Utility::ConstBuffer &;
+
+struct RespondCtx {
+	ExternalBuffer buffer;
+};
+
 using RespondCb = std::function<void(Utility::ConstBuffer)>;
+
+struct ForwardCtx {
+	ExternalBuffer buffer;
+	RespondCb respondCb;
+};
+
 using ForwardCb = std::function<void(Utility::ConstBuffer, RespondCb)>;
-using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
 using GetBufferCb = std::function<Utility::ConstBuffer()>;
+
+struct AsyncNotifyCtx {
+	const EndpointVariant &aEndpointVariant;
+	GetBufferCb buffer;
+	RespondCb respondCb;
+	ForwardCb forwardCb;
+};
+
+struct NotifyCtx {
+	const EndpointVariant &aEndpointVariant;
+	ExternalBuffer buffer;
+	RespondCb respondCb;
+	ForwardCb forwardCb;
+};
+
+using ReceiveCb = std::function<void(const EndpointVariant & /*sender*/, Buffer, RespondCb, ForwardCb)>;  ///< If a receiver does not consume a message, it must forward it
 
 /// \brief The purpose of Receiver class is to (1) spare buffer copying and (2) ensure thread-safe and deadlock-free
 /// notification with the minimum code on the side of a receiver.
