@@ -102,11 +102,11 @@ private:
 	};
 
 public:
-
 	constexpr FreertosTask(const char *aName, int aStack, int aPrio = PriorityMedium,
 		CorePin aCore = CorePin::CoreNone) :
 		Thread(),
-		taskInfo{aName, aStack, aPrio, static_cast<int>(aCore), nullptr}
+		taskInfo{aName, aStack, aPrio, static_cast<int>(aCore), nullptr},
+		suspended{false}
 	{
 	}
 
@@ -120,6 +120,11 @@ public:
 	void resume();
 private:
 	TaskInfo taskInfo;
+
+	/// \brief Without using `suspended` flag, FreeRTOS, APPARENTLY, gives the specified task a time quant regardless of
+	/// which task's turn it is now on each `resume` call. When called frequently, it causes resource starvation
+	///
+	bool suspended;
 };
 
 }  // namespace Thr
