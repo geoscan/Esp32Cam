@@ -17,6 +17,7 @@
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
 #include "utility/thr/WorkQueue.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 
 namespace Sock {
 
@@ -267,26 +268,13 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
 
 		if (!aError) {
 			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
-			for (auto &cb : Sub::Rout::OnReceived::getIterators()) { // Notify subscribers
-
-				// Reduce memory expenses on stack memory allocation
-				Wq::MediumPriority::getInstance().pushWait(
-					[this, &cb, &endpoint, &port, &buffer, &anReceived, &aSocket]() mutable
-					{
-						auto response = cb({Sub::Rout::Socket<asio::ip::udp>{*endpoint.get(), port,
-							asio::const_buffer(buffer.get(), anReceived)}});
-
-						// If a subscriber provides a response, send it
-						if (response.getType() == Sub::Rout::Response::Type::Response) {
-							ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - sending respose (%d bytes)",
-								response.payload.size());
-							std::lock_guard<std::mutex> lock{syncAsyncMutex};
-							(void)lock;
-							asio::error_code err;
-							aSocket.send_to(response.payload, *endpoint.get(), 0, err);
-						}
-					});
-			}
+			Bdg::Receiver::notifyAs(Bdg::NotifyCtx{Bdg::EndpointVariant{Bdg::UdpEndpoint{*endpoint.get(), port}},
+				Utility::ConstBuffer{buffer.get(), anReceived},
+				[&aSocket, endpoint](Bdg::RespondCtx aCtx)
+				{
+					asio::error_code err{};
+					aSocket.send_to(Utility::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
+				}});
 			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - next round");
 			udpAsyncReceiveFrom(aSocket);
 		} else {
