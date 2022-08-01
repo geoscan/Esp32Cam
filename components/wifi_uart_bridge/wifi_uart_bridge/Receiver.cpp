@@ -16,6 +16,7 @@
 #include "utility/comm/RaiiCounter.hpp"
 #include "utility/thr/WorkQueue.hpp"
 #include "utility/comm/InstanceRegistry.hpp"
+#include "utility/LogSection.hpp"
 #include "wifi_uart_bridge/RoutingRules.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 
@@ -27,6 +28,7 @@ constexpr std::chrono::milliseconds kNotifyWait{20};
 ///
 void Receiver::notifyAs(NotifyCtx aCtx)
 {
+	GS_UTILITY_LOG_SECTIOND(Bdg::kDebugTag, "Receiver::notifyAs()");
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
@@ -54,6 +56,7 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 ///
 void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 {
+	GS_UTILITY_LOG_SECTIOND(Bdg::kDebugTag, "Receiver::notifyAsAsync()");
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
