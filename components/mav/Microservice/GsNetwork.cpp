@@ -16,8 +16,9 @@
 #include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "socket/Api.hpp"
+#include "wifi_uart_bridge/RoutingRules.hpp"
+#include "utility/Algorithm.hpp"
 #include <algorithm>
-#include <utility/Algorithm.hpp>
 #include <memory>
 #include "mav/mav.hpp"
 
@@ -293,6 +294,18 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 	if (asio::error::already_open == errorCode) {
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 	}
+
+	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
+		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+			MAV_GS_NETWORK_TRANSPORT_TCP6))
+		{
+			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack, Bdg::NamedEndpoint::MavlinkIpPackForwarded);
+		} else {
+			Bdg::RoutingRules::getInstance().addStatic(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack, Bdg::NamedEndpoint::MavlinkIpPackForwarded);
+		}
+	}
 }
 
 void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
@@ -317,6 +330,18 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 
 	if (asio::error::not_found == errorCode) {
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	}
+
+	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
+		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+			MAV_GS_NETWORK_TRANSPORT_TCP6))
+		{
+			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack);
+		} else {
+			Bdg::RoutingRules::getInstance().remove(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack);
+		}
 	}
 }
 
