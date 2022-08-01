@@ -54,12 +54,14 @@ private:
 
 private:
 	void onReceive(Bdg::OnReceiveCtx aCtx) override;
+	void onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent);
 
 private:
 	struct Key {
 		typename Sub::Rout::MavlinkPackForward<asio::ip::tcp> packForwardTcp;
 		typename Sub::Rout::MavlinkPackForward<asio::ip::udp> packForwardUdp;
 		Sub::Rout::MavlinkPackTcpEvent packTcpEvent;
+		Sub::Rout::OnTcpEvent tcpEvent;
 	} key;
 
 	struct {

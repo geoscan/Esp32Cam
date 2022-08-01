@@ -32,6 +32,7 @@ GsNetwork::GsNetwork() :
 		{&GsNetwork::packForward<asio::ip::tcp>, this},
 		{&GsNetwork::packForward<asio::ip::udp>, this},
 		{&GsNetwork::packTcpEvent, this},
+		{&GsNetwork::onTcpEvent, this}
 	}
 {
 }
@@ -403,6 +404,31 @@ void GsNetwork::onReceive(Bdg::OnReceiveCtx aCtx)
 	const auto kMaxMessageLen = mavGsNetworkGetMaxMessageLength(mavlinkMavGsNetwork.payload_len);
 	auto nPacked = Marshalling::push(mavlinkMessage, {resp.buffer, kMaxMessageLen});
 	aCtx.forwardCb({{resp.buffer, nPacked}, [](Bdg::RespondCtx){}});
-
 	aCtx.buffer.slice(nProcessed);
+}
+
+void GsNetwork::onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent)
+{
+	Bdg::Receiver::notifyAsAsync({Bdg::NamedEndpoint::Mavlink,
+		[this, aTcpEvent]()
+		{
+			mavlink_mav_gs_network_t mavlinkMavGsNetwork;
+			aTcpEvent.match(
+				[&mavlinkMavGsNetwork](const Sub::Rout::TcpConnected &a) {
+					initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
+					mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTED;
+				},
+				[&mavlinkMavGsNetwork](const Sub::Rout::TcpDisconnected &a) {
+					initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
+					mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTION_ABORTED;
+				}
+			);
+			mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
+			mavlink_message_t mavlinkMessage;
+			mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
+			const std::size_t nProcessed = Marshalling::push(mavlinkMessage, resp.buffer);
+
+			return Utility::ConstBuffer(resp.buffer, nProcessed);
+		},
+		[](Bdg::RespondCtx){}});
 }
