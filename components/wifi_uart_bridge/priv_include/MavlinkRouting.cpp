@@ -74,6 +74,7 @@ MavlinkRouting::MavlinkRouting()
 			}});
 	}
 
+	// Apply routing rules based on the project configuration
 	if (Bdg::RoutingRules::checkInstance()) {
 		for (const auto &staticRule : kStaticRoutingRules) {
 			Bdg::RoutingRules::getInstance().addStatic(std::get<0>(staticRule), std::get<1>(staticRule),

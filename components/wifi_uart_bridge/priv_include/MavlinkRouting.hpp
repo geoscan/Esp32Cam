@@ -15,6 +15,8 @@ namespace Bdg {
 
 class LambdaReceiver;
 
+/// \brief Encapsulates MAVLink-related routing. Provides RAII-based access to MAVLink routing capabilities.
+///
 class MavlinkRouting final {
 public:
 	MavlinkRouting();
@@ -32,7 +34,7 @@ public:
 
 private:
 	std::vector<asio::ip::udp::endpoint> clientsUdp;
-	std::vector<LambdaReceiver> receivers;  ///< They mock receiving endpoints (UARTs and IP sockets), so there is no need to complicate implementation of the respective modules itselves
+	std::vector<LambdaReceiver> receivers;  ///< Those mock receiving endpoints (UARTs and IP sockets), so there is no need to complicate implementation of the respective
 };
 
 }  // namespace Bdg
