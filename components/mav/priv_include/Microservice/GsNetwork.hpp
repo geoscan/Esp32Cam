@@ -33,7 +33,7 @@ public:
 
 private:
 	template <class Tproto, class Tbuf>
-	std::size_t initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
+	static std::size_t initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
 		const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer);
 
 	template <class Tproto>
