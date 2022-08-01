@@ -382,6 +382,7 @@ void GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage,
 
 void GsNetwork::onReceive(Bdg::OnReceiveCtx aCtx)
 {
+	ESP_LOGV(Mav::kDebugTag, "GsNetwork::onReceive()");
 	asio::ip::tcp::endpoint tcpEndpoint{};
 	std::uint16_t localPort = 0;
 	aCtx.endpointVariant.match(
@@ -412,6 +413,7 @@ void GsNetwork::onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent)
 	Bdg::Receiver::notifyAsAsync({Bdg::NamedEndpoint::Mavlink,
 		[this, aTcpEvent]()
 		{
+			ESP_LOGV(Mav::kDebugTag, "GsNetwork::onTcpEvent()");
 			mavlink_mav_gs_network_t mavlinkMavGsNetwork;
 			aTcpEvent.match(
 				[&mavlinkMavGsNetwork](const Sub::Rout::TcpConnected &a) {
