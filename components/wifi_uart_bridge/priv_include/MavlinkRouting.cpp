@@ -5,8 +5,13 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL)
+
 #include "wifi_uart_bridge/Receiver.hpp"
 #include "wifi_uart_bridge/RoutingRules.hpp"
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "MavlinkRouting.hpp"
@@ -48,11 +53,14 @@ MavlinkRouting::MavlinkRouting()
 {
 	clientsUdp.reserve(2);
 	receivers.reserve(3);
+	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UART hook");
 	receivers.push_back({{Bdg::UartEndpoint{getMavlinkUartNum()}},  // UART sender
 		[](Bdg::OnReceiveCtx aCtx)
 		{
+			ESP_LOGV(Bdg::kDebugTag, "MavlinkRouting::receivers UART %d bytes", aCtx.buffer.size());
 			Sub::Rout::UartSend::notify({Utility::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
 		}});
+	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
 	receivers.push_back({{Bdg::NamedEndpoint::Mavlink},  // Hook, updates the list of UDP clients
 		[this](Bdg::OnReceiveCtx aCtx)
 		{
@@ -67,9 +75,12 @@ MavlinkRouting::MavlinkRouting()
 		}});
 
 	if (Sock::Api::checkInstance()) {
+		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP hook for port %d", getMavlinkUdpPort());
 		receivers.push_back({{Bdg::UdpPort{getMavlinkUdpPort()}},
 			[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
 			{
+				ESP_LOGV(Bdg::kDebugTag, "MavlinkRouting::receivers UDP notifying udp clients from port %d",
+					getMavlinkUdpPort());
 				for (auto &endpoint : clientsUdp) {
 					asio::error_code err;
 					auto port = getMavlinkUdpPort();
@@ -79,6 +90,7 @@ MavlinkRouting::MavlinkRouting()
 	}
 
 	// Apply routing rules based on the project configuration
+	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR initializing static routing rules");
 	if (Bdg::RoutingRules::checkInstance()) {
 		for (const auto &staticRule : kStaticRoutingRules) {
 			Bdg::RoutingRules::getInstance().addStatic(std::get<0>(staticRule), std::get<1>(staticRule),
