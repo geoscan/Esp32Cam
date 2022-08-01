@@ -311,37 +311,13 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 				typename Sub::Rout::OnReceived::Ret response;
 
 				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
-				for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
-
-					for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer.get(), anReceived);
-						bufView.size();
-						bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
-						bufView.asSlice(response.nProcessed) :
-						bufView.asSlice(bufView.size()))
+				Bdg::Receiver::notifyAs({{Bdg::TcpEndpoint{epRemote, aSocket.local_endpoint().port()}},
+					Utility::ConstBuffer{buffer.get(), anReceived},
+					[&aSocket](Bdg::RespondCtx aCtx)
 					{
-
-						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
-
-						// Reduce expenses on stack memory allocation
-						Wq::MediumPriority::getInstance().pushWait(
-							[&response, &epRemote, &aSocket, &anReceived, &buffer, &cb]()
-							{
-								response = cb({Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
-									asio::const_buffer(buffer.get(), anReceived) }});
-							});
-
-						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);
-
-						// If a subscriber provides a response, send it
-						if (response.getType() == Sub::Rout::Response::Type::Response) {
-							ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
-							asio::error_code err;
-							aSocket.write_some(response.payload, err);
-						}
-
-						response.reset();
-					}
-				}
+						asio::error_code err{};
+						aSocket.write_some(Utility::makeAsioCb(aCtx.buffer), err);
+					}});
 				tcpAsyncReceiveFrom(aSocket, buffer);
 			} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
 				asio::error::bad_descriptor))
