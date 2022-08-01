@@ -293,10 +293,13 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<ch
 		});
 }
 
-void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
+void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<char[]> buffer)
 {
 	using namespace Utility::Thr;
-	std::shared_ptr<char[]> buffer{new char[kReceiveBufferSize]};
+
+	if (!buffer) {
+		buffer = std::shared_ptr<char[]> {new char[kReceiveBufferSize]};
+	}
 
 	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
 		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable {
@@ -339,7 +342,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)
 					response.reset();
 				}
 			}
-			tcpAsyncReceiveFrom(aSocket);
+			tcpAsyncReceiveFrom(aSocket, buffer);
 		} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
 			asio::error::bad_descriptor))
 		{
