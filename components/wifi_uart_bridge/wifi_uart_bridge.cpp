@@ -36,6 +36,8 @@ namespace Bdg {
 void init()
 {
 	esp_log_level_set(Bdg::kDebugTag, LOG_LOCAL_LEVEL);
+	ESP_LOGD(Bdg::kDebugTag, "Debug log test");
+	ESP_LOGV(Bdg::kDebugTag, "Verbose log test");
 	static Routing routing;
 	static Bdg::RoutingRules routingRules{};
 	static Bdg::MavlinkRouting mavlinkRouting{};
