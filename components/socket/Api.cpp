@@ -256,36 +256,41 @@ void Api::closeTcp(uint16_t aPort, asio::error_code &aErr)
 	}
 }
 
-void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket)
+void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<char[]> buffer,
+	std::shared_ptr<asio::ip::udp::endpoint> endpoint)
 {
-	using namespace Utility::Thr;
-	std::shared_ptr<char[]> buffer {new char[kReceiveBufferSize]};
-	auto endpoint = std::make_shared<asio::ip::udp::endpoint>();
+	if (!buffer) {
+		buffer = std::shared_ptr<char[]> {new char[kReceiveBufferSize]};
+	}
+
+	if (!endpoint) {
+		endpoint = std::make_shared<asio::ip::udp::endpoint>();
+	}
+
 	auto port = aSocket.local_endpoint().port();
-
 	aSocket.async_receive_from(asio::buffer(buffer.get(), kReceiveBufferSize), *endpoint.get(),
-		[this, buffer, endpoint, port, &aSocket] (asio::error_code aError, std::size_t anReceived) mutable {
+		[this, buffer, endpoint, port, &aSocket] (asio::error_code aError, std::size_t anReceived) mutable
+		{
+			if (!aError) {
+				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
+				Bdg::Receiver::notifyAs(Bdg::NotifyCtx{Bdg::EndpointVariant{Bdg::UdpEndpoint{*endpoint.get(), port}},
+					Utility::ConstBuffer{buffer.get(), anReceived},
+					[&aSocket, endpoint](Bdg::RespondCtx aCtx)
+					{
+						asio::error_code err{};
+						aSocket.send_to(Utility::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
+					}});
+				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - next round");
+				udpAsyncReceiveFrom(aSocket, buffer, endpoint);
+			} else {
+				ESP_LOGE(kDebugTag, "udpAsyncReceiveFrom on port %d - error(%d), closing", port,
+					aError.value());
 
-		if (!aError) {
-			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
-			Bdg::Receiver::notifyAs(Bdg::NotifyCtx{Bdg::EndpointVariant{Bdg::UdpEndpoint{*endpoint.get(), port}},
-				Utility::ConstBuffer{buffer.get(), anReceived},
-				[&aSocket, endpoint](Bdg::RespondCtx aCtx)
-				{
-					asio::error_code err{};
-					aSocket.send_to(Utility::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
-				}});
-			ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - next round");
-			udpAsyncReceiveFrom(aSocket);
-		} else {
-			ESP_LOGE(kDebugTag, "udpAsyncReceiveFrom on port %d - error(%d), closing", port,
-				aError.value());
-
-			if (aError != asio::error::operation_aborted) {
-				closeUdp(aSocket.local_endpoint().port(), aError);
+				if (aError != asio::error::operation_aborted) {
+					closeUdp(aSocket.local_endpoint().port(), aError);
+				}
 			}
-		}
-	});
+		});
 }
 
 void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket)

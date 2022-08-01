@@ -56,7 +56,8 @@ public:
 
 private:
 	void tcpAsyncAccept(asio::ip::tcp::acceptor &aAcceptor, std::uint16_t aPort);
-	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket);
+	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<char[]> buffer = {},
+		std::shared_ptr<asio::ip::udp::endpoint> aEndpoint = {});
 	void tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket);
 };
 
