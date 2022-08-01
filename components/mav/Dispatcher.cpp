@@ -17,6 +17,7 @@
 #include "Microservice/GsNetwork.hpp"
 #include "Microservice/Camera.hpp"
 #include "Dispatcher.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 #include "mav/mav.hpp"
 
 Mav::Dispatcher::Dispatcher() :
@@ -29,12 +30,8 @@ Mav::Dispatcher::Dispatcher() :
 void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 {
 	// Warn. Do not replace iteration w/ RR's Key<...>::notify(), because locking order matters
-	for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Iterate over subscribers in a thread-safe way
-		std::lock_guard<std::mutex> lock{resp.mutex};  // Lock response buffer
-		(void)lock;
-		resp.size = Marshalling::push(aMavlinkMessage, resp.buffer);
-		cb({Sub::Rout::Mavlink{respAsPayload()}});
-	}
+	Bdg::Receiver::notifyAs({Bdg::NamedEndpoint::Mavlink,
+		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }
 
 Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
