@@ -302,76 +302,76 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 	}
 
 	aSocket.async_receive(asio::buffer(buffer.get(), kReceiveBufferSize),
-		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable {
-
-		if (!aErr) {
-			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
-			std::error_code err;
-			auto epRemote = aSocket.remote_endpoint(err);
-			typename Sub::Rout::OnReceived::Ret response;
-
-			ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
-			for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
-
-				for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer.get(), anReceived);
-					bufView.size();
-					bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
-					bufView.asSlice(response.nProcessed) :
-					bufView.asSlice(bufView.size()))
-				{
-
-					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
-
-					// Reduce expenses on stack memory allocation
-					Wq::MediumPriority::getInstance().pushWait(
-						[&response, &epRemote, &aSocket, &anReceived, &buffer, &cb]()
-						{
-							response = cb({Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
-								asio::const_buffer(buffer.get(), anReceived) }});
-						});
-
-					ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);
-
-					// If a subscriber provides a response, send it
-					if (response.getType() == Sub::Rout::Response::Type::Response) {
-						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
-						asio::error_code err;
-						aSocket.write_some(response.payload, err);
-					}
-
-					response.reset();
-				}
-			}
-			tcpAsyncReceiveFrom(aSocket, buffer);
-		} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
-			asio::error::bad_descriptor))
+		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable
 		{
-			asio::error_code err;
-			auto epRemote = aSocket.remote_endpoint(err);
-			std::uint16_t portLocal = 0;
+			if (!aErr) {
+				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
+				std::error_code err;
+				auto epRemote = aSocket.remote_endpoint(err);
+				typename Sub::Rout::OnReceived::Ret response;
 
-			if (!err) {
-				auto epLocal = aSocket.local_endpoint(err);
+				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
+				for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Notify subscribers
+
+					for (auto bufView = Utility::toBuffer<const std::uint8_t>(buffer.get(), anReceived);
+						bufView.size();
+						bufView = response.nProcessed > 0 && response.nProcessed < bufView.size() ?
+						bufView.asSlice(response.nProcessed) :
+						bufView.asSlice(bufView.size()))
+					{
+
+						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): processing (%d bytes remain)", bufView.size());
+
+						// Reduce expenses on stack memory allocation
+						Wq::MediumPriority::getInstance().pushWait(
+							[&response, &epRemote, &aSocket, &anReceived, &buffer, &cb]()
+							{
+								response = cb({Sub::Rout::Socket<asio::ip::tcp>{epRemote, aSocket.local_endpoint().port(),
+									asio::const_buffer(buffer.get(), anReceived) }});
+							});
+
+						ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom(): chunk nProcessed %d", response.nProcessed);
+
+						// If a subscriber provides a response, send it
+						if (response.getType() == Sub::Rout::Response::Type::Response) {
+							ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - got response (%d bytes) sending", response.payload.size());
+							asio::error_code err;
+							aSocket.write_some(response.payload, err);
+						}
+
+						response.reset();
+					}
+				}
+				tcpAsyncReceiveFrom(aSocket, buffer);
+			} else if (Utility::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
+				asio::error::bad_descriptor))
+			{
+				asio::error_code err;
+				auto epRemote = aSocket.remote_endpoint(err);
+				std::uint16_t portLocal = 0;
 
 				if (!err) {
-					portLocal = epLocal.port();
+					auto epLocal = aSocket.local_endpoint(err);
+
+					if (!err) {
+						portLocal = epLocal.port();
+					}
+				}
+
+				if (!err) {
+					ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error(%d), disconnecting...",
+						epRemote.address().to_string().c_str(), epRemote.port(), portLocal, aErr.value());
+					Wq::MediumPriority::getInstance().push(
+						[&epRemote, portLocal]()
+						{
+							Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{epRemote, portLocal});
+						});
+					disconnect(epRemote, portLocal, aErr);
+				} else {
+					ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom - disconnect failure. Could not get the client's endpoint");
 				}
 			}
-
-			if (!err) {
-				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom %s : %d on port %d - error(%d), disconnecting...",
-					epRemote.address().to_string().c_str(), epRemote.port(), portLocal, aErr.value());
-				Wq::MediumPriority::getInstance().push(
-					[&epRemote, portLocal]()
-					{
-						Sub::Rout::OnTcpEvent::notify(Sub::Rout::TcpDisconnected{epRemote, portLocal});
-					});
-				disconnect(epRemote, portLocal, aErr);
-			} else {
-				ESP_LOGE(kDebugTag, "tcpAsyncReceiveFrom - disconnect failure. Could not get the client's endpoint");
-			}
-		}
-	});
+		});
 }
 
 ///
