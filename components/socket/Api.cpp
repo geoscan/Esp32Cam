@@ -308,7 +308,6 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
 				std::error_code err;
 				auto epRemote = aSocket.remote_endpoint(err);
-				typename Sub::Rout::OnReceived::Ret response;
 
 				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
 				Bdg::Receiver::notifyAs({{Bdg::TcpEndpoint{epRemote, aSocket.local_endpoint().port()}},
