@@ -20,6 +20,10 @@
 #include "wifi_uart_bridge/RoutingRules.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 1)
+
 namespace Bdg {
 
 constexpr std::chrono::milliseconds kNotifyWait{20};
@@ -28,24 +32,23 @@ constexpr std::chrono::milliseconds kNotifyWait{20};
 ///
 void Receiver::notifyAs(NotifyCtx aCtx)
 {
-	GS_UTILITY_LOG_SECTIOND(Bdg::kDebugTag, "Receiver::notifyAs()");
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
 	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
 		[&route, &ongoing, &aCtx]()
 		{
-			ESP_LOGV(Bdg::kDebugTag ,"Receiver::notifyAsAsync() WorkQueue task is ongoing");
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "WorkQueue task is ongoing");
 			bool ret = true;
 
 			if (ongoing) {
 				if (route.checkDone()) {
-					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Releasing the lock");
+					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Releasing the lock");
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Acquired the lock");
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Acquired the lock");
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
 			}
@@ -53,13 +56,11 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 			return ret;
 		});
 }
-
 /// \brief Same as `notifyAs`, but without waiting. When the caller's turn comes, `aGetBufferCb` will be called, and
 /// it is expected to produce a message.
 ///
 void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 {
-	GS_UTILITY_LOG_SECTIOND(Bdg::kDebugTag, "Receiver::notifyAsAsync()");
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
@@ -67,16 +68,16 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 		[ongoing, route, aCtx]() mutable
 		{
 			bool ret = true;
-			ESP_LOGV(Bdg::kDebugTag ,"Receiver::notifyAsAsync() WorkQueue task is ongoing");
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsAsync, "WorkQueue task is ongoing");
 
 			if (ongoing) {
 				if (route.checkDone()) {
-					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Releasing the lock");
+					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsAsync, "Releasing the lock");
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Acquired the lock");
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsAsync, "Acquired the lock");
 				notifyAsImpl(route, {aCtx.endpointVariant, aCtx.getBufferCb(), std::move(aCtx.respondCb)});
 				ongoing = true;
 			}
@@ -103,12 +104,12 @@ Receiver::~Receiver()
 ///
 void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 {
-	ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() starting notification cycle");
+	GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "starting notification cycle");
 	for (auto receiver : Receiver::getReceiverRegistry().instances) {
 		auto reduced = aCtx.endpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
-			ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() found a suitable reduction");
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "found a suitable reduction");
 			Utility::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
@@ -123,15 +124,16 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 
 			// Notify the receiver, and, depending on whether it performs chunk-by-chunk or batch processing, re-notify it w/ a sliced buffer
 			do {
-				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() feeding the buffer %d bytes remaining",
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "feeding the buffer %d bytes remaining",
 					aCtx.buffer.size());
 				receiver->onReceive(OnReceiveCtx{aCtx.endpointVariant, bufferSlice, aCtx.respondCb,
 					std::move(forwardCb)});
 
 				if (forwarded) {
-					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() forwarded, initializing new notification cycle...");
+					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
+						"forwarded, initializing new notification cycle...");
 					notifyAsImpl(aRoute, {reduced, outBuffer, std::move(aCtx.respondCb)});
-					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() finished forwarding");
+					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
 				}
 			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
 		}
