@@ -103,13 +103,12 @@ Receiver::~Receiver()
 ///
 void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 {
-	assert(RoutingRules::checkInstance());
-
 	ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() starting notification cycle");
 	for (auto receiver : Receiver::getReceiverRegistry().instances) {
 		auto reduced = aCtx.endpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
+			ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() found a suitable reduction");
 			Utility::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
@@ -130,7 +129,9 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 					std::move(forwardCb)});
 
 				if (forwarded) {
+					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() forwarded, initializing new notification cycle...");
 					notifyAsImpl(aRoute, {reduced, outBuffer, std::move(aCtx.respondCb)});
+					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() finished forwarding");
 				}
 			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
 		}
