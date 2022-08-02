@@ -154,7 +154,7 @@ void Receiver::onReceive(OnReceiveCtx)
 {
 }
 
-ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1) + 1}
+ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1)}
 {
 }
 
