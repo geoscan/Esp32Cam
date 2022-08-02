@@ -32,8 +32,9 @@ bool operator<(const Bdg::RoutingRulesImpl::ReductionRule &aLhs, const Bdg::Rout
 
 }  // namespace RoutingRulesImpl
 
-RoutingRules::RoutingRules() : mutex{}, reductionRules{kRulesReserved}
+RoutingRules::RoutingRules() : mutex{}, reductionRules(kRulesReserved)
 {
+	reductionRules.clear();
 }
 
 /// \brief So-called "static" routing rules do not require functor-based inference, which is the case with relation
@@ -50,6 +51,9 @@ bool RoutingRules::addStatic(const EndpointVariant &aOrigin, const EndpointVaria
 	const bool ret = (std::end(reductionRules) == it);
 
 	if (ret) {
+		if (reductionRules.size() == reductionRules.capacity()) {
+			ESP_LOGW(Bdg::kDebugTag, "RoutingRules::addStatic() storage capacity will be extended");
+		}
 		reductionRules.insert(std::lower_bound(std::begin(reductionRules), std::end(reductionRules), reductionRule),
 			reductionRule);
 	} else {
