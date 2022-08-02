@@ -25,7 +25,9 @@ struct cl {\
 // Debug section - "verbose" level
 #define GS_UTILITY_LOG_SECTIONV(tag, context) GS_UTILITY_LOG_SECTION_IMPL(tag,context,__LINE__, ESP_LOGV)
 
-// DEbug section - "debug" level
+// Debug section - "debug" level
 #define GS_UTILITY_LOG_SECTIOND(tag, context) GS_UTILITY_LOG_SECTION_IMPL(tag,context,__LINE__, ESP_LOGD)
+
+#define GS_UTILITY_LOGV_METHOD(tag, cls, method, ...) ESP_LOGV(tag, #cls "::" #method "() " __VA_ARGS__)
 
 #endif // UTILITY_UTILITY_LOGSECTION_HPP_
