@@ -18,6 +18,13 @@
 #include <mutex>
 #include <list>
 
+#if 0
+# include <esp_log.h>
+# define WQ_DEBUG(...) ESP_LOGI("WQ", __VA_ARGS__)
+#else
+# define WQ_DEBUG(...)
+#endif
+
 namespace Utility {
 namespace Thr {
 namespace Wq {
@@ -46,13 +53,15 @@ private:
 
 		void push(Task &&aTask)
 		{
+			WQ_DEBUG("push()");
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
-			queue.push_back(std::move(aTask));
+			queue.push_back(aTask);
 		}
 
 		bool pop(Task &aTask)
 		{
+			WQ_DEBUG("pop()");
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
 			bool ret = !queue.empty();
@@ -129,7 +138,10 @@ public:
 		push([this, aTask]() mutable
 			{
 				if (aTask()) {
+					WQ_DEBUG("pushContinuous() re-pushing the task");
 					pushContinuous(std::move(aTask));
+				} else {
+					WQ_DEBUG("pushContinuous() discontinuing the task");
 				}
 			});
 		resume();
@@ -142,9 +154,11 @@ public:
 		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([&sem, &aTask]()
 			{
+				WQ_DEBUG("pushContinuousWait() invoking");
 				bool f = aTask();
 
 				if (!f) {
+					WQ_DEBUG("pushContinuousWait() releasing sem.");
 					sem.release();
 				}
 
@@ -203,5 +217,7 @@ using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 4096, 
 }  // namespace Wq
 }  // namespace Thr
 }  // namespace Utility
+
+#undef WQ_DEBUG
 
 #endif // UTILITY_UTILITY_WORKQUEUE_HPP_
