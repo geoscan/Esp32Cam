@@ -35,15 +35,18 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
 		[&route, &ongoing, &aCtx]()
 		{
+			ESP_LOGV(Bdg::kDebugTag ,"Receiver::notifyAsAsync() WorkQueue task is ongoing");
 			bool ret = true;
 
 			if (ongoing) {
 				if (route.checkDone()) {
+					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Releasing the lock");
 					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
+				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Acquired the lock");
 				Receiver::getReceiverRegistry().mutex.lock();
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
@@ -66,15 +69,18 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 		[ongoing, route, aCtx]() mutable
 		{
 			bool ret = true;
+			ESP_LOGV(Bdg::kDebugTag ,"Receiver::notifyAsAsync() WorkQueue task is ongoing");
 
 			if (ongoing) {
 				if (route.checkDone()) {
+					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Releasing the lock");
 					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
 				Receiver::getReceiverRegistry().mutex.lock();
+				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Acquired the lock");
 				notifyAsImpl(route, {aCtx.endpointVariant, aCtx.getBufferCb(), std::move(aCtx.respondCb)});
 				ongoing = true;
 			}
@@ -103,6 +109,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 {
 	assert(RoutingRules::checkInstance());
 
+	ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() starting notification cycle");
 	for (auto receiver : Receiver::getReceiverRegistry().instances) {
 		auto reduced = aCtx.endpointVariant;
 
@@ -121,6 +128,8 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 
 			// Notify the receiver, and, depending on whether it performs chunk-by-chunk or batch processing, re-notify it w/ a sliced buffer
 			do {
+				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsImpl() feeding the buffer %d bytes remaining",
+					aCtx.buffer.size());
 				receiver->onReceive(OnReceiveCtx{aCtx.endpointVariant, bufferSlice, aCtx.respondCb,
 					std::move(forwardCb)});
 
