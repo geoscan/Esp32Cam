@@ -8,7 +8,7 @@ address_firmware               = hex(0x10000)
 _here = Path(__file__).resolve().parent
 _path_project = _here.parent.parent
 
-openocd_use_from_toolchain = True  # There is a version of "Openocd" in the project, but it has some SEGFAULT bug which reveals itself from time to time
+openocd_use_from_toolchain = False  # There is a version of "Openocd" in the project, but it has some SEGFAULT bug which reveals itself from time to time
 
 if openocd_use_from_toolchain:
 	path_openocd_toolchain_base = _here.parent / "idftools" / "tools" / "openocd-esp32"  # Search in the toolchains directory
@@ -23,7 +23,12 @@ else:
 
 path_project                    = str(_path_project)
 path_openocd_config             = str(_here / ".jlinkesp32.cfg")
-path_gdbinit                    = str(_here / ".jlinkgdbinit")
+
+if openocd_use_from_toolchain:
+	path_gdbinit                    = str(_here / ".jlinkgdbinit_toolchain")
+else:
+	path_gdbinit                    = str(_here / ".jlinkgdbinit")
+
 path_build_dir                  = str(_path_project / "build")
 
 _path_build_dir = Path(path_build_dir).resolve()
