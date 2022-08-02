@@ -16,7 +16,7 @@
 #include <functional>
 #include <chrono>
 #include <mutex>
-#include <list>
+#include <deque>
 
 #if 0
 # include <esp_log.h>
@@ -47,9 +47,14 @@ template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
 private:
 	struct Queue {
-		using QueueType = std::list<Task>;
+		using QueueType = std::deque<Task>;
 		QueueType queue;
 		std::mutex mutex;
+
+		Queue() : queue(32)
+		{
+			queue.clear();
+		}
 
 		void push(Task &&aTask)
 		{
