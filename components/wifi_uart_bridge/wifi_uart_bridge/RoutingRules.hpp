@@ -23,7 +23,7 @@ using DynamicReduction = std::function<EndpointVariant(const EndpointVariant &, 
 namespace RoutingRulesImpl {
 
 using RuleTrigger = std::tuple<EndpointVariant, EndpointVariant>;  ///< Unique identifier of a rule
-using ReductionVariant = typename mapbox::util::variant<DynamicReduction, EndpointVariant>;
+using ReductionVariant = EndpointVariant;
 
 struct ReductionRule {
 	RuleTrigger ruleTrigger;

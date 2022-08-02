@@ -86,15 +86,7 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 	bool ret = (std::end(reductionRules) != it);
 
 	if (ret) {  // The rule has been found, perform reduction
-		aoSrc = it->reductionVariant.match(
-			[&aoSrc, &aCandidate](DynamicReduction a) {return a(aoSrc, aCandidate); },
-			[](const EndpointVariant &a) {return a; },
-			[](...)
-			{
-				ESP_LOGE(Bdg::kDebugTag, "RoutingRules::reduce() match error");
-				return EndpointVariant{};
-			}
-		);
+		aoSrc = it->reductionVariant;
 	} else {
 		ESP_LOGV(Bdg::kDebugTag, "RoutingRules::reduce Could not find a suitable reduction");
 	}
