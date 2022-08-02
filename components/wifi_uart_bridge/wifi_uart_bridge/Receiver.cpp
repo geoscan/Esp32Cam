@@ -46,8 +46,8 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Acquired the lock");
 				Receiver::getReceiverRegistry().mutex.lock();
+				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Acquired the lock");
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
 			}
