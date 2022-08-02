@@ -105,7 +105,9 @@ typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::fi
 		if (it->ruleTrigger != ruleTrigger) {
 			it = end;
 		}
-	} else {
+	}
+
+	if (it == end) {
 		for (auto &alternative : aOrigin.asAlternative()) {
 			it = find(alternative, aIntermediary);
 
