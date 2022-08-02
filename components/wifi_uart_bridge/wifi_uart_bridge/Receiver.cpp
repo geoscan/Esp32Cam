@@ -39,10 +39,12 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 
 			if (ongoing) {
 				if (route.checkDone()) {
+					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
+				Receiver::getReceiverRegistry().mutex.lock();
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
 			}
@@ -67,10 +69,12 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 
 			if (ongoing) {
 				if (route.checkDone()) {
+					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
+				Receiver::getReceiverRegistry().mutex.lock();
 				notifyAsImpl(route, {aCtx.endpointVariant, aCtx.getBufferCb(), std::move(aCtx.respondCb)});
 				ongoing = true;
 			}
