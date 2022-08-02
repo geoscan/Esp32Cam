@@ -17,9 +17,9 @@
 #include <chrono>
 #include <mutex>
 #include <deque>
+#include <esp_log.h>
 
 #if 0
-# include <esp_log.h>
 # define WQ_DEBUG(...) ESP_LOGI("WQ", __VA_ARGS__)
 #else
 # define WQ_DEBUG(...)
@@ -61,6 +61,9 @@ private:
 			WQ_DEBUG("push()");
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
+			if (queue.size() == queue.max_size()) {
+				ESP_LOGW("WQ", "work queue capacity will be extended");
+			}
 			queue.push_back(aTask);
 		}
 
@@ -216,7 +219,7 @@ private:
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
 
-using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 4096, FreertosTask::PriorityMedium,
+using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
 	FreertosTask::CorePin::CoreNone>;
 
 }  // namespace Wq
