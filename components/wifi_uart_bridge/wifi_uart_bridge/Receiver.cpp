@@ -41,12 +41,10 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 			if (ongoing) {
 				if (route.checkDone()) {
 					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Releasing the lock");
-					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				Receiver::getReceiverRegistry().mutex.lock();
 				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAs() Acquired the lock");
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
@@ -74,12 +72,10 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 			if (ongoing) {
 				if (route.checkDone()) {
 					ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Releasing the lock");
-					Receiver::getReceiverRegistry().mutex.unlock();
 					route.unlock();
 					ret = false;
 				}
 			} else if (route.tryLock()) {
-				Receiver::getReceiverRegistry().mutex.lock();
 				ESP_LOGV(Bdg::kDebugTag, "Receiver::notifyAsAsync() Acquired the lock");
 				notifyAsImpl(route, {aCtx.endpointVariant, aCtx.getBufferCb(), std::move(aCtx.respondCb)});
 				ongoing = true;
