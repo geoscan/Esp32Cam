@@ -10,13 +10,6 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
 #include <esp_log.h>
 #include "utility/LogSection.hpp"
-
-#if 0
-# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV(tag, title)
-#else
-# define UART_SECTION_LOGV(tag, title)
-#endif  // #if 0
-
 #include <cassert>
 #include "utility/CircularSwap.hpp"
 #include "utility/Buffer.hpp"
@@ -27,6 +20,15 @@
 #include "utility/time.hpp"
 #include "utility/thr/WorkQueue.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
+
+#if 0
+# define UART_SECTION_LOGV(tag, title) GS_UTILITY_LOG_SECTIONV(tag, title)
+#else
+# define UART_SECTION_LOGV(tag, title)
+#endif  // #if 0
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Uart::Task, taskProcess, 1)
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Uart::Task, taskProcess, 1)
 
 using namespace Uart;
 using namespace Utility;
@@ -71,11 +73,14 @@ void Task::taskProcess()
 		auto *buffer = swap.getFull();
 
 		if (nullptr != buffer) {
-			ESP_LOGV(Uart::kDebugTag, "got buffer to process");
+			GS_UTILITY_LOGV_METHOD(Uart::kDebugTag, Task, taskProcess, "Got buffer of %d bytes to process",
+				buffer->pos);
 			Bdg::Receiver::notifyAs({Bdg::UartEndpoint{buffer->device->getNum()},
 				{buffer->buf.data(), buffer->pos},
 				[&buffer](Bdg::RespondCtx aCtx)
 				{
+					GS_UTILITY_LOGD_METHOD(Uart::kDebugTag, Task, taskProcess, "got response of %d bytes",
+						aCtx.buffer.size());
 					buffer->device->write(aCtx.buffer);
 				}});
 			swap.pushFree(buffer);  // The buffer has been processed
