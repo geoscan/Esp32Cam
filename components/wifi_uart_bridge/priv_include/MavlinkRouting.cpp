@@ -69,7 +69,7 @@ void MavlinkRouting::init()
 	clientsUdp.reserve(2);
 	receivers.reserve(3);
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UART hook");
-	receivers.emplace_back(getMavlinkUartNum(),  // UART sender
+	receivers.emplace_back(Bdg::UartEndpoint(getMavlinkUartNum()),  // UART sender
 		"MAVLink UART hook",
 		[](Bdg::OnReceiveCtx aCtx)
 		{
