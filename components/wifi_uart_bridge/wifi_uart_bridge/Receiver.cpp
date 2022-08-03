@@ -34,6 +34,10 @@ constexpr std::chrono::milliseconds kNotifyWait{20};
 ///
 void Receiver::notifyAs(NotifyCtx aCtx)
 {
+#if CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL >= 5
+	aCtx.endpointVariant.logv("Receiver::notifyAs: ");
+#endif
+
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
