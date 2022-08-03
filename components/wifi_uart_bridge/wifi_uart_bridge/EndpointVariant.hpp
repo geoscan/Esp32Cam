@@ -26,24 +26,52 @@ enum class NamedEndpoint {
 	None,  ///< Stub meaning that no further reduction is required
 };
 
+/// \brief Makes it possible to distinguish between endpoint types.
+///
+/// \details Event w/ use of inheritance from `std::tuple`, inherited types will produce ambiguity in certain contexts,
+/// but it is not the case, when Marker is used.
+///
+template <class T>
+struct EndpointMarker {
+};
+
+template <class T>
+constexpr bool operator<(const EndpointMarker<T> &aLhs, const EndpointMarker<T> &aRhs)
+{
+	return false;
+}
+
+template <class T>
+constexpr bool operator==(const EndpointMarker<T> &aLhs, const EndpointMarker<T> &aRhs)
+{
+	return true;
+}
+
+template <class T>
+constexpr bool operator!=(const EndpointMarker<T> &aLhs, const EndpointMarker<T> &aRhs)
+{
+	return false;
+}
+
 using TcpEndpoint = typename std::tuple<asio::ip::tcp::endpoint, std::uint16_t /* Port */>;
 using UdpEndpoint = typename std::tuple<asio::ip::udp::endpoint, std::uint16_t /* Port */>;
 using UartEndpoint = typename std::tuple<std::uint8_t /* UART num */>;
-struct TcpPort : std::tuple<std::uint16_t> {  // Inheritance from `std::tuple` is used to differentiate b/w types while retaining comparison operators implemented for `std::tuple`.
-	using std::tuple<std::uint16_t>::tuple;
-};
+struct MarkerTcpPort;
+using TcpPort = typename std::tuple<std::uint16_t, EndpointMarker<MarkerTcpPort>>;
+
 struct UdpPort : std::tuple<std::uint16_t> {
 	using std::tuple<std::uint16_t>::tuple;
 };
 
 using EndpointVariantBase = mapbox::util::variant<NamedEndpoint, TcpEndpoint, UdpEndpoint, UartEndpoint,
-	asio::ip::udp::endpoint, asio::ip::tcp::endpoint>;
+	asio::ip::udp::endpoint, asio::ip::tcp::endpoint, TcpPort, UdpPort>;
 
 struct EndpointVariant : EndpointVariantBase
 {
 	static constexpr auto kPosArraySize = 2;
 	using EndpointVariantBase::EndpointVariantBase;
 	Utility::PosArray<EndpointVariant, kPosArraySize> asAlternative() const;
+	void logv(const char *prefix);
 };
 
 }  // namespace Bdg
