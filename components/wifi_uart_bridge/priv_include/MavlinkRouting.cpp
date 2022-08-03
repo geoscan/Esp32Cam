@@ -51,6 +51,8 @@ static const StaticRule kStaticRoutingRules[] = {
 	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
 		Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}}, Bdg::NamedEndpoint::None),
 #endif
+	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
+		Bdg::UdpHook(MavlinkRouting::getMavlinkUdpPort(), {}), NamedEndpoint::None),
 	makeStaticRule(Bdg::NamedEndpoint::MavlinkIpPackForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
 		Bdg::NamedEndpoint::None),
 	makeStaticRule(Bdg::NamedEndpoint::Mavlink, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
