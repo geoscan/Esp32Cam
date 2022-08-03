@@ -19,6 +19,10 @@
 #include "Dispatcher.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
 #include "mav/mav.hpp"
+#include "utility/LogSection.hpp"
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mav::Dispatcher, onReceive, 1)
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Dispatcher, process, 1)
 
 Mav::Dispatcher::Dispatcher() :
 	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink},
@@ -45,8 +49,11 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 		resp.size = 0;
 		ret = micAggregate.process(message,
 			[this](mavlink_message_t &aMsg) mutable {
-				ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
-				resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.asSlice(resp.size));
+				std::size_t inc = Marshalling::push(aMsg,
+					Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.asSlice(resp.size));
+				GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, Dispatcher, process, "(on response callback)"
+					"pushed %d bytes into response buffer", inc);
+				resp.size += inc;
 			});
 
 		unmarshalling.pop();
@@ -105,11 +112,13 @@ void Mav::Dispatcher::onReceive(Bdg::OnReceiveCtx aCtx)
 			break;
 
 		case Microservice::Ret::Response:
+			GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Dispatcher, onReceive, "Formed a response of %d bytes. Sending back",
+				resp.size);
 			aCtx.respondCb({{static_cast<void *>(resp.buffer), resp.size}});
 
 			break;
 	}
 
-	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", nprocessed);
+	GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Dispatcher, onReceive, "processed %d bytes", nprocessed);
 	aCtx.buffer.slice(nprocessed);  // Change the size of the buffer, so `Dispatcher` will be re-notified
 }
