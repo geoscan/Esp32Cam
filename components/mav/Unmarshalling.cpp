@@ -12,15 +12,19 @@
 
 #include <algorithm>
 #include "utility/Buffer.hpp"
+#include "utility/LogSection.hpp"
 #include "Unmarshalling.hpp"
 #include "mav/mav.hpp"
 
 using namespace Mav;
 
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Unmarshalling, push, 0)
+
 std::size_t Mav::Unmarshalling::push(Utility::ConstBuffer aBuffer)
 {
 	auto buffer = aBuffer.as<const std::uint8_t>();
-	ESP_LOGV(Mav::kDebugTag, "Unmarshalling::push(): processing buffer (%d bytes)", buffer.size());
+	GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Unmarshalling, push, "Unmarshalling::push(): processing buffer (%d bytes)",
+		buffer.size());
 	std::size_t counter = 0;
 
 	for (auto *ch = buffer.data(); ch < buffer.data() + buffer.size() && size() < kUnmarshallingQueueMaxSize;
@@ -33,6 +37,6 @@ std::size_t Mav::Unmarshalling::push(Utility::ConstBuffer aBuffer)
 		}
 	}
 
-	ESP_LOGV(Mav::kDebugTag, "Unmarshalling::push(): processed %d bytes", counter);
+	GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Unmarshalling, push, "Unmarshalling::push(): processed %d bytes", counter);
 	return counter;
 }
