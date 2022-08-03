@@ -68,6 +68,8 @@ struct GsUtilityLogMethodV {
 	static constexpr bool enabled = false;
 };
 
+/// \brief False-fallback, default implementation for debug level.
+///
 template <class T>
 struct GsUtilityLogMethodD {
 	static constexpr bool enabled = false;
@@ -98,33 +100,30 @@ do { \
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_CALL(level, tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-		GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, cls, method, __VA_ARGS__)
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, cls, method, __VA_ARGS__)
 
 // User-level defines accessing struct generators
 
-/// \defgroup GS_UTILITY_ Log-related macros
+/// \defgroup GS_UTILITY_LOG_METHOD \brief Method-level logging macros akin to topics
+///
+/// \details "METHOD_SET_ENABLED" macros use template specialization mechanism to define `enabled` flags for individual
+/// methods. It is not necessary to call those, because there is a default false-fallback for undefined (CLASS, METHOD)
+/// pairs (see GsUtilityLogMethodD for details)
+///
+/// Their counterparts, "METHOD" macros invoke standard ESP-IDF's logging functions according to the logging level.
+///
 /// @{
+///
 
-/// \brief Uses template specialization mechanism to define `enabled` flags for individual methods.
-///
-/// \details The default implementation provides false-fallback, so using `GS_UTILITY_LOGV_METHOD_SET_ENABLED` for
-/// disabling logging for a particular method not necessary
-///
 #define GS_UTILITY_LOGV_METHOD_SET_ENABLED(cls, method, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(V, cls, method, (en && GS_UTILITY_VERBOSE_LEVEL_ENABLED))
 
-/// \brief Based on `enabled` flag (see `GS_UTILITY_LOGV_METHOD_SET_ENABLED`), either ignores this or invokes
-/// `ESP_LOGV` macro.
-///
 #define GS_UTILITY_LOGV_METHOD(tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL(V, tag, cls, method, __VA_ARGS__)
 
-/// \brief Same as `GS_UTILITY_LOGV_METHOD_SET_ENABLED`, but for "debug" log level
-///
 #define GS_UTILITY_LOGD_METHOD_SET_ENABLED(cls, method, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(D, cls, method, (en && GS_UTILITY_DEBUG_LEVEL_ENABLED))
 
-/// \brief Same as `GS_UTILITY_LOGV_METHOD`, but for "debug" log level
 #define GS_UTILITY_LOGD_METHOD(tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL(D, tag, cls, method, __VA_ARGS__)
 
