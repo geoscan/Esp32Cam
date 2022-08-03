@@ -70,6 +70,7 @@ void MavlinkRouting::init()
 	receivers.reserve(3);
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UART hook");
 	receivers.push_back({{Bdg::UartEndpoint{getMavlinkUartNum()}},  // UART sender
+		"MAVLink UART hook",
 		[](Bdg::OnReceiveCtx aCtx)
 		{
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init, "MavlinkRouting::receivers UART %d bytes",
@@ -78,6 +79,7 @@ void MavlinkRouting::init()
 		}});
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
 	receivers.push_back({{Bdg::NamedEndpoint::Mavlink},  // Hook, updates the list of UDP clients
+		"MAVLink clients registerer",
 		[this](Bdg::OnReceiveCtx aCtx)
 		{
 			aCtx.endpointVariant.match(
@@ -100,6 +102,7 @@ void MavlinkRouting::init()
 	if (Sock::Api::checkInstance()) {
 		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP hook for port %d", getMavlinkUdpPort());
 		receivers.push_back({{Bdg::UdpPort{getMavlinkUdpPort()}},
+			"MAVLink UDP clients notifier",
 			[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
 			{
 				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
