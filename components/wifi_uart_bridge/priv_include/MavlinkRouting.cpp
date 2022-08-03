@@ -78,13 +78,14 @@ void MavlinkRouting::init()
 			Sub::Rout::UartSend::notify({Utility::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
 		});
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
-	receivers.emplace_back(UdpPort(getMavlinkUdpPort()),  // Hook, updates the list of UDP clients
-		"MAVLink UDP clients notifier",
+	receivers.emplace_back(UdpHook(getMavlinkUdpPort(), {}),  // Hook, updates the list of UDP clients
+		"MAVLink UDP hook",
 		[this](Bdg::OnReceiveCtx aCtx)
 		{
 			aCtx.endpointVariant.match(
 				[this](const Bdg::UdpEndpoint &aEndpoint)
 				{
+					GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Mavlink UDP hook");
 					if (std::get<1>(aEndpoint) == getMavlinkUdpPort()) {
 						const auto endpoint = std::get<0>(aEndpoint);
 						auto it = std::find(clientsUdp.begin(), clientsUdp.end(), endpoint);
