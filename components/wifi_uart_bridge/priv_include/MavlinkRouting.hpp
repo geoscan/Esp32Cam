@@ -29,7 +29,7 @@ public:
 
 	static constexpr std::uint8_t getMavlinkUartNum()
 	{
-		return 1;
+		return 0;
 	}
 
 private:
