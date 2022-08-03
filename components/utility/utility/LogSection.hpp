@@ -7,6 +7,8 @@
 
 // Enables section-wide debug output.
 
+/// \file
+
 #ifndef UTILITY_UTILITY_LOGSECTION_HPP_
 #define UTILITY_UTILITY_LOGSECTION_HPP_
 
@@ -62,12 +64,23 @@ struct GsUtilityLogvMethod {
 	static constexpr bool enabled = false;
 };
 
+/// \defgroup GS_UTILITY_ Log-related macros
+/// @{
+
+/// \brief Uses template specialization mechanism to define `enabled` flags for individual methods.
+///
+/// \details The default implementation provides false-fallback, so using `GS_UTILITY_LOGV_METHOD_SET_ENABLED` for
+/// disabling logging for a particular method not necessary
+///
 #define GS_UTILITY_LOGV_METHOD_SET_ENABLED(cls, method, en) \
 template<> \
 struct GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
 	static constexpr bool enabled = en; \
 };
 
+/// \brief Based on `enabled` flag (see `GS_UTILITY_LOGV_METHOD_SET_ENABLED`), either ignores this or invokes
+/// `ESP_LOGV` macro.
+///
 #define GS_UTILITY_LOGV_METHOD(tag, cls, method, ...) \
 struct cls##method ; \
 do { \
@@ -76,6 +89,6 @@ do { \
 	} \
 } while (0)
 
-//#define GS_UTILITY_LOGV_METHOD(tag, cls, method, ...) ESP_LOGV(tag, #cls "::" #method "() " __VA_ARGS__)
+/// @}
 
 #endif // UTILITY_UTILITY_LOGSECTION_HPP_
