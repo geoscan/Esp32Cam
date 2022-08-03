@@ -34,26 +34,26 @@ static StaticRule makeStaticRule(F &&aFrom, T &&aTo, R &&aReduce)
 
 static const StaticRule kStaticRoutingRules[] = {
 #if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
-	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()}, Bdg::NamedEndpoint::Mavlink,
+	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}}, Bdg::NamedEndpoint::Mavlink,
 		Bdg::NamedEndpoint::UartMavlinkForwarded),
-	makeStaticRule(Bdg::NamedEndpoint::UartMavlinkForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUdpPort()},
+	makeStaticRule(Bdg::NamedEndpoint::UartMavlinkForwarded, Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
 		Bdg::NamedEndpoint::None),
 #else
-	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
 		Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()}, Bdg::NamedEndpoint::None),
 #endif
 #if CONFIG_WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
 	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()}, Bdg::NamedEndpoint::Mavlink,
 		Bdg::NamedEndpoint::UdpMavlinkForwarded),
-	makeStaticRule(Bdg::NamedEndpoint::UdpMavlinkForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+	makeStaticRule(Bdg::NamedEndpoint::UdpMavlinkForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
 		Bdg::NamedEndpoint::None),
 #else
 	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
-		Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()}, Bdg::NamedEndpoint::None),
+		Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}}, Bdg::NamedEndpoint::None),
 #endif
-	makeStaticRule(Bdg::NamedEndpoint::MavlinkIpPackForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+	makeStaticRule(Bdg::NamedEndpoint::MavlinkIpPackForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
 		Bdg::NamedEndpoint::None),
-	makeStaticRule(Bdg::NamedEndpoint::Mavlink, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+	makeStaticRule(Bdg::NamedEndpoint::Mavlink, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum(), {}},
 		Bdg::NamedEndpoint::None),
 	makeStaticRule(Bdg::NamedEndpoint::Mavlink, Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
 		Bdg::NamedEndpoint::None),
@@ -69,7 +69,7 @@ void MavlinkRouting::init()
 	clientsUdp.reserve(2);
 	receivers.reserve(3);
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UART hook");
-	receivers.emplace_back(Bdg::UartEndpoint(getMavlinkUartNum()),  // UART sender
+	receivers.emplace_back(Bdg::UartEndpoint(getMavlinkUartNum(), {}),  // UART sender
 		"MAVLink UART hook",
 		[](Bdg::OnReceiveCtx aCtx)
 		{
