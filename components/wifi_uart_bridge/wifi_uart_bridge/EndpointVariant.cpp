@@ -69,7 +69,7 @@ Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVaria
 ///
 void EndpointVariant::logv(const char *aPrefix) const
 {
-	static auto visitor = mapbox::util::make_visitor(
+	match(
 		[aPrefix](NamedEndpoint a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv,
 			"%s NamedEndpoint::%s", aPrefix, namedEndpointAsStr(a)); },
 		[aPrefix](const TcpEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s TcpEndpoint"
@@ -89,7 +89,6 @@ void EndpointVariant::logv(const char *aPrefix) const
 		[aPrefix](...){GS_UTILITY_LOGV_METHOD(kDebugTag, EndpointVariant, logv, "%s UNHANDLED VARIANT CONTENT",
 			aPrefix); }
 	);
-	mapbox::util::apply_visitor(visitor, *this);
 }
 
 #else
