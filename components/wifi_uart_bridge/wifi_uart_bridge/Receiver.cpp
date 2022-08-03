@@ -133,9 +133,9 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
 						"forwarded, initializing new notification cycle...");
 					notifyAsImpl(aRoute, {reduced, outBuffer, std::move(aCtx.respondCb)});
-					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
 				}
 			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
 		}
 	}
 }
