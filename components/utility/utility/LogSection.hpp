@@ -12,6 +12,14 @@
 #ifndef UTILITY_UTILITY_LOGSECTION_HPP_
 #define UTILITY_UTILITY_LOGSECTION_HPP_
 
+#if !defined(__ESP_LOG_H__)
+# error "<esp_log.h> must be included before LogSection.hpp"
+#endif
+
+#if !defined(LOG_LOCAL_LEVEL)
+# error "LogSection.hpp relies on presence of LOG_LEVEL_LOCAL macro which can be included from <esp_log.h>"
+#endif
+
 // RAII wrapper over debug output
 #define GS_UTILITY_LOG_SECTION_SUFF_LEVEL(tag, context, cl, instance, command) \
 struct cl {\
@@ -62,6 +70,9 @@ template <class T>
 struct GsUtilityLogdMethod {
 	static constexpr bool enabled = false;
 };
+
+#define GS_UTILITY_DEBUG_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 4)
+#define GS_UTILITY_VERBOSE_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 5)
 
 /// \defgroup GS_UTILITY_ Log-related macros
 /// @{
