@@ -22,7 +22,7 @@
 
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 1)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, tryLock, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, unlock, 0)
 
@@ -88,16 +88,14 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 		});
 }
 
-Receiver::Receiver(const EndpointVariant &aIdentity) :
-	endpointVariant{aIdentity},
-	name{""}
+Receiver::Receiver(const EndpointVariant &aIdentity) : Receiver{aIdentity, ""}
 {
-	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
-	Receiver::getReceiverRegistry().instances.add(*this);
 }
 
 Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpointVariant{aIdentity}, name{aName}
 {
+	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
+	Receiver::getReceiverRegistry().instances.add(*this);
 }
 
 Receiver::~Receiver()
@@ -116,7 +114,8 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 		auto reduced = aCtx.endpointVariant;
 
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
-			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "found a suitable reduction");
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
+				"found a suitable reduction for receiver \"%s\"", receiver->getName());
 			Utility::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
@@ -142,6 +141,9 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 				}
 			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // A receiver either slices buffer or leaves it unscathed. In the former case, it will be notified until the buffer is sliced to `size()==0`
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
+		} else {
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
+				"could not find reduction rule for receiver \"%s\"", receiver->getName());
 		}
 	}
 }
