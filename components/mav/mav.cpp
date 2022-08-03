@@ -9,7 +9,6 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL)
 
-
 #include "mav/mav.hpp"
 #include "Mavlink.hpp"
 #include "Marshalling.hpp"
