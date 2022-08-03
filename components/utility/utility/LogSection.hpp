@@ -45,16 +45,10 @@ struct GsUtilityLogFunction {
 };
 
 template <class T, class R, class ...Ts>
-constexpr auto gsUtilityRevealType(R (T::*)(Ts...)) -> GsUtilityLogMember<R, T, Ts...>
-{
-	return {};
-}
+constexpr auto gsUtilityRevealType(R (T::*)(Ts...)) -> GsUtilityLogMember<R, T, Ts...>;
 
 template <class T, class R, class ...Ts>
-constexpr auto gsUtilityRevealType(R (*)(Ts...)) -> GsUtilityLogFunction<R, T, Ts...>
-{
-	return {};
-}
+constexpr auto gsUtilityRevealType(R (*)(Ts...)) -> GsUtilityLogFunction<R, T, Ts...>;
 
 #define GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) \
 	typename decltype(gsUtilityRevealType< cls >(&cls::method))::Impl<&cls::method>
