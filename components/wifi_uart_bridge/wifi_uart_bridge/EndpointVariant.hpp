@@ -55,7 +55,8 @@ constexpr bool operator!=(const EndpointMarker<T> &aLhs, const EndpointMarker<T>
 
 using TcpEndpoint = typename std::tuple<asio::ip::tcp::endpoint, std::uint16_t /* Port */>;
 using UdpEndpoint = typename std::tuple<asio::ip::udp::endpoint, std::uint16_t /* Port */>;
-using UartEndpoint = typename std::tuple<std::uint8_t /* UART num */>;
+struct MarkerUart;
+using UartEndpoint = typename std::tuple<std::uint8_t /* UART num */, EndpointMarker<MarkerUart>>;
 struct MarkerTcpPort;
 using TcpPort = typename std::tuple<std::uint16_t, EndpointMarker<MarkerTcpPort>>;
 
