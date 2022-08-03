@@ -47,15 +47,45 @@ struct GsUtilityLogMember {
 	};
 };
 
+template <class T, class R, class ...Ts>
+constexpr auto gsUtilityRevealType(R (T::*)(Ts...)) -> GsUtilityLogMember<R, T, Ts...>;
+
+template <class R, class T, class ...Ts>
+struct GsUtilityLogMemberConst {
+	template <R (T::* M)(Ts...) const>
+	struct Impl {
+	};
+};
+
+template <class T, class R, class ...Ts>
+constexpr auto gsUtilityRevealType(R (T::*)(Ts...) const) -> GsUtilityLogMemberConst<R, T, Ts...>;
+
+template <class R, class T, class ...Ts>
+struct GsUtilityLogMemberVolatile {
+	template <R (T::* M)(Ts...) volatile>
+	struct Impl {
+	};
+};
+
+template <class T, class R, class ...Ts>
+constexpr auto gsUtilityRevealType(R (T::*)(Ts...) volatile) -> GsUtilityLogMemberVolatile<R, T, Ts...>;
+
+template <class R, class T, class ...Ts>
+struct GsUtilityLogMemberCv {
+	template <R (T::* M)(Ts...) const volatile>
+	struct Impl {
+	};
+};
+
+template <class T, class R, class ...Ts>
+constexpr auto gsUtilityRevealType(R (T::*)(Ts...) const volatile) -> GsUtilityLogMemberCv<R, T, Ts...>;
+
 template <class R, class T, class ...Ts>
 struct GsUtilityLogFunction {
 	template <R (*F)(Ts...)>
 	struct Impl {
 	};
 };
-
-template <class T, class R, class ...Ts>
-constexpr auto gsUtilityRevealType(R (T::*)(Ts...)) -> GsUtilityLogMember<R, T, Ts...>;
 
 template <class T, class R, class ...Ts>
 constexpr auto gsUtilityRevealType(R (*)(Ts...)) -> GsUtilityLogFunction<R, T, Ts...>;
