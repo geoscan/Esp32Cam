@@ -59,13 +59,15 @@ struct MarkerUart;
 using UartEndpoint = typename std::tuple<std::uint8_t /* UART num */, EndpointMarker<MarkerUart>>;
 struct MarkerTcpPort;
 using TcpPort = typename std::tuple<std::uint16_t, EndpointMarker<MarkerTcpPort>>;
+struct MarkerUdpHook;
+using UdpHook = typename std::tuple<std::uint16_t, EndpointMarker<MarkerUdpHook>>;
 
 struct UdpPort : std::tuple<std::uint16_t> {
 	using std::tuple<std::uint16_t>::tuple;
 };
 
 using EndpointVariantBase = mapbox::util::variant<NamedEndpoint, TcpEndpoint, UdpEndpoint, UartEndpoint,
-	asio::ip::udp::endpoint, asio::ip::tcp::endpoint, TcpPort, UdpPort>;
+	asio::ip::udp::endpoint, asio::ip::tcp::endpoint, TcpPort, UdpPort, UdpHook>;
 
 struct EndpointVariant : EndpointVariantBase
 {

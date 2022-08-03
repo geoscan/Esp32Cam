@@ -86,6 +86,8 @@ void EndpointVariant::logv(const char *aPrefix) const
 			"%s asio::ip::udp::endpoint %s port %d", aPrefix, a.address().to_string().c_str(), a.port()); },
 		[aPrefix](const UdpPort &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpPort %d",
 			aPrefix, std::get<0>(a)); },
+		[aPrefix](const UdpHook &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpHook %d",
+			aPrefix, std::get<0>(a)); },
 		[aPrefix](const TcpPort &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s TcpPort %d",
 			aPrefix, std::get<0>(a)); },
 		[aPrefix](...){GS_UTILITY_LOGV_METHOD(kDebugTag, EndpointVariant, logv, "%s UNHANDLED VARIANT CONTENT",
