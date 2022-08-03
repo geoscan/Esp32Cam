@@ -21,6 +21,7 @@ class MavlinkRouting final {
 public:
 	MavlinkRouting();
 	~MavlinkRouting();
+	void init();
 
 	static constexpr std::uint16_t getMavlinkUdpPort()
 	{

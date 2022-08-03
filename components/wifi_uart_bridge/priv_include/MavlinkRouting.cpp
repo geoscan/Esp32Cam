@@ -15,8 +15,11 @@
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "MavlinkRouting.hpp"
+#include "utility/LogSection.hpp"
 #include <sdkconfig.h>
 #include <utility>
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::MavlinkRouting, init, 1)
 
 namespace Bdg {
 
@@ -58,13 +61,19 @@ static const StaticRule kStaticRoutingRules[] = {
 
 MavlinkRouting::MavlinkRouting()
 {
+	init();
+}
+
+void MavlinkRouting::init()
+{
 	clientsUdp.reserve(2);
 	receivers.reserve(3);
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UART hook");
 	receivers.push_back({{Bdg::UartEndpoint{getMavlinkUartNum()}},  // UART sender
 		[](Bdg::OnReceiveCtx aCtx)
 		{
-			ESP_LOGV(Bdg::kDebugTag, "MavlinkRouting::receivers UART %d bytes", aCtx.buffer.size());
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init, "MavlinkRouting::receivers UART %d bytes",
+				aCtx.buffer.size());
 			Sub::Rout::UartSend::notify({Utility::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
 		}});
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
@@ -93,8 +102,8 @@ MavlinkRouting::MavlinkRouting()
 		receivers.push_back({{Bdg::UdpPort{getMavlinkUdpPort()}},
 			[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
 			{
-				ESP_LOGV(Bdg::kDebugTag, "MavlinkRouting::receivers UDP notifying udp clients from port %d",
-					getMavlinkUdpPort());
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
+					"MavlinkRouting::receivers UDP notifying udp clients from port %d", getMavlinkUdpPort());
 				for (auto &endpoint : clientsUdp) {
 					asio::error_code err;
 					auto port = getMavlinkUdpPort();
@@ -104,8 +113,8 @@ MavlinkRouting::MavlinkRouting()
 	}
 
 	// Apply routing rules based on the project configuration
-	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR initializing static routing rules");
 	if (Bdg::RoutingRules::checkInstance()) {
+		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR initializing static routing rules");
 		for (const auto &staticRule : kStaticRoutingRules) {
 			Bdg::RoutingRules::getInstance().addStatic(std::get<0>(staticRule), std::get<1>(staticRule),
 				std::get<2>(staticRule));
