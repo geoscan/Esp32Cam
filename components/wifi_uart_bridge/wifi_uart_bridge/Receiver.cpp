@@ -20,7 +20,7 @@
 #include "wifi_uart_bridge/RoutingRules.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 1)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, tryLock, 0)
@@ -45,8 +45,8 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 
 			if (ongoing) {
 				if (route.checkDone()) {
-					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Releasing the lock");
 					route.unlock();
+					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Unlocked");
 					ret = false;
 				}
 			} else if (route.tryLock()) {
