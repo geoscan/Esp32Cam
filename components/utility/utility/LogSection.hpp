@@ -80,27 +80,29 @@ struct GsUtilityLogMethodD {
 
 // Definitions generating compile-time boolean logging flags for particular method (GsUtilityLogMethod(V|D))
 
-#define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(structname, cls, method, en) \
+#define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(structname, marker, en) \
 template<> \
-struct structname < GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
+struct structname < marker > { \
 	static constexpr bool enabled = en; \
 };
 
-#define GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(structname, esplogdefine, tag, cls, method, ...) \
+#define GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(structname, esplogdefine, tag, markertype, ...) \
 do { \
-	if (structname < GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
-		esplogdefine (tag, #cls "::" #method "() " __VA_ARGS__ ); \
+	if (structname < markertype >::enabled) { \
+		esplogdefine (tag, __VA_ARGS__ ); \
 	} \
 } while (0)
 
 // Wrappers over struct generators
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(level, cls, method, en) \
-	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), cls, method, en)
+	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
+	GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), en)
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_CALL(level, tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, cls, method, __VA_ARGS__)
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
+	#cls "::" #method "() " __VA_ARGS__)
 
 // User-level defines accessing struct generators
 
