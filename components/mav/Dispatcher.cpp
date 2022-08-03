@@ -25,7 +25,7 @@ GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mav::Dispatcher, onReceive, 0)
 GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Dispatcher, process, 1)
 
 Mav::Dispatcher::Dispatcher() :
-	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink, "Mavlink"},
+	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink, "Mavlink dispatcher"},
 	key{{&Dispatcher::onMavlinkReceived, this}},
 	micAggregate{*this}
 {
