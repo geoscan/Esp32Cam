@@ -157,7 +157,12 @@ public:
 	static void notifyAs(NotifyCtx aNotifyCtx);
 	static void notifyAsAsync(AsyncNotifyCtx aAsyncNotifyCtx);
 	Receiver(const EndpointVariant &aIdentity);
+	Receiver(const EndpointVariant &, const char *aName);
 	virtual ~Receiver();
+	inline const char *getName()
+	{
+		return name;
+	}
 
 private:
 	static void notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aNotifyCtx);
@@ -166,6 +171,7 @@ private:
 
 private:
 	EndpointVariant endpointVariant;
+	const char *name;
 };
 
 /// \brief Enables creating receivers using lambda expressions instead of overriding `onReceive` method
@@ -173,6 +179,7 @@ private:
 class LambdaReceiver : Receiver {
 public:
 	LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb);
+	LambdaReceiver(const EndpointVariant &aEndpointVariant, const char *aName, ReceiveCb &&aReceiveCb);
 
 private:
 	void onReceive(OnReceiveCtx aOnReceiveCtx) override;

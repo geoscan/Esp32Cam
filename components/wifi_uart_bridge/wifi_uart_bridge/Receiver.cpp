@@ -20,7 +20,7 @@
 #include "wifi_uart_bridge/RoutingRules.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, tryLock, 0)
@@ -89,10 +89,15 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 }
 
 Receiver::Receiver(const EndpointVariant &aIdentity) :
-	endpointVariant{aIdentity}
+	endpointVariant{aIdentity},
+	name{""}
 {
 	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
 	Receiver::getReceiverRegistry().instances.add(*this);
+}
+
+Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpointVariant{aIdentity}, name{aName}
+{
 }
 
 Receiver::~Receiver()
@@ -230,6 +235,12 @@ bool operator==(const Receiver &aLhs, const EndpointVariant &aRhs)
 
 LambdaReceiver::LambdaReceiver(const EndpointVariant &aEndpointVariant, ReceiveCb &&aReceiveCb) :
 	Receiver{aEndpointVariant}, receiveCb{aReceiveCb}
+{
+}
+
+LambdaReceiver::LambdaReceiver(const EndpointVariant &aEndpointVariant, const char *aName, ReceiveCb &&aReceiveCb) :
+	Receiver{aEndpointVariant, aName},
+	receiveCb{aReceiveCb}
 {
 }
 
