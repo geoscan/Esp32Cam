@@ -38,6 +38,8 @@ struct cl {\
 // Debug section - "debug" level
 #define GS_UTILITY_LOG_SECTIOND(tag, context) GS_UTILITY_LOG_SECTION_IMPL(tag,context,__LINE__, ESP_LOGD)
 
+// Method-level logging. Enables one to enable or disable logging for a particular method. Useful for debugging purposes
+
 template <class R, class T, class ...Ts>
 struct GsUtilityLogMember {
 	template <R (T::* M)(Ts...)>
@@ -74,6 +76,8 @@ struct GsUtilityLogMethodD {
 #define GS_UTILITY_DEBUG_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 4)
 #define GS_UTILITY_VERBOSE_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 5)
 
+// Definitions generating compile-time boolean logging flags for particular method (GsUtilityLogMethod(V|D))
+
 #define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(structname, cls, method, en) \
 template<> \
 struct structname < GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
@@ -87,12 +91,16 @@ do { \
 	} \
 } while (0)
 
+// Wrappers over struct generators
+
 #define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(level, cls, method, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), cls, method, en)
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_CALL(level, tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
 		GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, cls, method, __VA_ARGS__)
+
+// User-level defines accessing struct generators
 
 /// \defgroup GS_UTILITY_ Log-related macros
 /// @{
