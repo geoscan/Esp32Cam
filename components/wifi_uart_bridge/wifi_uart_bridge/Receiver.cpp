@@ -22,7 +22,9 @@
 
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, tryLock, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, unlock, 0)
 
 namespace Bdg {
 
@@ -182,6 +184,7 @@ bool ReceiverImpl::Route::tryLock()
 
 	if (ret) {
 		Receiver::getReceiverRegistry().mutex.lock();
+		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Route, tryLock, "locked");
 	}
 
 	return ret;
@@ -194,6 +197,7 @@ void ReceiverImpl::Route::unlock()
 
 	if (turnExpected == turn) {
 		Receiver::getReceiverRegistry().mutex.unlock();
+		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Route, unlock, "unlocked");
 	}
 }
 
