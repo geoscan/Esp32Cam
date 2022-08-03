@@ -102,22 +102,23 @@ void MavlinkRouting::init()
 				[](...){});
 		});
 
-	if (Sock::Api::checkInstance()) {
-		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP clients notifier for UDP port %d",
-			getMavlinkUdpPort());
-		receivers.emplace_back(Bdg::UdpPort{getMavlinkUdpPort()},
-			"MAVLink UDP clients notifier",
-			[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
-			{
-				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
-					"MavlinkRouting::receivers UDP notifying udp clients from port %d", getMavlinkUdpPort());
-				for (auto &endpoint : clientsUdp) {
-					asio::error_code err;
-					auto port = getMavlinkUdpPort();
-					Sock::Api::getInstance().sendTo(endpoint, port, Utility::makeAsioCb(aCtx.buffer), err);
-				}
-			});
-	}
+	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP clients notifier for UDP port %d",
+		getMavlinkUdpPort());
+	receivers.emplace_back(Bdg::UdpPort{getMavlinkUdpPort()},
+		"MAVLink UDP clients notifier",
+		[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
+		{
+			if (!Sock::Api::checkInstance()) {
+				return;
+			}
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
+				"MavlinkRouting::receivers UDP notifying udp clients from port %d", getMavlinkUdpPort());
+			for (auto &endpoint : clientsUdp) {
+				asio::error_code err;
+				auto port = getMavlinkUdpPort();
+				Sock::Api::getInstance().sendTo(endpoint, port, Utility::makeAsioCb(aCtx.buffer), err);
+			}
+		});
 
 	// Apply routing rules based on the project configuration
 	if (Bdg::RoutingRules::checkInstance()) {
