@@ -75,7 +75,7 @@ void Task::taskProcess()
 		if (nullptr != buffer) {
 			GS_UTILITY_LOGV_METHOD(Uart::kDebugTag, Task, taskProcess, "Got buffer of %d bytes to process",
 				buffer->pos);
-			Bdg::Receiver::notifyAs({Bdg::UartEndpoint{buffer->device->getNum()},
+			Bdg::Receiver::notifyAs({Bdg::UartEndpoint{static_cast<std::uint8_t>(buffer->device->getNum()), {}},
 				{buffer->buf.data(), buffer->pos},
 				[&buffer](Bdg::RespondCtx aCtx)
 				{
