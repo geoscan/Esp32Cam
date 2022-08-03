@@ -64,6 +64,11 @@ struct GsUtilityLogvMethod {
 	static constexpr bool enabled = false;
 };
 
+template <class T>
+struct GsUtilityLogdMethod {
+	static constexpr bool enabled = false;
+};
+
 /// \defgroup GS_UTILITY_ Log-related macros
 /// @{
 
@@ -78,6 +83,14 @@ struct GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
 	static constexpr bool enabled = en; \
 };
 
+/// \brief Same as `GS_UTILITY_LOGV_METHOD_SET_ENABLED`, but for "debug" log level
+///
+#define GS_UTILITY_LOGD_METHOD_SET_ENABLED(cls, method, en) \
+template<> \
+struct GsUtilityLogdMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
+	static constexpr bool enabled = en; \
+};
+
 /// \brief Based on `enabled` flag (see `GS_UTILITY_LOGV_METHOD_SET_ENABLED`), either ignores this or invokes
 /// `ESP_LOGV` macro.
 ///
@@ -86,6 +99,15 @@ struct cls##method ; \
 do { \
 	if (GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
 		ESP_LOGV(tag, #cls "::" #method "() " __VA_ARGS__ ); \
+	} \
+} while (0)
+
+/// \brief Same as `GS_UTILITY_LOGV_METHOD`, but for "debug" log level
+#define GS_UTILITY_LOGD_METHOD(tag, cls, method, ...) \
+struct cls##method ; \
+do { \
+	if (GsUtilityLogdMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
+		ESP_LOGD(tag, #cls "::" #method "() " __VA_ARGS__ ); \
 	} \
 } while (0)
 
