@@ -103,7 +103,8 @@ void MavlinkRouting::init()
 		});
 
 	if (Sock::Api::checkInstance()) {
-		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP hook for port %d", getMavlinkUdpPort());
+		ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating Mavlink UDP clients notifier for UDP port %d",
+			getMavlinkUdpPort());
 		receivers.emplace_back(Bdg::UdpPort{getMavlinkUdpPort()},
 			"MAVLink UDP clients notifier",
 			[this](Bdg::OnReceiveCtx aCtx)  // Iterates over the list of UDP clients, notifies each one of them
