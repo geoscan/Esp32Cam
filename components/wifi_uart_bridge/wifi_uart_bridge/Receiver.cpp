@@ -117,8 +117,8 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 				[&forwarded, &outBuffer, &outRespondCb](Bdg::ForwardCtx aCtx)
 				{
 					forwarded = true;
-					outBuffer = aCtx.buffer;
-					outRespondCb = aCtx.respondCb;
+					outBuffer = aCtx.buffer;  // A receiver may override buffer that is being used for notification
+					outRespondCb = aCtx.respondCb;  // A receiver may override response function
 				};
 			auto bufferSlice = aCtx.buffer;
 
@@ -126,15 +126,14 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 			do {
 				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "feeding the buffer %d bytes remaining",
 					aCtx.buffer.size());
-				receiver->onReceive(OnReceiveCtx{aCtx.endpointVariant, bufferSlice, aCtx.respondCb,
-					std::move(forwardCb)});
+				receiver->onReceive(OnReceiveCtx{aCtx.endpointVariant, bufferSlice, aCtx.respondCb, forwardCb});
 
 				if (forwarded) {
 					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
 						"forwarded, initializing new notification cycle...");
-					notifyAsImpl(aRoute, {reduced, outBuffer, std::move(aCtx.respondCb)});
+					notifyAsImpl(aRoute, {reduced, outBuffer, outRespondCb});
 				}
-			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // If `Receiver` has sliced the buffer, notify until it is fully consumed
+			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // A receiver either slices buffer or leaves it unscathed. In the former case, it will be notified until the buffer is sliced to `size()==0`
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
 		}
 	}
