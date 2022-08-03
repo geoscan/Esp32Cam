@@ -75,7 +75,12 @@ MavlinkRouting::MavlinkRouting()
 				[this](const Bdg::UdpEndpoint &aEndpoint)
 				{
 					if (std::get<1>(aEndpoint) == getMavlinkUdpPort()) {
-						clientsUdp.push_back(std::get<0>(aEndpoint));
+						const auto endpoint = std::get<0>(aEndpoint);
+						auto it = std::find(clientsUdp.begin(), clientsUdp.end(), endpoint);
+
+						if (clientsUdp.end() == it) {
+							clientsUdp.push_back(std::get<0>(aEndpoint));
+						}
 					}
 				},
 				[](...){});
