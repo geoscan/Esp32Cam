@@ -116,9 +116,13 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 		if (RoutingRules::getInstance().reduce(reduced, receiver->endpointVariant)) {
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
 				"found a suitable reduction for receiver \"%s\"", receiver->getName());
+
+#if CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL >= 5
 			aCtx.endpointVariant.logv("Receiver::notifyAsImpl() Reduction source: ");
 			receiver->endpointVariant.logv("Receiver::notifyAsImpl() Reduction destination: ");
 			reduced.logv("Receiver::notifyAsImpl() Reduced as: ");
+#endif
+
 			Utility::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
