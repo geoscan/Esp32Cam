@@ -80,6 +80,8 @@ MavlinkRouting::MavlinkRouting()
 
 						if (clientsUdp.end() == it) {
 							clientsUdp.push_back(std::get<0>(aEndpoint));
+							ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting UDP hook Added a new client %s %d",
+								endpoint.address().to_string().c_str(), endpoint.port());
 						}
 					}
 				},
