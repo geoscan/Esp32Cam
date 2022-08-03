@@ -78,7 +78,7 @@ void MavlinkRouting::init()
 			Sub::Rout::UartSend::notify({Utility::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
 		});
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
-	receivers.emplace_back(NamedEndpoint::Mavlink,  // Hook, updates the list of UDP clients
+	receivers.emplace_back(UdpPort(getMavlinkUdpPort()),  // Hook, updates the list of UDP clients
 		"MAVLink UDP clients notifier",
 		[this](Bdg::OnReceiveCtx aCtx)
 		{
