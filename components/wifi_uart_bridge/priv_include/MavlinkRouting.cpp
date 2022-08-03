@@ -33,10 +33,17 @@ static const StaticRule kStaticRoutingRules[] = {
 #if CONFIG_WIFI_UART_BRIDGE_UART_MAVLINK_PROCESS
 	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()}, Bdg::NamedEndpoint::Mavlink,
 		Bdg::NamedEndpoint::UartMavlinkForwarded),
+	makeStaticRule(Bdg::NamedEndpoint::UartMavlinkForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUdpPort()},
+		Bdg::NamedEndpoint::None),
+#else
+	makeStaticRule(Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+		Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()}, Bdg::NamedEndpoint::None),
 #endif
 #if CONFIG_WIFI_UART_BRIDGE_UDP_MAVLINK_PROCESS
 	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()}, Bdg::NamedEndpoint::Mavlink,
 		Bdg::NamedEndpoint::UdpMavlinkForwarded),
+	makeStaticRule(Bdg::NamedEndpoint::UdpMavlinkForwarded, Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()},
+		Bdg::NamedEndpoint::None),
 #else
 	makeStaticRule(Bdg::UdpPort{MavlinkRouting::getMavlinkUdpPort()},
 		Bdg::UartEndpoint{MavlinkRouting::getMavlinkUartNum()}, Bdg::NamedEndpoint::None),
