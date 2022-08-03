@@ -300,7 +300,7 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
-			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port},
+			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
 				Bdg::NamedEndpoint::MavlinkIpPack, Bdg::NamedEndpoint::MavlinkIpPackForwarded);
 		} else {
 			Bdg::RoutingRules::getInstance().addStatic(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
@@ -337,7 +337,7 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
-			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port},
+			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
 				Bdg::NamedEndpoint::MavlinkIpPack);
 		} else {
 			Bdg::RoutingRules::getInstance().remove(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
