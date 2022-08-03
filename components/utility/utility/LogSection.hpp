@@ -74,6 +74,19 @@ struct GsUtilityLogdMethod {
 #define GS_UTILITY_DEBUG_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 4)
 #define GS_UTILITY_VERBOSE_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 5)
 
+#define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(structname, cls, method, en) \
+template<> \
+struct structname < GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
+	static constexpr bool enabled = en; \
+};
+
+#define GS_UTILITY_LOG_METHOD_STRUCT_CALL(structname, esplogdefine, tag, cls, method, ...) \
+do { \
+	if (structname < GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
+		esplogdefine (tag, #cls "::" #method "() " __VA_ARGS__ ); \
+	} \
+} while (0)
+
 /// \defgroup GS_UTILITY_ Log-related macros
 /// @{
 
@@ -83,38 +96,22 @@ struct GsUtilityLogdMethod {
 /// disabling logging for a particular method not necessary
 ///
 #define GS_UTILITY_LOGV_METHOD_SET_ENABLED(cls, method, en) \
-template<> \
-struct GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
-	static constexpr bool enabled = en && GS_UTILITY_VERBOSE_LEVEL_ENABLED; \
-};
+	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(GsUtilityLogvMethod, cls, method, (en && GS_UTILITY_VERBOSE_LEVEL_ENABLED))
 
 /// \brief Based on `enabled` flag (see `GS_UTILITY_LOGV_METHOD_SET_ENABLED`), either ignores this or invokes
 /// `ESP_LOGV` macro.
 ///
 #define GS_UTILITY_LOGV_METHOD(tag, cls, method, ...) \
-struct cls##method ; \
-do { \
-	if (GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
-		ESP_LOGV(tag, #cls "::" #method "() " __VA_ARGS__ ); \
-	} \
-} while (0)
+	GS_UTILITY_LOG_METHOD_STRUCT_CALL(GsUtilityLogvMethod, ESP_LOGV, tag, cls, method, __VA_ARGS__)
 
 /// \brief Same as `GS_UTILITY_LOGV_METHOD_SET_ENABLED`, but for "debug" log level
 ///
 #define GS_UTILITY_LOGD_METHOD_SET_ENABLED(cls, method, en) \
-template<> \
-struct GsUtilityLogdMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
-	static constexpr bool enabled = en && GS_UTILITY_DEBUG_LEVEL_ENABLED; \
-};
+	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(GsUtilityLogdMethod, cls, method, (en && GS_UTILITY_DEBUG_LEVEL_ENABLED))
 
 /// \brief Same as `GS_UTILITY_LOGV_METHOD`, but for "debug" log level
 #define GS_UTILITY_LOGD_METHOD(tag, cls, method, ...) \
-struct cls##method ; \
-do { \
-	if (GsUtilityLogdMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) >::enabled) { \
-		ESP_LOGD(tag, #cls "::" #method "() " __VA_ARGS__ ); \
-	} \
-} while (0)
+	GS_UTILITY_LOG_METHOD_STRUCT_CALL(GsUtilityLogdMethod, ESP_LOGD, tag, cls, method, __VA_ARGS__)
 
 /// @}
 
