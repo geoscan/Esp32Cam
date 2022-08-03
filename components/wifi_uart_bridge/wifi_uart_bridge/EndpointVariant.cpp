@@ -67,7 +67,7 @@ Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVaria
 
 /// \brief If the logging level is high enough, prints its own content into logv
 ///
-void EndpointVariant::logv(const char *aPrefix)
+void EndpointVariant::logv(const char *aPrefix) const
 {
 	static auto visitor = mapbox::util::make_visitor(
 		[aPrefix](NamedEndpoint a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv,

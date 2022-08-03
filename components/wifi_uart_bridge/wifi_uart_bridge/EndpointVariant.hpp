@@ -71,7 +71,7 @@ struct EndpointVariant : EndpointVariantBase
 	static constexpr auto kPosArraySize = 2;
 	using EndpointVariantBase::EndpointVariantBase;
 	Utility::PosArray<EndpointVariant, kPosArraySize> asAlternative() const;
-	void logv(const char *prefix);
+	void logv(const char *prefix) const;
 };
 
 }  // namespace Bdg
