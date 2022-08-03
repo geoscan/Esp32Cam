@@ -67,6 +67,10 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 ///
 void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 {
+#if CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL >= 5
+	aCtx.endpointVariant.logv("Receiver::notifyAsAsync: ");
+#endif
+
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
