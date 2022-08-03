@@ -20,7 +20,6 @@
 #include <cassert>
 #include "utility/CircularSwap.hpp"
 #include "utility/Buffer.hpp"
-#include "utility/LogSection.hpp"
 #include "uart/uart.hpp"
 #include "sub/Rout.hpp"
 #include "UartDevice.hpp"
