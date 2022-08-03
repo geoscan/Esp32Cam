@@ -11,6 +11,7 @@
 #include <thread>
 #include <chrono>
 #include "utility/thr/Threading.hpp"
+#include <esp_log.h>
 
 namespace Sock {
 
@@ -20,6 +21,7 @@ static void apiInit(Sock::Api &aApi)
 	asio::error_code err;
 
 	for (auto port : kUdpOpen) {
+		ESP_LOGI(Sock::kDebugTag, "Sock::apiInit() opening udp socket on port %d", port);
 		aApi.openUdp(port, err);
 	}
 }
