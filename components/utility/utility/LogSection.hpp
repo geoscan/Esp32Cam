@@ -85,7 +85,7 @@ struct GsUtilityLogdMethod {
 #define GS_UTILITY_LOGV_METHOD_SET_ENABLED(cls, method, en) \
 template<> \
 struct GsUtilityLogvMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
-	static constexpr bool enabled = en; \
+	static constexpr bool enabled = en && GS_UTILITY_VERBOSE_LEVEL_ENABLED; \
 };
 
 /// \brief Based on `enabled` flag (see `GS_UTILITY_LOGV_METHOD_SET_ENABLED`), either ignores this or invokes
@@ -104,7 +104,7 @@ do { \
 #define GS_UTILITY_LOGD_METHOD_SET_ENABLED(cls, method, en) \
 template<> \
 struct GsUtilityLogdMethod< GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) > { \
-	static constexpr bool enabled = en; \
+	static constexpr bool enabled = en && GS_UTILITY_DEBUG_LEVEL_ENABLED; \
 };
 
 /// \brief Same as `GS_UTILITY_LOGV_METHOD`, but for "debug" log level
