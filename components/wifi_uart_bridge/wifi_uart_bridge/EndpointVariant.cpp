@@ -75,6 +75,8 @@ void EndpointVariant::logv(const char *aPrefix) const
 		[aPrefix](const TcpEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s TcpEndpoint"
 			"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(),
 			std::get<1>(a)); },
+		[aPrefix](const UartEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s"
+			"UartEndpoint %d", aPrefix, std::get<0>(a)); },
 		[aPrefix](const UdpEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpEndpoint"
 			"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(),
 			std::get<1>(a)); },
