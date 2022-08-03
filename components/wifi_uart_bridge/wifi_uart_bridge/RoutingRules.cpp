@@ -11,8 +11,12 @@
 
 #include "RoutingRules.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "utility/LogSection.hpp"
 #include <esp_log.h>
 #include <algorithm>
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::RoutingRules, reduce, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::RoutingRules, find, 0)
 
 using namespace Bdg::RoutingRulesImpl;
 static constexpr unsigned kRulesReserved = 16;
@@ -75,7 +79,8 @@ void RoutingRules::remove(const EndpointVariant &aOrigin, const EndpointVariant 
 	if (std::end(reductionRules) != it) {
 		reductionRules.erase(it);
 	} else {
-		ESP_LOGW(Bdg::kDebugTag, "RoutingRules::remove() Could not find a rule");
+		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, remove,
+			"RoutingRules::remove() Could not find a rule");
 	}
 }
 
@@ -89,10 +94,13 @@ bool RoutingRules::reduce(EndpointVariant &aoSrc, const EndpointVariant &aCandid
 	auto it = find(aoSrc, aCandidate);
 	bool ret = (std::end(reductionRules) != it);
 
+	GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, reduce, "Rules count %d", reductionRules.size());
+
 	if (ret) {  // The rule has been found, perform reduction
 		aoSrc = it->reductionVariant;
 	} else {
-		ESP_LOGV(Bdg::kDebugTag, "RoutingRules::reduce Could not find a suitable reduction");
+		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, reduce,
+			"RoutingRules::reduce Could not find a suitable reduction");
 	}
 
 	return ret;
@@ -108,6 +116,8 @@ typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::fi
 	if (it != end) {
 		if (it->ruleTrigger != ruleTrigger) {
 			it = end;
+		} else {
+			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, find, "found a direct reduction");
 		}
 	}
 
@@ -116,6 +126,8 @@ typename std::vector<RoutingRulesImpl::ReductionRule>::iterator RoutingRules::fi
 			it = find(alternative, aIntermediary);
 
 			if (std::end(reductionRules) != it) {
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, find,
+					"found an alternative reduction");
 				break;
 			}
 		}
