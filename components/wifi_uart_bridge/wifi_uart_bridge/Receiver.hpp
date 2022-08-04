@@ -63,10 +63,16 @@ public:
 	Route(const EndpointVariant &);
 	Route(const Route &aOther) = default;
 	Route(Route &&aOther) = default;
+	~Route();
 	void lock();
 	bool tryLock();
 	void unlock();
 	bool checkDone();
+	inline std::size_t getTurn() const
+	{
+		return turn;
+	}
+	static std::size_t getCurrentTurnGlobal();
 
 private:
 	static RouteDetails &getRouteDetails();

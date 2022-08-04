@@ -7,7 +7,7 @@
 
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
-#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL)
+#define LOG_LOCAL_LEVEL (CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL)
 #include <esp_log.h>
 
 #include "Receiver.hpp"
@@ -22,9 +22,18 @@
 
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAs, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsAsync, 0)
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::Receiver, notifyAsImpl, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, tryLock, 0)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::ReceiverImpl::Route, unlock, 0)
+
+enum class LogAspect {
+	RoutingLock,
+	Lifecycle,
+};
+
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Bdg::ReceiverImpl::Route, LogAspect::RoutingLock, 1)
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Bdg::ReceiverImpl::Route, LogAspect::Lifecycle, 1)
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Bdg::Receiver, LogAspect::RoutingLock, 1)
 
 namespace Bdg {
 
@@ -52,11 +61,18 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 					route.unlock();
 					GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Unlocked");
 					ret = false;
+				} else {
+					GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Receiver, LogAspect::RoutingLock,
+						"Waiting for the route to get completed turn %d", route.getTurn());
 				}
 			} else if (route.tryLock()) {
 				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Acquired the lock");
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
+			} else {
+				GS_UTILITY_LOG_EVERY_N_TURNS(100, GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag,
+					Receiver, LogAspect::RoutingLock, "Waiting for turn %d current turn %d", route.getTurn(),
+					ReceiverImpl::Route::getCurrentTurnGlobal()); );
 			}
 
 			return ret;
@@ -191,6 +207,12 @@ void Receiver::onReceive(OnReceiveCtx)
 
 ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1)}
 {
+	GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::Lifecycle, "Constructed Route turn #%d", turn);
+}
+
+ReceiverImpl::Route::~Route()
+{
+	GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::Lifecycle, "Destructed Route turn #%d", turn);
 }
 
 void ReceiverImpl::Route::lock()
@@ -206,7 +228,7 @@ bool ReceiverImpl::Route::tryLock()
 
 	if (ret) {
 		Receiver::getReceiverRegistry().mutex.lock();
-		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Route, tryLock, "locked");
+		GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::RoutingLock, "Locked turn %d", turn);
 	}
 
 	return ret;
@@ -219,13 +241,21 @@ void ReceiverImpl::Route::unlock()
 
 	if (turnExpected == turn) {
 		Receiver::getReceiverRegistry().mutex.unlock();
-		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Route, unlock, "unlocked");
+		GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::RoutingLock, "Unlocked turn %d next turn %d",
+			turn, turn + 1);
+	} else {
+		assert(false);  // The route must be locked first
 	}
 }
 
 bool ReceiverImpl::Route::checkDone()
 {
 	return true;
+}
+
+std::size_t ReceiverImpl::Route::getCurrentTurnGlobal()
+{
+	return getRouteDetails().turn.load();
 }
 
 ReceiverImpl::Route::RouteDetails &ReceiverImpl::Route::getRouteDetails()
