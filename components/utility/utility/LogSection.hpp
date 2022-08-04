@@ -122,10 +122,10 @@ struct structname < marker > { \
 	static constexpr bool enabled = en; \
 };
 
-#define GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(structname, esplogdefine, tag, markertype, ...) \
+#define GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(structname, esplogdefine, markertype, ...) \
 do { \
 	if (structname < markertype >::enabled) { \
-		esplogdefine (tag, __VA_ARGS__ ); \
+		esplogdefine (__VA_ARGS__ ); \
 	} \
 } while (0)
 
@@ -137,8 +137,8 @@ do { \
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_CALL(level, tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
-	#cls "::" #method "() " __VA_ARGS__)
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
+	tag, #cls "::" #method "() " __VA_ARGS__)
 
 #define GS_UTILITY_LOG_CLASS_ASPECT_DEFINE(level, cls, aspectid, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
@@ -146,8 +146,8 @@ do { \
 
 #define GS_UTILITY_LOG_CLASS_ASPECT_CALL(level, tag, cls, aspect, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspect), \
-	#cls "(" #aspect ") " __VA_ARGS__)
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspect), \
+	tag, #cls "(" #aspect ") " __VA_ARGS__)
 
 // User-level defines accessing struct generators
 
