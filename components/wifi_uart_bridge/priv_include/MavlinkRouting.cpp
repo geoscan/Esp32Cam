@@ -19,7 +19,7 @@
 #include <sdkconfig.h>
 #include <utility>
 
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::MavlinkRouting, init, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::MavlinkRouting, init, 0)
 
 namespace Bdg {
 
@@ -87,9 +87,12 @@ void MavlinkRouting::init()
 			aCtx.endpointVariant.match(
 				[this](const Bdg::UdpEndpoint &aEndpoint)
 				{
-					GS_UTILITY_LOG_SECTIONV(Bdg::kDebugTag, "Mavlink UDP hook");
+					const auto endpoint = std::get<0>(aEndpoint);
+					GS_UTILITY_LOGV_METHOD_SECTION(Bdg::kDebugTag, MavlinkRouting, init,
+						"called UDP hook %s %d local port %d", endpoint.address().to_string().c_str(),
+						endpoint.port(), std::get<1>(aEndpoint));
+
 					if (std::get<1>(aEndpoint) == getMavlinkUdpPort()) {
-						const auto endpoint = std::get<0>(aEndpoint);
 						auto it = std::find(clientsUdp.begin(), clientsUdp.end(), endpoint);
 
 						if (clientsUdp.end() == it) {
@@ -111,9 +114,10 @@ void MavlinkRouting::init()
 			if (!Sock::Api::checkInstance()) {
 				return;
 			}
-			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
-				"MavlinkRouting::receivers UDP notifying udp clients from port %d", getMavlinkUdpPort());
 			for (auto &endpoint : clientsUdp) {
+				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init,
+					"MavlinkRouting::receivers UDP notifying udp client %s:%d from port %d",
+						endpoint.address().to_string().c_str(), endpoint.port(), getMavlinkUdpPort());
 				asio::error_code err;
 				auto port = getMavlinkUdpPort();
 				Sock::Api::getInstance().sendTo(endpoint, port, Utility::makeAsioCb(aCtx.buffer), err);
