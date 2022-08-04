@@ -220,7 +220,7 @@ template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
-	FreertosTask::CorePin::CoreNone>;
+	FreertosTask::CorePin::Core1>;
 
 }  // namespace Wq
 }  // namespace Thr
