@@ -117,14 +117,21 @@ Receiver::Receiver(const EndpointVariant &aIdentity) : Receiver{aIdentity, ""}
 
 Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpointVariant{aIdentity}, name{aName}
 {
-	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
 	Receiver::getReceiverRegistry().instances.add(*this);
+	Utility::Thr::Wq::MediumPriority::getInstance().push(
+		[this]()
+		{
+			Receiver::getReceiverRegistry().instances.add(*this);
+		});
 }
 
 Receiver::~Receiver()
 {
-	std::lock_guard<std::mutex> lock{Receiver::getReceiverRegistry().mutex};
-	Receiver::getReceiverRegistry().instances.remove(*this);
+	Utility::Thr::Wq::MediumPriority::getInstance().pushWait(
+		[this]()
+		{
+			Receiver::getReceiverRegistry().instances.remove(*this);
+		});
 }
 
 /// \brief Determine which receivers are eligible for being notified upon an incoming message based on `RoutingRules`.
@@ -181,7 +188,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 Receiver::ReceiverRegistry &Receiver::getReceiverRegistry()
 {
 	static constexpr std::size_t kReceiverStorageCapacity = 16;
-	static ReceiverRegistry receiverRegistry{{kReceiverStorageCapacity}, {}};
+	static ReceiverRegistry receiverRegistry{{kReceiverStorageCapacity}};
 
 	return receiverRegistry;
 }
@@ -214,17 +221,15 @@ ReceiverImpl::Route::~Route()
 
 void ReceiverImpl::Route::lock()
 {
-	Receiver::getReceiverRegistry().mutex.lock();
 }
 
 bool ReceiverImpl::Route::tryLock()
 {
-	return Receiver::getReceiverRegistry().mutex.try_lock();
+	return true;
 }
 
 void ReceiverImpl::Route::unlock()
 {
-	Receiver::getReceiverRegistry().mutex.unlock();
 }
 
 bool ReceiverImpl::Route::checkDone()
@@ -234,7 +239,7 @@ bool ReceiverImpl::Route::checkDone()
 
 ReceiverImpl::Route::RouteDetails &ReceiverImpl::Route::getRouteDetails()
 {
-	static RouteDetails routeDetails {{}};
+	static RouteDetails routeDetails {};
 
 	return routeDetails;
 }

@@ -14,7 +14,6 @@
 #include <Rr/Util/Module.hpp>
 #include <list>
 #include <functional>
-#include <mutex>
 
 namespace Bdg {
 
@@ -53,7 +52,6 @@ namespace ReceiverImpl {
 class Route final {
 private:
 	struct RouteDetails {
-		std::mutex mutex;
 	};
 public:
 	Route(const EndpointVariant &);
@@ -141,7 +139,6 @@ private:
 	///
 	struct ReceiverRegistry {
 		Utility::Comm::OrderedInstanceRegistry<Receiver> instances;
-		std::mutex mutex;
 	};
 
 public:
