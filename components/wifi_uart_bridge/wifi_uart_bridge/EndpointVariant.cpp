@@ -14,7 +14,7 @@
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include <esp_log.h>
 
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::EndpointVariant, logv, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Bdg::EndpointVariant, logv, 0)
 
 namespace Bdg {
 
@@ -34,6 +34,28 @@ static const char *namedEndpointAsStr(NamedEndpoint aEndpoint)
 {
 	return kNamedEndpoints[static_cast<std::size_t>(aEndpoint)];
 }
+
+#define ENDPOINT_VARIANT_LOG_PREFIXED(logfn,...) \
+match( \
+	[aPrefix](NamedEndpoint a) {logfn ( __VA_ARGS__, \
+		"%s NamedEndpoint::%s", aPrefix, namedEndpointAsStr(a)); }, \
+	[aPrefix](const TcpEndpoint &a) {logfn ( __VA_ARGS__, "%s TcpEndpoint" \
+		"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(), \
+		std::get<1>(a)); }, \
+	[aPrefix](const UartEndpoint &a) {logfn ( __VA_ARGS__, "%s" \
+		"UartEndpoint %d", aPrefix, std::get<0>(a)); }, \
+	[aPrefix](const UdpEndpoint &a) {logfn ( __VA_ARGS__, "%s UdpEndpoint" \
+		"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(), \
+		std::get<1>(a)); }, \
+	[aPrefix](const asio::ip::tcp::endpoint &a) {logfn ( __VA_ARGS__, \
+		"%s asio::ip::tcp::endpoint %s port %d", aPrefix, a.address().to_string().c_str(), a.port()); }, \
+	[aPrefix](const asio::ip::udp::endpoint &a) {logfn ( __VA_ARGS__, \
+		"%s asio::ip::udp::endpoint %s port %d", aPrefix, a.address().to_string().c_str(), a.port()); }, \
+	[aPrefix](const UdpPort &a) {logfn ( __VA_ARGS__, "%s UdpPort %d",  aPrefix, std::get<0>(a)); }, \
+	[aPrefix](const UdpHook &a) {logfn ( __VA_ARGS__, "%s UdpHook %d", aPrefix, std::get<0>(a)); }, \
+	[aPrefix](const TcpPort &a) {logfn ( __VA_ARGS__, "%s TcpPort %d", aPrefix, std::get<0>(a)); }, \
+	[aPrefix](...){logfn (__VA_ARGS__, "%s UNHANDLED VARIANT CONTENT", \
+		aPrefix); })
 
 /// \brief Enables additional interpretation of an identity
 ///
@@ -63,36 +85,18 @@ Utility::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVaria
 	return ret;
 }
 
+void EndpointVariant::logi(const char *aPrefix) const
+{
+	ENDPOINT_VARIANT_LOG_PREFIXED(ESP_LOGI, Bdg::kDebugTag);
+}
+
 #if CONFIG_WIFI_UART_BRIDGE_DEBUG_LEVEL >= 5
 
 /// \brief If the logging level is high enough, prints its own content into logv
 ///
 void EndpointVariant::logv(const char *aPrefix) const
 {
-	match(
-		[aPrefix](NamedEndpoint a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv,
-			"%s NamedEndpoint::%s", aPrefix, namedEndpointAsStr(a)); },
-		[aPrefix](const TcpEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s TcpEndpoint"
-			"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(),
-			std::get<1>(a)); },
-		[aPrefix](const UartEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s"
-			"UartEndpoint %d", aPrefix, std::get<0>(a)); },
-		[aPrefix](const UdpEndpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpEndpoint"
-			"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(),
-			std::get<1>(a)); },
-		[aPrefix](const asio::ip::tcp::endpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv,
-			"%s asio::ip::tcp::endpoint %s port %d", aPrefix, a.address().to_string().c_str(), a.port()); },
-		[aPrefix](const asio::ip::udp::endpoint &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv,
-			"%s asio::ip::udp::endpoint %s port %d", aPrefix, a.address().to_string().c_str(), a.port()); },
-		[aPrefix](const UdpPort &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpPort %d",
-			aPrefix, std::get<0>(a)); },
-		[aPrefix](const UdpHook &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s UdpHook %d",
-			aPrefix, std::get<0>(a)); },
-		[aPrefix](const TcpPort &a) {GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, EndpointVariant, logv, "%s TcpPort %d",
-			aPrefix, std::get<0>(a)); },
-		[aPrefix](...){GS_UTILITY_LOGV_METHOD(kDebugTag, EndpointVariant, logv, "%s UNHANDLED VARIANT CONTENT",
-			aPrefix); }
-	);
+	ENDPOINT_VARIANT_LOG_PREFIXED(GS_UTILITY_LOGV_METHOD, Bdg::kDebugTag, EndpointVariant, logv);
 }
 
 #else
