@@ -237,9 +237,8 @@ bool ReceiverImpl::Route::tryLock()
 void ReceiverImpl::Route::unlock()
 {
 	auto turnExpected = turn;
-	Route::getRouteDetails().turn.compare_exchange_weak(turnExpected, turn + 1);
 
-	if (turnExpected == turn) {
+	if (Route::getRouteDetails().turn.compare_exchange_weak(turnExpected, turn + 1)) {
 		Receiver::getReceiverRegistry().mutex.unlock();
 		GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::RoutingLock, "Unlocked turn %d next turn %d",
 			turn, turn + 1);
