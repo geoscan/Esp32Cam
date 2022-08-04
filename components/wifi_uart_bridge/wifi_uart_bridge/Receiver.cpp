@@ -117,7 +117,6 @@ Receiver::Receiver(const EndpointVariant &aIdentity) : Receiver{aIdentity, ""}
 
 Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpointVariant{aIdentity}, name{aName}
 {
-	Receiver::getReceiverRegistry().instances.add(*this);
 	Utility::Thr::Wq::MediumPriority::getInstance().push(
 		[this]()
 		{
