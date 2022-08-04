@@ -51,9 +51,10 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 					Hlpr::MavlinkCommandLong().initTargetFromRequest(aMessage)
 						.initRequestMessage(MAVLINK_MSG_ID_AUTOPILOT_VERSION).packInto(aMessage);
 					aOnResponse(aMessage);
+					ret = Microservice::Ret::Response;
+				} else {
+					ret = Microservice::Ret::Ignored;
 				}
-
-				ret = Microservice::Ret::Response;
 
 				break;
 			}
@@ -71,7 +72,7 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 				version.swMajor = (mavlinkAutopilotVersion.flight_sw_version & 0xFF00) >> 8;
 				version.swMinor = mavlinkAutopilotVersion.flight_sw_version & 0xFF;
 
-				ret = Microservice::Ret::NoResponse;
+				ret = Microservice::Ret::Ignored;
 
 				break;
 			}
