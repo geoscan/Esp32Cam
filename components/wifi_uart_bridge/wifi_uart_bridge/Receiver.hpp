@@ -14,7 +14,7 @@
 #include <Rr/Util/Module.hpp>
 #include <list>
 #include <functional>
-#include <atomic>
+#include <mutex>
 
 namespace Bdg {
 
@@ -52,13 +52,9 @@ namespace ReceiverImpl {
 ///
 class Route final {
 private:
-	/// \brief Stores shared (static) info on the state of the errands pertaining to route locking
-	///
 	struct RouteDetails {
-		std::atomic_size_t turnBoundary;  ///< Instance creation counter. For assigning a newly created entities w/ a turn number
-		std::atomic_size_t turn;  ///< \brief Current turn. \details Take a look at the locking mechanism for an insight into the internals
+		std::mutex mutex;
 	};
-
 public:
 	Route(const EndpointVariant &);
 	Route(const Route &aOther) = default;
@@ -68,17 +64,9 @@ public:
 	bool tryLock();
 	void unlock();
 	bool checkDone();
-	inline std::size_t getTurn() const
-	{
-		return turn;
-	}
-	static std::size_t getCurrentTurnGlobal();
 
 private:
 	static RouteDetails &getRouteDetails();
-
-private:
-	std::size_t turn;
 };
 
 }  // namespace ReceiverImpl

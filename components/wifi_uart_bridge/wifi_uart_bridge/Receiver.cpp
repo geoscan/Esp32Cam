@@ -63,16 +63,15 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 					ret = false;
 				} else {
 					GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Receiver, LogAspect::RoutingLock,
-						"Waiting for the route to get completed turn %d", route.getTurn());
+						"Waiting for the route to get completed");
 				}
 			} else if (route.tryLock()) {
 				GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "Acquired the lock");
 				notifyAsImpl(route, aCtx);
 				ongoing = true;
 			} else {
-				GS_UTILITY_LOG_EVERY_N_TURNS(100, GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag,
-					Receiver, LogAspect::RoutingLock, "Waiting for turn %d current turn %d", route.getTurn(),
-					ReceiverImpl::Route::getCurrentTurnGlobal()); );
+				GS_UTILITY_LOG_EVERY_N_TURNS(5, GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag,
+					Receiver, LogAspect::RoutingLock, "Waiting for lock"); )
 			}
 
 			return ret;
@@ -205,46 +204,27 @@ void Receiver::onReceive(OnReceiveCtx)
 {
 }
 
-ReceiverImpl::Route::Route(const EndpointVariant &) : turn{Route::getRouteDetails().turnBoundary.fetch_add(1)}
+ReceiverImpl::Route::Route(const EndpointVariant &)
 {
-	GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::Lifecycle, "Constructed Route turn #%d", turn);
 }
 
 ReceiverImpl::Route::~Route()
 {
-	GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::Lifecycle, "Destructed Route turn #%d", turn);
 }
 
 void ReceiverImpl::Route::lock()
 {
-	while (!tryLock()) {
-		Utility::Tim::taskDelay(kNotifyWait);
-	}
+	Receiver::getReceiverRegistry().mutex.lock();
 }
 
 bool ReceiverImpl::Route::tryLock()
 {
-	bool ret = Route::getRouteDetails().turn.load() == turn;
-
-	if (ret) {
-		Receiver::getReceiverRegistry().mutex.lock();
-		GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::RoutingLock, "Locked turn %d", turn);
-	}
-
-	return ret;
+	return Receiver::getReceiverRegistry().mutex.try_lock();
 }
 
 void ReceiverImpl::Route::unlock()
 {
-	auto turnExpected = turn;
-
-	if (Route::getRouteDetails().turn.compare_exchange_weak(turnExpected, turn + 1)) {
-		Receiver::getReceiverRegistry().mutex.unlock();
-		GS_UTILITY_LOGV_CLASS_ASPECT(Bdg::kDebugTag, Route, LogAspect::RoutingLock, "Unlocked turn %d next turn %d",
-			turn, turn + 1);
-	} else {
-		assert(false);  // The route must be locked first
-	}
+	Receiver::getReceiverRegistry().mutex.unlock();
 }
 
 bool ReceiverImpl::Route::checkDone()
@@ -252,14 +232,9 @@ bool ReceiverImpl::Route::checkDone()
 	return true;
 }
 
-std::size_t ReceiverImpl::Route::getCurrentTurnGlobal()
-{
-	return getRouteDetails().turn.load();
-}
-
 ReceiverImpl::Route::RouteDetails &ReceiverImpl::Route::getRouteDetails()
 {
-	static RouteDetails routeDetails {{0}, {0}};
+	static RouteDetails routeDetails {{}};
 
 	return routeDetails;
 }
