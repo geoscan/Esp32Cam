@@ -186,6 +186,14 @@ do { \
 #define GS_UTILITY_LOGD_CLASS_ASPECT(tag, cls, aspect, ...) \
 	GS_UTILITY_LOG_CLASS_ASPECT_CALL(D, tag, cls, aspect, __VA_ARGS__)
 
+#define GS_UTILITY_LOG_EVERY_N_TURNS(nturns, ...) \
+{ \
+	static unsigned turn = 0; \
+	if ((turn++) % nturns == 0) { \
+		__VA_ARGS__ ; \
+	} \
+}
+
 /// @}
 
 #endif // UTILITY_UTILITY_LOGSECTION_HPP_
