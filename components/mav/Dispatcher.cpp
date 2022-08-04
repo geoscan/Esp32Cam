@@ -104,7 +104,7 @@ void Mav::Dispatcher::onReceive(Bdg::OnReceiveCtx aCtx)
 	int nprocessed = 0;
 	switch (process(aCtx.buffer, nprocessed)) {
 		case Microservice::Ret::Ignored:
-			aCtx.forwardCb({aCtx.buffer, aCtx.respondCb});
+			aCtx.forwardCb({aCtx.buffer.asSlice(0, nprocessed), aCtx.respondCb});
 
 			break;
 
