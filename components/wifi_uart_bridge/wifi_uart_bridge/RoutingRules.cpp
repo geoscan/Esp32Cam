@@ -58,8 +58,14 @@ bool RoutingRules::addStatic(const EndpointVariant &aOrigin, const EndpointVaria
 		if (reductionRules.size() == reductionRules.capacity()) {
 			ESP_LOGW(Bdg::kDebugTag, "RoutingRules::addStatic() storage capacity will be extended");
 		}
+
 		reductionRules.insert(std::lower_bound(std::begin(reductionRules), std::end(reductionRules), reductionRule),
 			reductionRule);
+		ESP_LOGI(Bdg::kDebugTag, "RoutingRules::addStatic() Added new rule:");
+		aOrigin.logi("RoutingRules::addStatic() Origin:    ");
+		aIntermediary.logi("RoutingRules::addStatic() Receiver:  ");
+		aReduce.logi("RoutingRules::addStatic() Reduction: ");
+
 	} else {
 		ESP_LOGW(Bdg::kDebugTag, "RoutingRules::addStatic() attempt to add a duplicate rule");
 	}
@@ -78,6 +84,9 @@ void RoutingRules::remove(const EndpointVariant &aOrigin, const EndpointVariant 
 
 	if (std::end(reductionRules) != it) {
 		reductionRules.erase(it);
+		ESP_LOGI(Bdg::kDebugTag, "RoutingRules::remove() REMOVED a rule:");
+		aOrigin.logi("RoutingRules::remove() Origin:    ");
+		aIntermediary.logi("RoutingRules::remove() Receiver:  ");
 	} else {
 		GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, RoutingRules, remove,
 			"RoutingRules::remove() Could not find a rule");
