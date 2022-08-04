@@ -42,7 +42,7 @@ match( \
 	[aPrefix](const TcpEndpoint &a) {logfn ( __VA_ARGS__, "%s TcpEndpoint" \
 		"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(), \
 		std::get<1>(a)); }, \
-	[aPrefix](const UartEndpoint &a) {logfn ( __VA_ARGS__, "%s" \
+	[aPrefix](const UartEndpoint &a) {logfn ( __VA_ARGS__, "%s " \
 		"UartEndpoint %d", aPrefix, std::get<0>(a)); }, \
 	[aPrefix](const UdpEndpoint &a) {logfn ( __VA_ARGS__, "%s UdpEndpoint" \
 		"remote %s:%d local port %d", aPrefix, std::get<0>(a).address().to_string().c_str(), std::get<0>(a).port(), \
