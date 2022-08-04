@@ -162,6 +162,13 @@ do { \
 /// @{
 ///
 
+#define GS_UTILITY_LOGV_METHOD_SECTION(tag, cls, method, commentstr) \
+	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(\
+	GsUtilityLogMethodV, \
+	GS_UTILITY_LOG_SECTIONV, \
+	GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
+	tag, #cls "::" #method "() " commentstr)
+
 #define GS_UTILITY_LOGV_METHOD_SET_ENABLED(cls, method, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE(V, cls, method, (en && GS_UTILITY_VERBOSE_LEVEL_ENABLED))
 
