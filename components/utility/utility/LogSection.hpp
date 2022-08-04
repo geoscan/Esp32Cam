@@ -90,9 +90,6 @@ struct GsUtilityLogFunction {
 template <class T, class R, class ...Ts>
 constexpr auto gsUtilityRevealType(R (*)(Ts...)) -> GsUtilityLogFunction<R, T, Ts...>;
 
-#define GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) \
-	typename decltype(gsUtilityRevealType< cls >(&cls::method))::Impl<&cls::method>
-
 template <class T>
 struct GsUtilityLogMethodV {
 	static constexpr bool enabled = false;
@@ -105,10 +102,19 @@ struct GsUtilityLogMethodD {
 	static constexpr bool enabled = false;
 };
 
+template <class T, unsigned A>
+struct GsUtilityLogClassAspect;
+
 #define GS_UTILITY_DEBUG_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 4)
 #define GS_UTILITY_VERBOSE_LEVEL_ENABLED (LOG_LOCAL_LEVEL >= 5)
 
 // Definitions generating compile-time boolean logging flags for particular method (GsUtilityLogMethod(V|D))
+
+#define GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method) \
+	typename decltype(gsUtilityRevealType< cls >(&cls::method))::Impl<&cls::method>
+
+#define GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspectid) \
+	GsUtilityLogClassAspect < cls, static_cast<unsigned>( aspectid ) >
 
 #define GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(structname, marker, en) \
 template<> \
@@ -134,6 +140,15 @@ do { \
 	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
 	#cls "::" #method "() " __VA_ARGS__)
 
+#define GS_UTILITY_LOG_CLASS_ASPECT_DEFINE(level, cls, aspectid, en) \
+	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
+	GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspectid), en)
+
+#define GS_UTILITY_LOG_CLASS_ASPECT_CALL(level, tag, cls, aspect, ...) \
+	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), tag, GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspect), \
+	#cls "(" #aspect ") " __VA_ARGS__)
+
 // User-level defines accessing struct generators
 
 /// \defgroup GS_UTILITY_LOG_METHOD \brief Method-level logging macros akin to topics
@@ -158,6 +173,18 @@ do { \
 
 #define GS_UTILITY_LOGD_METHOD(tag, cls, method, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL(D, tag, cls, method, __VA_ARGS__)
+
+#define GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(cls, aspect, en) \
+	GS_UTILITY_LOG_CLASS_ASPECT_DEFINE(V, cls, aspect, en)
+
+#define GS_UTILITY_LOGV_CLASS_ASPECT(tag, cls, aspect, ...) \
+	GS_UTILITY_LOG_CLASS_ASPECT_CALL(V, tag, cls, aspect, __VA_ARGS__)
+
+#define GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(cls, aspect, en) \
+	GS_UTILITY_LOG_CLASS_ASPECT_DEFINE(D, cls, aspect, en)
+
+#define GS_UTILITY_LOGD_CLASS_ASPECT(tag, cls, aspect, ...) \
+	GS_UTILITY_LOG_CLASS_ASPECT_CALL(D, tag, cls, aspect, __VA_ARGS__)
 
 /// @}
 
