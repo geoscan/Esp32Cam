@@ -32,10 +32,10 @@ struct cl {\
 #define GS_UTILITY_LOG_DEF_APPEND(x, y) x ## y
 #define GS_UTILITY_LOG_SECTION_IMPL(tag, context, suff, command) GS_UTILITY_LOG_SECTION_SUFF_LEVEL(tag, context, GS_UTILITY_LOG_DEF_APPEND(Log,suff), GS_UTILITY_LOG_DEF_APPEND(log,suff), command)
 
-// Debug section - "verbose" level
+// Debug section - "verbose" level DEPRECATED use GS_UTILITY_LOGV_METHOD_SECTION instead
 #define GS_UTILITY_LOG_SECTIONV(tag, context) GS_UTILITY_LOG_SECTION_IMPL(tag,context,__LINE__, ESP_LOGV)
 
-// Debug section - "debug" level
+// Debug section - "debug" level DEPRECATED use GS_UTILITY_LOGD_METHOD_SECTION instead
 #define GS_UTILITY_LOG_SECTIOND(tag, context) GS_UTILITY_LOG_SECTION_IMPL(tag,context,__LINE__, ESP_LOGD)
 
 // Method-level logging. Enables one to enable or disable logging for a particular method. Useful for debugging purposes
@@ -166,6 +166,13 @@ do { \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(\
 	GsUtilityLogMethodV, \
 	GS_UTILITY_LOG_SECTIONV, \
+	GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
+	tag, #cls "::" #method "() " commentstr)
+
+#define GS_UTILITY_LOGD_METHOD_SECTION(tag, cls, method, commentstr) \
+	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(\
+	GsUtilityLogMethodD, \
+	GS_UTILITY_LOG_SECTIOND, \
 	GS_UTILITY_LOG_METHOD_MARKER_TYPE(cls, method), \
 	tag, #cls "::" #method "() " commentstr)
 
