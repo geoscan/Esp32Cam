@@ -9,4 +9,5 @@ idf_component_register(
 		asio
 		sub
 		utility
+		wifi_uart_bridge
 )

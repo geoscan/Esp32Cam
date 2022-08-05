@@ -13,8 +13,12 @@
 #include "UartEndpoint.hpp"
 #include "UdpEndpoint.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "wifi_uart_bridge/RoutingRules.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
+#include "MavlinkRouting.hpp"
 #include "socket/Api.hpp"
 #include "Routing.hpp"
+#include <vector>
 
 void wifiUartBridgeStart(asio::io_context &context)
 {
@@ -32,8 +36,14 @@ namespace Bdg {
 void init()
 {
 	esp_log_level_set(Bdg::kDebugTag, LOG_LOCAL_LEVEL);
+	ESP_LOGD(Bdg::kDebugTag, "Debug log test");
+	ESP_LOGV(Bdg::kDebugTag, "Verbose log test");
 	static Routing routing;
+	static Bdg::RoutingRules routingRules{};
+	static Bdg::MavlinkRouting mavlinkRouting{};
 	(void)routing;
+	(void)routingRules;
+	(void)mavlinkRouting;
 }
 
 }  // namespace Bdg

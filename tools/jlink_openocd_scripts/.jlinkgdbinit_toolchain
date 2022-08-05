@@ -1,0 +1,19 @@
+
+target remote :3333
+
+set remote hardware-breakpoint-limit 2
+
+file /home/dmurashov/Documents/ESP32/esp32-firmware/build/esp32.elf
+
+monitor program_esp32 /home/dmurashov/Documents/ESP32/esp32-firmware/build/bootloader/bootloader.bin 0x1000 verify reset
+monitor reset halt
+
+monitor program_esp32 /home/dmurashov/Documents/ESP32/esp32-firmware/build/partition_table/partition-table.bin 0x8000 verify reset
+monitor reset halt
+
+monitor program_esp32 /home/dmurashov/Documents/ESP32/esp32-firmware/build/esp32.bin 0x10000 verify reset
+monitor reset halt
+
+thb app_main
+monitor reset halt
+c

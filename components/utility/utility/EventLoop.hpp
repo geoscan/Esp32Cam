@@ -8,7 +8,7 @@
 #ifndef UTILITY_UTILITY_EVENTLOOP_HPP_
 #define UTILITY_UTILITY_EVENTLOOP_HPP_
 
-#include "utility/IntsanceRegistry.hpp"
+#include "utility/comm/InstanceRegistry.hpp"
 #include <esp_event.h>
 #include <string>
 #include <list>
@@ -47,7 +47,7 @@ private:
 	std::string name;
 	esp_event_loop_handle_t espEventLoopHandle;
 
-	static struct InstanceRegistry : Utility::InstanceRegistry<Loop, std::list> {
+	static struct InstanceRegistry : Utility::Comm::InstanceRegistry<Loop, std::list> {
 		Loop *find(const char *);
 	} instanceRegistry;
 };

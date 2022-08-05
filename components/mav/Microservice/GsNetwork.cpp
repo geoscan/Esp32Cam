@@ -16,20 +16,26 @@
 #include "Globals.hpp"
 #include "sub/Subscription.hpp"
 #include "socket/Api.hpp"
+#include "wifi_uart_bridge/RoutingRules.hpp"
+#include "utility/Algorithm.hpp"
+#include "utility/LogSection.hpp"
 #include <algorithm>
-#include <utility/Algorithm.hpp>
 #include <memory>
 #include "mav/mav.hpp"
+
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Mic::GsNetwork, process, 1)
 
 using namespace Mav;
 using namespace Mav::Mic;
 using namespace asio::ip;
 
 GsNetwork::GsNetwork() :
+	Bdg::Receiver{Bdg::NamedEndpoint::MavlinkIpPack, "MavlinkGsNetwork"},
 	key{
 		{&GsNetwork::packForward<asio::ip::tcp>, this},
 		{&GsNetwork::packForward<asio::ip::udp>, this},
 		{&GsNetwork::packTcpEvent, this},
+		{&GsNetwork::onTcpEvent, this}
 	}
 {
 }
@@ -44,7 +50,7 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnRespo
 	Ret ret;
 	mavlink_msg_mav_gs_network_decode(&aMavlinkMessage, &mavlinkMavGsNetwork);
 
-	ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: mavlink_mav_gs_network_t: host_port %d remote_port: %d "
+	GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "mavlink_mav_gs_network_t: host_port %d remote_port: %d "
 		"command %d ack %d transport %d payload_len %d, payload: %*.*s", mavlinkMavGsNetwork.host_port,
 		mavlinkMavGsNetwork.remote_port, mavlinkMavGsNetwork.command, mavlinkMavGsNetwork.ack,
 		mavlinkMavGsNetwork.transport, mavlinkMavGsNetwork.payload_len, mavlinkMavGsNetwork.payload_len,
@@ -53,54 +59,54 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnRespo
 	switch (mavlinkMavGsNetwork.ack) {
 		case MAV_GS_NETWORK_ACK_NONE:
 			ret = Ret::Response;
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: response required");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "response required");
 
 			break;
 
 		case MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE:
 			ret = Ret::NoResponse;
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: No response required");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "No response required");
 
 			break;
 
 		default:  // Non-request message
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process: Non-request message");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "Non-request message");
 			return Ret::NoResponse;
 	}
 
 	switch (mavlinkMavGsNetwork.command) {  // Command message
 		case MAV_GS_NETWORK_COMMAND_CONNECT:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process CONNECT");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "CONNECT");
 			processConnect(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_DISCONNECT:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process DISCONNECT");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "DISCONNECT");
 			processDisconnect(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_SEND:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process SEND");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "SEND");
 			processSend(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_OPEN:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process OPEN");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "OPEN");
 			processOpen(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_CLOSE:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process CLOSE");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "CLOSE");
 			processClose(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
 
 		case MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED:
-			ESP_LOGD(Mav::kDebugTag, "GsNetwork:process COMMAND_PROCESS_RECEIVED");
+			GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, GsNetwork, process, "COMMAND_PROCESS_RECEIVED");
 			processReceived(aMavlinkMessage, mavlinkMavGsNetwork);
 
 			break;
@@ -292,6 +298,18 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 	if (asio::error::already_open == errorCode) {
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
 	}
+
+	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
+		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+			MAV_GS_NETWORK_TRANSPORT_TCP6))
+		{
+			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
+				Bdg::NamedEndpoint::MavlinkIpPack, Bdg::NamedEndpoint::MavlinkIpPackForwarded);
+		} else {
+			Bdg::RoutingRules::getInstance().addStatic(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack, Bdg::NamedEndpoint::MavlinkIpPackForwarded);
+		}
+	}
 }
 
 void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
@@ -316,6 +334,18 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 
 	if (asio::error::not_found == errorCode) {
 		aMavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_SUCCESS;
+	}
+
+	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
+		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+			MAV_GS_NETWORK_TRANSPORT_TCP6))
+		{
+			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
+				Bdg::NamedEndpoint::MavlinkIpPack);
+		} else {
+			Bdg::RoutingRules::getInstance().remove(Bdg::UdpPort{aMavlinkMavGsNetwork.host_port},
+				Bdg::NamedEndpoint::MavlinkIpPack);
+		}
 	}
 }
 
@@ -351,4 +381,59 @@ void GsNetwork::processSend(mavlink_message_t &aMavlinkMessage,
 void GsNetwork::processReceived(mavlink_message_t &aMavlinkMessage,
 	mavlink_mav_gs_network_t &aMavlinkMavGsNetwork)
 {
+}
+
+void GsNetwork::onReceive(Bdg::OnReceiveCtx aCtx)
+{
+	ESP_LOGV(Mav::kDebugTag, "GsNetwork::onReceive()");
+	asio::ip::tcp::endpoint tcpEndpoint{};
+	std::uint16_t localPort = 0;
+	aCtx.endpointVariant.match(
+		[&tcpEndpoint, &localPort](const Bdg::TcpEndpoint &aEndpoint)
+		{
+			tcpEndpoint = std::get<0>(aEndpoint);
+			localPort = std::get<1>(aEndpoint);
+		},
+		[](...){} );
+	mavlink_mav_gs_network_t mavlinkMavGsNetwork;
+	mavlink_message_t mavlinkMessage;
+
+	// Encode address-related info and payload into the message
+	mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
+	mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_RECEIVED;
+	auto nProcessed = initMavlinkMavGsNetwork(mavlinkMavGsNetwork, tcpEndpoint, localPort, aCtx.buffer);
+	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
+
+	// Pack the message into a buffer
+	const auto kMaxMessageLen = mavGsNetworkGetMaxMessageLength(mavlinkMavGsNetwork.payload_len);
+	auto nPacked = Marshalling::push(mavlinkMessage, {resp.buffer, kMaxMessageLen});
+	aCtx.forwardCb({{resp.buffer, nPacked}, [](Bdg::RespondCtx){}});
+	aCtx.buffer.slice(nProcessed);
+}
+
+void GsNetwork::onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent)
+{
+	Bdg::Receiver::notifyAsAsync({Bdg::NamedEndpoint::Mavlink,
+		[this, aTcpEvent]()
+		{
+			ESP_LOGV(Mav::kDebugTag, "GsNetwork::onTcpEvent()");
+			mavlink_mav_gs_network_t mavlinkMavGsNetwork;
+			aTcpEvent.match(
+				[&mavlinkMavGsNetwork](const Sub::Rout::TcpConnected &a) {
+					initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
+					mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTED;
+				},
+				[&mavlinkMavGsNetwork](const Sub::Rout::TcpDisconnected &a) {
+					initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
+					mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTION_ABORTED;
+				}
+			);
+			mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
+			mavlink_message_t mavlinkMessage;
+			mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
+			const std::size_t nProcessed = Marshalling::push(mavlinkMessage, resp.buffer);
+
+			return Utility::ConstBuffer(resp.buffer, nProcessed);
+		},
+		[](Bdg::RespondCtx){}});
 }

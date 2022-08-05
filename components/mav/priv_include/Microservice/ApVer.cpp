@@ -16,6 +16,10 @@
 #include "Globals.hpp"
 #include "Helper/MavlinkCommandLong.hpp"
 #include "mav/mav.hpp"
+#include "utility/LogSection.hpp"
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mav::Mic::ApVer, process, 0);
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Mic::ApVer, process, 0);
 
 namespace Mav {
 namespace Mic {
@@ -32,9 +36,9 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 
 #if CONFIG_MAV_DEBUG_LEVEL >= 4
 	if (MAVLINK_MSG_ID_HEARTBEAT == aMessage.msgid) {
-		ESP_LOGD(Mav::kDebugTag, "ApVer::process() got HEARTBEAT");
+		GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, ApVer, process, "got HEARTBEAT");
 	} else if (MAVLINK_MSG_ID_AUTOPILOT_VERSION == aMessage.msgid) {
-		ESP_LOGD(Mav::kDebugTag, "ApVer::process() got AUTOPILOT_VERSION");
+		GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, ApVer, process, "got AUTOPILOT_VERSION");
 	}
 #endif
 
@@ -42,7 +46,7 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 
 		switch (aMessage.msgid) {
 			case MAVLINK_MSG_ID_HEARTBEAT: {
-				ESP_LOGD(Mav::kDebugTag, "ApVer::process() got heartbeat from compid %d", aMessage.compid);
+				GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, ApVer, process, "got heartbeat from compid %d", aMessage.compid);
 
 				if (!updated.version) {
 					ESP_LOGD(Mav::kDebugTag, "ApVer::process() requesting message version from compid %d",
@@ -51,9 +55,10 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 					Hlpr::MavlinkCommandLong().initTargetFromRequest(aMessage)
 						.initRequestMessage(MAVLINK_MSG_ID_AUTOPILOT_VERSION).packInto(aMessage);
 					aOnResponse(aMessage);
+					ret = Microservice::Ret::Response;
+				} else {
+					ret = Microservice::Ret::Ignored;
 				}
-
-				ret = Microservice::Ret::Response;
 
 				break;
 			}
@@ -71,7 +76,7 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 				version.swMajor = (mavlinkAutopilotVersion.flight_sw_version & 0xFF00) >> 8;
 				version.swMinor = mavlinkAutopilotVersion.flight_sw_version & 0xFF;
 
-				ret = Microservice::Ret::NoResponse;
+				ret = Microservice::Ret::Ignored;
 
 				break;
 			}

@@ -11,11 +11,19 @@
 #include "utility/thr/Semaphore.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "utility/thr/Threading.hpp"
+#include "utility/time.hpp"
 #include <sdkconfig.h>
 #include <functional>
 #include <chrono>
 #include <mutex>
-#include <list>
+#include <deque>
+#include <esp_log.h>
+
+#if 0
+# define WQ_DEBUG(...) ESP_LOGI("WQ", __VA_ARGS__)
+#else
+# define WQ_DEBUG(...)
+#endif
 
 namespace Utility {
 namespace Thr {
@@ -39,19 +47,29 @@ template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
 private:
 	struct Queue {
-		using QueueType = std::list<Task>;
+		using QueueType = std::deque<Task>;
 		QueueType queue;
 		std::mutex mutex;
 
+		Queue() : queue(32)
+		{
+			queue.clear();
+		}
+
 		void push(Task &&aTask)
 		{
+			WQ_DEBUG("push()");
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
-			queue.push_back(std::move(aTask));
+			if (queue.size() == queue.max_size()) {
+				ESP_LOGW("WQ", "work queue capacity will be extended");
+			}
+			queue.push_back(aTask);
 		}
 
 		bool pop(Task &aTask)
 		{
+			WQ_DEBUG("pop()");
 			std::lock_guard<std::mutex> lock{mutex};
 			(void)lock;
 			bool ret = !queue.empty();
@@ -66,6 +84,17 @@ private:
 	};
 
 public:
+	template <class Trep, class Tper>
+	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
+	{
+		const auto start{Utility::bootTimeUs()};
+		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
+		return [aTask, start, timeout]()
+			{
+				return aTask() && !Utility::expired(start, timeout);
+			};
+	}
+
 	WorkQueue() : FreertosTask("WorkQueue", Istack, Iprio, Icore)
 	{
 	}
@@ -114,10 +143,13 @@ public:
 	///
 	void pushContinuous(ContinuousTask &&aTask)
 	{
-		push([aTask]()
+		push([this, aTask]() mutable
 			{
 				if (aTask()) {
-					pushContinuous(aTask);
+					WQ_DEBUG("pushContinuous() re-pushing the task");
+					pushContinuous(std::move(aTask));
+				} else {
+					WQ_DEBUG("pushContinuous() discontinuing the task");
 				}
 			});
 		resume();
@@ -130,9 +162,11 @@ public:
 		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([&sem, &aTask]()
 			{
+				WQ_DEBUG("pushContinuousWait() invoking");
 				bool f = aTask();
 
 				if (!f) {
+					WQ_DEBUG("pushContinuousWait() releasing sem.");
 					sem.release();
 				}
 
@@ -185,11 +219,13 @@ private:
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
 
-using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 4096, FreertosTask::PriorityMedium,
-	FreertosTask::CorePin::CoreNone>;
+using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
+	FreertosTask::CorePin::Core1>;
 
 }  // namespace Wq
 }  // namespace Thr
 }  // namespace Utility
+
+#undef WQ_DEBUG
 
 #endif // UTILITY_UTILITY_WORKQUEUE_HPP_

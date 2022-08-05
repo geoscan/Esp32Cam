@@ -69,10 +69,14 @@ void Utility::Thr::FreertosTask::start()
 
 void Utility::Thr::FreertosTask::suspend()
 {
+	suspended = true;
 	vTaskSuspend(taskInfo.handle);
 }
 
 void Utility::Thr::FreertosTask::resume()
 {
-	vTaskResume(taskInfo.handle);
+	if (suspended) {
+		suspended = false;
+		vTaskResume(taskInfo.handle);
+	}
 }

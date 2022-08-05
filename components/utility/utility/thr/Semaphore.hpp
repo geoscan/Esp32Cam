@@ -50,22 +50,28 @@ public:
 template <class T>
 class SemaphoreLock final {
 public:
-	SemaphoreLock(T &aSem) : sem{aSem}
+	SemaphoreLock(T &aSem) : sem{&aSem}
 	{
-		sem.acquire();
+		sem->acquire();
 	}
 
 	~SemaphoreLock()
 	{
-		sem.release();
+		if (nullptr != sem) {
+			sem->release();
+		}
+	}
+
+	SemaphoreLock(SemaphoreLock &&aLock) : sem{nullptr}
+	{
+		std::swap(aLock.sem, sem);
 	}
 
 	SemaphoreLock(const SemaphoreLock &) = delete;
-	SemaphoreLock(SemaphoreLock &&) = delete;
 	SemaphoreLock &operator=(const SemaphoreLock &) = delete;
 	SemaphoreLock &operator=(SemaphoreLock &&) = delete;
 private:
-	T& sem;
+	T* sem;
 };
 
 }  // namespace Thr

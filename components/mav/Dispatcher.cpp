@@ -17,9 +17,15 @@
 #include "Microservice/GsNetwork.hpp"
 #include "Microservice/Camera.hpp"
 #include "Dispatcher.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 #include "mav/mav.hpp"
+#include "utility/LogSection.hpp"
 
-Mav::Dispatcher::Dispatcher():
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mav::Dispatcher, onReceive, 0)
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Dispatcher, process, 1)
+
+Mav::Dispatcher::Dispatcher() :
+	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink, "Mavlink dispatcher"},
 	key{{&Dispatcher::onMavlinkReceived, this}},
 	micAggregate{*this}
 {
@@ -28,12 +34,8 @@ Mav::Dispatcher::Dispatcher():
 void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 {
 	// Warn. Do not replace iteration w/ RR's Key<...>::notify(), because locking order matters
-	for (auto &cb : Sub::Rout::OnReceived::getIterators()) {  // Iterate over subscribers in a thread-safe way
-		std::lock_guard<std::mutex> lock{resp.mutex};  // Lock response buffer
-		(void)lock;
-		resp.size = Marshalling::push(aMavlinkMessage, resp.buffer);
-		cb({Sub::Rout::Mavlink{respAsPayload()}});
-	}
+	Bdg::Receiver::notifyAs({Bdg::NamedEndpoint::Mavlink,
+		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }
 
 Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
@@ -45,10 +47,14 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 		auto &message = unmarshalling.front();
 
 		resp.size = 0;
-		ret = micAggregate.process(message, [this](mavlink_message_t &aMsg) mutable {
-			ESP_LOGD(Mav::kDebugTag, "Dispatcher::process::lambda (on response)");
-			resp.size += Marshalling::push(aMsg, Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.slice(resp.size));
-		});
+		ret = micAggregate.process(message,
+			[this](mavlink_message_t &aMsg) mutable {
+				std::size_t inc = Marshalling::push(aMsg,
+					Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.asSlice(resp.size));
+				GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, Dispatcher, process, "(on response callback)"
+					"pushed %d bytes into response buffer", inc);
+				resp.size += inc;
+			});
 
 		unmarshalling.pop();
 	}
@@ -91,4 +97,28 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
 {
 	return Sub::Rout::Payload{resp.buffer, resp.size};
+}
+
+void Mav::Dispatcher::onReceive(Bdg::OnReceiveCtx aCtx)
+{
+	int nprocessed = 0;
+	switch (process(aCtx.buffer, nprocessed)) {
+		case Microservice::Ret::Ignored:
+			aCtx.forwardCb({aCtx.buffer.asSlice(0, nprocessed), aCtx.respondCb});
+
+			break;
+
+		case Microservice::Ret::NoResponse:
+			break;
+
+		case Microservice::Ret::Response:
+			GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Dispatcher, onReceive, "Formed a response of %d bytes. Sending back",
+				resp.size);
+			aCtx.respondCb({{static_cast<void *>(resp.buffer), resp.size}});
+
+			break;
+	}
+
+	GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Dispatcher, onReceive, "processed %d bytes", nprocessed);
+	aCtx.buffer.slice(nprocessed);  // Change the size of the buffer, so `Dispatcher` will be re-notified
 }

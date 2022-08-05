@@ -12,4 +12,5 @@ idf_component_register(
 	REQUIRES
 		sub
 		freertos
-		utility)
+		utility
+		wifi_uart_bridge)

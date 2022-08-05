@@ -88,7 +88,7 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 
 					// Slice payload
 					tcp.payload = Utility::makeAsioCb(
-						Utility::toBuffer<const void>(tcp.payload).slice(nresponse.nProcessed));
+						Utility::toBuffer<const void>(tcp.payload).asSlice(nresponse.nProcessed));
 				}
 			}
 

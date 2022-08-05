@@ -4,6 +4,7 @@ idf_component_register(
 		utility
 		mavlink
 		sd_fat
+		wifi_uart_bridge
 	SRC_DIRS
 		"."
 		"priv_include/Microservice/"
