@@ -7,14 +7,14 @@ file(GLOB
 
 idf_component_register(
 	SRCS         ${SOURCE_FILES}
-    INCLUDE_DIRS "."
-    REQUIRES
-        wifi
-        cam
-        esp_common
-        json
-        esp_http_server
-        version
+	INCLUDE_DIRS "."
+	REQUIRES
+		wifi
+		cam
+		esp_common
+		json
+		esp_http_server
+		version
 		camera_recorder
 		sd_fat
 		utility
