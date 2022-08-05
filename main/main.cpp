@@ -33,15 +33,11 @@ extern "C" int app_main(void)
 	Wq::start();
 	CameraRecorder::init();
 	camInit();
-
 	esp_event_loop_create_default();
 	wifiStart();
 	httpStart();
 	cameraThreadInit();
-
-//	logUdpStart(context);
 	cameraStreamerStart(context);
-
 	Mav::init();
 	Bdg::init();
 	Sock::start();
