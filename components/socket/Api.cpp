@@ -11,13 +11,17 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_SOCKET_DEBUG_LEVEL)
 #include <esp_log.h>
 #include "utility/LogSection.hpp"
-
 #include "socket/socket.hpp"
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
 #include "utility/Algorithm.hpp"
 #include "utility/thr/WorkQueue.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Sock::Api, udpAsyncReceiveFrom, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Sock::Api, tcpAsyncReceiveFrom, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Sock::Api, sendToUdp, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Sock::Api, sendToTcp, 0)
 
 namespace Sock {
 
@@ -272,7 +276,8 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<ch
 		[this, buffer, endpoint, port, &aSocket] (asio::error_code aError, std::size_t anReceived) mutable
 		{
 			if (!aError) {
-				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - received (%d bytes)", anReceived);
+				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, udpAsyncReceiveFrom,
+					"udpAsyncReceiveFrom - received (%d bytes)", anReceived);
 				Bdg::Receiver::notifyAs(Bdg::NotifyCtx{Bdg::EndpointVariant{Bdg::UdpEndpoint{*endpoint.get(), port}},
 					Utility::ConstBuffer{buffer.get(), anReceived},
 					[&aSocket, endpoint](Bdg::RespondCtx aCtx)
@@ -280,7 +285,7 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<ch
 						asio::error_code err{};
 						aSocket.send_to(Utility::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
 					}});
-				ESP_LOGV(kDebugTag, "udpAsyncReceiveFrom - next round");
+				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, udpAsyncReceiveFrom, "next round");
 				udpAsyncReceiveFrom(aSocket, buffer, endpoint);
 			} else {
 				ESP_LOGE(kDebugTag, "udpAsyncReceiveFrom on port %d - error(%d), closing", port,
@@ -305,11 +310,12 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 		[this, buffer, &aSocket](asio::error_code aErr, std::size_t anReceived) mutable
 		{
 			if (!aErr) {
-				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - received (%d bytes)", anReceived);
+				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, tcpAsyncReceiveFrom, "received (%d bytes)", anReceived);
 				std::error_code err;
 				auto epRemote = aSocket.remote_endpoint(err);
 
-				ESP_LOGV(kDebugTag, "tcpAsyncReceiveFrom - notifying subscribers");
+				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, tcpAsyncReceiveFrom,
+					"tcpAsyncReceiveFrom - notifying subscribers");
 				Bdg::Receiver::notifyAs({{Bdg::TcpEndpoint{epRemote, aSocket.local_endpoint().port()}},
 					Utility::ConstBuffer{buffer.get(), anReceived},
 					[&aSocket](Bdg::RespondCtx aCtx)
@@ -360,7 +366,8 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr)
 {
-	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(TCP)");
+	GS_UTILITY_LOGV_METHOD_SECTION(kDebugTag, Api, sendToTcp, "%s:%d", aEndpoint.address().to_string().c_str(),
+		aEndpoint.port());
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it = container.tcpConnected.end();
@@ -383,7 +390,8 @@ std::size_t Api::sendTo(const asio::ip::tcp::endpoint &aEndpoint, std::uint16_t 
 std::size_t Api::sendTo(const asio::ip::udp::endpoint &aRemoteEndpoint, std::uint16_t &aLocalPort, asio::const_buffer aBuffer,
 	asio::error_code &aErr, asio::ip::udp aUdp)
 {
-	GS_UTILITY_LOG_SECTIONV(kDebugTag, "Api::sendTo(UDP)");
+	GS_UTILITY_LOGV_METHOD_SECTION(kDebugTag, Api, sendToUdp, "%s:%d", aRemoteEndpoint.address().to_string().c_str(),
+		aRemoteEndpoint.port());
 	std::lock_guard<std::mutex> lock{syncAsyncMutex};
 	(void)lock;
 	auto it{container.udp.end()};

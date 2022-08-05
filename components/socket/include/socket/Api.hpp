@@ -59,6 +59,12 @@ private:
 	void udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<char[]> buffer = {},
 		std::shared_ptr<asio::ip::udp::endpoint> aEndpoint = {});
 	void tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<char[]> buffer = {});
+	constexpr inline void sendToUdp()  ///< Distinguishable marker for logging purposes
+	{
+	}
+	constexpr inline void sendToTcp()  ///< Distinguishable marker for logging purposes
+	{
+	}
 };
 
 }  // namespace Sock
