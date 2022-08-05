@@ -18,7 +18,6 @@
 #include "cam/cam.hpp"
 #include "camera_thread/camera_thread.hpp"
 #include "camera_recorder/camera_recorder.hpp"
-#include "version.hpp"
 #include "sd_fat.h"
 #include "log_udp.h"
 #include "mav/mav.hpp"
@@ -34,16 +33,11 @@ extern "C" int app_main(void)
 	Wq::start();
 	CameraRecorder::init();
 	camInit();
-	versionInit();
-
 	esp_event_loop_create_default();
 	wifiStart();
 	httpStart();
 	cameraThreadInit();
-
-//	logUdpStart(context);
 	cameraStreamerStart(context);
-
 	Mav::init();
 	Bdg::init();
 	Sock::start();

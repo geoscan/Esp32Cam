@@ -12,7 +12,6 @@ idf_component_register(
 		asio
 		pthread
 		OV2640
-		version
 		sd_fat
 		esp_event
 		log_udp
