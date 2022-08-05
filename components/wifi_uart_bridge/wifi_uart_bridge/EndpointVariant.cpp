@@ -101,7 +101,7 @@ void EndpointVariant::logv(const char *aPrefix) const
 
 #else
 
-void EndpointVariant::logv()
+void EndpointVariant::logv(const char *)
 {
 }
 
