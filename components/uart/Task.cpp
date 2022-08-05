@@ -27,8 +27,16 @@
 # define UART_SECTION_LOGV(tag, title)
 #endif  // #if 0
 
-GS_UTILITY_LOGV_METHOD_SET_ENABLED(Uart::Task, taskProcess, 1)
-GS_UTILITY_LOGD_METHOD_SET_ENABLED(Uart::Task, taskProcess, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Uart::Task, taskProcess, 0)
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Uart::Task, taskProcess, 0)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Uart::Task, taskRead, 0)
+GS_UTILITY_LOGD_METHOD_SET_ENABLED(Uart::Task, taskRead, 0)
+
+enum class LogAspect {
+	BufferManagement,
+};
+
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Uart::Task, LogAspect::BufferManagement, 0)
 
 using namespace Uart;
 using namespace Utility;
@@ -36,7 +44,6 @@ using namespace Utility;
 void Task::taskRead()
 {
 	ESP_LOGI(Uart::kDebugTag, "Task::taskRead - started");
-	unsigned logCounter = 0;
 
 	while (true) {
 		for (auto uart : uartDevices) {
@@ -47,16 +54,16 @@ void Task::taskRead()
 				buffer->pos = uart->read(buffer->buf.data(), buffer->buf.size());
 
 				if (buffer->pos) {
-					ESP_LOGV(Uart::kDebugTag, "uart %d got %d bytes", uart->getNum(), buffer->pos);
+					GS_UTILITY_LOGV_METHOD(Uart::kDebugTag, Uart::Task, taskRead, "uart %d got %d bytes",
+						uart->getNum(), buffer->pos);
 					swap.pushFull(buffer);
 				} else {
 					swap.pushFree(buffer);
 					Utility::waitMs(20);
 				}
 
-				if ((logCounter = (logCounter + 1) % 100) == 0) {
-					ESP_LOGD(Uart::kDebugTag, "Task::taskRead: free buffers %d", swap.swap.countFree());
-				}
+				GS_UTILITY_LOG_EVERY_N_TURNS(100, GS_UTILITY_LOGD_CLASS_ASPECT(Uart::kDebugTag, Uart::Task,
+					LogAspect::BufferManagement, "free buffers %d", swap.swap.countFree());)
 			} else {
 				ESP_LOGW(Uart::kDebugTag, "taskRead(): Could not pop a free buffer");
 				Utility::waitMs(20);
@@ -92,7 +99,7 @@ void Task::taskProcess()
 
 Task::Buf *Task::SyncedSwap::getFree()
 {
-	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::getFree()");
+	GS_UTILITY_LOGV_METHOD_SECTION(Uart::kDebugTag, Uart::Task::SyncedSwap, getFree);
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 	Task::Buf *ret = nullptr;
@@ -108,7 +115,7 @@ Task::Buf *Task::SyncedSwap::getFree()
 
 Task::Buf *Task::SyncedSwap::getFull()
 {
-	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::getFull()");
+	GS_UTILITY_LOGV_METHOD_SECTION(Uart::kDebugTag, Uart::Task::SyncedSwap, getFull);
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 	Task::Buf *ret = nullptr;
@@ -122,8 +129,8 @@ Task::Buf *Task::SyncedSwap::getFull()
 
 void Task::SyncedSwap::pushFree(Task::Buf *aBuf)
 {
+	GS_UTILITY_LOGV_METHOD_SECTION(Uart::kDebugTag, Uart::Task::SyncedSwap, pushFree);
 	assert(nullptr != aBuf);
-	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::pushFree()");
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 
@@ -132,6 +139,7 @@ void Task::SyncedSwap::pushFree(Task::Buf *aBuf)
 
 void Task::SyncedSwap::pushFull(Task::Buf *aBuf)
 {
+	GS_UTILITY_LOGV_METHOD_SECTION(Uart::kDebugTag, Uart::Task::SyncedSwap, pushFull);
 	assert(nullptr != aBuf);
 	UART_SECTION_LOGV(Uart::kDebugTag, "Task::SyncedSwap::pushFull()");
 	std::lock_guard<std::mutex> lock{mutex};
