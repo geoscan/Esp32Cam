@@ -150,6 +150,8 @@ do { \
 	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspect), \
 	tag, #cls "(" #aspect ") " __VA_ARGS__)
 
+// Utility macros
+
 #define GS_UTILITY_FILE_LINE_CONTEXT_IMPL(line) __FILE__ ":" #line
 #define GS_UTILITY_FILE_LINE_CONTEXT(line) GS_UTILITY_FILE_LINE_CONTEXT_IMPL(line)
 
