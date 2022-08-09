@@ -113,6 +113,7 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	memset(&sStaWifiConfig, 0, sizeof(sStaWifiConfig));
 	sStaWifiConfig.sta.pmf_cfg.capable = true;
 	sStaWifiConfig.sta.pmf_cfg.required = false;
+	sStaWifiConfig.sta.channel = 6;
 	strcpy((char *)sStaWifiConfig.sta.password, targetApPassword);
 	strcpy((char *)sStaWifiConfig.sta.ssid, targetApSsid);
 
@@ -198,7 +199,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
 	sApWifiConfig.ap.beacon_interval = 100;  // default
-	sApWifiConfig.ap.channel = 0;  // auto
+	sApWifiConfig.ap.channel = 1;  // auto
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
 
