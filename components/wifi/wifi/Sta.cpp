@@ -21,7 +21,7 @@ namespace Wifi {
 
 static constexpr auto kModule = Utility::Mod::Module::WifiStaConnection;
 
-Sta::Sta() : Utility::Mod::ModuleBase{kModule}
+Sta::Sta(esp_netif_t **aEspNetif) : Utility::Mod::ModuleBase{kModule}, espNetif{aEspNetif}
 {
 }
 
@@ -35,6 +35,18 @@ void Sta::getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnRespon
 				ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)));
 
 			break;
+		}
+		case Utility::Mod::Fld::Field::Ip: {
+			wifi_ap_record_t wifiApRecord{};
+
+			if (ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)) {
+				esp_netif_ip_info_t espNetifIpInfo{};
+
+				if (*espNetif != nullptr && ESP_OK == esp_netif_get_ip_info(*espNetif, &espNetifIpInfo)) {
+					aOnResponse(makeResponse<kModule, Utility::Mod::Fld::Field::Ip>(
+						asio::ip::address_v4{espNetifIpInfo.ip.addr}));
+				}
+			}
 		}
 		default:
 			break;

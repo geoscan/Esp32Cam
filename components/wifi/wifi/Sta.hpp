@@ -6,13 +6,17 @@
 //
 
 #include "utility/mod/ModuleBase.hpp"
+#include <esp_netif.h>
 
 namespace Wifi {
 
 class Sta : public Utility::Mod::ModuleBase {
 public:
-	Sta();
+	Sta(esp_netif_t **);
 	void getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnResponseCallback aOnResponse);
+
+private:
+	esp_netif_t **espNetif;
 };
 
 }  // namespace Wifi
