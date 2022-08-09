@@ -47,7 +47,10 @@ class ModuleBase :
 public:
 	ModuleBase(Module aModule);
 	virtual ~ModuleBase() = default;
-	Module getModule() const;
+	inline Module getModule() const
+	{
+		return identity.type;
+	}
 
 	template <Module Im, Fld::Field If>
 	using Field = typename Fld::GetType<If, Im>::Type;
