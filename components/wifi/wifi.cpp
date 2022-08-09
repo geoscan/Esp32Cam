@@ -5,6 +5,7 @@
 #include <esp_log.h>
 
 #include "wifi.h"
+#include "wifi/Sta.hpp"
 #include "utility/Algorithm.hpp"
 #include <esp_event.h>
 #include <esp_system.h>
@@ -219,4 +220,6 @@ void wifiStart(void)
 	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
 	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
+	static Wifi::Sta sta{};
+	(void)sta;
 }
