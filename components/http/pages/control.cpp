@@ -231,9 +231,6 @@ static void printStatus(httpd_req_t *req, Error res)
 						const auto bytes = aAddr.to_bytes();
 						const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
 						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
-					},
-					[root](...) mutable {
-						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(nullptr, 0));
 					}
 				);
 			});
