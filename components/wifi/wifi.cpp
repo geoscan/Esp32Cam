@@ -1,18 +1,22 @@
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "nvs_flash.h"
-#include "utility/Algorithm.hpp"
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL (CONFIG_WIFI_DEBUG_LEVEL)
+#include <esp_log.h>
+
+#include "wifi.h"
+#include "utility/Algorithm.hpp"
+#include <esp_event.h>
+#include <esp_system.h>
+#include <esp_wifi.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/event_groups.h>
+#include <nvs_flash.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
+#include <lwip/err.h>
+#include <lwip/sys.h>
 
 // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
 #define SSID_MAX_LENGTH    32
@@ -211,5 +215,8 @@ void wifi_init_sta(void)
 
 void wifiStart(void)
 {
+	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
+	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
+	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
 }
