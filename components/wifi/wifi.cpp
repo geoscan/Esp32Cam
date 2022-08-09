@@ -38,6 +38,7 @@ esp_netif_t *sStaEspNetif = NULL;
 
 static constexpr unsigned kBitConnected = BIT0;
 static constexpr unsigned kBitDisconnected = BIT1;
+static constexpr unsigned kBitStaGotIp = BIT2;
 
 ///
 /// \brief get_ssid Decorates SSID with MAC address, using the latter as a suffix
@@ -126,6 +127,8 @@ static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* event
 		xEventGroupSetBits(eventGroupHandle, kBitConnected);
 	} else if (eventId == WIFI_EVENT_STA_DISCONNECTED) {
 		xEventGroupSetBits(eventGroupHandle, kBitDisconnected);
+	} else if (eventId == IP_EVENT_STA_GOT_IP) {
+		xEventGroupSetBits(eventGroupHandle, kBitStaGotIp);
 	}
 }
 
@@ -146,20 +149,27 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 
 	// Update connection configuration
 	CUSTOM_ESP_ERR_RETURN(wifiConfigStaConnection(targetApSsid, targetApPassword, ip, gateway, netmask));
-
-	// Establish connection
-
+	// Establish connection. Wait for the respective flags to be updated
 	EventGroupHandle_t wifiEventGroup = xEventGroupCreate();
 	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler, &wifiEventGroup);
 	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler, &wifiEventGroup);
-
+	esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler, &wifiEventGroup);
 	CUSTOM_ESP_ERR_RETURN(esp_wifi_connect());
-	const EventBits_t bits = xEventGroupWaitBits(wifiEventGroup, kBitConnected | kBitDisconnected, pdFALSE, pdFALSE,
-		portMAX_DELAY);
-	const esp_err_t err = (bits & kBitConnected) ? ESP_OK : ESP_FAIL;
+	const bool useDhcp = Utility::Algorithm::in(nullptr, ip, gateway, netmask);
+	EventBits_t eventBits;
 
+	if (useDhcp) {
+		eventBits = xEventGroupWaitBits(wifiEventGroup, kBitStaGotIp | kBitDisconnected, pdFALSE, pdFALSE,
+			portMAX_DELAY);
+	} else {
+		eventBits = xEventGroupWaitBits(wifiEventGroup, kBitConnected | kBitDisconnected, pdFALSE, pdFALSE,
+			portMAX_DELAY);
+	}
+
+	const esp_err_t err = (eventBits & kBitConnected) ? ESP_OK : ESP_FAIL;
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler);
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler);
+	esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler);
 	vEventGroupDelete(wifiEventGroup);
 
 	return err;
