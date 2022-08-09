@@ -220,6 +220,6 @@ void wifiStart(void)
 	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
 	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
-	static Wifi::Sta sta{};
+	static Wifi::Sta sta{&sStaEspNetif};
 	(void)sta;
 }
