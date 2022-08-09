@@ -22,6 +22,7 @@ namespace Mod {
 enum class Module : std::uint8_t {
 	Camera,
 	Autopilot,  ///< The main (autopilot) board
+	WifiStaConnection,  ///< Connection info (the ESP32 is connected to some other Access Point, AP)
 	All,  ///< The request is addressed to every module
 };
 
@@ -40,6 +41,7 @@ enum class Field : std::uint8_t {
 	VersionSoftwareMinor,  ///< Software version, minor revision
 	VersionSoftwarePatch,  ///< Software version, patch revision, or the number of commits from the latest revision,
 	VersionCommitHash,  ///< Git commit hash
+	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
 };
 
 template <class T>
@@ -58,6 +60,7 @@ template <Module I> struct GetType<Field::VersionSoftwareMajor, I> : StoreType<u
 template <Module I> struct GetType<Field::VersionSoftwareMinor, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
+template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
 
 /// \brief Encapsulates responses produced by a module.
 ///
@@ -69,7 +72,8 @@ struct Resp {
 		unsigned,
 		std::pair<int, int>,
 		bool,
-		const char *
+		const char *,
+		mapbox::util::variant<asio::ip::address_v4>
 	>;
 
 	Variant variant;  ///< The actual response

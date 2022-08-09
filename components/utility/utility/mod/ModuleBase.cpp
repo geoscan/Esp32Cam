@@ -18,11 +18,6 @@ ModuleBase::ModuleBase(Module aModule) :
 {
 }
 
-Module ModuleBase::getModule() const
-{
-	return identity.type;
-}
-
 void ModuleBase::getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse)
 {
 }

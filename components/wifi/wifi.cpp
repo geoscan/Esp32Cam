@@ -1,18 +1,23 @@
-#include "esp_event.h"
-#include "esp_log.h"
-#include "esp_system.h"
-#include "esp_wifi.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/event_groups.h"
-#include "nvs_flash.h"
-#include "utility/Algorithm.hpp"
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL (CONFIG_WIFI_DEBUG_LEVEL)
+#include <esp_log.h>
+
+#include "wifi.h"
+#include "wifi/Sta.hpp"
+#include "utility/Algorithm.hpp"
+#include <esp_event.h>
+#include <esp_system.h>
+#include <esp_wifi.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <freertos/event_groups.h>
+#include <nvs_flash.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include "lwip/err.h"
-#include "lwip/sys.h"
+#include <lwip/err.h>
+#include <lwip/sys.h>
 
 // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
 #define SSID_MAX_LENGTH    32
@@ -33,6 +38,7 @@ esp_netif_t *sStaEspNetif = NULL;
 
 static constexpr unsigned kBitConnected = BIT0;
 static constexpr unsigned kBitDisconnected = BIT1;
+static constexpr unsigned kBitStaGotIp = BIT2;
 
 ///
 /// \brief get_ssid Decorates SSID with MAC address, using the latter as a suffix
@@ -68,7 +74,8 @@ static void decorateSsid(uint8_t **data, unsigned *len, const char *prefix)
 /// \param gateway          Gateway of the network, if NULL, a DHCP client will be used
 /// \param netmask          Netmask of the network, if NULL, a DHCP client will be used
 ///
-esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr, uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
+esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr,
+	uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
 {
 	const bool useDhcp = (ip == NULL || gateway == NULL || netmask == NULL);
 
@@ -81,12 +88,14 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	if (useDhcp) {
 		esp_err_t err = esp_netif_dhcpc_start(sStaEspNetif);
 		if (!Utility::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED)) {
+			ESP_LOGW(Wifi::kDebugTag, "wifiConfigStaConnection() Failed to start DHCP");
 			return err;
 		}
 	} else {
 		{
 			esp_err_t err = esp_netif_dhcpc_stop(sStaEspNetif);
 			if (!Utility::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED)) {
+				ESP_LOGW(Wifi::kDebugTag, "wifiConfigStaConnection() Failed to stop DHCP");
 				return err;
 			}
 		}
@@ -104,6 +113,7 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	memset(&sStaWifiConfig, 0, sizeof(sStaWifiConfig));
 	sStaWifiConfig.sta.pmf_cfg.capable = true;
 	sStaWifiConfig.sta.pmf_cfg.required = false;
+	sStaWifiConfig.sta.channel = 6;
 	strcpy((char *)sStaWifiConfig.sta.password, targetApPassword);
 	strcpy((char *)sStaWifiConfig.sta.ssid, targetApSsid);
 
@@ -120,6 +130,8 @@ static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* event
 		xEventGroupSetBits(eventGroupHandle, kBitConnected);
 	} else if (eventId == WIFI_EVENT_STA_DISCONNECTED) {
 		xEventGroupSetBits(eventGroupHandle, kBitDisconnected);
+	} else if (eventId == IP_EVENT_STA_GOT_IP) {
+		xEventGroupSetBits(eventGroupHandle, kBitStaGotIp);
 	}
 }
 
@@ -127,31 +139,45 @@ static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* event
 /// \brief wifiStaConnect Tries to connect to an Access Point. The parameters
 /// are the same as for \ref wifiConfigStaConnection
 ///
-esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr, uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
+esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr,
+	uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
 {
 	// Disconnect from an AP
 	{
-		const esp_err_t err = esp_wifi_disconnect();
-		if (Utility::Algorithm::in(err, ESP_ERR_WIFI_NOT_INIT, ESP_ERR_WIFI_NOT_STARTED)) {
-			return err;
+		wifi_ap_record_t wifiApRecord{};
+		if (ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)) {
+			const esp_err_t err = esp_wifi_disconnect();
+			if (Utility::Algorithm::in(err, ESP_ERR_WIFI_NOT_INIT, ESP_ERR_WIFI_NOT_STARTED)) {
+				ESP_LOGW(Wifi::kDebugTag, "wifiStaConnect() failed to disconnect");
+				return err;
+			}
 		}
 	}
 
 	// Update connection configuration
 	CUSTOM_ESP_ERR_RETURN(wifiConfigStaConnection(targetApSsid, targetApPassword, ip, gateway, netmask));
-
-	// Establish connection
-
+	// Establish connection. Wait for the respective flags to be updated
 	EventGroupHandle_t wifiEventGroup = xEventGroupCreate();
 	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler, &wifiEventGroup);
 	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler, &wifiEventGroup);
-
+	esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler, &wifiEventGroup);
 	CUSTOM_ESP_ERR_RETURN(esp_wifi_connect());
-	const EventBits_t bits = xEventGroupWaitBits(wifiEventGroup, kBitConnected | kBitDisconnected, pdFALSE, pdFALSE, portMAX_DELAY);
-	const esp_err_t err = (bits & kBitConnected) ? ESP_OK : ESP_FAIL;
+	const bool useDhcp = Utility::Algorithm::in(nullptr, ip, gateway, netmask);
+	EventBits_t eventBits;
 
+	if (useDhcp) {
+		constexpr unsigned kDhcpWaitTimeoutMs = 6000 / portTICK_PERIOD_MS;
+		eventBits = xEventGroupWaitBits(wifiEventGroup, kBitStaGotIp | kBitDisconnected, pdFALSE, pdFALSE,
+			kDhcpWaitTimeoutMs);
+	} else {
+		eventBits = xEventGroupWaitBits(wifiEventGroup, kBitConnected | kBitDisconnected, pdFALSE, pdFALSE,
+			portMAX_DELAY);
+	}
+
+	const esp_err_t err = (eventBits & kBitConnected) ? ESP_OK : ESP_FAIL;
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler);
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler);
+	esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler);
 	vEventGroupDelete(wifiEventGroup);
 
 	return err;
@@ -173,7 +199,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
 	sApWifiConfig.ap.beacon_interval = 100;  // default
-	sApWifiConfig.ap.channel = 0;  // auto
+	sApWifiConfig.ap.channel = 1;  // auto
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
 
@@ -211,5 +237,10 @@ void wifi_init_sta(void)
 
 void wifiStart(void)
 {
+	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
+	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
+	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
+	static Wifi::Sta sta{&sStaEspNetif};
+	(void)sta;
 }

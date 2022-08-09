@@ -22,30 +22,33 @@
 #include "sd_fat.h"
 #include "wifi.h"
 #include "utility/time.hpp"
+#include "utility/mod/ModuleBase.hpp"
 #include "esp_wifi.h"
 #include "sub/Cam.hpp"
 
 using namespace std;
 
 // Various keys
-static constexpr const char *kName     = "name";      // key
-static constexpr const char *kSsid     = "ssid";      // key
-static constexpr const char *kPassword = "password";  // key
-static constexpr const char *kIp       = "ip";        // key
-static constexpr const char *kGateway  = "gateway";   // key
-static constexpr const char *kNetmask  = "netmask";   // key
+static constexpr const char *kName = "name"; // key
+static constexpr const char *kSsid = "ssid"; // key
+static constexpr const char *kPassword = "password"; // key
+static constexpr const char *kIp = "ip"; // key
+static constexpr const char *kGateway = "gateway"; // key
+static constexpr const char *kNetmask = "netmask"; // key
 // Function
-static constexpr const char *kFunction    = "function";      // key
-static constexpr const char *kVideoStream = "video_stream";  // value
-static constexpr const char *kVideoRecord = "video_record";  // value
-static constexpr const char *kPhoto       = "photo";         // value
-static constexpr const char *kWifi        = "wifi";          // value
+static constexpr const char *kFunction = "function"; // key
+static constexpr const char *kVideoStream = "video_stream"; // value
+static constexpr const char *kVideoRecord = "video_record"; // value
+static constexpr const char *kPhoto = "photo"; // value
+static constexpr const char *kWifi = "wifi"; // value
+static constexpr const char *kWifiStaConnected = "wifi_sta_connected"; // value
+static constexpr const char *kWifiStaIp = "wifi_sta_ip"; // value
 // Command
-static constexpr const char *kCommand    = "command";     // key
-static constexpr const char *kStop       = "stop";        // value
-static constexpr const char *kStart      = "start";       // value
-static constexpr const char *kConnect    = "connect";     //value
-static constexpr const char *kDisconnect = "disconnect";  //value
+static constexpr const char *kCommand = "command"; // key
+static constexpr const char *kStop = "stop"; // value
+static constexpr const char *kStart = "start"; // value
+static constexpr const char *kConnect = "connect"; //value
+static constexpr const char *kDisconnect = "disconnect"; //value
 // JSON response
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
@@ -212,6 +215,28 @@ static void printStatus(httpd_req_t *req, Error res)
 
 	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateBool(status.videoRecRunning));
 
+	{
+		bool wifiStaConnected = false;
+		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
+			Utility::Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
+		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
+		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
+			Utility::Mod::Fld::Field::Ip>(
+			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
+			{
+				aAddr.match(
+					[root, &aAddr](const asio::ip::address_v4 &aAddr) mutable
+					{
+						static constexpr auto kIpLen = 4;
+						const auto bytes = aAddr.to_bytes();
+						const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
+						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
+					}
+				);
+			});
+	}
+
+	// Response a request
 	if (res != ErrNone) {
 		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool((int)(res == Ok)));
 		if (res != Ok) {
