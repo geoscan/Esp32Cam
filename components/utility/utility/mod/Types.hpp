@@ -22,6 +22,7 @@ namespace Mod {
 enum class Module : std::uint8_t {
 	Camera,
 	Autopilot,  ///< The main (autopilot) board
+	WifiStaConnection,  ///< Connection info (the ESP32 is connected to some other Access Point, AP)
 	All,  ///< The request is addressed to every module
 };
 
