@@ -42,6 +42,7 @@ static constexpr const char *kVideoRecord = "video_record"; // value
 static constexpr const char *kPhoto = "photo"; // value
 static constexpr const char *kWifi = "wifi"; // value
 static constexpr const char *kWifiStaConnected = "wifi_sta_connected"; // value
+static constexpr const char *kWifiStaIp = "wifi_sta_ip"; // value
 // Command
 static constexpr const char *kCommand = "command"; // key
 static constexpr const char *kStop = "stop"; // value
@@ -219,6 +220,23 @@ static void printStatus(httpd_req_t *req, Error res)
 		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
 			Utility::Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
+		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
+			Utility::Mod::Fld::Field::Ip>(
+			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
+			{
+				aAddr.match(
+					[root, &aAddr](const asio::ip::address_v4 &aAddr) mutable
+					{
+						static constexpr auto kIpLen = 4;
+						const auto bytes = aAddr.to_bytes();
+						const int bytesInt[kIpLen] = {bytes[0], bytes[1], bytes[2], bytes[3]};
+						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
+					},
+					[root](...) mutable {
+						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(nullptr, 0));
+					}
+				);
+			});
 	}
 
 	// Response a request
