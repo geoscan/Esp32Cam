@@ -16,7 +16,7 @@ namespace COMPONENT_FRAME_NAMESPACE {
 
 void init()
 {
-	esp_log_level_set(COMPONENT_FRAME_NAMESPACE::kDebugTag, (esp_log_level_t)CONFIG_COMPONENT_FRAME_DEBUG_LEVEL);
+	esp_log_level_set(COMPONENT_FRAME_NAMESPACE::kDebugTag, (esp_log_level_t)CONFIG_COMPONENT_FRAME_UPPER_DEBUG_LEVEL);
 	ESP_LOGD(COMPONENT_FRAME_NAMESPACE::kDebugTag, "Debug log test");
 	ESP_LOGV(COMPONENT_FRAME_NAMESPACE::kDebugTag, "Verbose log test");
 }
