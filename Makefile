@@ -46,6 +46,7 @@ new_component:
 	export COMPONENT_FRAME_UPPER=`echo $(COMPONENT_FRAME) | tr a-z A-Z` && find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i "s/COMPONENT_FRAME_UPPER/$${COMPONENT_FRAME_UPPER}/g"
 	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME_NAMESPACE/$(COMPONENT_FRAME_NAMESPACE)/g'
 	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME/$(COMPONENT_FRAME)/g'
+	echo '# $(COMPONENT_FRAME)' > components/$(COMPONENT_FRAME)/README.md
 
 clean: clean_preconfigured
 clean_:
