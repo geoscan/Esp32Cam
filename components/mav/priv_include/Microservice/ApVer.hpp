@@ -9,7 +9,7 @@
 #define MAV_PRIV_INCLUDE_MICROSERVICE_APVER_HPP_
 
 #include "Microservice.hpp"
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 #include <cstdint>
 
 namespace Mav {
@@ -18,7 +18,7 @@ namespace Mic {
 /// \brief Listens for incoming MAVLink HEARTBEAT(0) messages w/ `compid` corresponding to AP board. When one of those
 /// is received, requests version info from the AP board
 ///
-class ApVer : public Microservice, public Utility::Mod::ModuleBase {
+class ApVer : public Microservice, public Mod::ModuleBase {
 private:
 	/// \brief Buffers version info received over MAVLink
 	///
@@ -40,7 +40,7 @@ public:
 	Microservice::Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse);
 
 protected:
-	void getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnResponseCallback aOnResponse) override;
+	void getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResponse) override;
 
 private:
 	Version version;

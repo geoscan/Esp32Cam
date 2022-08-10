@@ -11,7 +11,7 @@
 #include "Record.hpp"
 #include "utility/thr/Semaphore.hpp"
 #include "sub/Cam.hpp"
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 #include <type_traits>
 #include <chrono>
 #include <cmath>
@@ -22,7 +22,7 @@ extern "C" {
 
 namespace CameraRecorder {
 
-class RecMjpgAvi : public Record, public Utility::Mod::ModuleBase {
+class RecMjpgAvi : public Record, public Mod::ModuleBase {
 private:
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
@@ -48,7 +48,7 @@ private:
 	bool startWrap(const char *filename);
 public:
 	RecMjpgAvi();
-	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
+	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 	bool start(const char *filename) override;
 	void stop() override;
 };

@@ -8,16 +8,16 @@
 #if !defined(CAMERA_RECORDER_CAMERA_RECORDER_STORAGE_HPP_)
 #define CAMERA_RECORDER_CAMERA_RECORDER_STORAGE_HPP_
 
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 #include <esp_err.h>
 
 namespace CameraRecorder {
 
 /// \brief Encapsulates various aspects of working w/ a file system in the context of storing photo/video frames
 ///
-struct Storage : Utility::Mod::ModuleBase {
+struct Storage : Mod::ModuleBase {
 	Storage();
-	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
+	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 	static esp_err_t countFrames(unsigned &aCountOut);
 };
 

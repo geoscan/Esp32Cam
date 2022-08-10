@@ -11,7 +11,7 @@ static constexpr const char *kTag = "[OV2640]";
 
 
 Ov2640::Ov2640() :
-	Utility::Mod::ModuleBase{Utility::Mod::Module::Camera}
+	Mod::ModuleBase{Mod::Module::Camera}
 {
 }
 
@@ -264,9 +264,9 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 
 #endif
 
-void Ov2640::getFieldValue(Utility::Mod::Fld::Req aRequest, Utility::Mod::Fld::OnResponseCallback aOnResponse)
+void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback aOnResponse)
 {
-	using namespace Utility::Mod;
+	using namespace Mod;
 
 	switch (aRequest.field) {
 		case Fld::Field::FrameSize:

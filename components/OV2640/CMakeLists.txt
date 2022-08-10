@@ -68,4 +68,5 @@ idf_component_register(
 		esp_http_server
 		asio
 		freertos
+		module
 		cam)

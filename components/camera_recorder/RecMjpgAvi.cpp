@@ -39,17 +39,17 @@ bool RecMjpgAvi::startWrap(const char *filename)
 }
 
 RecMjpgAvi::RecMjpgAvi() :
-	Utility::Mod::ModuleBase(Utility::Mod::Module::Camera),
+	Mod::ModuleBase(Mod::Module::Camera),
 	sub{{&RecMjpgAvi::startWrap, this}, {&RecMjpgAvi::stop, this}}
 {
 	ESP_LOGI(kTag, "RecMjpgAvi initialized");
 }
 
-void RecMjpgAvi::getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnResponseCallback aOnResponse)
+void RecMjpgAvi::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResponse)
 {
 	switch (aReq.field) {
-		case Utility::Mod::Fld::Field::Recording:
-			aOnResponse(makeResponse<Utility::Mod::Module::Camera, Utility::Mod::Fld::Field::Recording>(
+		case Mod::Fld::Field::Recording:
+			aOnResponse(makeResponse<Mod::Module::Camera, Mod::Fld::Field::Recording>(
 				nullptr != stat.fd));
 
 			break;

@@ -19,31 +19,31 @@ GS_UTILITY_LOGD_METHOD_SET_ENABLED(Wifi::Sta, getFieldValue, 1)
 
 namespace Wifi {
 
-static constexpr auto kModule = Utility::Mod::Module::WifiStaConnection;
+static constexpr auto kModule = Mod::Module::WifiStaConnection;
 
-Sta::Sta(esp_netif_t **aEspNetif) : Utility::Mod::ModuleBase{kModule}, espNetif{aEspNetif}
+Sta::Sta(esp_netif_t **aEspNetif) : Mod::ModuleBase{kModule}, espNetif{aEspNetif}
 {
 }
 
-void Sta::getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnResponseCallback aOnResponse)
+void Sta::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResponse)
 {
 	switch (aReq.field) {
-		case Utility::Mod::Fld::Field::Initialized: {
+		case Mod::Fld::Field::Initialized: {
 			GS_UTILITY_LOGD_METHOD(Wifi::kDebugTag, Sta, getFieldValue, "Field::Initialized");
 			wifi_ap_record_t wifiApRecord{};
-			aOnResponse(makeResponse<kModule, Utility::Mod::Fld::Field::Initialized>(
+			aOnResponse(makeResponse<kModule, Mod::Fld::Field::Initialized>(
 				ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)));
 
 			break;
 		}
-		case Utility::Mod::Fld::Field::Ip: {
+		case Mod::Fld::Field::Ip: {
 			wifi_ap_record_t wifiApRecord{};
 
 			if (ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)) {
 				esp_netif_ip_info_t espNetifIpInfo{};
 
 				if (*espNetif != nullptr && ESP_OK == esp_netif_get_ip_info(*espNetif, &espNetifIpInfo)) {
-					aOnResponse(makeResponse<kModule, Utility::Mod::Fld::Field::Ip>(
+					aOnResponse(makeResponse<kModule, Mod::Fld::Field::Ip>(
 						asio::ip::address_v4{espNetifIpInfo.ip.addr}));
 				}
 			}

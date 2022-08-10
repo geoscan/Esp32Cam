@@ -22,7 +22,7 @@
 #include "sd_fat.h"
 #include "wifi.h"
 #include "utility/time.hpp"
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 #include "esp_wifi.h"
 #include "sub/Cam.hpp"
 
@@ -217,11 +217,11 @@ static void printStatus(httpd_req_t *req, Error res)
 
 	{
 		bool wifiStaConnected = false;
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
-			Utility::Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
+			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::WifiStaConnection,
-			Utility::Mod::Fld::Field::Ip>(
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
+			Mod::Fld::Field::Ip>(
 			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
 			{
 				aAddr.match(

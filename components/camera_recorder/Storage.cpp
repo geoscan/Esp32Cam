@@ -25,20 +25,20 @@ namespace CameraRecorder {
 /// \brief Counts frames stored on SD card
 /// \return `ESP_ERR_NOT_FOUND` if no storage is available
 ///
-Storage::Storage() : Utility::Mod::ModuleBase{Utility::Mod::Module::Camera}
+Storage::Storage() : Mod::ModuleBase{Mod::Module::Camera}
 {
 	ESP_LOGI(CameraRecorder::kDebugTag, "initializing Storage");
 }
 
-void Storage::getFieldValue(Utility::Mod::Fld::Req aRequest, Utility::Mod::Fld::OnResponseCallback aOnResponse)
+void Storage::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback aOnResponse)
 {
 	GS_UTILITY_LOG_SECTIONV(CameraRecorder::kDebugTag, "Storage::getFieldValue");
 	switch (aRequest.field) {
-		case Utility::Mod::Fld::Field::CaptureCount: {
+		case Mod::Fld::Field::CaptureCount: {
 			unsigned count = 0;
 
 			if (ESP_OK == countFrames(count)) {
-				aOnResponse(makeResponse<Utility::Mod::Module::Camera, Utility::Mod::Fld::Field::CaptureCount>(count));
+				aOnResponse(makeResponse<Mod::Module::Camera, Mod::Fld::Field::CaptureCount>(count));
 			}
 
 			break;
