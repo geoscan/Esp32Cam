@@ -84,8 +84,16 @@ struct Req {
 
 using OnResponseCallback = typename std::function<void(Resp)>;
 
-}  // namespace Fld
+struct WriteReq {
+	Field field;  ///< Requested field
+};
 
+struct WriteResp {
+};
+
+using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
+
+}  // namespace Fld
 }  // namespace Mod
 
 #endif // UTILITY_UTILITY_MOD_TYPES_HPP_
