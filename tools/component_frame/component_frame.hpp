@@ -1,7 +1,7 @@
 //
 // COMPONENT_FRAME.hpp
 //
-// Created:
+// Created: COMPONENT_FRAME_DATE
 //  Author:
 //
 
