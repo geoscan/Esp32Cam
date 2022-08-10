@@ -20,4 +20,5 @@ idf_component_register(
 		uart
 		socket
 		wq
+		module
 )
