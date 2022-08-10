@@ -8,15 +8,14 @@
 #if !defined(UTILITY_UTILITY_MOD_TYPES_HPP_)
 #define UTILITY_UTILITY_MOD_TYPES_HPP_
 
-#include "sub/Subscription.hpp"
 #include "utility/Algorithm.hpp"
+#include <asio.hpp>
 #include <cstdint>
 #include <mapbox/variant.hpp>
 #include <Rr/Trait/StoreType.hpp>
 #include <utility>
 #include <functional>
 
-namespace Utility {
 namespace Mod {
 
 enum class Module : std::uint8_t {
@@ -84,11 +83,9 @@ struct Req {
 };
 
 using OnResponseCallback = typename std::function<void(Resp)>;
-using ModuleGetFieldMult = typename ::Sub::NoLockKey<void(Req, OnResponseCallback)>;  ///< \pre NoLockKey implies that the module must ensure its MT-safety
 
 }  // namespace Fld
 
 }  // namespace Mod
-}  // namespace Utility
 
 #endif // UTILITY_UTILITY_MOD_TYPES_HPP_

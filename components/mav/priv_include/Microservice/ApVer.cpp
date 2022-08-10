@@ -24,7 +24,7 @@ GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Mic::ApVer, process, 0);
 namespace Mav {
 namespace Mic {
 
-ApVer::ApVer() : ModuleBase{Utility::Mod::Module::Autopilot}, version{}, updated{}
+ApVer::ApVer() : ModuleBase{Mod::Module::Autopilot}, version{}, updated{}
 {
 }
 
@@ -90,31 +90,31 @@ Microservice::Ret ApVer::process(mavlink_message_t &aMessage, Microservice::OnRe
 	return ret;
 }
 
-void ApVer::getFieldValue(Utility::Mod::Fld::Req aReq, Utility::Mod::Fld::OnResponseCallback aOnResponse)
+void ApVer::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResponse)
 {
 	if (updated.version) {
 		switch (aReq.field) {
-			case Utility::Mod::Fld::Field::VersionCommitHash:
-				aOnResponse(makeResponse<Utility::Mod::Module::Autopilot,
-					Utility::Mod::Fld::Field::VersionCommitHash>(version.swCommit));
+			case Mod::Fld::Field::VersionCommitHash:
+				aOnResponse(makeResponse<Mod::Module::Autopilot,
+					Mod::Fld::Field::VersionCommitHash>(version.swCommit));
 
 				break;
 
-			case Utility::Mod::Fld::Field::VersionSoftwareMajor:
-				aOnResponse(makeResponse<Utility::Mod::Module::Autopilot,
-					Utility::Mod::Fld::Field::VersionSoftwareMajor>(version.swMajor));
+			case Mod::Fld::Field::VersionSoftwareMajor:
+				aOnResponse(makeResponse<Mod::Module::Autopilot,
+					Mod::Fld::Field::VersionSoftwareMajor>(version.swMajor));
 
 				break;
 
-			case Utility::Mod::Fld::Field::VersionSoftwareMinor:
-				aOnResponse(makeResponse<Utility::Mod::Module::Autopilot,
-					Utility::Mod::Fld::Field::VersionSoftwareMinor>(version.swMinor));
+			case Mod::Fld::Field::VersionSoftwareMinor:
+				aOnResponse(makeResponse<Mod::Module::Autopilot,
+					Mod::Fld::Field::VersionSoftwareMinor>(version.swMinor));
 
 				break;
 
-			case Utility::Mod::Fld::Field::VersionSoftwarePatch:
-				aOnResponse(makeResponse<Utility::Mod::Module::Autopilot,
-					Utility::Mod::Fld::Field::VersionSoftwarePatch>(version.swRev));
+			case Mod::Fld::Field::VersionSoftwarePatch:
+				aOnResponse(makeResponse<Mod::Module::Autopilot,
+					Mod::Fld::Field::VersionSoftwarePatch>(version.swRev));
 
 				break;
 

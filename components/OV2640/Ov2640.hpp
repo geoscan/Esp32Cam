@@ -7,13 +7,13 @@
 #include <memory>
 #include "asio.hpp"
 #include "cam/Camera.hpp"
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 
 // Wrapper around C API for OV2640
 
 // --------------------------- Ov2640 --------------------------- //
 
-class Ov2640 : public Cam::CameraBase, public Utility::Mod::ModuleBase {
+class Ov2640 : public Cam::CameraBase, public Mod::ModuleBase {
 public:
 	Ov2640();
 	void init() override;
@@ -36,7 +36,7 @@ private:
 	};
 
 protected:
-	void getFieldValue(Utility::Mod::Fld::Req, Utility::Mod::Fld::OnResponseCallback) override;
+	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 
 	struct {
 		bool initialized = false;

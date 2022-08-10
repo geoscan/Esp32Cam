@@ -1,13 +1,12 @@
 //
-// Sys.cpp
+// ModuleBase.cpp
 //
 // Created on: Apr 22, 2022
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/mod/ModuleBase.hpp"
+#include "ModuleBase.hpp"
 
-namespace Utility {
 namespace Mod {
 namespace Fld {
 
@@ -23,4 +22,3 @@ void ModuleBase::getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnRespons
 }
 
 }  // namespace Mod
-}  // namespace Utility

@@ -1,5 +1,5 @@
 //
-// Sys.hpp
+// ModuleBase.hpp
 //
 // Created on: Apr 22, 2022
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
@@ -12,12 +12,11 @@
 #ifndef SUB_INCLUDE_SUB_SYS_HPP_
 #define SUB_INCLUDE_SUB_SYS_HPP_
 
-#include "utility/mod/Types.hpp"
+#include "Types.hpp"
 #include <Rr/Util/Module.hpp>
 #include <mutex>
 #include <list>
 
-namespace Utility {
 namespace Mod {
 
 class ModuleBase;
@@ -88,6 +87,5 @@ private:
 };
 
 }  // namespace Mod
-}  // namespace Utility
 
 #endif // SUB_INCLUDE_SUB_SYS_HPP_

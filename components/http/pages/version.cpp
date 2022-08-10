@@ -1,7 +1,7 @@
 #include "pages.h"
 #include "Ov2640.hpp"
 #include "version.hpp"
-#include "utility/mod/ModuleBase.hpp"
+#include "module/ModuleBase.hpp"
 #include <cstring>
 #include <esp_err.h>
 #include <esp_http_server.h>
@@ -19,14 +19,14 @@ esp_err_t infoPageHandler(httpd_req_t *req)
 		std::uint32_t revPatch = 0;
 		std::uint32_t hashCommit = 0;
 
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::Autopilot,
-			Utility::Mod::Fld::Field::VersionSoftwareMajor>([&revMajor](unsigned a){revMajor = a;});
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::Autopilot,
-			Utility::Mod::Fld::Field::VersionSoftwareMinor>([&revMinor](unsigned a){revMinor = a;});
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::Autopilot,
-			Utility::Mod::Fld::Field::VersionSoftwarePatch>([&revPatch](unsigned a){revPatch = a;});
-		Utility::Mod::ModuleBase::moduleFieldReadIter<Utility::Mod::Module::Autopilot,
-			Utility::Mod::Fld::Field::VersionCommitHash>([&hashCommit](unsigned a){hashCommit = a;});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Autopilot,
+			Mod::Fld::Field::VersionSoftwareMajor>([&revMajor](unsigned a){revMajor = a;});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Autopilot,
+			Mod::Fld::Field::VersionSoftwareMinor>([&revMinor](unsigned a){revMinor = a;});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Autopilot,
+			Mod::Fld::Field::VersionSoftwarePatch>([&revPatch](unsigned a){revPatch = a;});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Autopilot,
+			Mod::Fld::Field::VersionCommitHash>([&hashCommit](unsigned a){hashCommit = a;});
 
 		const auto versionStringLength = snprintf(nullptr, 0, "%d.%d.%d-%x", revMajor, revMinor, revPatch, hashCommit);
 		char versionString[versionStringLength + 1] = {0};
