@@ -17,7 +17,7 @@ PRINT_PREFIX := "\\n\\n\\n------------------ "
 EXE_PYTHON := python3
 EXE_NJET := $(PATH_NJET)/njet
 
-# The ESP-IDF framework relies on certain paths being 
+# The ESP-IDF framework relies on certain paths being
 # present in the environment. This snippet serves as
 # a shortcut setting them up
 SNIPPET_EXPORT_PATHS := \
@@ -26,7 +26,7 @@ SNIPPET_EXPORT_PATHS := \
 	export IDF_TOOLS_PATH=$(PATH_IDF_TOOLS_PATH)
 
 # The chain evaluates as build -> build_preconfigured -> build_
-# All the calls that get "proxied" through %_preconfigured must 
+# All the calls that get "proxied" through %_preconfigured must
 # abide the naming rule, i.e. "<TARGET_NAME>_" (note the underscore)
 
 build: build_preconfigured
@@ -34,6 +34,18 @@ build_:
 	idf.py build
 
 rebuild: build_preconfigured
+
+# Usage example: make new_component COMPONENT_FRAME=parameter COMPONENT_FRAME_NAMESPACE=Prm
+new_component:
+	mkdir -p components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)
+	cp tools/component_frame/CMakeLists.txt components/$(COMPONENT_FRAME)
+	cp tools/component_frame/Kconfig.projbuild components/$(COMPONENT_FRAME)
+	cp tools/component_frame/component_frame.cpp components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)/$(COMPONENT_FRAME).cpp
+	cp tools/component_frame/component_frame.hpp components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)/$(COMPONENT_FRAME).hpp
+	export COMPONENT_FRAME_DATE=`date +%Y-%m-%d` && find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i "s/COMPONENT_FRAME_DATE/$${COMPONENT_FRAME_DATE}/g"
+	export COMPONENT_FRAME_UPPER=`echo $(COMPONENT_FRAME) | tr a-z A-Z` && find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i "s/COMPONENT_FRAME_UPPER/$${COMPONENT_FRAME_UPPER}/g"
+	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME_NAMESPACE/$(COMPONENT_FRAME_NAMESPACE)/g'
+	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME/$(COMPONENT_FRAME)/g'
 
 clean: clean_preconfigured
 clean_:
@@ -47,7 +59,7 @@ pyclean: pyclean_preconfigured
 pyclean_:
 	idf.py python-clean
 
-jlinkespconnect: jlinkespconnect_preconfigured 
+jlinkespconnect: jlinkespconnect_preconfigured
 jlinkespconnect_:
 	$(EXE_PYTHON) $(PATH_JLINK_SCRIPTS)/jlinkesp32.py
 
@@ -105,7 +117,7 @@ configure:
 	@echo $(PRINT_PREFIX) Installing ESP IDF
 	$(SNIPPET_EXPORT_PATHS) && $(PATH_IDF_PATH)/install.sh
 	echo "$(SNIPPET_EXPORT_PATHS) && . $(PATH_IDF_PATH)/export.sh" > $(PATH_ENVIRONMENT)
-	
+
 	@echo $(PRINT_PREFIX) SUCCESS
 	@echo Configuring done
 	@echo Use \"make *\" or \". $(PATH_ENVIRONMENT)\" and further calls to manage your project
