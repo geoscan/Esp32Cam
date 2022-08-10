@@ -35,6 +35,7 @@ build_:
 
 rebuild: build_preconfigured
 
+# Usage example: make new_component COMPONENT_FRAME=parameter COMPONENT_FRAME_NAMESPACE=Prm
 new_component:
 	mkdir -p components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)
 	cp tools/component_frame/CMakeLists.txt components/$(COMPONENT_FRAME)
