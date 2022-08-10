@@ -89,6 +89,11 @@ struct WriteReq {
 };
 
 struct WriteResp {
+	enum class Result {
+		Ok,
+	};
+
+	Result result;
 };
 
 using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
