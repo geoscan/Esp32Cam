@@ -21,4 +21,8 @@ void ModuleBase::getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnRespons
 {
 }
 
+void ModuleBase::setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb)
+{
+}
+
 }  // namespace Mod
