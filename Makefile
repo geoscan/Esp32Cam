@@ -41,6 +41,7 @@ new_component:
 	cp tools/component_frame/Kconfig.projbuild components/$(COMPONENT_FRAME)
 	cp tools/component_frame/component_frame.cpp components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)/$(COMPONENT_FRAME).cpp
 	cp tools/component_frame/component_frame.hpp components/$(COMPONENT_FRAME)/$(COMPONENT_FRAME)/$(COMPONENT_FRAME).hpp
+	export COMPONENT_FRAME_DATE=`date +%Y-%m-%d` && find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i "s/COMPONENT_FRAME_DATE/$${COMPONENT_FRAME_DATE}/g"
 	export COMPONENT_FRAME_UPPER=`echo $(COMPONENT_FRAME) | tr a-z A-Z` && find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i "s/COMPONENT_FRAME_UPPER/$${COMPONENT_FRAME_UPPER}/g"
 	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME_NAMESPACE/$(COMPONENT_FRAME_NAMESPACE)/g'
 	find components/$(COMPONENT_FRAME) -type f | xargs -n 1 sed -i 's/COMPONENT_FRAME/$(COMPONENT_FRAME)/g'
