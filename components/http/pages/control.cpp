@@ -43,6 +43,7 @@ static constexpr const char *kPhoto = "photo"; // value
 static constexpr const char *kWifi = "wifi"; // value
 static constexpr const char *kWifiStaConnected = "wifi_sta_connected"; // value
 static constexpr const char *kWifiStaIp = "wifi_sta_ip"; // value
+static constexpr const char *kCameraResolution = "camera_resolution"; // value
 // Command
 static constexpr const char *kCommand = "command"; // key
 static constexpr const char *kStop = "stop"; // value
@@ -220,8 +221,7 @@ static void printStatus(httpd_req_t *req, Error res)
 		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
 			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
-		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
-			Mod::Fld::Field::Ip>(
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(
 			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
 			{
 				aAddr.match(
@@ -233,6 +233,12 @@ static void printStatus(httpd_req_t *req, Error res)
 						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
 					}
 				);
+			});
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+			[root](const std::pair<int, int> aFrameSize)
+			{
+				int data[2] = {std::get<0>(aFrameSize), std::get<1>(aFrameSize)};
+				cJSON_AddItemReferenceToObject(root, kCameraResolution, cJSON_CreateIntArray(data, 2));
 			});
 	}
 
