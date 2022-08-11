@@ -37,6 +37,7 @@ private:
 
 protected:
 	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
+	void setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback) override;
 
 	struct {
 		bool initialized = false;
