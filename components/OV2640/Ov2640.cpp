@@ -231,29 +231,32 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 {
 	switch (aReq.field) {
 		case Mod::Fld::Field::FrameSize: {
-			auto frameSize = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameSize>();
+			const auto frameSize = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameSize>();
+			nvs_handle_t nvsHandle{};
+			esp_err_t err = nvs_open(kNvsKey, NVS_READWRITE, &nvsHandle);
 
-			for (auto &map : kFrameSizeModeMap) {
-				if (std::get<0>(frameSize) == map.w && std::get<1>(frameSize) == map.h) {
-					nvs_handle_t nvsHandle{};
-					esp_err_t err = nvs_open(kNvsKey, NVS_READWRITE, &nvsHandle);
+			if (err == ESP_OK) {
+				const auto it = std::find_if(kFrameSizeModeMap.begin(), kFrameSizeModeMap.end(),
+					[&frameSize](const FrameSizeModeMap &aMap) {
+						return aMap.w == std::get<0>(frameSize) && aMap.h == std::get<1>(frameSize);
+					});
 
-					if (err == ESP_OK) {
-						err = nvs_set_u8(nvsHandle, kNvsFrameSize, static_cast<std::uint8_t>(map.mode));
+				if (kFrameSizeModeMap.end() != it) {
+					err = nvs_set_u8(nvsHandle, kNvsFrameSize, static_cast<std::uint8_t>(it->mode));
 
-						if (err != ESP_OK) {
-							aCb({Mod::Fld::RequestResult::StorageError});
-							ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
-						} else {
-							aCb({Mod::Fld::RequestResult::Ok});
-						}
-					} else {
-						ESP_LOGW(kTag, "Unable to open NVS storage, error \"%s\"", esp_err_to_name(err));
+					if (err != ESP_OK) {
 						aCb({Mod::Fld::RequestResult::StorageError});
+						ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
+					} else {
+						aCb({Mod::Fld::RequestResult::Ok});
 					}
-
-					break;
+				} else {
+					ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
+					aCb({Mod::Fld::RequestResult::OutOfRange});
 				}
+			} else {
+				ESP_LOGW(kTag, "Unable to open NVS storage, error \"%s\"", esp_err_to_name(err));
+				aCb({Mod::Fld::RequestResult::StorageError});
 			}
 
 			break;
