@@ -64,6 +64,7 @@ enum Error : esp_err_t {
 	ErrSd = 4,
 	ErrIpParse = 5,
 	ErrOther = 6,
+	OkNoRequest = 7,
 
 	ErrMax,
 };
@@ -76,6 +77,7 @@ static std::array<const char *, static_cast<unsigned>(ErrMax)> sErrorMessages {{
 	"Storage or filesystem error",
 	"IP parsing error",
 	"",
+	""
 }};
 
 static bool shotFile(const char *);
@@ -277,8 +279,11 @@ static void printStatus(httpd_req_t *req, Error res)
 			int data[2] = {std::get<0>(aFrameSize), std::get<1>(aFrameSize)};
 			cJSON_AddItemReferenceToObject(root, kCameraResolution, cJSON_CreateIntArray(data, 2));
 		});
-	// Produce response to the request
-	cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
+
+	if (res != OkNoRequest) {
+		// Produce response to the request
+		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
+	}
 
 	if (res != Ok) {
 		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
@@ -293,7 +298,7 @@ static void printStatus(httpd_req_t *req, Error res)
 
 extern "C" esp_err_t controlHandler(httpd_req_t *req)
 {
-	Error ret = Ok;
+	Error ret = OkNoRequest;
 
 	auto value = getArgValueByKey(req, kFunction);
 
