@@ -285,7 +285,7 @@ static void printStatus(httpd_req_t *req, Error res)
 		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
 	}
 
-	if (res != Ok) {
+	if (!Utility::Algorithm::in(res, Ok, OkNoRequest)) {
 		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
 	}
 
