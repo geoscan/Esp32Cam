@@ -43,7 +43,9 @@ static constexpr const char *kPhoto = "photo"; // value
 static constexpr const char *kWifi = "wifi"; // value
 static constexpr const char *kWifiStaConnected = "wifi_sta_connected"; // value
 static constexpr const char *kWifiStaIp = "wifi_sta_ip"; // value
-static constexpr const char *kCameraResolution = "camera_resolution"; // value
+static constexpr const char *kCameraResolution = "camera_frame_size"; // value
+static constexpr const char *kHeight = "height";
+static constexpr const char *kWidth = "width";
 // Command
 static constexpr const char *kCommand = "command"; // key
 static constexpr const char *kStop = "stop"; // value
@@ -217,7 +219,30 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 		default:
 			return Err;
 	}
+}
 
+static Error processCameraResolution(std::string aWidth, std::string aHeight)
+{
+	Error err = Ok;
+	int width = atoi(aWidth.c_str());
+	int height = atoi(aHeight.c_str());
+
+	if (0 == width || 0 == height) {
+		err = ErrArg;
+	} else {
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>({width, height},
+			[&err](Mod::Fld::WriteResp aWriteResp)
+			{
+				if (Mod::Fld::RequestResult::Ok == aWriteResp.result) {
+					err = Ok;
+				} else {
+					err = ErrOther;
+					sErrorMessages[ErrOther] = Mod::Fld::RequestResult::toCstr(aWriteResp.result);
+				}
+			});
+	}
+
+	return err;
 }
 
 static void printStatus(httpd_req_t *req, Error res)
@@ -286,6 +311,8 @@ extern "C" esp_err_t controlHandler(httpd_req_t *req)
 				getArgValueByKey(req, kIp),
 				getArgValueByKey(req, kGateway),
 				getArgValueByKey(req, kNetmask));
+		} else if (value == kCameraResolution) {
+			ret = processCameraResolution(getArgValueByKey(req, kWidth), getArgValueByKey(req, kHeight));
 		} else {
 			ret = ErrArg;
 		}
