@@ -94,12 +94,20 @@ struct WriteReq {
 	FieldVariant variant;
 };
 
-struct WriteResp {
-	enum class Result {
-		Ok,
+struct RequestResult {
+	enum Result {
+		Ok = 0,
+		StorageError,
+		OutOfRange,
+
+		N,
 	};
 
-	Result result;
+	static const char *toCstr(Result);
+};
+
+struct WriteResp {
+	RequestResult::Result result;
 };
 
 using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
