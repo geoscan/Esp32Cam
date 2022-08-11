@@ -12,12 +12,11 @@ namespace Fld {
 
 const char *RequestResult::toCstr(Mod::Fld::RequestResult::Result aResult)
 {
-	static constexpr const char *names[] = {
+	static constexpr std::array<const char *, static_cast<unsigned>(Result::N)> names {{
 		"Ok",
 		"Storage error",
 		"Value is out of range, or unacceptible"
-	};
-	static_assert(sizeof(names) / sizeof(names[0]) == static_cast<unsigned>(Result::N), "");
+	}};
 	return names[static_cast<unsigned>(aResult)];
 }
 
