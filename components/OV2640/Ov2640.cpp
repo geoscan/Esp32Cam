@@ -252,6 +252,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 							aCb({Mod::Fld::RequestResult::Ok});
 						}
 					} else {
+						aCb({Mod::Fld::RequestResult::OutOfRange});
 						ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold", it->w, it->h);
 					}
 				} else {
