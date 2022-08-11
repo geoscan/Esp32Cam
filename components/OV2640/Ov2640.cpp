@@ -242,13 +242,17 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 					});
 
 				if (kFrameSizeModeMap.end() != it) {
-					err = nvs_set_u8(nvsHandle, kNvsFrameSize, static_cast<std::uint8_t>(it->mode));
+					if (it->mode <= kResolutionLimit) {
+						err = nvs_set_u8(nvsHandle, kNvsFrameSize, static_cast<std::uint8_t>(it->mode));
 
-					if (err != ESP_OK) {
-						aCb({Mod::Fld::RequestResult::StorageError});
-						ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
+						if (err != ESP_OK) {
+							aCb({Mod::Fld::RequestResult::StorageError});
+							ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
+						} else {
+							aCb({Mod::Fld::RequestResult::Ok});
+						}
 					} else {
-						aCb({Mod::Fld::RequestResult::Ok});
+						ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold", it->w, it->h);
 					}
 				} else {
 					ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
