@@ -59,7 +59,7 @@ public:
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
-				mod.setFieldValue({If}, aCb);
+				mod.setFieldValue({If, field}, aCb);
 			}
 		}
 	}
