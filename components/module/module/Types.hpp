@@ -61,21 +61,26 @@ template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<u
 template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
 
+using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
+	mapbox::util::variant<asio::ip::address_v4>>;
+
+struct FieldVariant : public FieldVariantBase {
+	using FieldVariantBase::FieldVariantBase;
+
+	template <Module M, Field F>
+	const typename GetType<F, M>::Type &getUnchecked()
+	{
+		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
+	}
+};
+
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
 	/// \brief Response variant type.
 	///
-	using Variant = mapbox::util::variant<
-		None,
-		unsigned,
-		std::pair<int, int>,
-		bool,
-		const char *,
-		mapbox::util::variant<asio::ip::address_v4>
-	>;
 
-	Variant variant;  ///< The actual response
+	FieldVariant variant;  ///< The actual response
 };
 
 struct Req {
@@ -84,8 +89,30 @@ struct Req {
 
 using OnResponseCallback = typename std::function<void(Resp)>;
 
-}  // namespace Fld
+struct WriteReq {
+	Field field;  ///< Requested field
+	FieldVariant variant;
+};
 
+struct RequestResult {
+	enum Result {
+		Ok = 0,
+		StorageError,
+		OutOfRange,
+
+		N,
+	};
+
+	static const char *toCstr(Result);
+};
+
+struct WriteResp {
+	RequestResult::Result result;
+};
+
+using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
+
+}  // namespace Fld
 }  // namespace Mod
 
 #endif // UTILITY_UTILITY_MOD_TYPES_HPP_

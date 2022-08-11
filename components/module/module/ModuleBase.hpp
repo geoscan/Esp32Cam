@@ -54,8 +54,18 @@ public:
 	template <Module Im, Fld::Field If>
 	using Field = typename Fld::GetType<If, Im>::Type;
 
-	template <Module Im, Fld::Field If, class Tcb>
-	static void moduleFieldReadIter(Tcb &&aCb)
+	template <Module Im, Fld::Field If>
+	static void moduleFieldWriteIter(const typename Fld::GetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
+	{
+		for (auto &mod : ModuleBase::getIterators()) {
+			if (mod.getModule() == Im || Im == Module::All) {
+				mod.setFieldValue({If, field}, aCb);
+			}
+		}
+	}
+
+	template <Module Im, Fld::Field If>
+	static void moduleFieldReadIter(std::function<void(typename Fld::GetType<If, Im>::Type)> aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
@@ -79,6 +89,7 @@ protected:
 	}
 
 	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);
+	virtual void setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb);
 
 private:
 	struct {

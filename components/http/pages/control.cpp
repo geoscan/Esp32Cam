@@ -43,6 +43,9 @@ static constexpr const char *kPhoto = "photo"; // value
 static constexpr const char *kWifi = "wifi"; // value
 static constexpr const char *kWifiStaConnected = "wifi_sta_connected"; // value
 static constexpr const char *kWifiStaIp = "wifi_sta_ip"; // value
+static constexpr const char *kCameraResolution = "camera_frame_size"; // value
+static constexpr const char *kHeight = "height";
+static constexpr const char *kWidth = "width";
 // Command
 static constexpr const char *kCommand = "command"; // key
 static constexpr const char *kStop = "stop"; // value
@@ -54,17 +57,28 @@ static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
 
 enum Error : esp_err_t {
-	// Standard ESP's errors
-	Ok      = ESP_OK,
-	Err     = ESP_FAIL,
-	ErrArg  = ESP_ERR_INVALID_ARG,
+	Ok = 0,
+	Err = 1,
+	ErrArg = 2,
+	ErrCam = 3,
+	ErrSd = 4,
+	ErrIpParse = 5,
+	ErrOther = 6,
+	OkNoRequest = 7,
 
-	// Custom errors
-	ErrNone    = ESP_FAIL - 1,
-	ErrCam     = ESP_FAIL - 2,
-	ErrSd      = ESP_FAIL - 3,
-	ErrIpParse = ESP_FAIL - 4,
+	ErrMax,
 };
+
+static std::array<const char *, static_cast<unsigned>(ErrMax)> sErrorMessages {{
+	"",
+	"Unknown error",
+	"Wrong input argument(s)",
+	"Camera Error",
+	"Storage or filesystem error",
+	"IP parsing error",
+	"",
+	""
+}};
 
 static bool shotFile(const char *);
 static Error processPhoto(string name);
@@ -189,7 +203,8 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 		asio::ip::address_v4::bytes_type gateway = asio::ip::make_address_v4(aGateway, arrErr[1]).to_bytes();
 		asio::ip::address_v4::bytes_type netmask = asio::ip::make_address_v4(aNetmask, arrErr[2]).to_bytes();
 
-		if (std::any_of(arrErr.begin(), arrErr.end(), [](const asio::error_code &errCode) {return static_cast<bool>(errCode);}))
+		if (std::any_of(arrErr.begin(), arrErr.end(),
+			[](const asio::error_code &errCode) {return static_cast<bool>(errCode);}))
 		{
 			return ErrIpParse;
 		}
@@ -206,7 +221,30 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 		default:
 			return Err;
 	}
+}
 
+static Error processCameraResolution(std::string aWidth, std::string aHeight)
+{
+	Error err = Ok;
+	int width = atoi(aWidth.c_str());
+	int height = atoi(aHeight.c_str());
+
+	if (0 == width || 0 == height) {
+		err = ErrArg;
+	} else {
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>({width, height},
+			[&err](Mod::Fld::WriteResp aWriteResp)
+			{
+				if (Mod::Fld::RequestResult::Ok == aWriteResp.result) {
+					err = Ok;
+				} else {
+					err = ErrOther;
+					sErrorMessages[ErrOther] = Mod::Fld::RequestResult::toCstr(aWriteResp.result);
+				}
+			});
+	}
+
+	return err;
 }
 
 static void printStatus(httpd_req_t *req, Error res)
@@ -215,13 +253,12 @@ static void printStatus(httpd_req_t *req, Error res)
 
 	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateBool(status.videoRecRunning));
 
-	{
+	{  // Acquire STA connection info (ESP is a STA to some remote WiFi Access Point)
 		bool wifiStaConnected = false;
 		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
 			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
-		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
-			Mod::Fld::Field::Ip>(
+		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(
 			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
 			{
 				aAddr.match(
@@ -235,48 +272,33 @@ static void printStatus(httpd_req_t *req, Error res)
 				);
 			});
 	}
+	// Get camera frame size
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[root](const std::pair<int, int> aFrameSize)
+		{
+			int data[2] = {std::get<0>(aFrameSize), std::get<1>(aFrameSize)};
+			cJSON_AddItemReferenceToObject(root, kCameraResolution, cJSON_CreateIntArray(data, 2));
+		});
 
-	// Response a request
-	if (res != ErrNone) {
-		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool((int)(res == Ok)));
-		if (res != Ok) {
-			switch (res) {
+	if (res != OkNoRequest) {
+		// Produce response to the request
+		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
+	}
 
-				case ErrCam:
-					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("Camera Error"));
-					break;
-
-				case ErrSd:
-					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("Storage or filesystem error"));
-					break;
-
-				case ErrArg:
-					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("Wrong input argument(s)"));
-					break;
-
-				case ErrIpParse:
-					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("IP parsing error"));
-					break;
-
-				default:
-					cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString("Unknown error"));
-					break;
-			}
-		}
+	if (!Utility::Algorithm::in(res, Ok, OkNoRequest)) {
+		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
 	}
 
 	char *json = cJSON_Print(root);
-
 	httpd_resp_set_type(req, "application/json");
 	httpd_resp_send(req, json, strlen(json));
-
 	free(json);
 	cJSON_Delete(root);
 }
 
 extern "C" esp_err_t controlHandler(httpd_req_t *req)
 {
-	Error ret = ErrNone;
+	Error ret = OkNoRequest;
 
 	auto value = getArgValueByKey(req, kFunction);
 
@@ -294,6 +316,10 @@ extern "C" esp_err_t controlHandler(httpd_req_t *req)
 				getArgValueByKey(req, kIp),
 				getArgValueByKey(req, kGateway),
 				getArgValueByKey(req, kNetmask));
+		} else if (value == kCameraResolution) {
+			ret = processCameraResolution(getArgValueByKey(req, kWidth), getArgValueByKey(req, kHeight));
+		} else {
+			ret = ErrArg;
 		}
 	}
 
