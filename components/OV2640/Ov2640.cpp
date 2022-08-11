@@ -12,37 +12,33 @@ using namespace std;
 static constexpr const char *kTag = "[OV2640]";
 static constexpr const char *kNvsKey = "Ov2640";
 static constexpr const char *kNvsFrameSize = "FrameSize";
-static constexpr auto kResolutionLimit = FRAMESIZE_VGA;
+static constexpr auto kResolutionLimit = FRAMESIZE_SVGA;
 
-struct FrameSizeModeMap {
-	framesize_t mode;
-	std::uint16_t w;
-	std::uint16_t h;
-};
+using FrameSizeModeMap = std::pair<int, int>;
 
 static constexpr std::array<FrameSizeModeMap, 22> kFrameSizeModeMap {{
-	{FRAMESIZE_96X96, 96, 96},
-	{FRAMESIZE_QQVGA, 160, 120},
-	{FRAMESIZE_QCIF, 176, 144},
-	{FRAMESIZE_HQVGA, 240, 176},
-	{FRAMESIZE_240X240, 240, 240},
-	{FRAMESIZE_QVGA, 320, 240},
-	{FRAMESIZE_CIF, 400, 296},
-	{FRAMESIZE_HVGA, 480, 320},
-	{FRAMESIZE_VGA, 640, 480},
-	{FRAMESIZE_SVGA, 800, 600},
-	{FRAMESIZE_XGA, 1024, 768},
-	{FRAMESIZE_HD, 1280, 720},
-	{FRAMESIZE_SXGA, 1280, 1024},
-	{FRAMESIZE_UXGA, 1600, 1200},
-	{FRAMESIZE_FHD, 1920, 1080},
-	{FRAMESIZE_P_HD, 720, 1280},
-	{FRAMESIZE_P_3MP, 864, 1536},
-	{FRAMESIZE_QXGA, 2048, 1536},
-	{FRAMESIZE_QHD, 2560, 1440},
-	{FRAMESIZE_WQXGA, 2560, 1600},
-	{FRAMESIZE_P_FHD, 1080, 1920},
-	{FRAMESIZE_QSXGA, 2560, 1920},
+	{96, 96},
+	{160, 120},
+	{176, 144},
+	{240, 176},
+	{240, 240},
+	{320, 240},
+	{400, 296},
+	{480, 320},
+	{640, 480},
+	{800, 600},
+	{1024, 768},
+	{1280, 720},
+	{1280, 1024},
+	{1600, 1200},
+	{1920, 1080},
+	{720, 1280},
+	{864, 1536},
+	{2048, 1536},
+	{2560, 1440},
+	{2560, 1600},
+	{1080, 1920},
+	{2560, 1920},
 }};
 
 Ov2640::Ov2640() :
@@ -118,7 +114,7 @@ void Ov2640::init()
 			err = nvs_get_u8(nvsHandle, kNvsFrameSize, &frame);
 
 			if (err == ESP_OK) {
-				if (frame <= kResolutionLimit) {
+				if (frame < kResolutionLimit) {
 					cameraConfig.frame_size = static_cast<framesize_t>(frame);
 				} else {
 					ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
@@ -132,13 +128,8 @@ void Ov2640::init()
 	}
 
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
-
-	for (const auto &map : kFrameSizeModeMap) {
-		if (map.mode == cameraConfig.frame_size) {
-			status.frame.w = map.w;
-			status.frame.h = map.h;
-		}
-	}
+	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
+	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
 }
 
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
@@ -236,14 +227,20 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 			esp_err_t err = nvs_open(kNvsKey, NVS_READWRITE, &nvsHandle);
 
 			if (err == ESP_OK) {
-				const auto it = std::find_if(kFrameSizeModeMap.begin(), kFrameSizeModeMap.end(),
-					[&frameSize](const FrameSizeModeMap &aMap) {
-						return aMap.w == std::get<0>(frameSize) && aMap.h == std::get<1>(frameSize);
-					});
+				std::uint8_t mode = 0;
+				bool mapped = false;
 
-				if (kFrameSizeModeMap.end() != it) {
-					if (it->mode <= kResolutionLimit) {
-						err = nvs_set_u8(nvsHandle, kNvsFrameSize, static_cast<std::uint8_t>(it->mode));
+				for (; mode <= kFrameSizeModeMap.size(); ++mode) {
+					if (kFrameSizeModeMap[mode] == frameSize) {
+						mapped = true;
+
+						break;
+					}
+				}
+
+				if (mapped) {
+					if (mode < kResolutionLimit) {
+						err = nvs_set_u8(nvsHandle, kNvsFrameSize, mode);
 
 						if (err != ESP_OK) {
 							aCb({Mod::Fld::RequestResult::StorageError});
@@ -253,7 +250,9 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 						}
 					} else {
 						aCb({Mod::Fld::RequestResult::OutOfRange});
-						ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold", it->w, it->h);
+						ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold %dx%d", std::get<0>(frameSize),
+							std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[kResolutionLimit - 1]),
+							std::get<1>(kFrameSizeModeMap[kResolutionLimit - 1]));
 					}
 				} else {
 					ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
