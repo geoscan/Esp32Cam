@@ -216,7 +216,7 @@ static void printStatus(httpd_req_t *req, Error res)
 
 	cJSON_AddItemToObject(root, kVideoRecord, cJSON_CreateBool(status.videoRecRunning));
 
-	{
+	{  // Acquire STA connection info (ESP is a STA to some remote WiFi Access Point)
 		bool wifiStaConnected = false;
 		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection,
 			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
@@ -234,13 +234,14 @@ static void printStatus(httpd_req_t *req, Error res)
 					}
 				);
 			});
-		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
-			[root](const std::pair<int, int> aFrameSize)
-			{
-				int data[2] = {std::get<0>(aFrameSize), std::get<1>(aFrameSize)};
-				cJSON_AddItemReferenceToObject(root, kCameraResolution, cJSON_CreateIntArray(data, 2));
-			});
 	}
+	// Get camera frame size
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[root](const std::pair<int, int> aFrameSize)
+		{
+			int data[2] = {std::get<0>(aFrameSize), std::get<1>(aFrameSize)};
+			cJSON_AddItemReferenceToObject(root, kCameraResolution, cJSON_CreateIntArray(data, 2));
+		});
 
 	// Response a request
 	if (res != ErrNone) {
@@ -300,6 +301,8 @@ extern "C" esp_err_t controlHandler(httpd_req_t *req)
 				getArgValueByKey(req, kIp),
 				getArgValueByKey(req, kGateway),
 				getArgValueByKey(req, kNetmask));
+		} else {
+			ret = ErrArg;
 		}
 	}
 
