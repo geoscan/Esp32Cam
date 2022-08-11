@@ -196,7 +196,9 @@ void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback 
 
 	switch (aRequest.field) {
 		case Fld::Field::FrameSize:
-			aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameSize>(status.frame.w, status.frame.h));
+			if (status.initialized) {
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameSize>(status.frame.w, status.frame.h));
+			}
 
 			break;
 
@@ -206,12 +208,16 @@ void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback 
 			break;
 
 		case Fld::Field::ModelName:
-			aOnResponse(makeResponse<Module::Camera, Fld::Field::ModelName>("OV2640"));
+			if (status.initialized) {
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::ModelName>("OV2640"));
+			}
 
 			break;
 
 		case Fld::Field::VendorName:
-			aOnResponse(makeResponse<Module::Camera, Fld::Field::VendorName>("OmniVision"));
+			if (status.initialized) {
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::VendorName>("OmniVision"));
+			}
 
 			break;
 
