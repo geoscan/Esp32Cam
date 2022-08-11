@@ -19,4 +19,5 @@ idf_component_register(
 		asio
 		freertos
 		module
+		nvs_flash
 		cam)
