@@ -48,6 +48,15 @@ Ov2640::Ov2640() :
 
 void Ov2640::init()
 {
+	cameraConfigLoad();
+	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
+	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
+	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
+}
+
+/// \brief Load
+void Ov2640::cameraConfigLoad()
+{
 	// WARNING: The following only represents pinout of ESP32 Ai Thinker
 	enum {
 		CAM_PIN_PWDN  = 32, // Power down is used
@@ -68,7 +77,7 @@ void Ov2640::init()
 		CAM_PIN_PCLK  = 22,
 	};
 
-	camera_config_t cameraConfig = {
+	cameraConfig = camera_config_t{
 		.pin_pwdn     = CAM_PIN_PWDN,
 		.pin_reset    = CAM_PIN_RESET,
 		.pin_xclk     = CAM_PIN_XCLK,
@@ -100,31 +109,25 @@ void Ov2640::init()
 		.n_managed_buffers = 0
 	};
 
-	{
-		nvs_handle_t nvsHandle;
-		auto err = nvs_open(kNvsKey, NVS_READONLY, &nvsHandle);
+	nvs_handle_t nvsHandle;
+	auto err = nvs_open(kNvsKey, NVS_READONLY, &nvsHandle);
+
+	if (err == ESP_OK) {
+		std::uint8_t frame{};
+		err = nvs_get_u8(nvsHandle, kNvsFrameSize, &frame);
 
 		if (err == ESP_OK) {
-			std::uint8_t frame{};
-			err = nvs_get_u8(nvsHandle, kNvsFrameSize, &frame);
-
-			if (err == ESP_OK) {
-				if (frame < kResolutionLimit) {
-					cameraConfig.frame_size = static_cast<framesize_t>(frame);
-				} else {
-					ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
-				}
+			if (frame < kResolutionLimit) {
+				cameraConfig.frame_size = static_cast<framesize_t>(frame);
 			} else {
-				ESP_LOGW(kTag, "Error when reading value \"%s\" \"%s\"", kNvsFrameSize, esp_err_to_name(err));
+				ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
 			}
 		} else {
-			ESP_LOGW(kTag, "Error when accessing NVS \"%s\"", esp_err_to_name(err));
+			ESP_LOGW(kTag, "Error when reading value \"%s\" \"%s\"", kNvsFrameSize, esp_err_to_name(err));
 		}
+	} else {
+		ESP_LOGW(kTag, "Error when accessing NVS \"%s\"", esp_err_to_name(err));
 	}
-
-	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
-	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
-	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
 }
 
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT

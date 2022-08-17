@@ -38,6 +38,10 @@ protected:
 	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 	void setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback) override;
 
+private:
+	void cameraConfigLoad();
+
+private:
 	struct {
 		bool initialized = false;
 		struct {
@@ -45,6 +49,7 @@ protected:
 			int w = -1;
 		} frame;
 	} status;
+	camera_config_t cameraConfig;
 };
 
 
