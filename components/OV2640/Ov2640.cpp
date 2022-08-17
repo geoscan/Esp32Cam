@@ -97,12 +97,6 @@ void Ov2640::init()
 
 		.jpeg_quality = 12, //0-63 lower number means higher quality
 		.fb_count     = 1,  //if more than one, i2s runs in continuous mode. Use only with JPEG
-
-#if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
-		.n_managed_buffers = CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT_N_BUFFERS,  // Use manual buffer management (n_managed_buffers > 0)
-#else
-		.n_managed_buffers = 0,
-#endif
 	};
 
 	{
