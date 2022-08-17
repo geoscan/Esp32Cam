@@ -219,24 +219,24 @@ timeout:
 
 static void camera_fb_deinit()
 {
-	if (s_state->config.n_managed_buffers == 0) {  // Custom buffer management was not used
-		camera_fb_int_t * _fb1 = s_state->fb, * _fb2 = NULL;
-		while(s_state->fb) {
-			_fb2 = s_state->fb;
-			s_state->fb = _fb2->next;
-			if(_fb2->next == _fb1) {
-				s_state->fb = NULL;
-			}
-			free(_fb2->buf);
-			free(_fb2);
-		}
-	} else {
-		for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
-			free(s_managed_buffers[i]->buf);
-			free(s_managed_buffers[i]);
-			free(s_managed_buffers);
-		}
-	}
+    if (s_state->config.n_managed_buffers == 0) {  // Custom buffer management was not used
+        camera_fb_int_t * _fb1 = s_state->fb, * _fb2 = NULL;
+        while(s_state->fb) {
+            _fb2 = s_state->fb;
+            s_state->fb = _fb2->next;
+            if(_fb2->next == _fb1) {
+                s_state->fb = NULL;
+            }
+            free(_fb2->buf);
+            free(_fb2);
+        }
+    } else {
+        for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
+            free(s_managed_buffers[i]->buf);
+            free(s_managed_buffers[i]);
+            free(s_managed_buffers);
+        }
+    }
 }
 
 static esp_err_t camera_fb_init(size_t count, bool deinit)
@@ -245,9 +245,9 @@ static esp_err_t camera_fb_init(size_t count, bool deinit)
         return ESP_ERR_INVALID_ARG;
     }
 
-	if (deinit) {
-		camera_fb_deinit();
-	}
+    if (deinit) {
+        camera_fb_deinit();
+    }
 
     ESP_LOGI(TAG, "Allocating %u frame buffers (%d KB total)", count, (s_state->fb_size * count) / 1024);
 
@@ -459,7 +459,7 @@ static void i2s_init()
     I2S0.timing.rx_dsync_sw = 1;
 
     // Allocate I2S interrupt, keep it disabled
-    ESP_ERROR_CHECK(esp_intr_alloc(ETS_I2S0_INTR_SOURCE,
+    (esp_intr_alloc(ETS_I2S0_INTR_SOURCE,
                    ESP_INTR_FLAG_INTRDISABLED | ESP_INTR_FLAG_LOWMED | ESP_INTR_FLAG_IRAM,
                    &i2s_isr, NULL, &s_state->i2s_intr_handle));
 }
@@ -958,11 +958,10 @@ static void IRAM_ATTR dma_filter_rgb888_highspeed(const dma_elem_t* src, lldesc_
 
 esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera_model)
 {
-    if (s_state != NULL) {
-        return ESP_ERR_INVALID_STATE;
+    if (s_state == NULL) {
+        s_state = (camera_state_t*) calloc(sizeof(*s_state), 1);
     }
 
-    s_state = (camera_state_t*) calloc(sizeof(*s_state), 1);
     if (!s_state) {
         return ESP_ERR_NO_MEM;
     }
@@ -972,7 +971,7 @@ esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera
 
     ESP_LOGD(TAG, "Initializing SSCB");
     SCCB_Init(config->pin_sscb_sda, config->pin_sscb_scl);
-	
+
     if(config->pin_pwdn >= 0) {
         ESP_LOGD(TAG, "Resetting camera by power down line");
         gpio_config_t conf = { 0 };
@@ -1008,7 +1007,7 @@ esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera
         camera_disable_out_clock();
         return ESP_ERR_CAMERA_NOT_DETECTED;
     }
-    
+
     //slv_addr = 0x30;
     ESP_LOGD(TAG, "Detected camera at address=0x%02x", slv_addr);
     sensor_id_t* id = &s_state->sensor.id;
@@ -1221,28 +1220,28 @@ esp_err_t camera_init(const camera_config_t* config)
     }
 
     if (s_state->config.n_managed_buffers) {
-		s_state->config.fb_count = 1;
-		// Manual buffer management
+        s_state->config.fb_count = 1;
+        // Manual buffer management
 
-		s_managed_buffers = calloc(s_state->config.n_managed_buffers, sizeof(camera_fb_int_t *));
-		for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
-			esp_err_t err = camera_fb_init(1, false);
-			if (err != ESP_OK) {
-				ESP_LOGE(TAG, "Failed to allocate frame buffer");
-				goto fail;
-			}
+        s_managed_buffers = calloc(s_state->config.n_managed_buffers, sizeof(camera_fb_int_t *));
+        for (size_t i = 0; i < s_state->config.n_managed_buffers; ++i) {
+            esp_err_t err = camera_fb_init(1, false);
+            if (err != ESP_OK) {
+                ESP_LOGE(TAG, "Failed to allocate frame buffer");
+                goto fail;
+            }
 
-			s_managed_buffers[i] = s_state->fb;
-		}
+            s_managed_buffers[i] = s_state->fb;
+        }
     } else {
-		// Default buffer management
+        // Default buffer management
 
-		//s_state->fb_size = 75 * 1024;
-		err = camera_fb_init(s_state->config.fb_count, true);
-		if (err != ESP_OK) {
-			ESP_LOGE(TAG, "Failed to allocate frame buffer");
-			goto fail;
-		}
+        //s_state->fb_size = 75 * 1024;
+        err = camera_fb_init(s_state->config.fb_count, true);
+        if (err != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to allocate frame buffer");
+            goto fail;
+        }
     }
 
     s_state->data_ready = xQueueCreate(16, sizeof(size_t));
@@ -1286,13 +1285,13 @@ esp_err_t camera_init(const camera_config_t* config)
     vsync_intr_disable();
     err = gpio_install_isr_service(ESP_INTR_FLAG_LEVEL1 | ESP_INTR_FLAG_IRAM);
     if (err != ESP_OK) {
-    	if (err != ESP_ERR_INVALID_STATE) {
-    		ESP_LOGE(TAG, "gpio_install_isr_service failed (%x)", err);
-        	goto fail;
-    	}
-    	else {
-    		ESP_LOGW(TAG, "gpio_install_isr_service already installed");
-    	}
+        if (err != ESP_ERR_INVALID_STATE) {
+            ESP_LOGE(TAG, "gpio_install_isr_service failed (%x)", err);
+            goto fail;
+        }
+        else {
+            ESP_LOGW(TAG, "gpio_install_isr_service already installed");
+        }
     }
     err = gpio_isr_handler_add(s_state->config.pin_vsync, &vsync_isr, NULL);
     if (err != ESP_OK) {
@@ -1364,6 +1363,7 @@ esp_err_t esp_camera_init(const camera_config_t* config)
         ESP_LOGE(TAG, "Camera init failed with error 0x%x", err);
         return err;
     }
+
     return ESP_OK;
 
 fail:
@@ -1449,9 +1449,9 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
     }
     // Make sure there is no ongoing writing process
     if(!I2S0.conf.rx_start) {
-		assert(n < s_state->config.n_managed_buffers);
-		s_state->fb = s_managed_buffers[n];
-		return esp_camera_fb_get();
+        assert(n < s_state->config.n_managed_buffers);
+        s_state->fb = s_managed_buffers[n];
+        return esp_camera_fb_get();
     }
     return NULL;
 }
@@ -1472,7 +1472,7 @@ sensor_t * esp_camera_sensor_get()
     return &s_state->sensor;
 }
 
-esp_err_t esp_camera_save_to_nvs(const char *key) 
+esp_err_t esp_camera_save_to_nvs(const char *key)
 {
 #if ESP_IDF_VERSION_MAJOR > 3
     nvs_handle_t handle;
@@ -1480,7 +1480,7 @@ esp_err_t esp_camera_save_to_nvs(const char *key)
     nvs_handle handle;
 #endif
     esp_err_t ret = nvs_open(key,NVS_READWRITE,&handle);
-    
+
     if (ret == ESP_OK) {
         sensor_t *s = esp_camera_sensor_get();
         if (s != NULL) {
@@ -1491,7 +1491,7 @@ esp_err_t esp_camera_save_to_nvs(const char *key)
             }
             return ret;
         } else {
-            return ESP_ERR_CAMERA_NOT_DETECTED; 
+            return ESP_ERR_CAMERA_NOT_DETECTED;
         }
         nvs_close(handle);
         return ret;
@@ -1500,7 +1500,7 @@ esp_err_t esp_camera_save_to_nvs(const char *key)
     }
 }
 
-esp_err_t esp_camera_load_from_nvs(const char *key) 
+esp_err_t esp_camera_load_from_nvs(const char *key)
 {
 #if ESP_IDF_VERSION_MAJOR > 3
     nvs_handle_t handle;
@@ -1510,7 +1510,7 @@ esp_err_t esp_camera_load_from_nvs(const char *key)
   uint8_t pf;
 
   esp_err_t ret = nvs_open(key,NVS_READWRITE,&handle);
-  
+
   if (ret == ESP_OK) {
       sensor_t *s = esp_camera_sensor_get();
       camera_status_t st;
@@ -1531,7 +1531,7 @@ esp_err_t esp_camera_load_from_nvs(const char *key)
             s->set_denoise(s,st.denoise);
             s->set_exposure_ctrl(s,st.aec);
             s->set_framesize(s,st.framesize);
-            s->set_gain_ctrl(s,st.agc);          
+            s->set_gain_ctrl(s,st.agc);
             s->set_gainceiling(s,st.gainceiling);
             s->set_hmirror(s,st.hmirror);
             s->set_lenc(s,st.lenc);
@@ -1544,7 +1544,7 @@ esp_err_t esp_camera_load_from_nvs(const char *key)
             s->set_wb_mode(s,st.wb_mode);
             s->set_whitebal(s,st.awb);
             s->set_wpc(s,st.wpc);
-        }  
+        }
         ret = nvs_get_u8(handle,CAMERA_PIXFORMAT_NVS_KEY,&pf);
         if (ret == ESP_OK) {
           s->set_pixformat(s,pf);
