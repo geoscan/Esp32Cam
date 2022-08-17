@@ -1,0 +1,20 @@
+idf_component_register(
+	SRC_DIRS
+		"."
+		"driver"
+		"conversions"
+		"sensors"
+	INCLUDE_DIRS
+		"."
+		"driver/include"
+		"conversions/include"
+	PRIV_INCLUDE_DIRS
+		"driver/private_include"
+		"sensors/private_include"
+		"conversions/private_include"
+	REQUIRES
+		wifi
+		freertos
+		module
+		nvs_flash
+		cam)

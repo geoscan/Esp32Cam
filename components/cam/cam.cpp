@@ -22,6 +22,6 @@ void camInit()
 {
 #ifdef CONFIG_CAM_MODEL_OV2640
 	init<Ov2640>();
-#elif
+#else
 #endif // CONFIG_CAM_MODEL_OV2640
 }

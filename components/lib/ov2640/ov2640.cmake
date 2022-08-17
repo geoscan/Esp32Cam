@@ -1,0 +1,23 @@
+idf_component_register(
+	SRC_DIRS
+		"ov2640/."
+		"ov2640/driver"
+		"ov2640/conversions"
+		"ov2640/sensors"
+	INCLUDE_DIRS
+		"ov2640"
+		"ov2640/driver/include"
+		"ov2640/conversions/include"
+	PRIV_INCLUDE_DIRS
+		"ov2640/driver/private_include"
+		"ov2640/sensors/private_include"
+		"ov2640/conversions/private_include"
+	REQUIRES
+		wifi
+		OV2640
+		esp_http_server
+		asio
+		freertos
+		module
+		nvs_flash
+		cam)

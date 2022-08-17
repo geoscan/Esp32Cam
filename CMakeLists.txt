@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
-list(APPEND EXTRA_COMPONENT_DIRS components main components/lib/mavlink)
+list(APPEND EXTRA_COMPONENT_DIRS
+	components
+	main
+	components/lib/mavlink
+	components/lib/ov2640)
 list(APPEND EXTRA_COMPONENT_DIRS components/lib/rr)
 list(APPEND EXTRA_COMPONENT_DIRS components/lib/mapbox_variant)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
