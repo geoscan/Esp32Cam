@@ -125,6 +125,7 @@ void Ov2640::cameraConfigLoad()
 		} else {
 			ESP_LOGW(kTag, "Error when reading value \"%s\" \"%s\"", kNvsFrameSize, esp_err_to_name(err));
 		}
+		nvs_close(nvsHandle);
 	} else {
 		ESP_LOGW(kTag, "Error when accessing NVS \"%s\"", esp_err_to_name(err));
 	}
@@ -256,6 +257,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 					ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
 					aCb({Mod::Fld::RequestResult::OutOfRange});
 				}
+				nvs_close(nvsHandle);
 			} else {
 				ESP_LOGW(kTag, "Unable to open NVS storage, error \"%s\"", esp_err_to_name(err));
 				aCb({Mod::Fld::RequestResult::StorageError});
