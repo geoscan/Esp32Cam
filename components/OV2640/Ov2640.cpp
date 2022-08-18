@@ -131,6 +131,12 @@ void Ov2640::cameraConfigLoad()
 	}
 }
 
+void Ov2640::reinit()
+{
+	esp_camera_deinit();
+	init();
+}
+
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
 std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 {
@@ -246,6 +252,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 							ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
 						} else {
 							aCb({Mod::Fld::RequestResult::Ok});
+							reinit();
 						}
 					} else {
 						aCb({Mod::Fld::RequestResult::OutOfRange});

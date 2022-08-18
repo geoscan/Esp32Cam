@@ -40,6 +40,7 @@ protected:
 
 private:
 	void cameraConfigLoad();
+	void reinit();
 
 private:
 	struct {
