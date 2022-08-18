@@ -133,7 +133,7 @@ typedef struct {
 } camera_state_t;
 
 camera_state_t* s_state = NULL;
-
+SemaphoreHandle_t s_state_mutex;
 camera_fb_int_t **s_managed_buffers;
 
 static void i2s_init();
@@ -1334,6 +1334,13 @@ fail:
 
 esp_err_t esp_camera_init(const camera_config_t* config)
 {
+    if (NULL == s_state_mutex) {
+        static StaticSemaphore_t sem;
+        s_state_mutex = xSemaphoreCreateRecursiveMutexStatic(&sem);
+        assert(s_state_mutex != NULL);
+    }
+    xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
+
     camera_model_t camera_model = CAMERA_NONE;
     esp_err_t err = camera_probe(config, &camera_model);
     if (err != ESP_OK) {
@@ -1361,21 +1368,26 @@ esp_err_t esp_camera_init(const camera_config_t* config)
     err = camera_init(config);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera init failed with error 0x%x", err);
+        xSemaphoreGiveRecursive(s_state_mutex);
         return err;
     }
 
+    xSemaphoreGiveRecursive(s_state_mutex);
     return ESP_OK;
 
 fail:
     free(s_state);
     s_state = NULL;
     camera_disable_out_clock();
+    xSemaphoreGiveRecursive(s_state_mutex);
     return err;
 }
 
 esp_err_t esp_camera_deinit()
 {
+    xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
     if (s_state == NULL) {
+        xSemaphoreGiveRecursive(s_state_mutex);
         return ESP_ERR_INVALID_STATE;
     }
     if (s_state->dma_filter_task) {
@@ -1404,6 +1416,8 @@ esp_err_t esp_camera_deinit()
     s_state = NULL;
     camera_disable_out_clock();
     periph_module_disable(PERIPH_I2S0_MODULE);
+    xSemaphoreGiveRecursive(s_state_mutex);
+
     return ESP_OK;
 }
 
@@ -1411,14 +1425,22 @@ esp_err_t esp_camera_deinit()
 
 camera_fb_t* esp_camera_fb_get()
 {
-    if (s_state == NULL) {
+    if (NULL == s_state_mutex) {  // In case esp_camera_fb_get will be called before camera initialization due to erroneous initialization order
         return NULL;
     }
+
+    xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
+    if (s_state == NULL) {
+        xSemaphoreGiveRecursive(s_state_mutex);
+        return NULL;
+    }
+
     if(!I2S0.conf.rx_start) {
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
         }
         if (i2s_run() != 0) {
+            xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
     }
@@ -1427,8 +1449,10 @@ camera_fb_t* esp_camera_fb_get()
         if (xSemaphoreTake(s_state->frame_ready, FB_GET_TIMEOUT) != pdTRUE){
             i2s_stop(&need_yield);
             ESP_LOGE(TAG, "Failed to get the frame on time!");
+            xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
+        xSemaphoreGiveRecursive(s_state_mutex);
         return (camera_fb_t*)s_state->fb;
     }
     camera_fb_int_t * fb = NULL;
@@ -1436,9 +1460,12 @@ camera_fb_t* esp_camera_fb_get()
         if (xQueueReceive(s_state->fb_out, &fb, FB_GET_TIMEOUT) != pdTRUE) {
             i2s_stop(&need_yield);
             ESP_LOGE(TAG, "Failed to get the frame on time!");
+            xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
     }
+    xSemaphoreGiveRecursive(s_state_mutex);
+
     return (camera_fb_t*)fb;
 }
 
