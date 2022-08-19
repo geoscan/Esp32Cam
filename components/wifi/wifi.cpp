@@ -87,14 +87,14 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 
 	if (useDhcp) {
 		esp_err_t err = esp_netif_dhcpc_start(sStaEspNetif);
-		if (!Ut::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED)) {
+		if (!Ut::Al::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STARTED)) {
 			ESP_LOGW(Wifi::kDebugTag, "wifiConfigStaConnection() Failed to start DHCP");
 			return err;
 		}
 	} else {
 		{
 			esp_err_t err = esp_netif_dhcpc_stop(sStaEspNetif);
-			if (!Ut::Algorithm::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED)) {
+			if (!Ut::Al::in(err, ESP_OK, ESP_ERR_ESP_NETIF_DHCP_ALREADY_STOPPED)) {
 				ESP_LOGW(Wifi::kDebugTag, "wifiConfigStaConnection() Failed to stop DHCP");
 				return err;
 			}
@@ -147,7 +147,7 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 		wifi_ap_record_t wifiApRecord{};
 		if (ESP_OK == esp_wifi_sta_get_ap_info(&wifiApRecord)) {
 			const esp_err_t err = esp_wifi_disconnect();
-			if (Ut::Algorithm::in(err, ESP_ERR_WIFI_NOT_INIT, ESP_ERR_WIFI_NOT_STARTED)) {
+			if (Ut::Al::in(err, ESP_ERR_WIFI_NOT_INIT, ESP_ERR_WIFI_NOT_STARTED)) {
 				ESP_LOGW(Wifi::kDebugTag, "wifiStaConnect() failed to disconnect");
 				return err;
 			}
@@ -162,7 +162,7 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 	esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler, &wifiEventGroup);
 	esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler, &wifiEventGroup);
 	CUSTOM_ESP_ERR_RETURN(esp_wifi_connect());
-	const bool useDhcp = Ut::Algorithm::in(nullptr, ip, gateway, netmask);
+	const bool useDhcp = Ut::Al::in(nullptr, ip, gateway, netmask);
 	EventBits_t eventBits;
 
 	if (useDhcp) {

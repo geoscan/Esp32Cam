@@ -324,7 +324,7 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 						aSocket.write_some(Ut::Cont::makeAsioCb(aCtx.buffer), err);
 					}});
 				tcpAsyncReceiveFrom(aSocket, buffer);
-			} else if (Ut::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,
+			} else if (Ut::Al::in(aErr, asio::error::connection_reset, asio::error::eof,
 				asio::error::bad_descriptor))
 			{
 				asio::error_code err;

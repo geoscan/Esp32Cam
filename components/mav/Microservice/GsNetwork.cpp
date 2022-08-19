@@ -300,7 +300,7 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 	}
 
 	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
-		if (Ut::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+		if (Ut::Al::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
 			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
@@ -337,7 +337,7 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 	}
 
 	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
-		if (Ut::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+		if (Ut::Al::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
 			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
