@@ -14,7 +14,7 @@
 #include <memory>
 #include <chrono>
 
-namespace Utility {
+namespace Ut {
 namespace Thr {
 
 template <std::size_t Slots, std::size_t FreeSlots = Slots>
@@ -75,7 +75,7 @@ private:
 };
 
 }  // namespace Thr
-}  // namespace Utility
+}  // namespace Ut
 
 #include "Semaphore.impl"
 

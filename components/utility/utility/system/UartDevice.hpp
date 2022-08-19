@@ -12,7 +12,7 @@
 #include "driver/gpio.h"
 #include "utility/Buffer.hpp"
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 //!
@@ -30,7 +30,7 @@ public:
 	/// \return Number of bytes read
 	///
 	size_t read(void *data, size_t size, size_t aWaitMs = 0);
-	size_t read(Utility::Buffer, size_t aWaitMs = 0);
+	size_t read(Ut::Buffer, size_t aWaitMs = 0);
 
 	///
 	/// \return Number of bytes written
@@ -55,7 +55,7 @@ private:
 };
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 #endif  // PLATFORM_LINUX_DRIVERS_UARTDEVICE_HPP_
 

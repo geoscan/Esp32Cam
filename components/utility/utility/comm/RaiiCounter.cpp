@@ -8,7 +8,7 @@
 #include "RaiiCounter.hpp"
 #include <algorithm>
 
-namespace Utility {
+namespace Ut {
 namespace Comm {
 
 RaiiCounter::RaiiCounter(unsigned &aOwners) : owners{&aOwners}
@@ -77,4 +77,4 @@ unsigned RaiiCounter::getValue() const
 }
 
 }  // namespace Comm
-}  // namespace Utility
+}  // namespace Ut

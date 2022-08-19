@@ -45,7 +45,7 @@ struct UartEndpoint {
 };
 
 struct Message {
-	Utility::ConstBuffer payload;  ///< Raw bytes transferred with an interface
+	Ut::ConstBuffer payload;  ///< Raw bytes transferred with an interface
 };
 
 // Derivatives of the atomic entities defined above

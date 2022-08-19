@@ -10,7 +10,7 @@
 
 #include <freertos/FreeRTOS.h>
 
-namespace Utility {
+namespace Ut {
 
 class Critical final {
 private:
@@ -33,6 +33,6 @@ private:
 	Critical &lock;
 };
 
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_CRITICALLOCK_HPP

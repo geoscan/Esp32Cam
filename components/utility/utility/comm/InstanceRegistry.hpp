@@ -12,7 +12,7 @@
 #include <mutex>
 #include <vector>
 
-namespace Utility {
+namespace Ut {
 namespace Comm {
 
 template <class T, template <class ...> class Tcontainer>
@@ -110,6 +110,6 @@ public:
 };
 
 }  // namespace Comm
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_COMM_INSTANCEREGISTRY_HPP_

@@ -87,8 +87,8 @@ Sub::Rout::Response Routing::operator()(const Sub::Rout::Socket<asio::ip::tcp> &
 					ESP_LOGV(Bdg::kDebugTag, "Routing(TCP), nprocessed: %d", nresponse.nProcessed);
 
 					// Slice payload
-					tcp.payload = Utility::makeAsioCb(
-						Utility::toBuffer<const void>(tcp.payload).asSlice(nresponse.nProcessed));
+					tcp.payload = Ut::makeAsioCb(
+						Ut::toBuffer<const void>(tcp.payload).asSlice(nresponse.nProcessed));
 				}
 			}
 

@@ -20,7 +20,7 @@ using namespace Mav;
 
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Unmarshalling, push, 0)
 
-std::size_t Mav::Unmarshalling::push(Utility::ConstBuffer aBuffer)
+std::size_t Mav::Unmarshalling::push(Ut::ConstBuffer aBuffer)
 {
 	auto buffer = aBuffer.as<const std::uint8_t>();
 	GS_UTILITY_LOGV_METHOD(Mav::kDebugTag, Unmarshalling, push, "Unmarshalling::push(): processing buffer (%d bytes)",

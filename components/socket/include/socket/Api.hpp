@@ -24,7 +24,7 @@ namespace Sock {
 /// "MAVLink GS_NETWORK" subprotocol) from managing sockets. It provides all the conventional UDP/TCP/IP operations
 /// such as connect to a remote endpoint, open a listening socket, etc.
 ///
-class Api : public Utility::MakeSingleton<Api> {
+class Api : public Ut::MakeSingleton<Api> {
 private:
 	asio::io_context &ioContext;
 	std::mutex &syncAsyncMutex;  ///< Shared b/w reactive requests to this Api, and whatever task that triggers asio::io_context in a loop

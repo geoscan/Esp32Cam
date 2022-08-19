@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include "utility/system/UartDevice.hpp"
 
-using namespace Utility::Sys;
+using namespace Ut::Sys;
 
 UartDevice::UartDevice(int num, gpio_num_t rxPin, gpio_num_t txPin, int rate, uart_parity_t parity,
 					   uart_stop_bits_t stopBits):
@@ -47,7 +47,7 @@ size_t UartDevice::read(void *data, size_t size, size_t aWaitMs)
 	return count > 0 ? static_cast<uint32_t>(count) : 0;
 }
 
-size_t UartDevice::read(Utility::Buffer aBuffer, size_t aWaitMs)
+size_t UartDevice::read(Ut::Buffer aBuffer, size_t aWaitMs)
 {
 	return read(aBuffer.data(), aBuffer.size(), aWaitMs);
 }

@@ -47,7 +47,7 @@ bool operator<(const RoutingRulesImpl::ReductionRule &aLhs, const RuleTrigger &a
 /// sequence is C.
 /// In this example, R1 is a virtual originator, since we have no endpoint called R1.
 ///
-class RoutingRules : public Utility::MakeSingleton<RoutingRules> {
+class RoutingRules : public Ut::MakeSingleton<RoutingRules> {
 public:
 	RoutingRules();
 	bool addStatic(const EndpointVariant &, const EndpointVariant&, const EndpointVariant &);

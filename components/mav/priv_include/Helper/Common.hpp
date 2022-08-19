@@ -45,7 +45,7 @@ template <class T>
 void fieldTimeBootMsInit(T &aObj)
 {
 	aObj.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::microseconds{Utility::bootTimeUs()}).count();
+		std::chrono::microseconds{Ut::bootTimeUs()}).count();
 }
 
 template <class T>

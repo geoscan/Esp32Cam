@@ -29,7 +29,7 @@ public:
 private:
 
 	using CliEndpoint = asio::ip::udp::endpoint;
-	using CliInfo     = std::pair<CliEndpoint, Utility::Time>;
+	using CliInfo     = std::pair<CliEndpoint, Ut::Time>;
 
 
 	// ------------ CliStack ------------ //
@@ -51,9 +51,9 @@ private:
 
 	class CliMap {
 	public:
-		Utility::Time &at(CliEndpoint);
+		Ut::Time &at(CliEndpoint);
 		bool contains(CliEndpoint);
-		void set(CliEndpoint, Utility::Time);  // Checks presence of the requested endpoint, adds it if it's not there
+		void set(CliEndpoint, Ut::Time);  // Checks presence of the requested endpoint, adds it if it's not there
 		CliStack stack();
 	private:
 		std::map<CliEndpoint, std::reference_wrapper<CliInfo>> cliMap;
@@ -61,7 +61,7 @@ private:
 		asio::detail::mutex mutex;  // Primarily used for maintaining of integrity of cliMap
 	};
 
-	const Utility::Time   kTimeout;  // us
+	const Ut::Time   kTimeout;  // us
 	const size_t          kMaxClients;
 	CliMap                cliMap;
 	asio::ip::udp::socket socket;

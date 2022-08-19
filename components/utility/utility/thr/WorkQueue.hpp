@@ -25,7 +25,7 @@
 # define WQ_DEBUG(...)
 #endif
 
-namespace Utility {
+namespace Ut {
 namespace Thr {
 namespace Wq {
 
@@ -87,11 +87,11 @@ public:
 	template <class Trep, class Tper>
 	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
 	{
-		const auto start{Utility::bootTimeUs()};
+		const auto start{Ut::bootTimeUs()};
 		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
 		return [aTask, start, timeout]()
 			{
-				return aTask() && !Utility::expired(start, timeout);
+				return aTask() && !Ut::expired(start, timeout);
 			};
 	}
 
@@ -113,7 +113,7 @@ public:
 	template <class Trep, class Tper>
 	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
-		Utility::Thr::Semaphore<1, 0> sem{};
+		Ut::Thr::Semaphore<1, 0> sem{};
 		push([sem, aTask]() mutable
 			{
 				aTask();
@@ -127,7 +127,7 @@ public:
 	///
 	void pushWait(Task &&aTask)
 	{
-		Utility::Thr::Semaphore<1, 0> sem{};
+		Ut::Thr::Semaphore<1, 0> sem{};
 		push([&sem, &aTask]()
 			{
 				aTask();
@@ -159,7 +159,7 @@ public:
 	///
 	void pushContinuousWait(ContinuousTask &&aTask)
 	{
-		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
+		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([&sem, &aTask]()
 			{
 				WQ_DEBUG("pushContinuousWait() invoking");
@@ -181,7 +181,7 @@ public:
 	template <class Trep, class Tper>
 	bool pushContinuousWaitFor(ContinuousTask &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
 	{
-		Utility::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
+		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([sem, aTask]() mutable
 			{
 				bool f = aTask();
@@ -224,7 +224,7 @@ using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, 
 
 }  // namespace Wq
 }  // namespace Thr
-}  // namespace Utility
+}  // namespace Ut
 
 #undef WQ_DEBUG
 

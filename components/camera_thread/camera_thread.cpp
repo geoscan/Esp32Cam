@@ -15,6 +15,6 @@ void cameraThreadInit()
 {
 		static CameraStream cameraStream;
 
-		Utility::Thr::setThreadCoreAffinity(1);
+		Ut::Thr::setThreadCoreAffinity(1);
 		static std::thread threadCameraStream(&CameraStream::operator(), &cameraStream);
 }

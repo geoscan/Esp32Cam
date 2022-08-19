@@ -12,18 +12,18 @@
 #include <array>
 #include <mutex>
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 class UartDevice;
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
-namespace Utility {
+namespace Ut {
 
 template <class T, std::size_t N>
 class CircularSwap;
 
-}  // namespace Utility
+}  // namespace Ut
 
 namespace Uart {
 
@@ -39,13 +39,13 @@ private:
 	struct Buf {
 		std::array<std::uint8_t, 1024> buf;
 		std::size_t pos;
-		Utility::Sys::UartDevice *device;
+		Ut::Sys::UartDevice *device;
 	};
 
-	using Swap = typename Utility::CircularSwap<Buf, 3>;
+	using Swap = typename Ut::CircularSwap<Buf, 3>;
 
 private:
-	const std::list<Utility::Sys::UartDevice *> uartDevices;
+	const std::list<Ut::Sys::UartDevice *> uartDevices;
 
 	struct SyncedSwap {
 		Swap swap;

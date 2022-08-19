@@ -50,7 +50,7 @@ void Receiver::notifyAs(NotifyCtx aCtx)
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
-	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
+	Ut::Thr::Wq::MediumPriority::getInstance().pushContinuousWait(
 		[&route, &ongoing, &aCtx]()
 		{
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAs, "WorkQueue task is ongoing");
@@ -89,7 +89,7 @@ void Receiver::notifyAsAsync(AsyncNotifyCtx aCtx)
 	ReceiverImpl::Route route{aCtx.endpointVariant};
 	bool ongoing = false;
 
-	Utility::Thr::Wq::MediumPriority::getInstance().pushContinuous(
+	Ut::Thr::Wq::MediumPriority::getInstance().pushContinuous(
 		[ongoing, route, aCtx]() mutable
 		{
 			bool ret = true;
@@ -117,7 +117,7 @@ Receiver::Receiver(const EndpointVariant &aIdentity) : Receiver{aIdentity, ""}
 
 Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpointVariant{aIdentity}, name{aName}
 {
-	Utility::Thr::Wq::MediumPriority::getInstance().push(
+	Ut::Thr::Wq::MediumPriority::getInstance().push(
 		[this]()
 		{
 			Receiver::getReceiverRegistry().instances.add(*this);
@@ -126,7 +126,7 @@ Receiver::Receiver(const EndpointVariant &aIdentity, const char *aName) : endpoi
 
 Receiver::~Receiver()
 {
-	Utility::Thr::Wq::MediumPriority::getInstance().pushWait(
+	Ut::Thr::Wq::MediumPriority::getInstance().pushWait(
 		[this]()
 		{
 			Receiver::getReceiverRegistry().instances.remove(*this);
@@ -152,7 +152,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 			reduced.logv("Receiver::notifyAsImpl() Reduced as: ");
 #endif
 
-			Utility::ConstBuffer outBuffer = aCtx.buffer;
+			Ut::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
 			auto forwardCb =

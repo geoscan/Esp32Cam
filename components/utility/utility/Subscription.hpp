@@ -12,7 +12,7 @@
 
 #include <type_traits>
 
-namespace Utility {
+namespace Ut {
 namespace Sub {
 
 ///
@@ -45,6 +45,6 @@ private:
 };
 
 }  // namespace Sub
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_SUBSCRIBER_HPP_

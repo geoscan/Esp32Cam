@@ -1,13 +1,13 @@
 #include "utility/thr/Threading.hpp"
 
-void Utility::Thr::setThreadCoreAffinity(int coreAffinity)
+void Ut::Thr::setThreadCoreAffinity(int coreAffinity)
 {
 	auto cfg = esp_pthread_get_default_config();
 	cfg.pin_to_core = coreAffinity;
 	esp_pthread_set_cfg(&cfg);
 }
 
-Utility::Thr::Config::Config(bool aFromDefault): config{}
+Ut::Thr::Config::Config(bool aFromDefault): config{}
 {
 	if (!aFromDefault) {
 		esp_pthread_get_cfg(&config);
@@ -16,48 +16,48 @@ Utility::Thr::Config::Config(bool aFromDefault): config{}
 	}
 }
 
-Utility::Thr::Config::~Config()
+Ut::Thr::Config::~Config()
 {
 	esp_pthread_set_cfg(&config);
 }
 
-Utility::Thr::Config &Utility::Thr::Config::core(int a)
+Ut::Thr::Config &Ut::Thr::Config::core(int a)
 {
 	config.pin_to_core = a;
 	return *this;
 }
 
-Utility::Thr::Config &Utility::Thr::Config::inherit(bool a)
+Ut::Thr::Config &Ut::Thr::Config::inherit(bool a)
 {
 	config.inherit_cfg = a;
 	return *this;
 }
 
-Utility::Thr::Config &Utility::Thr::Config::name(const char *a)
+Ut::Thr::Config &Ut::Thr::Config::name(const char *a)
 {
 	config.thread_name = a;
 	return *this;
 }
 
-Utility::Thr::Config &Utility::Thr::Config::priority(int a)
+Ut::Thr::Config &Ut::Thr::Config::priority(int a)
 {
 	config.prio = a;
 	return *this;
 }
 
-Utility::Thr::Config &Utility::Thr::Config::stack(int a)
+Ut::Thr::Config &Ut::Thr::Config::stack(int a)
 {
 	config.stack_size = a;
 	return *this;
 }
 
-void Utility::Thr::FreertosTask::run(void *aInstance)
+void Ut::Thr::FreertosTask::run(void *aInstance)
 {
 	auto &task = *reinterpret_cast<Thread *>(aInstance);
 	task.run();
 }
 
-void Utility::Thr::FreertosTask::start()
+void Ut::Thr::FreertosTask::start()
 {
 	if (static_cast<int>(CorePin::CoreNone) == taskInfo.core) {
 		xTaskCreate(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle);
@@ -67,13 +67,13 @@ void Utility::Thr::FreertosTask::start()
 	}
 }
 
-void Utility::Thr::FreertosTask::suspend()
+void Ut::Thr::FreertosTask::suspend()
 {
 	suspended = true;
 	vTaskSuspend(taskInfo.handle);
 }
 
-void Utility::Thr::FreertosTask::resume()
+void Ut::Thr::FreertosTask::resume()
 {
 	if (suspended) {
 		suspended = false;

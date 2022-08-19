@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <cstring>
 
-namespace Utility {
+namespace Ut {
 namespace Str {
 
 bool checkEndswith(const char *aStr, const char *aSuffix)
@@ -30,4 +30,4 @@ bool checkEndswith(const char *aStr, const char *aSuffix)
 }
 
 }  // namespace Str
-}  // namespace Utility
+}  // namespace Ut

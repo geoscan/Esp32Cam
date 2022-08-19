@@ -19,7 +19,7 @@ void versionInit()
 #ifdef CONFIG_VERSION_ACQUISITION_ENABLE
 
 	uint8_t buffer[CONFIG_VERSION_SERIAL_BUFFER_SIZE];
-	Utility::Sys::UartDevice uartDevice(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_VERSION_UART_BAUDRATE, UART_PARITY_DISABLE, UART_STOP_BITS_1);
+	Ut::Sys::UartDevice uartDevice(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_VERSION_UART_BAUDRATE, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 
 	const auto timeEnd = std::chrono::system_clock::now() + std::chrono::microseconds(CONFIG_VERSION_STM_ACQ_TIMEOUT_US);
 

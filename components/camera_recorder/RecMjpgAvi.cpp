@@ -73,7 +73,7 @@ void RecMjpgAvi::calculateFps()
 {
 	if (std::isnan(stat.fps)) {
 		float frames = static_cast<float>(stat.frames);
-		std::chrono::duration<float> duration = std::chrono::microseconds(Utility::bootTimeUs()) - stat.started;
+		std::chrono::duration<float> duration = std::chrono::microseconds(Ut::bootTimeUs()) - stat.started;
 		stat.fps = frames / duration.count();
 	}
 }
@@ -109,7 +109,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 
 	if ((stat.fd = AVI_open_output_file(const_cast<char *>(aFilename))) != nullptr) {
 		ESP_LOGI(kTag, "Record -- started: %s", aFilename);
-		stat.started = std::chrono::microseconds(Utility::bootTimeUs());
+		stat.started = std::chrono::microseconds(Ut::bootTimeUs());
 	    stat.frames  = 0;
 	    stat.fps     = NAN;
 		Record::key.enableSubscribe(true);

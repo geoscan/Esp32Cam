@@ -11,7 +11,7 @@
 #include <array>
 #include <algorithm>
 
-namespace Utility {
+namespace Ut {
 
 namespace Algorithm {
 
@@ -26,6 +26,6 @@ bool in(const T &object, const Args &...values)
 
 }  // namespace Algorithm
 
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // ALGORITHM_HPP

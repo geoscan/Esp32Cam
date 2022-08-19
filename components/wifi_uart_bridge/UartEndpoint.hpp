@@ -11,7 +11,7 @@
 #include "Endpoint.hpp"
 #include "utility/system/UartDevice.hpp"
 
-class UartEndpoint : private Utility::Sys::UartDevice, public Endpoint {
+class UartEndpoint : private Ut::Sys::UartDevice, public Endpoint {
 public:
 	using UartDevice::UartDevice;
 

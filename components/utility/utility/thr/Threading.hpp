@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <esp_pthread.h>
 
-namespace Utility {
+namespace Ut {
 namespace Thr {
 
 //
@@ -128,6 +128,6 @@ private:
 };
 
 }  // namespace Thr
-}  // namespace Utility
+}  // namespace Ut
 
 #endif  // COMPONENTS_UTILITY_RUN_HPP

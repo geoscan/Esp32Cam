@@ -73,7 +73,7 @@ struct EndpointVariant : EndpointVariantBase
 {
 	static constexpr auto kPosArraySize = 2;
 	using EndpointVariantBase::EndpointVariantBase;
-	Utility::PosArray<EndpointVariant, kPosArraySize> asAlternative() const;
+	Ut::PosArray<EndpointVariant, kPosArraySize> asAlternative() const;
 	void logi(const char *prefix) const;
 	void logv(const char *prefix) const;
 };

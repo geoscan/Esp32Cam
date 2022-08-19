@@ -12,7 +12,7 @@ namespace Wq {
 
 void start()
 {
-	static Utility::Thr::Wq::MediumPriority wqMediumPriority;
+	static Ut::Thr::Wq::MediumPriority wqMediumPriority;
 	wqMediumPriority.start();
 }
 

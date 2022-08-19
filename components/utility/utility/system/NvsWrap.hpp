@@ -12,7 +12,7 @@
 #include "utility/system/sys.hpp"
 #include <esp_log.h>
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 template <class T>
@@ -58,6 +58,6 @@ esp_err_t nvsSet(const char *aStorage, const char *aKey, T &&aOut)
 }
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILTIY_UTILITY_SYSTEM_NVSWRAP_HPP_

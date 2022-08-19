@@ -10,7 +10,7 @@
 
 #include <limits>
 
-namespace Utility {
+namespace Ut {
 namespace Comm {
 
 struct RaiiCounter final {
@@ -31,6 +31,6 @@ private:
 
 
 }  // namespace Comm
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_COMM_RAIICOUNTER_HPP_

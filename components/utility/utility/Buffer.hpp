@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace Utility {
+namespace Ut {
 
 namespace Impl {
 
@@ -101,10 +101,10 @@ asio::mutable_buffer makeAsioMb(Tbuf &&);
 template <class Tbuf>
 asio::const_buffer makeAsioCb(Tbuf &&);
 
-using Buffer = typename ::Utility::Tbuffer<void>;
-using ConstBuffer = typename ::Utility::Tbuffer<const void>;
+using Buffer = typename ::Ut::Tbuffer<void>;
+using ConstBuffer = typename ::Ut::Tbuffer<const void>;
 
-}  // namespace Utility
+}  // namespace Ut
 
 #include "Buffer.impl"
 

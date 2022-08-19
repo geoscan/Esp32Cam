@@ -39,7 +39,7 @@ enum class LogAspect {
 GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Uart::Task, LogAspect::BufferManagement, 0)
 
 using namespace Uart;
-using namespace Utility;
+using namespace Ut;
 
 void Task::taskRead()
 {
@@ -59,14 +59,14 @@ void Task::taskRead()
 					swap.pushFull(buffer);
 				} else {
 					swap.pushFree(buffer);
-					Utility::waitMs(20);
+					Ut::waitMs(20);
 				}
 
 				GS_UTILITY_LOG_EVERY_N_TURNS(100, GS_UTILITY_LOGD_CLASS_ASPECT(Uart::kDebugTag, Uart::Task,
 					LogAspect::BufferManagement, "free buffers %d", swap.swap.countFree());)
 			} else {
 				ESP_LOGW(Uart::kDebugTag, "taskRead(): Could not pop a free buffer");
-				Utility::waitMs(20);
+				Ut::waitMs(20);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ void Task::taskProcess()
 				}});
 			swap.pushFree(buffer);  // The buffer has been processed
 		} else {
-			Utility::waitMs(20);  // To prevent resource starvation.
+			Ut::waitMs(20);  // To prevent resource starvation.
 		}
 	}
 }
