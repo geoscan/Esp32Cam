@@ -9,11 +9,11 @@
 #define UTILITY_UTILITY_STRING_HPP_
 
 namespace Ut {
-namespace Str {
+namespace Al {
 
 bool checkEndswith(const char *aStr, const char *aSuffix);
 
-}  // namespace Str
+}  // namespace Al
 }  // namespace Ut
 
 #endif // UTILITY_UTILITY_STRING_HPP_
