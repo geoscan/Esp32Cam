@@ -8,7 +8,7 @@
 #if !defined(UTILITY_UTILITY_MOD_TYPES_HPP_)
 #define UTILITY_UTILITY_MOD_TYPES_HPP_
 
-#include "utility/Algorithm.hpp"
+#include "utility/al/Algorithm.hpp"
 #include <asio.hpp>
 #include <cstdint>
 #include <mapbox/variant.hpp>

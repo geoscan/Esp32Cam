@@ -6,7 +6,7 @@
 
 #include "wifi.h"
 #include "wifi/Sta.hpp"
-#include "utility/Algorithm.hpp"
+#include "utility/al/Algorithm.hpp"
 #include <esp_event.h>
 #include <esp_system.h>
 #include <esp_wifi.h>

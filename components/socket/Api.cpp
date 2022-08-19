@@ -14,7 +14,7 @@
 #include "socket/socket.hpp"
 #include "socket/Api.hpp"
 #include "sub/Rout.hpp"
-#include "utility/Algorithm.hpp"
+#include "utility/al/Algorithm.hpp"
 #include "utility/thr/WorkQueue.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
 

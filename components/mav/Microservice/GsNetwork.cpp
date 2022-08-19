@@ -17,7 +17,7 @@
 #include "sub/Subscription.hpp"
 #include "socket/Api.hpp"
 #include "wifi_uart_bridge/RoutingRules.hpp"
-#include "utility/Algorithm.hpp"
+#include "utility/al/Algorithm.hpp"
 #include "utility/LogSection.hpp"
 #include <algorithm>
 #include <memory>
