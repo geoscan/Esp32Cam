@@ -10,13 +10,13 @@
 
 #include "Microservice.hpp"
 #include "DelayedSend.hpp"
-#include "utility/HrTimer.hpp"
+#include "utility/system/HrTimer.hpp"
 #include "utility/CircularBuffer.hpp"
 
 namespace Mav {
 namespace Mic {
 
-class Camera final : public Microservice, public Utility::Tim::HrTimer, public Mav::DelayedSend {
+class Camera final : public Microservice, public Utility::Sys::HrTimer, public Mav::DelayedSend {
 private:
 	using SequenceId = std::uint32_t;
 
