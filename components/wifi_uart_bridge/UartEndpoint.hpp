@@ -9,9 +9,9 @@
 #define COMPONENTS_WIFI_UART_BRIDGE_UARTENDPOINT_HPP
 
 #include "Endpoint.hpp"
-#include "UartDevice.hpp"
+#include "utility/system/UartDevice.hpp"
 
-class UartEndpoint : private UartDevice, public Endpoint {
+class UartEndpoint : private Utility::Sys::UartDevice, public Endpoint {
 public:
 	using UartDevice::UartDevice;
 
