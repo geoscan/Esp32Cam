@@ -1,9 +1,11 @@
 #include <sdkconfig.h>
 #include <algorithm>
 #include <nvs_flash.h>
+#include <nvs_handle.hpp>
 #include <array>
 #include "Ov2640.hpp"
 #include "esp_camera.h"
+#include "utility/system/NvsWrap.hpp"
 
 using namespace std;
 
@@ -109,25 +111,16 @@ void Ov2640::cameraConfigLoad()
 		.n_managed_buffers = 0
 	};
 
-	nvs_handle_t nvsHandle;
-	auto err = nvs_open(kNvsKey, NVS_READONLY, &nvsHandle);
+	std::uint8_t frame;
+	esp_err_t err = Utility::Sys::nvsGet(kNvsKey, kNvsFrameSize, frame);
 
-	if (err == ESP_OK) {
-		std::uint8_t frame{};
-		err = nvs_get_u8(nvsHandle, kNvsFrameSize, &frame);
-
-		if (err == ESP_OK) {
-			if (frame < kResolutionLimit) {
-				cameraConfig.frame_size = static_cast<framesize_t>(frame);
-			} else {
-				ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
-			}
+	if (ESP_OK == err) {
+		if (frame < kResolutionLimit) {
+			cameraConfig.frame_size = static_cast<framesize_t>(frame);
 		} else {
-			ESP_LOGW(kTag, "Error when reading value \"%s\" \"%s\"", kNvsFrameSize, esp_err_to_name(err));
+			cameraConfig.frame_size = kResolutionLimit;
+			ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
 		}
-		nvs_close(nvsHandle);
-	} else {
-		ESP_LOGW(kTag, "Error when accessing NVS \"%s\"", esp_err_to_name(err));
 	}
 }
 
@@ -228,46 +221,37 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 	switch (aReq.field) {
 		case Mod::Fld::Field::FrameSize: {
 			const auto frameSize = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameSize>();
-			nvs_handle_t nvsHandle{};
-			esp_err_t err = nvs_open(kNvsKey, NVS_READWRITE, &nvsHandle);
+			std::uint8_t mode = 0;
+			bool mapped = false;
 
-			if (err == ESP_OK) {
-				std::uint8_t mode = 0;
-				bool mapped = false;
+			for (; mode <= kFrameSizeModeMap.size(); ++mode) {
+				if (kFrameSizeModeMap[mode] == frameSize) {
+					mapped = true;
 
-				for (; mode <= kFrameSizeModeMap.size(); ++mode) {
-					if (kFrameSizeModeMap[mode] == frameSize) {
-						mapped = true;
-
-						break;
-					}
+					break;
 				}
+			}
 
-				if (mapped) {
-					if (mode < kResolutionLimit) {
-						err = nvs_set_u8(nvsHandle, kNvsFrameSize, mode);
+			if (mapped) {
+				if (mode < kResolutionLimit) {
+					auto err = Utility::Sys::nvsSet(kNvsKey, kNvsFrameSize, mode);
 
-						if (err != ESP_OK) {
-							aCb({Mod::Fld::RequestResult::StorageError});
-							ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
-						} else {
-							aCb({Mod::Fld::RequestResult::Ok});
-							reinit();
-						}
+					if (err != ESP_OK) {
+						aCb({Mod::Fld::RequestResult::StorageError});
+						ESP_LOGW(kTag, "Unable to save frame size value to NVS, error \"%s\"", esp_err_to_name(err));
 					} else {
-						aCb({Mod::Fld::RequestResult::OutOfRange});
-						ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold %dx%d", std::get<0>(frameSize),
-							std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[kResolutionLimit - 1]),
-							std::get<1>(kFrameSizeModeMap[kResolutionLimit - 1]));
+						aCb({Mod::Fld::RequestResult::Ok});
+						reinit();
 					}
 				} else {
-					ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
 					aCb({Mod::Fld::RequestResult::OutOfRange});
+					ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold %dx%d", std::get<0>(frameSize),
+						std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[kResolutionLimit - 1]),
+						std::get<1>(kFrameSizeModeMap[kResolutionLimit - 1]));
 				}
-				nvs_close(nvsHandle);
 			} else {
-				ESP_LOGW(kTag, "Unable to open NVS storage, error \"%s\"", esp_err_to_name(err));
-				aCb({Mod::Fld::RequestResult::StorageError});
+				ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
+				aCb({Mod::Fld::RequestResult::OutOfRange});
 			}
 
 			break;
