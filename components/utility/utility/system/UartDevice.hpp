@@ -12,6 +12,9 @@
 #include "driver/gpio.h"
 #include "utility/Buffer.hpp"
 
+namespace Utility {
+namespace Sys {
+
 //!
 //! \brief The UartDevice class
 //!
@@ -51,4 +54,8 @@ private:
 	int currentRate;
 };
 
+}  // namespace Sys
+}  // namespace Utility
+
 #endif  // PLATFORM_LINUX_DRIVERS_UARTDEVICE_HPP_
+

@@ -12,7 +12,7 @@
 
 #include "utility/CircularSwap.hpp"
 #include "uart/uart.hpp"
-#include "UartDevice.hpp"
+#include "utility/system/UartDevice.hpp"
 #include "Task.hpp"
 #include "utility/thr/Threading.hpp"
 #include "OnSend.hpp"
@@ -26,9 +26,9 @@ static Task *task = nullptr;
 void init()
 {
 	esp_log_level_set(Uart::kDebugTag, LOG_LOCAL_LEVEL);
-	static UartDevice devices[] = {
-		UartDevice{UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_WIFI_UART_BRIDGE_BAUDRATE, UART_PARITY_DISABLE,
-			UART_STOP_BITS_1}  // MAVLink / Autopilot link
+	static Utility::Sys::UartDevice devices[] = {
+		Utility::Sys::UartDevice{UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_WIFI_UART_BRIDGE_BAUDRATE,
+			UART_PARITY_DISABLE, UART_STOP_BITS_1}  // MAVLink / Autopilot link
 	};
 	static Task sTask{devices[0]};
 	static OnSend<1> onSend{devices[0]};
