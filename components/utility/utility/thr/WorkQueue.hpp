@@ -11,6 +11,7 @@
 #include "utility/thr/Semaphore.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "utility/thr/Threading.hpp"
+#include "utility/al/Time.hpp"
 #include "utility/time.hpp"
 #include <sdkconfig.h>
 #include <functional>
@@ -91,7 +92,7 @@ public:
 		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
 		return [aTask, start, timeout]()
 			{
-				return aTask() && !Ut::expired(start, timeout);
+				return aTask() && !Ut::Al::expired(start, timeout);
 			};
 	}
 
