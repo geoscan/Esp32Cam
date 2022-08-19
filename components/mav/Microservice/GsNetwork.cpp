@@ -433,7 +433,7 @@ void GsNetwork::onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent)
 			mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
 			const std::size_t nProcessed = Marshalling::push(mavlinkMessage, resp.buffer);
 
-			return Ut::ConstBuffer(resp.buffer, nProcessed);
+			return Ut::Cont::ConstBuffer(resp.buffer, nProcessed);
 		},
 		[](Bdg::RespondCtx){}});
 }

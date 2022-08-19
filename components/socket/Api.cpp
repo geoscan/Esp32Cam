@@ -279,11 +279,11 @@ void Api::udpAsyncReceiveFrom(asio::ip::udp::socket &aSocket, std::shared_ptr<ch
 				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, udpAsyncReceiveFrom,
 					"udpAsyncReceiveFrom - received (%d bytes)", anReceived);
 				Bdg::Receiver::notifyAs(Bdg::NotifyCtx{Bdg::EndpointVariant{Bdg::UdpEndpoint{*endpoint.get(), port}},
-					Ut::ConstBuffer{buffer.get(), anReceived},
+					Ut::Cont::ConstBuffer{buffer.get(), anReceived},
 					[&aSocket, endpoint](Bdg::RespondCtx aCtx)
 					{
 						asio::error_code err{};
-						aSocket.send_to(Ut::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
+						aSocket.send_to(Ut::Cont::makeAsioCb(aCtx.buffer), *endpoint.get(), 0, err);
 					}});
 				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, udpAsyncReceiveFrom, "next round");
 				udpAsyncReceiveFrom(aSocket, buffer, endpoint);
@@ -317,11 +317,11 @@ void Api::tcpAsyncReceiveFrom(asio::ip::tcp::socket &aSocket, std::shared_ptr<ch
 				GS_UTILITY_LOGV_METHOD(kDebugTag, Api, tcpAsyncReceiveFrom,
 					"tcpAsyncReceiveFrom - notifying subscribers");
 				Bdg::Receiver::notifyAs({{Bdg::TcpEndpoint{epRemote, aSocket.local_endpoint().port()}},
-					Ut::ConstBuffer{buffer.get(), anReceived},
+					Ut::Cont::ConstBuffer{buffer.get(), anReceived},
 					[&aSocket](Bdg::RespondCtx aCtx)
 					{
 						asio::error_code err{};
-						aSocket.write_some(Ut::makeAsioCb(aCtx.buffer), err);
+						aSocket.write_some(Ut::Cont::makeAsioCb(aCtx.buffer), err);
 					}});
 				tcpAsyncReceiveFrom(aSocket, buffer);
 			} else if (Ut::Algorithm::in(aErr, asio::error::connection_reset, asio::error::eof,

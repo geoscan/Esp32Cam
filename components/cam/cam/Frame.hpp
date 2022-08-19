@@ -8,13 +8,13 @@
 #ifndef CAM_CAM_FRAME_HPP
 #define CAM_CAM_FRAME_HPP
 
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 
 namespace Cam {
 
-struct Frame : Ut::Buffer {
-	using Ut::Buffer::Buffer;
-	using Ut::Buffer::operator=;
+struct Frame : Ut::Cont::Buffer {
+	using Ut::Cont::Buffer::Buffer;
+	using Ut::Cont::Buffer::operator=;
 
 	virtual int width();
 	virtual int height();

@@ -77,7 +77,7 @@ void MavlinkRouting::init()
 		{
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, MavlinkRouting, init, "MavlinkRouting::receivers UART %d bytes",
 				aCtx.buffer.size());
-			Sub::Rout::UartSend::notify({Ut::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
+			Sub::Rout::UartSend::notify({Ut::Cont::makeAsioCb(aCtx.buffer), getMavlinkUartNum()});
 		});
 	ESP_LOGI(Bdg::kDebugTag, "MavlinkRouting::CTOR creating UDP->Mavlink HOOK for port %d", getMavlinkUdpPort());
 	receivers.emplace_back(UdpHook(getMavlinkUdpPort(), {}),  // Hook, updates the list of UDP clients
@@ -120,7 +120,7 @@ void MavlinkRouting::init()
 						endpoint.address().to_string().c_str(), endpoint.port(), getMavlinkUdpPort());
 				asio::error_code err;
 				auto port = getMavlinkUdpPort();
-				Sock::Api::getInstance().sendTo(endpoint, port, Ut::makeAsioCb(aCtx.buffer), err);
+				Sock::Api::getInstance().sendTo(endpoint, port, Ut::Cont::makeAsioCb(aCtx.buffer), err);
 			}
 		});
 

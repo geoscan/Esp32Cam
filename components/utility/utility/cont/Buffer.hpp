@@ -21,6 +21,7 @@
 #include <utility>
 
 namespace Ut {
+namespace Cont {
 
 namespace Impl {
 
@@ -101,9 +102,10 @@ asio::mutable_buffer makeAsioMb(Tbuf &&);
 template <class Tbuf>
 asio::const_buffer makeAsioCb(Tbuf &&);
 
-using Buffer = typename ::Ut::Tbuffer<void>;
-using ConstBuffer = typename ::Ut::Tbuffer<const void>;
+using Buffer = typename ::Ut::Cont::Tbuffer<void>;
+using ConstBuffer = typename ::Ut::Cont::Tbuffer<const void>;
 
+}  // namespace Cont
 }  // namespace Ut
 
 #include "Buffer.impl"

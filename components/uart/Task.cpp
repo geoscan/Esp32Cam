@@ -12,7 +12,7 @@
 #include "utility/LogSection.hpp"
 #include <cassert>
 #include "utility/CircularSwap.hpp"
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 #include "uart/uart.hpp"
 #include "sub/Rout.hpp"
 #include "utility/system/UartDevice.hpp"

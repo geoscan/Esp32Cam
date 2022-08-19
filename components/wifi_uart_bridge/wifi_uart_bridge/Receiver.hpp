@@ -9,7 +9,7 @@
 #define WIFI_UART_BRIDGE_WIFI_UART_BRIDGE_RECEIVER_HPP_
 
 #include "wifi_uart_bridge/EndpointVariant.hpp"
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 #include "utility/comm/InstanceRegistry.hpp"
 #include <Rr/Util/Module.hpp>
 #include <list>
@@ -72,7 +72,7 @@ private:
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
 struct RespondCtx {
-	Ut::ConstBuffer buffer;
+	Ut::Cont::ConstBuffer buffer;
 };
 
 using RespondCb = std::function<void(RespondCtx)>;
@@ -80,12 +80,12 @@ using RespondCb = std::function<void(RespondCtx)>;
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
 struct ForwardCtx {
-	Ut::ConstBuffer buffer;
+	Ut::Cont::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
 using ForwardCb = std::function<void(ForwardCtx)>;
-using GetBufferCb = std::function<Ut::ConstBuffer()>;
+using GetBufferCb = std::function<Ut::Cont::ConstBuffer()>;
 
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
@@ -99,7 +99,7 @@ struct AsyncNotifyCtx {
 ///
 struct NotifyCtx {
 	const EndpointVariant &endpointVariant;
-	Ut::ConstBuffer buffer;
+	Ut::Cont::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
@@ -111,7 +111,7 @@ struct NotifyCtx {
 ///
 struct OnReceiveCtx {
 	const EndpointVariant &endpointVariant;
-	Ut::ConstBuffer &buffer;
+	Ut::Cont::ConstBuffer &buffer;
 	RespondCb respondCb;
 	ForwardCb forwardCb;
 };

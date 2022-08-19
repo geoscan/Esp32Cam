@@ -47,7 +47,7 @@ size_t UartDevice::read(void *data, size_t size, size_t aWaitMs)
 	return count > 0 ? static_cast<uint32_t>(count) : 0;
 }
 
-size_t UartDevice::read(Ut::Buffer aBuffer, size_t aWaitMs)
+size_t UartDevice::read(Ut::Cont::Buffer aBuffer, size_t aWaitMs)
 {
 	return read(aBuffer.data(), aBuffer.size(), aWaitMs);
 }
