@@ -15,7 +15,7 @@
 #include "utility/Buffer.hpp"
 #include "uart/uart.hpp"
 #include "sub/Rout.hpp"
-#include "UartDevice.hpp"
+#include "utility/system/UartDevice.hpp"
 #include "Task.hpp"
 #include "utility/time.hpp"
 #include "utility/thr/WorkQueue.hpp"

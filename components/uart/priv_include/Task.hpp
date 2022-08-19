@@ -12,7 +12,11 @@
 #include <array>
 #include <mutex>
 
+namespace Utility {
+namespace Sys {
 class UartDevice;
+}  // namespace Sys
+}  // namespace Utility
 
 namespace Utility {
 
@@ -35,13 +39,13 @@ private:
 	struct Buf {
 		std::array<std::uint8_t, 1024> buf;
 		std::size_t pos;
-		UartDevice *device;
+		Utility::Sys::UartDevice *device;
 	};
 
 	using Swap = typename Utility::CircularSwap<Buf, 3>;
 
 private:
-	const std::list<UartDevice *> uartDevices;
+	const std::list<Utility::Sys::UartDevice *> uartDevices;
 
 	struct SyncedSwap {
 		Swap swap;

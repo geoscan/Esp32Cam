@@ -9,7 +9,9 @@
 #include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
-#include "UartDevice.hpp"
+#include "utility/system/UartDevice.hpp"
+
+using namespace Utility::Sys;
 
 UartDevice::UartDevice(int num, gpio_num_t rxPin, gpio_num_t txPin, int rate, uart_parity_t parity,
 					   uart_stop_bits_t stopBits):
