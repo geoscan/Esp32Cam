@@ -77,7 +77,7 @@ static bool parseResponse(const char *data, const unsigned len)
 extern "C" void getApNameSuffix(uint8_t **data, unsigned *len)
 {
 	const unsigned kWaitTimeoutMs = 10000;
-	Utility::Sys::UartDevice uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
+	Ut::Sys::UartDevice uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, 2000000, UART_PARITY_DISABLE, UART_STOP_BITS_1);
 	char buf[256] = {0};
 	auto timeEndUs = esp_timer_get_time() + kWaitTimeoutMs * 1000;
 	bool parsed = false;

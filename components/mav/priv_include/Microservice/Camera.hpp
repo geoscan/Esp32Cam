@@ -16,7 +16,7 @@
 namespace Mav {
 namespace Mic {
 
-class Camera final : public Microservice, public Utility::Sys::HrTimer, public Mav::DelayedSend {
+class Camera final : public Microservice, public Ut::Sys::HrTimer, public Mav::DelayedSend {
 private:
 	using SequenceId = std::uint32_t;
 
@@ -28,7 +28,7 @@ private:
 	};
 
 	struct History {
-		Utility::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
+		Ut::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
 		std::int32_t imageCaptureCount = 0;
 		ImageCapture *findBySequence(SequenceId);
 	};

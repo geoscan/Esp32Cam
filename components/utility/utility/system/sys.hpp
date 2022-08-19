@@ -8,12 +8,12 @@
 #if !defined(UTILITY_UTILITY_SYSTEM_SYS_HPP_)
 #define UTILITY_UTILITY_SYSTEM_SYS_HPP_
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 static constexpr const char *kTag = "[sys]";
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_SYSTEM_SYS_HPP_

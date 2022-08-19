@@ -24,7 +24,7 @@ CameraStream::CameraStream(Fps f) :	fps(f)
 
 void CameraStream::operator()()
 {
-	using Time = decltype(Utility::bootTimeUs());
+	using Time = decltype(Ut::bootTimeUs());
 	static const auto kWaitMs = (fps > 0) ? 1000 / fps : 0;
 
 	auto img = Cam::Camera::getInstance().getFrame();
@@ -33,7 +33,7 @@ void CameraStream::operator()()
 
 	while(true) {
 		if (fps > 0) {
-			lastSend = Utility::bootTimeUs() / 1000;
+			lastSend = Ut::bootTimeUs() / 1000;
 		}
 
 		key.notify(img);
@@ -42,9 +42,9 @@ void CameraStream::operator()()
 
 		if (fps > 0) {
 			// Timer counter overflow and high latency are taken into account
-			auto timeDelta = Utility::bootTimeUs() / 1000 - lastSend;
+			auto timeDelta = Ut::bootTimeUs() / 1000 - lastSend;
 			auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
-			Utility::waitMs(timeWait);
+			Ut::waitMs(timeWait);
 		}
 	}
 }

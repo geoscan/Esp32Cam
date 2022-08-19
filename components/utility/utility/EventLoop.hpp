@@ -13,7 +13,7 @@
 #include <string>
 #include <list>
 
-namespace Utility {
+namespace Ut {
 namespace Ev {
 
 class Handler;
@@ -47,7 +47,7 @@ private:
 	std::string name;
 	esp_event_loop_handle_t espEventLoopHandle;
 
-	static struct InstanceRegistry : Utility::Comm::InstanceRegistry<Loop, std::list> {
+	static struct InstanceRegistry : Ut::Comm::InstanceRegistry<Loop, std::list> {
 		Loop *find(const char *);
 	} instanceRegistry;
 };
@@ -73,7 +73,7 @@ template <class T>
 esp_err_t post(const char *aName, T*, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
 
 }  // namespace Ev
-}  // namespace Utility
+}  // namespace Ut
 
 #include "EventLoop.impl"
 

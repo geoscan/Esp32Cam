@@ -10,7 +10,7 @@
 
 #include <cassert>
 
-namespace Utility {
+namespace Ut {
 
 template <class T>
 class MakeSingleton {
@@ -56,6 +56,6 @@ public:
 template <class T>
 T *MakeSingleton<T>::instance = nullptr;
 
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_MAKESINGLETON_HPP

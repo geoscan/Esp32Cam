@@ -15,13 +15,13 @@
 struct __mavlink_mav_gs_network_t;
 using mavlink_mav_gs_network_t = __mavlink_mav_gs_network_t;
 
-namespace Utility {
+namespace Ut {
 namespace Subscription {
 
 struct IpEndpointCommand;
 
 }  // namespace Subscription
-}  // namespace Utility
+}  // namespace Ut
 
 namespace Mav {
 namespace Mic {

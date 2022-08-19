@@ -40,7 +40,7 @@ private:
 	static constexpr auto knUdpClients = 2;
 	static constexpr auto kfOverwriteUdpClients = true;
 	struct {
-		Utility::CircularBuffer<asio::ip::udp::endpoint, knUdpClients, kfOverwriteUdpClients> udpEndpoints;  ///> Memoized clients
+		Ut::CircularBuffer<asio::ip::udp::endpoint, knUdpClients, kfOverwriteUdpClients> udpEndpoints;  ///> Memoized clients
 	} container;
 
 	struct {

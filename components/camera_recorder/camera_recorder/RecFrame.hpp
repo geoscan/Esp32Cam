@@ -18,7 +18,7 @@ class RecFrame : public Record {
 private:
 	FILE *file;
 	struct {
-		Utility::Thr::Semaphore<1, 0> sem;
+		Ut::Thr::Semaphore<1, 0> sem;
 		std::mutex mut;
 	} sync;
 protected:

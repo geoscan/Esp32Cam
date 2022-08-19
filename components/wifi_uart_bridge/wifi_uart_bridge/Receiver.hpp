@@ -72,7 +72,7 @@ private:
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
 struct RespondCtx {
-	Utility::ConstBuffer buffer;
+	Ut::ConstBuffer buffer;
 };
 
 using RespondCb = std::function<void(RespondCtx)>;
@@ -80,12 +80,12 @@ using RespondCb = std::function<void(RespondCtx)>;
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
 struct ForwardCtx {
-	Utility::ConstBuffer buffer;
+	Ut::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
 using ForwardCb = std::function<void(ForwardCtx)>;
-using GetBufferCb = std::function<Utility::ConstBuffer()>;
+using GetBufferCb = std::function<Ut::ConstBuffer()>;
 
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
@@ -99,7 +99,7 @@ struct AsyncNotifyCtx {
 ///
 struct NotifyCtx {
 	const EndpointVariant &endpointVariant;
-	Utility::ConstBuffer buffer;
+	Ut::ConstBuffer buffer;
 	RespondCb respondCb;
 };
 
@@ -111,7 +111,7 @@ struct NotifyCtx {
 ///
 struct OnReceiveCtx {
 	const EndpointVariant &endpointVariant;
-	Utility::ConstBuffer &buffer;
+	Ut::ConstBuffer &buffer;
 	RespondCb respondCb;
 	ForwardCb forwardCb;
 };
@@ -138,7 +138,7 @@ private:
 	/// \brief Receiver instances are stored in a static registry, so they can be enumerated
 	///
 	struct ReceiverRegistry {
-		Utility::Comm::OrderedInstanceRegistry<Receiver> instances;
+		Ut::Comm::OrderedInstanceRegistry<Receiver> instances;
 	};
 
 public:

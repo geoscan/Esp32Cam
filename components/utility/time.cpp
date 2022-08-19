@@ -4,7 +4,7 @@
 #include <esp_timer.h>
 #include <limits>
 
-namespace Utility {
+namespace Ut {
 
 void waitMs(unsigned timeWaitMs)
 {
@@ -33,4 +33,4 @@ bool expired(const Time time, Time durationUs)
 	return isExpired;
 }
 
-}  // namespace Utility
+}  // namespace Ut

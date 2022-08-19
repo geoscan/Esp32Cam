@@ -15,16 +15,16 @@
 #include "sub/Rout.hpp"
 #include <array>
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 class UartDevice;
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 namespace Uart {
 
 template <unsigned N>
-using OnSendBase = std::array<Utility::Sys::UartDevice *, N>;
+using OnSendBase = std::array<Ut::Sys::UartDevice *, N>;
 
 ///
 /// \brief Handles UART send requests through use of Rr lib-based subscription

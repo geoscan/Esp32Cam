@@ -10,7 +10,7 @@
 
 #include "HrTimer.hpp"  // Makes no effect. Being used to enable syntax highlighting
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 template <class Trep, class Tperiod>
@@ -26,6 +26,6 @@ esp_err_t HrTimer::startPeriodic(const std::chrono::duration<Trep, Tperiod> &aDu
 }
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_HRTIMER_HPP_

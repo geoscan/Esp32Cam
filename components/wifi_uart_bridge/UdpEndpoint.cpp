@@ -13,7 +13,7 @@
 // ------------ UdpEndpoint ------------ //
 
 UdpEndpoint::UdpEndpoint(asio::io_context &context, uint16_t port, size_t nMaxClients, size_t timeoutNoInputSec) :
-	kTimeout(static_cast<Utility::Time>(timeoutNoInputSec) * 1000000),
+	kTimeout(static_cast<Ut::Time>(timeoutNoInputSec) * 1000000),
 	kMaxClients(nMaxClients),
 	socket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), port))
 {
@@ -24,7 +24,7 @@ size_t UdpEndpoint::read(asio::mutable_buffer buf)
 	CliEndpoint sender;
 	size_t      nrecv = socket.receive_from(buf, sender);
 
-	cliMap.set(sender, Utility::bootTimeUs());
+	cliMap.set(sender, Ut::bootTimeUs());
 
 	return nrecv;
 }
@@ -35,7 +35,7 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 	while (!cliStack.empty()) {
 		auto client = cliStack.pop();
-		if (!Utility::expired(client.second, kTimeout)) {
+		if (!Ut::expired(client.second, kTimeout)) {
 			asio::error_code err;
 			socket.send_to(buf, client.first, 0, err);
 		}
@@ -69,21 +69,21 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 // ------------ CliMap ------------ //
 
 
-Utility::Time &UdpEndpoint::CliMap::at(UdpEndpoint::CliEndpoint client)
+Ut::Time &UdpEndpoint::CliMap::at(UdpEndpoint::CliEndpoint client)
 {
-	auto guard = Utility::makeLockGuard(mutex);
+	auto guard = Ut::makeLockGuard(mutex);
 	return cliMap.at(client).get().second;
 }
 
 bool UdpEndpoint::CliMap::contains(UdpEndpoint::CliEndpoint client)
 {
-	auto guard = Utility::makeLockGuard(mutex);
+	auto guard = Ut::makeLockGuard(mutex);
 	return (cliMap.find(client) != cliMap.end());
 }
 
-void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, Utility::Time time)
+void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, Ut::Time time)
 {
-	auto       guard    = Utility::makeLockGuard(mutex);
+	auto       guard    = Ut::makeLockGuard(mutex);
 	const bool contains = (cliMap.find(client) != cliMap.end());
 
 	if (!contains) {
@@ -96,7 +96,7 @@ void UdpEndpoint::CliMap::set(UdpEndpoint::CliEndpoint client, Utility::Time tim
 
 UdpEndpoint::CliStack UdpEndpoint::CliMap::stack()
 {
-	auto guard = Utility::makeLockGuard(mutex);
+	auto guard = Ut::makeLockGuard(mutex);
 	return CliStack(cliStack.begin(), cliStack.size());
 }
 

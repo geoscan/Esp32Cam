@@ -7,7 +7,7 @@
 
 #include "utility/system/HrTimer.hpp"
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName, bool aSkipUnhandledEvents)
@@ -34,4 +34,4 @@ void HrTimer::onTimerStaticCallback(void *aInstance)
 }
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut

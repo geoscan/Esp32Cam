@@ -28,7 +28,7 @@ void wifiUartBridgeStart(asio::io_context &context)
 	static UdpEndpoint  udp(context);
 	static Bridge       bridge(uart, udp);
 
-	Utility::Thr::threadRun(bridge);
+	Ut::Thr::threadRun(bridge);
 }
 
 namespace Bdg {

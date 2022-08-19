@@ -7,7 +7,7 @@
 
 #include "EventLoop.hpp"
 
-namespace Utility {
+namespace Ut {
 namespace Ev {
 
 template <class T>
@@ -30,4 +30,4 @@ inline esp_err_t post(const char *aName, T *aData, esp_event_base_t aEventBase, 
 }
 
 }  // namespace Ev
-}  // namespace Utility
+}  // namespace Ut

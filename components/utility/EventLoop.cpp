@@ -8,7 +8,7 @@
 #include "utility/EventLoop.hpp"
 #include <cstring>
 
-namespace Utility {
+namespace Ut {
 namespace Ev {
 
 esp_err_t reg(const char *aName, Handler &aHandler, esp_event_base_t aEventBase, int32_t aEventId)
@@ -82,4 +82,4 @@ Loop *Loop::InstanceRegistry::find(const char *aName)
 }
 
 }  // namespace Ev
-}  // namespace Utility
+}  // namespace Ut

@@ -300,7 +300,7 @@ void GsNetwork::processOpen(mavlink_message_t &aMavlinkMessage,
 	}
 
 	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
-		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+		if (Ut::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
 			Bdg::RoutingRules::getInstance().addStatic(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
@@ -337,7 +337,7 @@ void GsNetwork::processClose(mavlink_message_t &aMavlinkMessage,
 	}
 
 	if (MAV_GS_NETWORK_ACK_SUCCESS == aMavlinkMavGsNetwork.ack && Bdg::RoutingRules::checkInstance()) {
-		if (Utility::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
+		if (Ut::Algorithm::in(aMavlinkMavGsNetwork.transport, MAV_GS_NETWORK_TRANSPORT_TCP4,
 			MAV_GS_NETWORK_TRANSPORT_TCP6))
 		{
 			Bdg::RoutingRules::getInstance().remove(Bdg::TcpPort{aMavlinkMavGsNetwork.host_port, {}},
@@ -433,7 +433,7 @@ void GsNetwork::onTcpEvent(typename Sub::Rout::OnTcpEvent::Arg<0> aTcpEvent)
 			mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
 			const std::size_t nProcessed = Marshalling::push(mavlinkMessage, resp.buffer);
 
-			return Utility::ConstBuffer(resp.buffer, nProcessed);
+			return Ut::ConstBuffer(resp.buffer, nProcessed);
 		},
 		[](Bdg::RespondCtx){}});
 }

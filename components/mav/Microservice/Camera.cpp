@@ -166,7 +166,7 @@ Microservice::Ret Camera::processRequestMessageCameraInformation(mavlink_command
 #endif
 			mavlink_camera_information_t mavlinkCameraInformation {};
 			mavlinkCameraInformation.time_boot_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-				std::chrono::microseconds{Utility::bootTimeUs()}).count();
+				std::chrono::microseconds{Ut::bootTimeUs()}).count();
 			mavlinkCameraInformation.flags = CAMERA_CAP_FLAGS_CAPTURE_IMAGE | CAMERA_CAP_FLAGS_CAPTURE_VIDEO |
 				CAMERA_CAP_FLAGS_CAN_CAPTURE_IMAGE_IN_VIDEO_MODE | CAMERA_CAP_FLAGS_HAS_VIDEO_STREAM;
 

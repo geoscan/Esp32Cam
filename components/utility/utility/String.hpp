@@ -8,12 +8,12 @@
 #if !defined(UTILITY_UTILITY_STRING_HPP_)
 #define UTILITY_UTILITY_STRING_HPP_
 
-namespace Utility {
+namespace Ut {
 namespace Str {
 
 bool checkEndswith(const char *aStr, const char *aSuffix);
 
 }  // namespace Str
-}  // namespace Utility
+}  // namespace Ut
 
 #endif // UTILITY_UTILITY_STRING_HPP_

@@ -112,7 +112,7 @@ void Ov2640::cameraConfigLoad()
 	};
 
 	std::uint8_t frame;
-	esp_err_t err = Utility::Sys::nvsGet(kNvsKey, kNvsFrameSize, frame);
+	esp_err_t err = Ut::Sys::nvsGet(kNvsKey, kNvsFrameSize, frame);
 
 	if (ESP_OK == err) {
 		if (frame < kResolutionLimit) {
@@ -234,7 +234,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 
 			if (mapped) {
 				if (mode < kResolutionLimit) {
-					auto err = Utility::Sys::nvsSet(kNvsKey, kNvsFrameSize, mode);
+					auto err = Ut::Sys::nvsSet(kNvsKey, kNvsFrameSize, mode);
 
 					if (err != ESP_OK) {
 						aCb({Mod::Fld::RequestResult::StorageError});

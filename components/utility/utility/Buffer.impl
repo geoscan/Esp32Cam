@@ -11,7 +11,7 @@
 #include "Buffer.hpp"
 #include <cassert>
 
-namespace Utility {
+namespace Ut {
 
 // Impl. Tbuffer
 
@@ -93,6 +93,6 @@ inline asio::const_buffer makeAsioCb(Tbuf &&aBuf)
 	return {constVoidBuffer.data(), constVoidBuffer.size()};
 }
 
-}  // namespace Utility
+}  // namespace Ut
 
 #endif  // UTILITY_UTILITY_BUFFER_IMPL

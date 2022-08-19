@@ -13,7 +13,7 @@
 #include <esp_timer.h>
 #include <chrono>
 
-namespace Utility {
+namespace Ut {
 namespace Sys {
 
 ///
@@ -41,7 +41,7 @@ private:
 };
 
 }  // namespace Sys
-}  // namespace Utility
+}  // namespace Ut
 
 #include "HrTimer.impl"
 

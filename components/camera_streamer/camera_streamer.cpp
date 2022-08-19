@@ -27,6 +27,6 @@ void cameraStreamerStart(asio::io_context &context)
 	static CameraStreamTcpControl cameraStreamTcpControl(acceptor, tcpSocket);
 	static FrameSender frameSender(udpSocket);
 
-	Utility::Thr::setThreadCoreAffinity(0);
+	Ut::Thr::setThreadCoreAffinity(0);
 	static std::thread threadCameraStreamTcpControl(&CameraStreamTcpControl::operator(), &cameraStreamTcpControl);
 }

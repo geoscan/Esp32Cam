@@ -4,7 +4,7 @@
 #include <esp_timer.h>
 #include <chrono>
 
-namespace Utility {
+namespace Ut {
 using Time = int64_t;
 
 // Wait for a certain duration
@@ -25,6 +25,6 @@ void taskDelay(const std::chrono::duration<Trep, Tper> &aDuration)
 }
 
 }  // namespace Tim
-}  // namespace Utility
+}  // namespace Ut
 
 #endif  // COMPONENTS_UTILITY_TIME_HPP

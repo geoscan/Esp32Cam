@@ -21,6 +21,6 @@ void Task::iter()
 void Task::run() {
 	while (true) {
 		iter();
-		Utility::waitMs(20);
+		Ut::waitMs(20);
 	}
 }

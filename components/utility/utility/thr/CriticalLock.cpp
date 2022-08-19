@@ -10,7 +10,7 @@
 #include <esp_log.h>
 
 
-namespace Utility {
+namespace Ut {
 
 CriticalLock::CriticalLock(Critical &aLock) : lock{aLock}
 {
@@ -26,5 +26,5 @@ Critical::Critical() : lock(portMUX_INITIALIZER_UNLOCKED)
 {
 }
 
-}  // namespace Utility
+}  // namespace Ut
 

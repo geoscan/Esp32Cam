@@ -27,7 +27,7 @@ struct Buf {
 	std::size_t len;
 };
 
-using MarshallingHoldQueue = typename Utility::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
+using MarshallingHoldQueue = typename Ut::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
 using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
 class Marshalling : public MarshallingBaseType {
@@ -35,7 +35,7 @@ private:
 	using MarshallingBaseType::push;
 
 public:
-	static std::size_t push(const mavlink_message_t &, Utility::Buffer);
+	static std::size_t push(const mavlink_message_t &, Ut::Buffer);
 	static std::size_t push(const mavlink_message_t &, void *aBuffer);
 	std::size_t push(const mavlink_message_t &);
 };

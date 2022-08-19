@@ -149,7 +149,7 @@ static Error processVideoRecord(string command, string name)
 	name.append(".avi");
 	sdFatInit();
 
-	Utility::waitMs(100);
+	Ut::waitMs(100);
 
 	ESP_LOGI("[http]", "command: %s, name: %s", command.c_str(), name.c_str());
 
@@ -285,7 +285,7 @@ static void printStatus(httpd_req_t *req, Error res)
 		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
 	}
 
-	if (!Utility::Algorithm::in(res, Ok, OkNoRequest)) {
+	if (!Ut::Algorithm::in(res, Ok, OkNoRequest)) {
 		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
 	}
 

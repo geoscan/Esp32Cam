@@ -38,7 +38,7 @@ void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }
 
-Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, int &anProcessed)
+Mav::Microservice::Ret Mav::Dispatcher::process(Ut::ConstBuffer aBuffer, int &anProcessed)
 {
 	auto ret = Microservice::Ret::Ignored;
 	anProcessed = unmarshalling.push(aBuffer);  // parse incoming message, check whether it is a mavlink
@@ -50,7 +50,7 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Utility::ConstBuffer aBuffer, in
 		ret = micAggregate.process(message,
 			[this](mavlink_message_t &aMsg) mutable {
 				std::size_t inc = Marshalling::push(aMsg,
-					Utility::Buffer{resp.buffer, sizeof(resp.buffer)}.asSlice(resp.size));
+					Ut::Buffer{resp.buffer, sizeof(resp.buffer)}.asSlice(resp.size));
 				GS_UTILITY_LOGD_METHOD(Mav::kDebugTag, Dispatcher, process, "(on response callback)"
 					"pushed %d bytes into response buffer", inc);
 				resp.size += inc;
@@ -67,7 +67,7 @@ Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::
 	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
 	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
 
-	switch (process(Utility::toBuffer<const void>(aMessage), response.nProcessed)) {
+	switch (process(Ut::toBuffer<const void>(aMessage), response.nProcessed)) {
 		case Microservice::Ret::Ignored:  // forward the message to UDP interface
 			response.setType(Sub::Rout::Response::Type::Ignored);
 

@@ -15,7 +15,7 @@
 // STL-style RAII lock guard
 //
 
-namespace Utility {
+namespace Ut {
 
 //  -----  LockGuard  -----  //
 
@@ -72,6 +72,6 @@ inline LockGuard<MutexType> makeLockGuard(MutexType &mutex)
 	return LockGuard<MutexType>(mutex);
 }
 
-}  // namespace Utility
+}  // namespace Ut
 
 #endif  // COMPONENTS_UTILITY_UTILITY_LOCKGUARD_HPP
