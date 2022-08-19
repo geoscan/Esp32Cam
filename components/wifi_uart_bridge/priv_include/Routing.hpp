@@ -9,7 +9,7 @@
 #define SUB_PRIV_INCLUDE_ROUTING_HPP
 
 #include "sub/Rout.hpp"
-#include "utility/CircularBuffer.hpp"
+#include "utility/cont/CircularBuffer.hpp"
 
 namespace Bdg {
 
@@ -40,7 +40,7 @@ private:
 	static constexpr auto knUdpClients = 2;
 	static constexpr auto kfOverwriteUdpClients = true;
 	struct {
-		Ut::CircularBuffer<asio::ip::udp::endpoint, knUdpClients, kfOverwriteUdpClients> udpEndpoints;  ///> Memoized clients
+		Ut::Cont::CircularBuffer<asio::ip::udp::endpoint, knUdpClients, kfOverwriteUdpClients> udpEndpoints;  ///> Memoized clients
 	} container;
 
 	struct {

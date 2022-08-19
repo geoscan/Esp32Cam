@@ -10,7 +10,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_UART_DEBUG_LEVEL)
 #include <esp_log.h>
 
-#include "utility/CircularSwap.hpp"
+#include "utility/cont/CircularSwap.hpp"
 #include "uart/uart.hpp"
 #include "utility/system/UartDevice.hpp"
 #include "Task.hpp"

@@ -12,8 +12,7 @@
 #include <algorithm>
 
 namespace Ut {
-
-namespace Algorithm {
+namespace Al {
 
 /// \brief Checks whether the \arg 'object' is contained in the domain specified by \arg 'values'
 template <typename T, typename ...Args>
@@ -24,8 +23,7 @@ bool in(const T &object, const Args &...values)
 	return std::any_of(comparisons.begin(), comparisons.end(), [](bool f){return f;});
 }
 
-}  // namespace Algorithm
-
+}  // namespace Al
 }  // namespace Ut
 
 #endif // ALGORITHM_HPP

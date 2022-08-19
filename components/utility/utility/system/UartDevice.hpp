@@ -10,7 +10,7 @@
 
 #include "driver/uart.h"
 #include "driver/gpio.h"
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 
 namespace Ut {
 namespace Sys {
@@ -30,7 +30,7 @@ public:
 	/// \return Number of bytes read
 	///
 	size_t read(void *data, size_t size, size_t aWaitMs = 0);
-	size_t read(Ut::Buffer, size_t aWaitMs = 0);
+	size_t read(Ut::Cont::Buffer, size_t aWaitMs = 0);
 
 	///
 	/// \return Number of bytes written

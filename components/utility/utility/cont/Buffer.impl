@@ -12,6 +12,7 @@
 #include <cassert>
 
 namespace Ut {
+namespace Cont {
 
 // Impl. Tbuffer
 
@@ -93,6 +94,7 @@ inline asio::const_buffer makeAsioCb(Tbuf &&aBuf)
 	return {constVoidBuffer.data(), constVoidBuffer.size()};
 }
 
+}  // namespace Cont
 }  // namespace Ut
 
 #endif  // UTILITY_UTILITY_BUFFER_IMPL

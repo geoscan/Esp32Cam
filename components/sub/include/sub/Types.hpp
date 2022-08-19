@@ -8,7 +8,7 @@
 #ifndef SUB_INCLUDE_TYPES_HPP
 #define SUB_INCLUDE_TYPES_HPP
 
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 
 namespace Sub {
 
@@ -45,7 +45,7 @@ struct UartEndpoint {
 };
 
 struct Message {
-	Ut::ConstBuffer payload;  ///< Raw bytes transferred with an interface
+	Ut::Cont::ConstBuffer payload;  ///< Raw bytes transferred with an interface
 };
 
 // Derivatives of the atomic entities defined above

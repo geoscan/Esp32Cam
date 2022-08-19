@@ -7,10 +7,10 @@
 
 #include <cassert>
 #include "Mavlink.hpp"
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 #include "Marshalling.hpp"
 
-std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Ut::Buffer aBuffer)
+std::size_t Mav::Marshalling::push(const mavlink_message_t &aMavlinkMessage, Ut::Cont::Buffer aBuffer)
 {
 	return mavlink_msg_to_send_buffer(static_cast<std::uint8_t *>(aBuffer.data()), &aMavlinkMessage);
 }

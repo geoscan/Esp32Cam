@@ -9,7 +9,7 @@
 #define CAM_CAM_CAMERA_HPP
 
 #include <memory>
-#include "utility/Buffer.hpp"
+#include "utility/cont/Buffer.hpp"
 #include "Frame.hpp"
 
 namespace Cam {

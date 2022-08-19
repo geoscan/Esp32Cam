@@ -5,12 +5,12 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/String.hpp"
+#include "utility/al/String.hpp"
 #include <algorithm>
 #include <cstring>
 
 namespace Ut {
-namespace Str {
+namespace Al {
 
 bool checkEndswith(const char *aStr, const char *aSuffix)
 {
@@ -29,5 +29,5 @@ bool checkEndswith(const char *aStr, const char *aSuffix)
 	return ret;
 }
 
-}  // namespace Str
+}  // namespace Al
 }  // namespace Ut

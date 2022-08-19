@@ -14,7 +14,7 @@
 #include <list>
 
 namespace Ut {
-namespace Ev {
+namespace Sys {
 
 class Handler;
 
@@ -72,7 +72,7 @@ esp_err_t post(const char *aName, T&&, esp_event_base_t aEventBase, std::int32_t
 template <class T>
 esp_err_t post(const char *aName, T*, esp_event_base_t aEventBase, std::int32_t aEventId, TickType_t aTicks);
 
-}  // namespace Ev
+}  // namespace Sys
 }  // namespace Ut
 
 #include "EventLoop.impl"

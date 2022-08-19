@@ -13,7 +13,7 @@
 #include "Marshalling.hpp"
 #include <type_traits>
 #include <algorithm>
-#include <utility/Buffer.hpp>
+#include <utility/cont/Buffer.hpp>
 
 namespace Mav {
 namespace Mic {

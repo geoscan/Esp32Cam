@@ -7,6 +7,7 @@
 
 #include <limits>
 #include "utility/thr/LockGuard.hpp"
+#include "utility/al/Time.hpp"
 #include "UdpEndpoint.hpp"
 
 
@@ -35,7 +36,7 @@ size_t UdpEndpoint::write(asio::const_buffer buf)
 
 	while (!cliStack.empty()) {
 		auto client = cliStack.pop();
-		if (!Ut::expired(client.second, kTimeout)) {
+		if (!Ut::Al::expired(client.second, kTimeout)) {
 			asio::error_code err;
 			socket.send_to(buf, client.first, 0, err);
 		}

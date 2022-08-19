@@ -11,7 +11,7 @@
 #include "Microservice.hpp"
 #include "DelayedSend.hpp"
 #include "utility/system/HrTimer.hpp"
-#include "utility/CircularBuffer.hpp"
+#include "utility/cont/CircularBuffer.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -28,7 +28,7 @@ private:
 	};
 
 	struct History {
-		Ut::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
+		Ut::Cont::CircularBuffer<ImageCapture, 4, true> imageCaptureSequence;  ///< Sequence numbers of processed capture requests
 		std::int32_t imageCaptureCount = 0;
 		ImageCapture *findBySequence(SequenceId);
 	};

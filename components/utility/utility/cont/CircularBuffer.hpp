@@ -13,6 +13,7 @@
 #include <type_traits>
 
 namespace Ut {
+namespace Cont {
 
 template <unsigned N>
 class CircularCounter {
@@ -295,6 +296,7 @@ public:
 	}
 };
 
+}  // namespace Cont
 }  // namespace Ut
 
 #endif  // UTILITY_UTILITY_CIRCULARBUFFER_HPP

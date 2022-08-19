@@ -152,7 +152,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 			reduced.logv("Receiver::notifyAsImpl() Reduced as: ");
 #endif
 
-			Ut::ConstBuffer outBuffer = aCtx.buffer;
+			Ut::Cont::ConstBuffer outBuffer = aCtx.buffer;
 			RespondCb outRespondCb = aCtx.respondCb;
 			bool forwarded = false;
 			auto forwardCb =

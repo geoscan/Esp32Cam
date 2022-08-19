@@ -13,6 +13,7 @@
 #include <cassert>
 
 namespace Ut {
+namespace Cont {
 
 template <class T, std::size_t N>
 class PosArray : public std::array<T, N> {
@@ -145,6 +146,7 @@ public:
 	}
 };
 
+}  // namespace Cont
 }  // namespace Ut
 
 #endif // CORE_INC_UTIL_POSARRAY_HPP

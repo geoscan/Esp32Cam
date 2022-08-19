@@ -9,8 +9,8 @@
 #define MAV_PRIV_INCLUDE_MARSHALLING_HPP_
 
 #include <queue>
-#include "utility/Buffer.hpp"
-#include "utility/CircularBuffer.hpp"
+#include "utility/cont/Buffer.hpp"
+#include "utility/cont/CircularBuffer.hpp"
 
 struct __mavlink_message;
 typedef __mavlink_message mavlink_message_t;
@@ -27,7 +27,7 @@ struct Buf {
 	std::size_t len;
 };
 
-using MarshallingHoldQueue = typename Ut::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
+using MarshallingHoldQueue = typename Ut::Cont::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
 using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
 class Marshalling : public MarshallingBaseType {
@@ -35,7 +35,7 @@ private:
 	using MarshallingBaseType::push;
 
 public:
-	static std::size_t push(const mavlink_message_t &, Ut::Buffer);
+	static std::size_t push(const mavlink_message_t &, Ut::Cont::Buffer);
 	static std::size_t push(const mavlink_message_t &, void *aBuffer);
 	std::size_t push(const mavlink_message_t &);
 };

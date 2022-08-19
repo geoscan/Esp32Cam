@@ -13,7 +13,7 @@
 
 #include "camera_recorder/Storage.hpp"
 #include "camera_recorder/camera_recorder.hpp"
-#include "utility/String.hpp"
+#include "utility/al/String.hpp"
 #include "utility/LogSection.hpp"
 #include "sd_fat.h"
 #include <dirent.h>
@@ -62,10 +62,10 @@ esp_err_t Storage::countFrames(unsigned &aCountOut)
 		while ((ep = readdir(dp))) {
 			ESP_LOGV(CameraRecorder::kDebugTag, "scanning a directory entry %s", ep->d_name);
 
-			aCountOut += Ut::Str::checkEndswith(ep->d_name, ".jpg") +
-				Ut::Str::checkEndswith(ep->d_name, ".jpeg") + Ut::Str::checkEndswith(ep->d_name, ".JPG") +
-				Ut::Str::checkEndswith(ep->d_name, ".JPEG") + Ut::Str::checkEndswith(ep->d_name, ".avi") +
-				Ut::Str::checkEndswith(ep->d_name, ".AVI");
+			aCountOut += Ut::Al::checkEndswith(ep->d_name, ".jpg") +
+				Ut::Al::checkEndswith(ep->d_name, ".jpeg") + Ut::Al::checkEndswith(ep->d_name, ".JPG") +
+				Ut::Al::checkEndswith(ep->d_name, ".JPEG") + Ut::Al::checkEndswith(ep->d_name, ".avi") +
+				Ut::Al::checkEndswith(ep->d_name, ".AVI");
 		}
 
 		ret = ESP_OK;

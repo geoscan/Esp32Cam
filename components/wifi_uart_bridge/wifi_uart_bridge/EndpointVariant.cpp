@@ -64,9 +64,9 @@ match( \
 /// match against entities that can be decomposed or re-interpreted, and fills the return vector w/ the results of that
 /// decomposition.
 ///
-Ut::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVariant::asAlternative() const
+Ut::Cont::PosArray<EndpointVariant, EndpointVariant::kPosArraySize> EndpointVariant::asAlternative() const
 {
-	Ut::PosArray<EndpointVariant, kPosArraySize> ret{};
+	Ut::Cont::PosArray<EndpointVariant, kPosArraySize> ret{};
 	match(
 		[&ret](const UdpEndpoint &aUdpEndpoint)
 		{
