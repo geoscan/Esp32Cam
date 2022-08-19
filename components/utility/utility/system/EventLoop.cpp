@@ -5,11 +5,11 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/EventLoop.hpp"
+#include "EventLoop.hpp"
 #include <cstring>
 
 namespace Ut {
-namespace Ev {
+namespace Sys {
 
 esp_err_t reg(const char *aName, Handler &aHandler, esp_event_base_t aEventBase, int32_t aEventId)
 {
@@ -81,5 +81,5 @@ Loop *Loop::InstanceRegistry::find(const char *aName)
 	return ret;
 }
 
-}  // namespace Ev
+}  // namespace Sys
 }  // namespace Ut
