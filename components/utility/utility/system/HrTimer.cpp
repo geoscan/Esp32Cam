@@ -5,10 +5,10 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/HrTimer.hpp"
+#include "utility/system/HrTimer.hpp"
 
 namespace Utility {
-namespace Tim {
+namespace Sys {
 
 HrTimer::HrTimer(esp_timer_dispatch_t aDispatchMethod, const char *aName, bool aSkipUnhandledEvents)
 {
@@ -33,5 +33,5 @@ void HrTimer::onTimerStaticCallback(void *aInstance)
 	static_cast<HrTimer *>(aInstance)->onHrTimer();
 }
 
-}  // namespace Tim
+}  // namespace Sys
 }  // namespace Utility
