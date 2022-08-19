@@ -11,7 +11,7 @@
 #include <esp_log.h>
 #include "utility/LogSection.hpp"
 #include <cassert>
-#include "utility/CircularSwap.hpp"
+#include "utility/cont/CircularSwap.hpp"
 #include "utility/cont/Buffer.hpp"
 #include "uart/uart.hpp"
 #include "sub/Rout.hpp"

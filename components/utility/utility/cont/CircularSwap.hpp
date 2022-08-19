@@ -11,10 +11,11 @@
 #include <array>
 #include <stack>
 #include "CircularBuffer.hpp"
-#include "PosArray.hpp"
+#include "utility/PosArray.hpp"
 #include <algorithm>
 
 namespace Ut {
+namespace Cont {
 
 template <class Tbuf, unsigned Nbuffers>
 class CircularSwap {  /// Stores a number of stack-allocated buffers organized in a circular manner
@@ -107,6 +108,7 @@ public:
 	}
 };
 
+}  // namespace Cont
 }  // namespace Ut
 
 #endif // CORE_INC_APP_SWAPCIRCULARBUFFER_HPP

@@ -10,7 +10,7 @@
 
 #include <queue>
 #include "utility/cont/Buffer.hpp"
-#include "utility/CircularBuffer.hpp"
+#include "utility/cont/CircularBuffer.hpp"
 
 struct __mavlink_message;
 typedef __mavlink_message mavlink_message_t;
@@ -27,7 +27,7 @@ struct Buf {
 	std::size_t len;
 };
 
-using MarshallingHoldQueue = typename Ut::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
+using MarshallingHoldQueue = typename Ut::Cont::CircularBuffer<Buf, kMarshallingQueueMaxSize, false>;
 using MarshallingBaseType = typename std::queue<mavlink_message_t, MarshallingHoldQueue>;
 
 class Marshalling : public MarshallingBaseType {

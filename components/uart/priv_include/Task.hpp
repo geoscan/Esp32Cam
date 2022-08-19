@@ -42,7 +42,7 @@ private:
 		Ut::Sys::UartDevice *device;
 	};
 
-	using Swap = typename Ut::CircularSwap<Buf, 3>;
+	using Swap = typename Ut::Cont::CircularSwap<Buf, 3>;
 
 private:
 	const std::list<Ut::Sys::UartDevice *> uartDevices;
