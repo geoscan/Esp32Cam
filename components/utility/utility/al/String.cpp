@@ -5,7 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/String.hpp"
+#include "utility/al/String.hpp"
 #include <algorithm>
 #include <cstring>
 
