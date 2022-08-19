@@ -11,7 +11,7 @@
 #include <array>
 #include <stack>
 #include "CircularBuffer.hpp"
-#include "utility/PosArray.hpp"
+#include "utility/cont/PosArray.hpp"
 #include <algorithm>
 
 namespace Ut {

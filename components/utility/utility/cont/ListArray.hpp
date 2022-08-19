@@ -8,7 +8,7 @@
 #if !defined(UTILITY_UTILITY_CONT_LISTARRAY_HPP_)
 #define UTILITY_UTILITY_CONT_LISTARRAY_HPP_
 
-#include "utility/PosArray.hpp"
+#include "utility/cont/PosArray.hpp"
 #include <list>
 
 namespace Ut {
@@ -20,16 +20,16 @@ namespace Cont {
 /// valid after `push_back`
 ///
 template <class T, unsigned N>
-class ListArray : private std::list<Ut::PosArray<T, N>> {
+class ListArray : private std::list<Ut::Cont::PosArray<T, N>> {
 public:
 	using value_type = T;
 	using size_type = std::size_t;
 	using reference = T &;
 	using const_reference = const T &;
 private:
-	using Base = typename std::list<Ut::PosArray<T, N>>;
+	using Base = typename std::list<Ut::Cont::PosArray<T, N>>;
 public:
-	ListArray() : std::list<Ut::PosArray<T, N>>{}
+	ListArray() : std::list<Ut::Cont::PosArray<T, N>>{}
 	{
 	}
 public:
