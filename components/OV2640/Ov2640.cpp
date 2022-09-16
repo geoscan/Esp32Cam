@@ -64,7 +64,7 @@ void Ov2640::init()
 		.pixel_format = PIXFORMAT_JPEG, // YUV422,GRAYSCALE,RGB565,JPEG
 		.frame_size   = FRAMESIZE_HVGA,  // QQVGA-UXGA Do not use sizes above QVGA when not JPEG
 
-		.jpeg_quality = 12, //0-63 lower number means higher quality
+		.jpeg_quality = 30, //0-63 lower number means higher quality
 		.fb_count     = 1,  //if more than one, i2s runs in continuous mode. Use only with JPEG
 
 #if CONFIG_OV2640_CUSTOM_BUFFER_MANAGEMENT
