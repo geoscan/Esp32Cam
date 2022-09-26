@@ -36,6 +36,7 @@
 #include "esp_camera.h"
 #include "camera_common.h"
 #include "xclk.h"
+#include "sdkconfig.h"
 #if CONFIG_OV2640_SUPPORT
 #include "ov2640.h"
 #endif
@@ -1189,7 +1190,7 @@ esp_err_t camera_init(const camera_config_t* config)
         (*s_state->sensor.set_quality)(&s_state->sensor, qp);
         s_state->in_bytes_per_pixel = 2;
         s_state->fb_bytes_per_pixel = 2;
-        s_state->fb_size = 1024 * 30;
+        s_state->fb_size = CONFIG_OV2640_JPEG_BUFFER_SIZE;
         s_state->dma_filter = &dma_filter_jpeg;
         s_state->sampling_mode = SM_0A00_0B00;
     } else {
