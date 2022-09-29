@@ -7,3 +7,6 @@
 [submodule "components/lib/rr/rr"]
 	path = components/lib/rr/rr
 	url = https://github.com/damurashov/Reciprocal-Receptacles.git
+[submodule "components/lib/mosse/mosse"]
+	path = components/lib/mosse/mosse
+	url = git@github.com:ESP-Tracking-port/mosse-cv.git
