@@ -61,6 +61,8 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				tracker.update(image, true);
 				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f", tracker.lastPsr());
 			}
+
+			break;
 		}
 		default:
 			break;
