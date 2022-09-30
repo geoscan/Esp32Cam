@@ -20,13 +20,22 @@ namespace Trk {
 
 class Profile {
 private:
-	struct Key {
+	struct Key {  ///< Profile waits for camera frames routed through a subscription mechanism
 		Sub::Key::NewFrame newFrame;
 	};
+	enum class State {
+		CamConfStart,  ///< Tracker will only work with camera switched to grayscale mode
+		CamConfFailed,
+		TrackerInit,  ///< Initialize tracker with a first ROI
+		TrackerRunning
+	};
 public:
-	void onFrame(const std::shared_ptr<Cam::Frame> &);
+	Profile();
+	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
 private:
 	Key key;
+	Mosse::Tracker &tracker;
+	State state;
 };
 
 }  // namespace Trk
