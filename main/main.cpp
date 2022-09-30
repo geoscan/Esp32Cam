@@ -25,6 +25,7 @@
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "socket/socket.hpp"
 #include "wq/wq.hpp"
+#include "tracking/tracking.hpp"
 #include <nvs_flash.h>
 
 static asio::io_context context(3);
@@ -46,5 +47,6 @@ extern "C" int app_main(void)
 	Bdg::init();
 	Sock::start();
 	Uart::start();
+	Trk::profileInit();
 	return 0;
 }
