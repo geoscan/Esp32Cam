@@ -48,6 +48,17 @@ static constexpr std::array<std::tuple<pixformat_t, const char *>, 2> kFramePixf
 	{PIXFORMAT_GRAYSCALE, "grayscale"},
 }};
 
+static const char *pixformatToStr(pixformat_t aPixformat)
+{
+	for (const auto &format : kFramePixformat) {
+		if (std::get<0>(format) == aPixformat) {
+			return std::get<1>(format);
+		}
+	}
+
+	return "";
+}
+
 Ov2640::Ov2640() :
 	Mod::ModuleBase{Mod::Module::Camera}
 {
@@ -216,6 +227,14 @@ void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback 
 
 			break;
 
+		case Fld::Field::FrameFormat: {
+			if (status.initialized) {
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameFormat>(status.pixformat,
+					pixformatToStr(status.pixformat)));
+			}
+
+			break;
+		}
 		default:
 			break;
 
