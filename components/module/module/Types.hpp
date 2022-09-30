@@ -65,7 +65,7 @@ template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::varia
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<std::tuple<std::uint8_t, const char *>> {};  ///< (identifier, human-readable name)
 
 template <Field F, Module M = Module::All> struct SetType : GetType<F, M> {};
-template <> struct SetType<Field::FrameFormat, Module::Camera> : StoreType<std::uint8_t> {};
+template <> struct SetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};
 
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
 	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t>;
