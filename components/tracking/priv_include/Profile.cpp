@@ -24,9 +24,9 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
 	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
-		case State::CamConfStart {  // Initialize the camera, switch it to grayscale mode
+		case State::CamConfStart: {  // Initialize the camera, switch it to grayscale mode
 			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>("grayscale",
-				[&state](const Mod::Fld::WriteResp &aWriteResp)
+				[this](const Mod::Fld::WriteResp &aWriteResp)
 				{
 					if (aWriteResp.isOk()) {
 						ESP_LOGI(Trk::kDebugTag, "Profile: switched camera to grayscale mode");
@@ -42,7 +42,8 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		}
 		case State::TrackerInit: {
 			if (static_cast<bool>(aFrame)) {
-				Mosse::Tp::Image image{aFrame.get()->data(), aFrame.get()->height(), aFrame.get()->width()};
+				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
+					aFrame.get()->width()};
 				Mosse::Tp::Roi roi{{0, 0}, {64, 64}};  // TODO Missing frame size bounds check
 				tracker.init(image, roi);
 				state = State::TrackerRunning;
@@ -50,10 +51,13 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			} else {
 				ESP_LOGW(Trk::kDebugTag, "Profile: nullptr frame");
 			}
+
+			break;
 		}
 		case State::TrackerRunning: {
 			if (static_cast<bool>(aFrame)) {
-				Mosse::Tp::Image image{aFrame.get()->data(), aFrame.get()->height(), aFrame.get()->width()};
+				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
+					aFrame.get()->width()};
 				tracker.update(image, true);
 				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f", tracker.lastPsr());
 			}
