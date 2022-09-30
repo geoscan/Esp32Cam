@@ -15,11 +15,17 @@ static constexpr const char *kTag = "[OV2640]";
 static constexpr const char *kNvsKey = "Ov2640";
 static constexpr const char *kNvsFrameSize = "FrameSize";
 
+/// \brief Memory constraints necessitate the use of frame size limitations
+///
+/// \details Format: (pixformat, "lt" limitation)
+///
 static constexpr std::array<std::tuple<pixformat_t, framesize_t>, 2> kResolutionLimit{{
 	{PIXFORMAT_JPEG, FRAMESIZE_SVGA},
-	{PIXFORMAT_GRAYSCALE, FRAMESIZE_240X240}
+	{PIXFORMAT_GRAYSCALE, FRAMESIZE_QVGA}
 }};
 
+/// \brief Finds max. frame size for a pixformat being used currently.
+///
 static framesize_t pixformatToResolutionLimit(pixformat_t aPixformat)
 {
 	static constexpr framesize_t kFramesizeDefault = FRAMESIZE_240X240;
@@ -60,11 +66,15 @@ static constexpr std::array<FrameSizeModeMap, 22> kFrameSizeModeMap {{
 	{2560, 1920},
 }};
 
+/// \brief Maps pixformat ID to a human-readable representation
+///
 static constexpr std::array<std::tuple<pixformat_t, const char *>, 2> kFramePixformat {{
 	{PIXFORMAT_JPEG, "jpeg"},
 	{PIXFORMAT_GRAYSCALE, "grayscale"},
 }};
 
+/// \brief Converts pixformat to a human-readable representation
+///
 static const char *pixformatToStr(pixformat_t aPixformat)
 {
 	for (const auto &format : kFramePixformat) {
@@ -85,6 +95,13 @@ void Ov2640::init()
 {
 	cameraConfigLoad();
 	cameraConfig.pixel_format = status.pixformat;
+	auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+	// Guardrails to prevent buffer allocation failures
+	if (cameraConfig.frame_size >= resolutionLimit) {
+		cameraConfig.frame_size = static_cast<framesize_t>(resolutionLimit - 1);
+	}
+
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
 	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
 	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
@@ -302,7 +319,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 
 			break;
 		}
-		case Mod::Fld::Field::FrameFormat: {
+		case Mod::Fld::Field::FrameFormat: {  // Change current camera mode and reconfigure the sensor
 			const char *frameFormatStr = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>();
 
 			for (auto &format : kFramePixformat) {
