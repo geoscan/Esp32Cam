@@ -9,4 +9,4 @@
 	url = https://github.com/damurashov/Reciprocal-Receptacles.git
 [submodule "components/lib/mosse/mosse"]
 	path = components/lib/mosse/mosse
-	url = git@github.com:ESP-Tracking-port/mosse-cv.git
+	url = https://github.com/ESP-Tracking-port/mosse-cv.git
