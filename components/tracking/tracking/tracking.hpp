@@ -11,6 +11,7 @@
 namespace Trk {
 
 void init();
+void profileInit();
 static constexpr const char *kDebugTag = "[tracking]";
 
 }  // namespace Trk
