@@ -65,9 +65,10 @@ template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::varia
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<std::tuple<std::uint8_t, const char *>> {};  ///< (identifier, human-readable name)
 
 template <Field F, Module M = Module::All> struct SetType : GetType<F, M> {};
+template <> struct SetType<Field::FrameFormat, Module::Camera> : StoreType<std::uint8_t> {};
 
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
-	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>>;
+	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t>;
 
 struct FieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
@@ -79,12 +80,19 @@ struct FieldVariant : public FieldVariantBase {
 	}
 };
 
+struct SetFieldVariant : public FieldVariantBase {
+	using FieldVariantBase::FieldVariantBase;
+
+	template <Module M, Field F>
+	const typename SetType<F, M>::Type &getUnchecked()
+	{
+		return FieldVariantBase::get_unchecked<typename SetType<F, M>::Type>();
+	}
+};
+
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
-	/// \brief Response variant type.
-	///
-
 	FieldVariant variant;  ///< The actual response
 };
 
@@ -96,7 +104,7 @@ using OnResponseCallback = typename std::function<void(Resp)>;
 
 struct WriteReq {
 	Field field;  ///< Requested field
-	FieldVariant variant;
+	SetFieldVariant variant;
 };
 
 struct RequestResult {
