@@ -14,7 +14,24 @@ using namespace std;
 static constexpr const char *kTag = "[OV2640]";
 static constexpr const char *kNvsKey = "Ov2640";
 static constexpr const char *kNvsFrameSize = "FrameSize";
-static constexpr auto kResolutionLimit = FRAMESIZE_SVGA;
+
+static constexpr std::array<std::tuple<pixformat_t, framesize_t>, 2> kResolutionLimit{{
+	{PIXFORMAT_JPEG, FRAMESIZE_SVGA},
+	{PIXFORMAT_GRAYSCALE, FRAMESIZE_240X240}
+}};
+
+static framesize_t pixformatToResolutionLimit(pixformat_t aPixformat)
+{
+	static constexpr framesize_t kFramesizeDefault = FRAMESIZE_240X240;
+
+	for (const auto &fmtSzPair : kResolutionLimit) {
+		if (std::get<0>(fmtSzPair) == aPixformat) {
+			return std::get<1>(fmtSzPair);
+		}
+	}
+
+	return kFramesizeDefault;
+}
 
 using FrameSizeModeMap = std::pair<int, int>;
 
@@ -132,10 +149,12 @@ void Ov2640::cameraConfigLoad()
 	esp_err_t err = Ut::Sys::nvsGet(kNvsKey, kNvsFrameSize, frame);
 
 	if (ESP_OK == err) {
-		if (frame < kResolutionLimit) {
+		const auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+		if (frame < resolutionLimit) {
 			cameraConfig.frame_size = static_cast<framesize_t>(frame);
 		} else {
-			cameraConfig.frame_size = kResolutionLimit;
+			cameraConfig.frame_size = resolutionLimit;
 			ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
 		}
 	}
@@ -258,7 +277,9 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 			}
 
 			if (mapped) {
-				if (mode < kResolutionLimit) {
+				const auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+				if (mode < resolutionLimit) {
 					auto err = Ut::Sys::nvsSet(kNvsKey, kNvsFrameSize, mode);
 
 					if (err != ESP_OK) {
@@ -271,8 +292,8 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 				} else {
 					aCb({Mod::Fld::RequestResult::OutOfRange});
 					ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold %dx%d", std::get<0>(frameSize),
-						std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[kResolutionLimit - 1]),
-						std::get<1>(kFrameSizeModeMap[kResolutionLimit - 1]));
+						std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[resolutionLimit - 1]),
+						std::get<1>(kFrameSizeModeMap[resolutionLimit - 1]));
 				}
 			} else {
 				ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
