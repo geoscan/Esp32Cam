@@ -55,7 +55,7 @@ public:
 	using Field = typename Fld::GetType<If, Im>::Type;
 
 	template <Module Im, Fld::Field If>
-	static void moduleFieldWriteIter(const typename Fld::GetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
+	static void moduleFieldWriteIter(const typename Fld::SetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
