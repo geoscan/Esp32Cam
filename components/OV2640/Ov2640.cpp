@@ -43,6 +43,11 @@ static constexpr std::array<FrameSizeModeMap, 22> kFrameSizeModeMap {{
 	{2560, 1920},
 }};
 
+static constexpr std::array<std::tuple<pixformat_t, const char *>, 2> kFramePixformat {{
+	{PIXFORMAT_JPEG, "jpeg"},
+	{PIXFORMAT_GRAYSCALE, "grayscale"},
+}};
+
 Ov2640::Ov2640() :
 	Mod::ModuleBase{Mod::Module::Camera}
 {
@@ -51,6 +56,7 @@ Ov2640::Ov2640() :
 void Ov2640::init()
 {
 	cameraConfigLoad();
+	cameraConfig.pixel_format = status.pixformat;
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
 	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
 	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
@@ -255,6 +261,22 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 			}
 
 			break;
+		}
+		case Mod::Fld::Field::FrameFormat: {
+			const char *frameFormatStr = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>();
+
+			for (auto &format : kFramePixformat) {
+				if (strcmp(std::get<1>(format), frameFormatStr) == 0) {
+					status.pixformat = std::get<0>(format);
+					aCb({Mod::Fld::RequestResult::Ok});
+					// TODO: automatically change aspect ratio for grayscale
+					reinit();
+					return;
+				}
+			}
+
+			aCb({Mod::Fld::RequestResult::Other, "Unsupported pixframe"});
+
 		}
 		default:
 			break;

@@ -49,6 +49,7 @@ private:
 			int h = -1;
 			int w = -1;
 		} frame;
+		pixformat_t pixformat = PIXFORMAT_JPEG;
 	} status;
 	camera_config_t cameraConfig;
 };
