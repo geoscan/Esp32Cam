@@ -1,3 +1,3 @@
 # `tracking` module
 
-An implementation of the MOSSE tracking algorithm
+An implementation of MOSSE tracking algorithm
