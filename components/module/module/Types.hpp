@@ -15,6 +15,7 @@
 #include <Rr/Trait/StoreType.hpp>
 #include <utility>
 #include <functional>
+#include <tuple>
 
 namespace Mod {
 
@@ -31,6 +32,7 @@ namespace Fld {
 
 enum class Field : std::uint8_t {
 	FrameSize,
+	FrameFormat,  ///< Frame format currently used by a camera (e.g. JPEG)
 	VendorName,
 	ModelName,
 	Initialized,
@@ -60,9 +62,10 @@ template <Module I> struct GetType<Field::VersionSoftwareMinor, I> : StoreType<u
 template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
+template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<std::tuple<std::uint8_t, const char *>> {};  ///< (identifier, human-readable name)
 
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
-	mapbox::util::variant<asio::ip::address_v4>>;
+	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>>;
 
 struct FieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
