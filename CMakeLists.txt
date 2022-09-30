@@ -3,7 +3,9 @@ list(APPEND EXTRA_COMPONENT_DIRS
 	components
 	main
 	components/lib/mavlink
-	components/lib/ov2640)
+	components/lib/mosse
+	components/lib/ov2640
+	)
 list(APPEND EXTRA_COMPONENT_DIRS components/lib/rr)
 list(APPEND EXTRA_COMPONENT_DIRS components/lib/mapbox_variant)
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
