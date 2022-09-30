@@ -22,6 +22,7 @@ Profile::Profile() :
 
 void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
+	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
 		case State::CamConfStart {  // Initialize the camera, switch it to grayscale mode
 			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>("grayscale",
