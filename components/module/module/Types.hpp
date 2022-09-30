@@ -112,6 +112,7 @@ struct RequestResult {
 		Ok = 0,
 		StorageError,
 		OutOfRange,
+		Other,
 
 		N,
 	};
@@ -121,6 +122,15 @@ struct RequestResult {
 
 struct WriteResp {
 	RequestResult::Result result;
+	const char *errorMessage;
+
+	constexpr WriteResp(RequestResult::Result aRes) : result{aRes}, errorMessage{""}
+	{
+	}
+	constexpr WriteResp(RequestResult::Result aRes, const char *aErrorMessage) : result{aRes}, errorMessage{aErrorMessage}
+	{
+	}
+
 };
 
 using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
