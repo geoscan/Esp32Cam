@@ -123,7 +123,12 @@ struct RequestResult {
 struct WriteResp {
 	RequestResult::Result result;
 	const char *errorMessage;
+	const char *resultAsCstr() const;
 
+	inline bool isOk() const
+	{
+		return RequestResult::Ok == result;
+	}
 	constexpr WriteResp(RequestResult::Result aRes) : result{aRes}, errorMessage{""}
 	{
 	}

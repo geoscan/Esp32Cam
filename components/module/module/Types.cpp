@@ -21,5 +21,14 @@ const char *RequestResult::toCstr(Mod::Fld::RequestResult::Result aResult)
 	return names[static_cast<unsigned>(aResult)];
 }
 
+const char *WriteResp::resultAsCstr() const
+{
+	if (RequestResult::Other == result) {
+		return errorMessage;
+	} else {
+		return RequestResult::toCstr(result);
+	}
+}
+
 }  // namespace Fld
 }  // namespace Mod
