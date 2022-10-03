@@ -9,7 +9,7 @@
 #define TRACKING_PRIV_INCLUDE_THREAD_HPP_
 
 #include <mosse/portsrc/Port/Thread.hpp>
-#include <thread>
+#include "utility/thr/Threading.hpp"
 
 namespace Trk {
 
@@ -19,7 +19,9 @@ public:
 	void start() override;
 	using Mosse::Port::Thread::Thread;
 private:
-	std::unique_ptr<std::thread> thread;
+	static void threadTask(void *);
+private:
+	xTaskHandle taskHandle;
 };
 
 }  // namespace Trk
