@@ -17,7 +17,6 @@ class Thread : public Mosse::Port::Thread {
 public:
 	std::unique_ptr<Mosse::Port::Thread> makeFromTask(Mosse::Port::Task &) override;
 	void start() override;
-	~Thread() override;
 	using Mosse::Port::Thread::Thread;
 private:
 	std::unique_ptr<std::thread> thread;
