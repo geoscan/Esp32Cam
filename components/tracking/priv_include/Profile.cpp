@@ -24,7 +24,7 @@ Mosse::Port::Thread &mosseThreadApi()
 static constexpr std::size_t knMosseThreads = 2;
 
 Profile::Profile() :
-	tracker{Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), knMosseThreads)},
+	tracker{Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), 1)},
 	state{State::CamConfStart},
 	key{{&Profile::onFrame, this}}
 {
