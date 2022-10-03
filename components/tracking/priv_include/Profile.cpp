@@ -10,12 +10,22 @@
 #include "tracking/tracking.hpp"
 #include <esp_log.h>
 #include "Profile.hpp"
+#include "Thread.hpp"
 
 namespace Trk {
 
+Mosse::Port::Thread &mosseThreadApi()
+{
+	static Thread thr;
+
+	return thr;
+}
+
+static constexpr std::size_t knMosseThreads = 2;
+
 Profile::Profile() :
 	key{{&Profile::onFrame, this}},
-	tracker{Mosse::getFp16AbRawF32BufDynAlloc()},
+	tracker{Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), knMosseThreads)},
 	state{State::CamConfStart}
 {
 }
