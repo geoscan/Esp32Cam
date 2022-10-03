@@ -30,4 +30,5 @@ void Trk::Thread::start()
 {
 	Ut::Thr::Config{true}.core(corePin());  // Configure core pin
 	thread = std::unique_ptr<std::thread>{new std::thread{&Mosse::Port::Task::run, task()}};
+	assert(nullptr != thread.get());
 }
