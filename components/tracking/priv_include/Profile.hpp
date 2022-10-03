@@ -33,9 +33,9 @@ public:
 	Profile();
 	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
 private:
-	Key key;
 	Mosse::Tracker &tracker;
 	State state;
+	Key key;
 };
 
 }  // namespace Trk
