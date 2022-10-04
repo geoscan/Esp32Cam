@@ -224,6 +224,7 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 	auto fb = esp_camera_fb_get();
 
 	if (!fb) {
+		ESP_LOGW(kTag, "Got nullptr frame");
 		return std::make_shared<Cam::Frame>();
 	}
 
