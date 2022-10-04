@@ -69,9 +69,10 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				Mosse::Tp::Roi roi{{0, 0}, {64, 64}};  // TODO Missing frame size bounds check
+				ESP_LOGI(Trk::kDebugTag, "Profile: initializing tracker w/ a new ROI");
 				tracker->init(image, roi);
 				state = State::TrackerRunning;
-				ESP_LOGI(Trk::kDebugTag, "Profile: initialized tracker");
+				ESP_LOGI(Trk::kDebugTag, "Profile: initialized tracker w/ a new ROI");
 			} else {
 				ESP_LOGW(Trk::kDebugTag, "Profile: nullptr frame");
 			}
@@ -89,6 +90,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			break;
 		}
 		default:
+			ESP_LOGI(Trk::kDebugTag, "Profile: Skipping frame");
 			break;
 	}
 }
