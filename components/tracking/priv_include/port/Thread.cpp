@@ -11,18 +11,6 @@
 #include "Thread.hpp"
 #include <esp_log.h>
 
-/// \brief Switches sequentially between core 0 and core 1 to achieve physical parallellism
-///
-static int corePin()
-{
-	static int sCoreAffinity = 0;
-	static constexpr int knCores = 2;
-	int ret = sCoreAffinity;
-	sCoreAffinity = (sCoreAffinity + 1) % knCores;
-
-	return ret;
-}
-
 std::unique_ptr<Mosse::Port::Thread> Trk::Thread::makeFromTask(Mosse::Port::Task &aTask)
 {
 	return Mosse::Port::Thread::makeUnique<Thread>(aTask);
@@ -35,15 +23,20 @@ void stub(void *)
 
 void Trk::Thread::start()
 {
+	static int corePin = 0;
+	static constexpr int knCores = 2;
+
 	ESP_LOGI(Trk::kDebugTag, "Creating tracking thread");
 	auto res = xTaskCreatePinnedToCore(threadTask, NULL, 1024 * 3, this, Ut::Thr::FreertosTask::PriorityMedium,
-		&taskHandle, corePin());
+		&taskHandle, corePin);
 
 	if (res != pdPASS) {
-		ESP_LOGE(Trk::kDebugTag, "Failed to create a tracking thread");
+		ESP_LOGE(Trk::kDebugTag, "Failed to create a tracking thread pinned to core %d", corePin);
 	} else {
-		ESP_LOGI(Trk::kDebugTag, "Successfully created tracking thread");
+		ESP_LOGI(Trk::kDebugTag, "Successfully created tracking thread pinned to core %d", corePin);
 	}
+
+	corePin = (corePin + 1) % knCores;
 }
 
 void Trk::Thread::threadTask(void *aInstance)
