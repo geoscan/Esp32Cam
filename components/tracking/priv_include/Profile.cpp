@@ -53,6 +53,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		}
 		case State::TrackerInit: {
 			if (static_cast<bool>(aFrame)) {
+				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				Mosse::Tp::Roi roi{{0, 0}, {64, 64}};  // TODO Missing frame size bounds check
