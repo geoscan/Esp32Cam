@@ -20,11 +20,13 @@ void init()
 {
 	esp_log_level_set(Trk::kDebugTag, (esp_log_level_t)CONFIG_TRACKING_DEBUG_LEVEL);
 	ESP_LOGD(Trk::kDebugTag, "Debug log test");
+	vTaskDelay(1);
 	ESP_LOGV(Trk::kDebugTag, "Verbose log test");
 }
 
 void profileInit()
 {
+	init();
 	static Profile profile;
 }
 
