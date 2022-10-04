@@ -7,12 +7,11 @@
 
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
-
 #include <memory>
-
 #include "CameraStream.hpp"
 #include "utility/time.hpp"
 #include "Ov2640.hpp"
+#include <esp_log.h>
 
 using asio::ip::udp;
 using namespace std;
@@ -32,6 +31,17 @@ void CameraStream::operator()()
 	Time lastSend = 0;
 
 	while(true) {
+		if (!img.get()) {
+			ESP_LOGW("[camera_thread]", "skipping nullptr frame");
+			vTaskDelay(pdMS_TO_TICKS(50));
+			continue;
+		} else if (!img.get()->valid()) {
+			ESP_LOGW("[camera_thread]", "skipping invalid frame");
+			img.reset();
+			vTaskDelay(pdMS_TO_TICKS(50));
+			continue;
+		}
+
 		if (fps > 0) {
 			lastSend = Ut::bootTimeUs() / 1000;
 		}
