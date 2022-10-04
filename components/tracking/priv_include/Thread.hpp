@@ -8,7 +8,7 @@
 #if !defined(TRACKING_PRIV_INCLUDE_THREAD_HPP_)
 #define TRACKING_PRIV_INCLUDE_THREAD_HPP_
 
-#include <mosse/portsrc/Port/Thread.hpp>
+#include <embmosse/Port/Thread.hpp>
 #include "utility/thr/Threading.hpp"
 
 namespace Trk {

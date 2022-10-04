@@ -5,7 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include <mosse/portsrc/Port/Task.hpp>
+#include <embmosse/Port/Task.hpp>
 #include "utility/thr/Threading.hpp"
 #include "tracking/tracking.hpp"
 #include "Thread.hpp"
