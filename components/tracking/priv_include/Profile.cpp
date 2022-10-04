@@ -12,7 +12,7 @@
 #include "module/ModuleBase.hpp"
 #include "tracking/tracking.hpp"
 #include "Profile.hpp"
-#include "Thread.hpp"
+#include "port/Thread.hpp"
 #include "utility/LogSection.hpp"
 #include <embmosse/Mosse.hpp>
 
