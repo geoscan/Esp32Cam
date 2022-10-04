@@ -28,7 +28,7 @@ Mosse::Port::Thread &mosseThreadApi()
 static constexpr std::size_t knMosseThreads = 2;
 
 Profile::Profile() :
-	tracker{Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), 1)},
+	tracker{nullptr},
 	state{State::CamConfStart},
 	key{{&Profile::onFrame, this}}
 {
@@ -39,7 +39,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
-		ESP_LOGV(Trk::kDebugTag, "Profile, onFrame");
+		ESP_LOGI(Trk::kDebugTag, "Profile, onFrame");
 		case State::CamConfStart: {  // Initialize the camera, switch it to grayscale mode
 			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>("grayscale",
 				[this](const Mod::Fld::WriteResp &aWriteResp)
@@ -58,11 +58,18 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		}
 		case State::TrackerInit: {
 			if (static_cast<bool>(aFrame)) {
+				assert(aFrame.get()->data() != nullptr);
+				if (tracker == nullptr) {
+					ESP_LOGI(Trk::kDebugTag, "Profile: initializing tracker. Frame size: %dx%d", aFrame.get()->width(),
+						aFrame.get()->height());
+					tracker = &Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), 2);
+				}
+
 				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				Mosse::Tp::Roi roi{{0, 0}, {64, 64}};  // TODO Missing frame size bounds check
-				tracker.init(image, roi);
+				tracker->init(image, roi);
 				state = State::TrackerRunning;
 				ESP_LOGI(Trk::kDebugTag, "Profile: initialized tracker");
 			} else {
@@ -75,8 +82,8 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			if (static_cast<bool>(aFrame)) {
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
-				tracker.update(image, true);
-				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f", tracker.lastPsr());
+				tracker->update(image, true);
+				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f", tracker->lastPsr());
 			}
 
 			break;
