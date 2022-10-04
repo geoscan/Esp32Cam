@@ -69,6 +69,8 @@ void CameraStreamTcpControl::operator()()
 				ESP_LOGI("[camera_streamer]", "disconnected, TCP %s:%d", str.c_str(), port);
 			}
 		}
+
+		vTaskDelay(1);
 	}
 }
 
