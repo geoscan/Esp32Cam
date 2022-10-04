@@ -11,12 +11,13 @@
 #include <esp_log.h>
 #include "tracking.hpp"
 #include "Profile.hpp"
+#include "port/OsApi.hpp"
 #include <embmosse/Mosse.hpp>
 #include <esp_log.h>
 
 namespace Trk {
 
-void init()
+static void logInit()
 {
 	esp_log_level_set(Trk::kDebugTag, (esp_log_level_t)CONFIG_TRACKING_DEBUG_LEVEL);
 	ESP_LOGD(Trk::kDebugTag, "Debug log test");
@@ -24,10 +25,24 @@ void init()
 	ESP_LOGV(Trk::kDebugTag, "Verbose log test");
 }
 
+static void apiInit()
+{
+	static OsApi osApi;
+	(void)osApi;
+}
+
+void init()
+{
+	apiInit();
+	logInit();
+}
+
 void profileInit()
 {
-	init();
+	logInit();
+	apiInit();
 	static Profile profile;
+	(void)profile;
 }
 
 }  // namespace Trk
