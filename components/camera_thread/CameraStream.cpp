@@ -34,11 +34,13 @@ void CameraStream::operator()()
 		if (!img.get()) {
 			ESP_LOGW("[camera_thread]", "skipping nullptr frame");
 			vTaskDelay(pdMS_TO_TICKS(50));
+			img = Cam::Camera::getInstance().getFrame();
 			continue;
 		} else if (!img.get()->valid()) {
 			ESP_LOGW("[camera_thread]", "skipping invalid frame");
 			img.reset();
 			vTaskDelay(pdMS_TO_TICKS(50));
+			img = Cam::Camera::getInstance().getFrame();
 			continue;
 		}
 
@@ -48,6 +50,7 @@ void CameraStream::operator()()
 
 		key.notify(img);
 		img.reset();
+		vTaskDelay(1);
 		img = Cam::Camera::getInstance().getFrame();
 
 		if (fps > 0) {
