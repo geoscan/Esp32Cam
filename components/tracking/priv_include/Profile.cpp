@@ -5,12 +5,16 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_TRACKING_DEBUG_LEVEL)
+
 #include "Mosse.hpp"
 #include "module/ModuleBase.hpp"
 #include "tracking/tracking.hpp"
-#include <esp_log.h>
 #include "Profile.hpp"
 #include "Thread.hpp"
+#include "utility/LogSection.hpp"
 
 namespace Trk {
 
@@ -35,6 +39,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
+		ESP_LOGV(Trk::kDebugTag, "Profile, onFrame");
 		case State::CamConfStart: {  // Initialize the camera, switch it to grayscale mode
 			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>("grayscale",
 				[this](const Mod::Fld::WriteResp &aWriteResp)
