@@ -10,8 +10,8 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_TRACKING_DEBUG_LEVEL)
 #include <esp_log.h>
 #include "tracking.hpp"
-#include "Mosse.hpp"
 #include "Profile.hpp"
+#include <embmosse/Mosse.hpp>
 #include <esp_log.h>
 
 namespace Trk {
