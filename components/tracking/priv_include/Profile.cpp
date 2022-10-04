@@ -9,12 +9,12 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_TRACKING_DEBUG_LEVEL)
 
-#include "Mosse.hpp"
 #include "module/ModuleBase.hpp"
 #include "tracking/tracking.hpp"
 #include "Profile.hpp"
 #include "Thread.hpp"
 #include "utility/LogSection.hpp"
+#include <embmosse/Mosse.hpp>
 
 namespace Trk {
 
