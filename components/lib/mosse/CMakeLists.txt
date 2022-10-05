@@ -6,5 +6,6 @@ idf_component_register(
 
 set(MOSSE_PORTABLE ON CACHE BOOL "")
 set(MOSSE_PORT_USE_CASSERT ON CACHE BOOL "")
+set(MOSSE_PORT_ARROGANT_HOLD_FRAMES 7 CACHE STRING "")
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/mosse EXCLUDE_FROM_ALL)
 target_link_libraries(${COMPONENT_LIB} PUBLIC embmosse)
