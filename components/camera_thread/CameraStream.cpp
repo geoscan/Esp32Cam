@@ -33,31 +33,29 @@ void CameraStream::operator()()
 	while(true) {
 		if (!img.get()) {
 			ESP_LOGW("[camera_thread]", "skipping nullptr frame");
-			vTaskDelay(pdMS_TO_TICKS(50));
+			img.reset();
 			img = Cam::Camera::getInstance().getFrame();
-			continue;
 		} else if (!img.get()->valid()) {
 			ESP_LOGW("[camera_thread]", "skipping invalid frame");
 			img.reset();
-			vTaskDelay(pdMS_TO_TICKS(50));
 			img = Cam::Camera::getInstance().getFrame();
-			continue;
-		}
+		} else {
+			if (fps > 0) {
+				lastSend = Ut::bootTimeUs() / 1000;
+			}
 
-		if (fps > 0) {
-			lastSend = Ut::bootTimeUs() / 1000;
-		}
+			key.notify(img);
+			img.reset();
+			vTaskDelay(1);
+			img = Cam::Camera::getInstance().getFrame();
 
-		key.notify(img);
-		img.reset();
-		vTaskDelay(1);
-		img = Cam::Camera::getInstance().getFrame();
+			if (fps > 0) {
+				// Timer counter overflow and high latency are taken into account
+				auto timeDelta = Ut::bootTimeUs() / 1000 - lastSend;
+				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
+				Ut::waitMs(timeWait);
+			}
 
-		if (fps > 0) {
-			// Timer counter overflow and high latency are taken into account
-			auto timeDelta = Ut::bootTimeUs() / 1000 - lastSend;
-			auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
-			Ut::waitMs(timeWait);
 		}
 	}
 }
