@@ -82,7 +82,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 				// The implementation allows using managed threads. It means that SIMD operations pertaining to assigned frame
 				// chunks will be parallelized, all except the managed one which will be run in the current thread
-				static constexpr float kSplit0Fraction = 0.4f;
+				static constexpr float kSplit0Fraction = 0.5f;
 				static constexpr std::size_t kManagedSplitId = 0;
 
 				assert(aFrame.get()->data() != nullptr);
