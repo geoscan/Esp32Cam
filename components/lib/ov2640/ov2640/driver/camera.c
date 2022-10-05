@@ -1424,6 +1424,7 @@ camera_fb_t* esp_camera_fb_get()
 
     xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
     if (s_state == NULL) {
+        ESP_LOGW(TAG, "esp_camera_fb_get Camera is uninitialized");
         xSemaphoreGiveRecursive(s_state_mutex);
         return NULL;
     }
@@ -1433,6 +1434,7 @@ camera_fb_t* esp_camera_fb_get()
             ESP_LOGD(TAG, "i2s_run");
         }
         if (i2s_run() != 0) {
+            ESP_LOGW(TAG, "esp_camera_fb_get i2s_run - failure");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
@@ -1460,6 +1462,7 @@ camera_fb_t* esp_camera_fb_get()
     }
     xSemaphoreGiveRecursive(s_state_mutex);
 
+    assert(fb != NULL);
     return (camera_fb_t*)fb;
 }
 
