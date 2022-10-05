@@ -58,11 +58,18 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		}
 		case State::TrackerInit: {
 			if (static_cast<bool>(aFrame)) {
+
+				// The implementation allows using managed threads. It means that SIMD operations pertaining to assigned frame
+				// chunks will be parallelized, all except the managed one which will be run in the current thread
+				static constexpr float kSplit0Fraction = 0.4f;
+				static constexpr std::size_t kManagedSplitId = 0;
+
 				assert(aFrame.get()->data() != nullptr);
 				if (tracker == nullptr) {
 					ESP_LOGI(Trk::kDebugTag, "Profile: initializing tracker. Frame size: %dx%d", aFrame.get()->width(),
 						aFrame.get()->height());
-					tracker = &Mosse::getFp16AbRawF32BufDynAllocThreaded(mosseThreadApi(), 2);
+					tracker = &Mosse::getFp16AbRawF32BufDynAllocThreadedSplit(mosseThreadApi(),
+						{{kSplit0Fraction, 1.0f - kSplit0Fraction}}, kManagedSplitId);
 				}
 
 				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
