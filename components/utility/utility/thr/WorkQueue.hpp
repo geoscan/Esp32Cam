@@ -121,6 +121,7 @@ public:
 				sem.release();
 			});
 		resume();
+		vTaskDelay(1);
 		return sem.try_acquire_for(aTimeout);
 	}
 
@@ -135,6 +136,7 @@ public:
 				sem.release();
 			});
 		resume();
+		vTaskDelay(1);
 		sem.acquire();
 	}
 
@@ -174,6 +176,7 @@ public:
 				return f;
 			});
 		resume();
+		vTaskDelay(1);
 		sem.acquire();
 	}
 
@@ -194,6 +197,7 @@ public:
 				return f;
 			});
 		resume();
+		vTaskDelay(1);
 
 		return sem.try_acquire_for(aTimeout);
 	}
