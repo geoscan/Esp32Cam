@@ -14,6 +14,8 @@
 #include "Profile.hpp"
 #include "port/Thread.hpp"
 #include "utility/LogSection.hpp"
+#include "utility/time.hpp"
+#include "utility/cont/CircularBuffer.hpp"
 #include <embmosse/Mosse.hpp>
 
 namespace Trk {
@@ -33,6 +35,25 @@ Profile::Profile() :
 	key{{&Profile::onFrame, this}}
 {
 }
+
+struct FpsCounter {
+	Ut::Cont::CircularBuffer<std::chrono::microseconds, 10, true> timestamps;
+
+	float onFrame()
+	{
+		timestamps.push_back(std::chrono::microseconds{Ut::bootTimeUs()});
+		float ret = 0.0f;
+
+		if (timestamps.size() > 1) {
+			ret = static_cast<float>(timestamps.size() + timestamps.capacity()) / (static_cast<float>((timestamps.back()
+				- timestamps.front()).count()) / 1000000.0f);
+		}
+
+		return ret;
+	}
+};
+
+static FpsCounter sFpsCounter;
 
 void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
@@ -91,7 +112,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				tracker->update(image, true);
-				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f", tracker->lastPsr());
+				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
 			}
 
 			break;
