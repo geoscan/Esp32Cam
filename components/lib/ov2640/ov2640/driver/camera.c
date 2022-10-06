@@ -1447,7 +1447,6 @@ camera_fb_t* esp_camera_fb_get()
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
-        xSemaphoreGive(s_state->frame_ready);
         xSemaphoreGiveRecursive(s_state_mutex);
         return (camera_fb_t*)s_state->fb;
     }
