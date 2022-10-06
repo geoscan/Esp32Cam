@@ -38,7 +38,7 @@ config SCCB_HARDWARE_I2C
 config OV2640_JPEG_BUFFER_SIZE
 	int "OV2640_JPEG_BUFFER_SIZE"
 	range 0 61440
-	default 30720
+	default 40960
 	help
 		Number of bytes the driver will allocate for storing JPEG frames, if JPEG encoding is used.
 
