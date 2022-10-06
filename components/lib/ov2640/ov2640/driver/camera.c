@@ -1433,6 +1433,7 @@ camera_fb_t* esp_camera_fb_get()
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
         }
+        ESP_LOGD(TAG, "starting i2s");
         if (i2s_run() != 0) {
             ESP_LOGW(TAG, "esp_camera_fb_get i2s_run - failure");
             xSemaphoreGiveRecursive(s_state_mutex);
