@@ -15,6 +15,7 @@ using namespace CameraThread;
 static void cameraThreadTask(void *)
 {
 	static CameraStream cameraStream;
+	cameraStream();
 }
 
 void cameraThreadInit()
