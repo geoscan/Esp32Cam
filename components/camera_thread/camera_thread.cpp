@@ -21,6 +21,9 @@ static void cameraThreadTask(void *)
 void cameraThreadInit()
 {
 	static TaskHandle_t taskHandle;
-	xTaskCreatePinnedToCore(cameraThreadTask, "camera_thread", CONFIG_PTHREAD_STACK_MIN, 0,
-		Ut::Thr::FreertosTask::PriorityLowest, &taskHandle, CONFIG_CAMERA_THREAD_PIN_TO_CORE);
+	constexpr std::size_t kStackSize = 1024 * 3;
+	constexpr void *kArg = nullptr;
+	constexpr UBaseType_t kPriority = Ut::Thr::FreertosTask::PriorityLowest + 1;
+	xTaskCreatePinnedToCore(cameraThreadTask, "camera_thread", kStackSize, kArg, kPriority, &taskHandle,
+		CONFIG_CAMERA_THREAD_PIN_TO_CORE);
 }
