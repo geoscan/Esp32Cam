@@ -107,7 +107,6 @@ choice DRIVER_OV2640_DEBUG_LEVEL
 	config DRIVER_OV2640_DEBUG_LEVEL_VERBOSE
 		bool "Verbose"
 
-
 endchoice
 
 config DRIVER_OV2640_DEBUG_LEVEL
