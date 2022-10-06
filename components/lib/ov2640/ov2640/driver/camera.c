@@ -11,6 +11,12 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_DRIVER_OV2640_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1327,6 +1333,7 @@ fail:
 
 esp_err_t esp_camera_init(const camera_config_t* config)
 {
+    esp_log_level_set(TAG, (esp_log_level_t)CONFIG_DRIVER_OV2640_DEBUG_LEVEL);
     if (NULL == s_state_mutex) {
         static StaticSemaphore_t sem;
         s_state_mutex = xSemaphoreCreateRecursiveMutexStatic(&sem);
