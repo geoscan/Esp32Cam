@@ -14,7 +14,7 @@ namespace Ut {
 namespace Thr {
 namespace Wq {
 
-TaskVariant::TaskVariant(Task &&aTask) : task{std::move(aTask)}
+TaskVariant::TaskVariant(Task &&aTask, TaskPrio aPrio) : task{std::move(aTask)}, prio{aPrio}
 {
 }
 
@@ -33,6 +33,7 @@ bool TaskVariant::operator()()
 void TaskVariant::moveImpl(TaskVariant &&aTask)
 {
 	task = std::move(aTask.task);
+	prio = aTask.prio;
 }
 
 }  // namespace Wq
