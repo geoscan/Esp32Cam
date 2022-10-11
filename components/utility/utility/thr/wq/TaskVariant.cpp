@@ -6,6 +6,7 @@
 //
 
 #include "TaskVariant.hpp"
+#include <cassert>
 
 namespace Ut {
 namespace Thr {
@@ -21,11 +22,13 @@ bool TaskVariant::operator()()
 {
 	switch (type) {
 		case Type::Task:
+			assert(static_cast<bool>(task));
 			task();
 
 			return false;
 
 		case Type::ContinuousTask:
+			assert(static_cast<bool>(continuousTask));
 			return continuousTask();
 
 		case Type::Uninit:
@@ -43,11 +46,13 @@ void TaskVariant::moveImpl(TaskVariant &&aTask)
 
 	switch (aTask.type) {
 		case Type::Task:
+			assert(static_cast<bool>(aTask.task));
 			task = std::move(aTask.task);
 
 			break;
 
 		case Type::ContinuousTask:
+			assert(static_cast<bool>(aTask.continuousTask));
 			continuousTask = std::move(aTask.continuousTask);
 
 			break;
@@ -63,11 +68,13 @@ void TaskVariant::destructImpl()
 {
 	switch (type) {
 		case Type::Task:
+			assert(static_cast<bool>(task));
 			task.~Task();
 
 			break;
 
 		case Type::ContinuousTask:
+			assert(static_cast<bool>(continuousTask));
 			continuousTask.~ContinuousTask();
 
 			break;
