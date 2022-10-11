@@ -49,9 +49,9 @@ public:
 
 	/// \brief Push task into the queue
 	///
-	void push(Task &&aTask)
+	void push(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
-		queue.push({std::move(aTask)});
+		queue.push({std::move(aTask), aPrio});
 		resume();
 	}
 
