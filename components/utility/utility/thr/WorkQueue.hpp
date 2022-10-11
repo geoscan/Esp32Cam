@@ -55,23 +55,6 @@ public:
 		resume();
 	}
 
-	/// \brief Push task into the queue and wait for it to finish for a given timespan. Returns true, if the semaphore has
-	/// been released in the given time.
-	///
-	template <class Trep, class Tper>
-	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
-	{
-		Ut::Thr::Semaphore<1, 0> sem{};
-		push([sem, aTask]() mutable
-			{
-				aTask();
-				sem.release();
-			});
-		resume();
-		vTaskDelay(1);
-		return sem.try_acquire_for(aTimeout);
-	}
-
 	/// \brief Push task into the queue and wait for it to finish. Enables synchronized execution of tasks.
 	///
 	void pushWait(Task &&aTask)
@@ -125,28 +108,6 @@ public:
 		resume();
 		vTaskDelay(1);
 		sem.acquire();
-	}
-
-	/// \brief Push a continuous task into the queue and wait for it to finish for a given timespan.
-	///
-	template <class Trep, class Tper>
-	bool pushContinuousWaitFor(ContinuousTask &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
-	{
-		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
-		pushContinuous([sem, aTask]() mutable
-			{
-				bool f = aTask();
-
-				if (!f) {
-					sem.release();
-				}
-
-				return f;
-			});
-		resume();
-		vTaskDelay(1);
-
-		return sem.try_acquire_for(aTimeout);
 	}
 
 	/// \brief Run the queue
