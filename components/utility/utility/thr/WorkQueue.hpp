@@ -43,17 +43,6 @@ namespace Wq {
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
 public:
-	template <class Trep, class Tper>
-	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
-	{
-		const auto start{Ut::bootTimeUs()};
-		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
-		return [aTask, start, timeout]()
-			{
-				return aTask() && !Ut::Al::expired(start, timeout);
-			};
-	}
-
 	WorkQueue() : FreertosTask("WorkQueue", Istack, Iprio, Icore)
 	{
 	}
