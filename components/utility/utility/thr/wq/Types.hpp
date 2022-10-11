@@ -17,6 +17,12 @@ namespace Wq {
 using Task = std::function<void()>;  ///< Regular tasks are removed from the queue after they are invoked.
 using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept invoked iteratively for as long as they return true
 
+/// \brief Named enumeration that establishes relative priorities b/w tasks
+enum class TaskPrio {
+	Default = 0,
+	Tracker,
+};
+
 }  // namespace Wq
 }  // namespace Thr
 }  // namespace Ut
