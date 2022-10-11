@@ -30,9 +30,10 @@ bool TaskVariant::operator()()
 
 		case Type::Uninit:
 			return false;
-	}
 
-	return false;
+		default:
+			return false;
+	}
 }
 
 void TaskVariant::moveImpl(TaskVariant &&aTask)
