@@ -50,4 +50,10 @@ private:
 }  // namespace Thr
 }  // namespace Ut
 
+namespace std {
+
+bool operator<(const Ut::Thr::Wq::TaskVariant &, const Ut::Thr::Wq::TaskVariant &);
+
+}  // namespace std
+
 #endif // UTILITY_UTILITY_THR_WQ_TASKVARIANT_HPP_
