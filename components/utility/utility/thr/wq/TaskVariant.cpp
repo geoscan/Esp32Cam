@@ -7,6 +7,7 @@
 
 #include "TaskVariant.hpp"
 #include <cassert>
+#include <esp_log.h>
 
 namespace Ut {
 namespace Thr {
@@ -47,17 +48,18 @@ void TaskVariant::moveImpl(TaskVariant &&aTask)
 	switch (aTask.type) {
 		case Type::Task:
 			assert(static_cast<bool>(aTask.task));
-			task = std::move(aTask.task);
+			task.swap(aTask.task);
 
 			break;
 
 		case Type::ContinuousTask:
 			assert(static_cast<bool>(aTask.continuousTask));
-			continuousTask = std::move(aTask.continuousTask);
+			continuousTask.swap(aTask.continuousTask);
 
 			break;
 
 		case Type::Uninit:
+			ESP_LOGW("WQ", "TaskVariant: move-constructor invoked upon uninitialized variant");
 			break;
 	}
 
@@ -69,13 +71,13 @@ void TaskVariant::destructImpl()
 	switch (type) {
 		case Type::Task:
 			assert(static_cast<bool>(task));
-			task.~Task();
+			task = Task{};
 
 			break;
 
 		case Type::ContinuousTask:
 			assert(static_cast<bool>(continuousTask));
-			continuousTask.~ContinuousTask();
+			continuousTask = ContinuousTask{};
 
 			break;
 
