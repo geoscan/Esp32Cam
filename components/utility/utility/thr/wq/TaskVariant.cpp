@@ -39,3 +39,8 @@ void TaskVariant::moveImpl(TaskVariant &&aTask)
 }  // namespace Wq
 }  // namespace Thr
 }  // namespace Ut
+
+bool std::operator<(const Ut::Thr::Wq::TaskVariant &aLhs, const Ut::Thr::Wq::TaskVariant &aRhs)
+{
+	return static_cast<int>(aLhs.priority()) < static_cast<int>(aRhs.priority());
+}
