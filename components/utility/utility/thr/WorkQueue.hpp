@@ -13,8 +13,8 @@
 #include "utility/thr/Threading.hpp"
 #include "utility/al/Time.hpp"
 #include "utility/time.hpp"
+#include "utility/thr/wq/Types.hpp"
 #include <sdkconfig.h>
-#include <functional>
 #include <chrono>
 #include <mutex>
 #include <deque>
@@ -29,9 +29,6 @@
 namespace Ut {
 namespace Thr {
 namespace Wq {
-
-using Task = std::function<void()>;  ///< Regular tasks are removed from the queue after they are invoked.
-using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept invoked iteratively for as long as they return true
 
 /// \brief Work queue is a separate thread that receives functor objects, enqueues them for execution, picks them from the
 /// queue and invokes.
