@@ -60,10 +60,12 @@ void Ut::Thr::FreertosTask::run(void *aInstance)
 void Ut::Thr::FreertosTask::start()
 {
 	if (static_cast<int>(CorePin::CoreNone) == taskInfo.core) {
-		xTaskCreate(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle);
+		auto ret = xTaskCreate(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle);
+		assert(pdPASS == ret);
 	} else {
-		xTaskCreatePinnedToCore(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio, &taskInfo.handle,
-			taskInfo.core);
+		auto ret = xTaskCreatePinnedToCore(FreertosTask::run, taskInfo.name, taskInfo.stack, this, taskInfo.prio,
+			&taskInfo.handle, taskInfo.core);
+		assert(pdPASS == ret);
 	}
 }
 
