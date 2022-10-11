@@ -89,8 +89,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				if (tracker == nullptr) {
 					ESP_LOGI(Trk::kDebugTag, "Profile: initializing tracker. Frame size: %dx%d", aFrame.get()->width(),
 						aFrame.get()->height());
-					tracker = &Mosse::getFp16AbRawF32BufDynAllocThreadedSplit(mosseThreadApi(),
-						{{kSplit0Fraction, 1.0f - kSplit0Fraction}}, kManagedSplitId);
+					tracker = &Mosse::getFp16AbRawF32BufDynAlloc();
 				}
 
 				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
