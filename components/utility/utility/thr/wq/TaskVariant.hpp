@@ -16,10 +16,26 @@ namespace Wq {
 
 class TaskVariant final {
 private:
+	union Variant {
+		Task task;
+		ContinuousTask continuousTask;
+	};
 	enum class Type {
 		Uninit,
 		Task,
 		ContinuousTask,
+	};
+	struct Storage {
+		alignas(long int) std::uint8_t storage[sizeof(Variant)];
+
+		inline Task &asTask()
+		{
+			return *reinterpret_cast<Task *>(storage);
+		}
+		inline ContinuousTask &asContinuousTask()
+		{
+			return *reinterpret_cast<ContinuousTask *>(storage);
+		}
 	};
 public:
 	inline TaskVariant() : type{Type::Uninit}
@@ -35,13 +51,13 @@ public:
 
 		return *this;
 	}
-	inline TaskVariant(ContinuousTask &&aTask) : type{Type::ContinuousTask}, continuousTask{std::move(aTask)}
+	inline bool isValid() const
 	{
-	}
-	inline TaskVariant(Task &&aTask) : type{Type::Task}, task{std::move(aTask)}
-	{
+		return type != Type::Uninit;
 	}
 
+	TaskVariant(ContinuousTask &&aTask);
+	TaskVariant(Task &&aTask);
 	TaskVariant(const TaskVariant &) = delete;
 	TaskVariant &operator=(const TaskVariant &) = delete;
 	~TaskVariant();
@@ -50,11 +66,9 @@ private:
 	void moveImpl(TaskVariant &&);
 	void destructImpl();
 private:
+private:
 	Type type;
-	union {
-		Task task;
-		ContinuousTask continuousTask;
-	};
+	alignas(long int) Storage storage;
 };
 
 }  // namespace Wq
