@@ -11,19 +11,18 @@ namespace Ut {
 namespace Thr {
 namespace Wq {
 
-Queue::Queue() : queue(32)
+Queue::Queue() : queue{}
 {
-	queue.clear();
 }
 
-void Queue::push(Task &&aTask)
+void Queue::push(TaskVariant &&aTask)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
-	queue.push_back(aTask);
+	queue.emplace_back(std::move(aTask));
 }
 
-bool Queue::pop(Task &aTask)
+bool Queue::pop(TaskVariant &aTask)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;

@@ -9,6 +9,7 @@
 #define UTILITY_UTILITY_THR_WQ_QUEUE
 
 #include "utility/thr/wq/Types.hpp"
+#include "utility/thr/wq/TaskVariant.hpp"
 #include <mutex>
 #include <deque>
 
@@ -19,10 +20,10 @@ namespace Wq {
 class Queue {
 public:
 	Queue();
-	void push(Task &&aTask);
-	bool pop(Task &aTask);
+	void push(TaskVariant &&aTask);
+	bool pop(TaskVariant &aTask);
 private:
-	using QueueType = std::deque<Task>;
+	using QueueType = std::deque<TaskVariant>;
 	QueueType queue;
 	std::mutex mutex;
 };
