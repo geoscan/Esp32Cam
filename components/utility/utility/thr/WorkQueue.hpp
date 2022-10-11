@@ -51,7 +51,7 @@ public:
 	///
 	void push(Task &&aTask)
 	{
-		queue.push(std::move(aTask));
+		queue.push({std::move(aTask)});
 		resume();
 	}
 
@@ -115,7 +115,7 @@ public:
 	void run() override
 	{
 		while (true) {
-			Task task;
+			TaskVariant task;
 
 			if (queue.pop(task)) {
 				task();
