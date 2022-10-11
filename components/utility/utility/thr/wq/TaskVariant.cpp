@@ -19,7 +19,7 @@ TaskVariant::TaskVariant(ContinuousTask &&aTask) : type{Type::ContinuousTask}
 	new (storage.storage) ContinuousTask{aTask};
 }
 
-TaskVariant::TaskVariant(Task &&aTask)
+TaskVariant::TaskVariant(Task &&aTask) : type{Type::Task}
 {
 	new (storage.storage) Task{aTask};
 }
