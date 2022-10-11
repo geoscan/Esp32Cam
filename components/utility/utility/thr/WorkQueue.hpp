@@ -14,10 +14,9 @@
 #include "utility/al/Time.hpp"
 #include "utility/time.hpp"
 #include "utility/thr/wq/Types.hpp"
+#include "utility/thr/wq/Queue.hpp"
 #include <sdkconfig.h>
 #include <chrono>
-#include <mutex>
-#include <deque>
 #include <esp_log.h>
 
 #if 0
@@ -43,44 +42,6 @@ namespace Wq {
 ///
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
-private:
-	struct Queue {
-		using QueueType = std::deque<Task>;
-		QueueType queue;
-		std::mutex mutex;
-
-		Queue() : queue(32)
-		{
-			queue.clear();
-		}
-
-		void push(Task &&aTask)
-		{
-			WQ_DEBUG("push()");
-			std::lock_guard<std::mutex> lock{mutex};
-			(void)lock;
-			if (queue.size() == queue.max_size()) {
-				ESP_LOGW("WQ", "work queue capacity will be extended");
-			}
-			queue.push_back(aTask);
-		}
-
-		bool pop(Task &aTask)
-		{
-			WQ_DEBUG("pop()");
-			std::lock_guard<std::mutex> lock{mutex};
-			(void)lock;
-			bool ret = !queue.empty();
-
-			if (ret) {
-				aTask = std::move(queue.front());
-				queue.pop_front();
-			}
-
-			return ret;
-		}
-	};
-
 public:
 	template <class Trep, class Tper>
 	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
@@ -215,11 +176,8 @@ public:
 	}
 
 private:
-	static Queue queue;  ///< Task storage
+	Queue queue;  ///< Task storage
 };
-
-template <int Istack, int Iprio, FreertosTask::CorePin Icore>
-typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
 	FreertosTask::CorePin::Core1>;
