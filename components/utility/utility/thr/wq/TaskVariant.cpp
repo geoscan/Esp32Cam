@@ -13,20 +13,7 @@ namespace Wq {
 
 TaskVariant::~TaskVariant()
 {
-	switch (type) {
-		case Type::Task:
-			task.~Task();
-
-			break;
-
-		case Type::ContinuousTask:
-			continuousTask.~ContinuousTask();
-
-			break;
-
-		case Type::Uninit:
-			break;
-	}
+	destructImpl();
 }
 
 /// \brief The task will get re-invoked for as long as it returns true.
@@ -50,6 +37,9 @@ bool TaskVariant::operator()()
 
 void TaskVariant::moveImpl(TaskVariant &&aTask)
 {
+	destructImpl();
+	type = aTask.type;
+
 	switch (aTask.type) {
 		case Type::Task:
 			task = std::move(aTask.task);
@@ -66,6 +56,26 @@ void TaskVariant::moveImpl(TaskVariant &&aTask)
 	}
 
 	aTask.type = Type::Uninit;
+}
+
+void TaskVariant::destructImpl()
+{
+	switch (type) {
+		case Type::Task:
+			task.~Task();
+
+			break;
+
+		case Type::ContinuousTask:
+			continuousTask.~ContinuousTask();
+
+			break;
+
+		case Type::Uninit:
+			break;
+	}
+
+	type = Type::Uninit;
 }
 
 }  // namespace Wq

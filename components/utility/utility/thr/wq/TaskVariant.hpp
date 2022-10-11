@@ -14,7 +14,7 @@ namespace Ut {
 namespace Thr {
 namespace Wq {
 
-class TaskVariant {
+class TaskVariant final {
 private:
 	enum class Type {
 		Uninit,
@@ -22,6 +22,9 @@ private:
 		ContinuousTask,
 	};
 public:
+	inline TaskVariant() : type{Type::Uninit}
+	{
+	}
 	inline TaskVariant(TaskVariant &&aTask)
 	{
 		moveImpl(std::move(aTask));
@@ -45,6 +48,7 @@ public:
 	bool operator()();
 private:
 	void moveImpl(TaskVariant &&);
+	void destructImpl();
 private:
 	Type type;
 	union {
