@@ -111,7 +111,8 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				constexpr float kPsrThreshold = 0.05f;
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
-				tracker->update(image, true);
+				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
+				tracker->update(imageWorkingArea, true);
 				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
 
 				if (tracker->lastPsr() < kPsrThreshold) {
