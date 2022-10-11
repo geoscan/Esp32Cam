@@ -7,11 +7,22 @@
 
 #include "TaskVariant.hpp"
 #include <cassert>
+#include <algorithm>
 #include <esp_log.h>
 
 namespace Ut {
 namespace Thr {
 namespace Wq {
+
+TaskVariant::TaskVariant(ContinuousTask &&aTask) : type{Type::ContinuousTask}
+{
+	new (storage.storage) ContinuousTask{aTask};
+}
+
+TaskVariant::TaskVariant(Task &&aTask)
+{
+	new (storage.storage) Task{aTask};
+}
 
 TaskVariant::~TaskVariant()
 {
@@ -23,14 +34,12 @@ bool TaskVariant::operator()()
 {
 	switch (type) {
 		case Type::Task:
-			assert(static_cast<bool>(task));
-			task();
+			storage.asTask()();
 
 			return false;
 
 		case Type::ContinuousTask:
-			assert(static_cast<bool>(continuousTask));
-			return continuousTask();
+			return storage.asContinuousTask()();
 
 		case Type::Uninit:
 			return false;
@@ -44,25 +53,7 @@ void TaskVariant::moveImpl(TaskVariant &&aTask)
 {
 	destructImpl();
 	type = aTask.type;
-
-	switch (aTask.type) {
-		case Type::Task:
-			assert(static_cast<bool>(aTask.task));
-			task.swap(aTask.task);
-
-			break;
-
-		case Type::ContinuousTask:
-			assert(static_cast<bool>(aTask.continuousTask));
-			continuousTask.swap(aTask.continuousTask);
-
-			break;
-
-		case Type::Uninit:
-			ESP_LOGW("WQ", "TaskVariant: move-constructor invoked upon uninitialized variant");
-			break;
-	}
-
+	std::copy_n(aTask.storage.storage, sizeof(storage.storage), storage.storage);
 	aTask.type = Type::Uninit;
 }
 
@@ -70,14 +61,12 @@ void TaskVariant::destructImpl()
 {
 	switch (type) {
 		case Type::Task:
-			assert(static_cast<bool>(task));
-			task = Task{};
+			storage.asTask().~Task();
 
 			break;
 
 		case Type::ContinuousTask:
-			assert(static_cast<bool>(continuousTask));
-			continuousTask = ContinuousTask{};
+			storage.asContinuousTask().~ContinuousTask();
 
 			break;
 
