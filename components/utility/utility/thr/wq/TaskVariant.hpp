@@ -30,15 +30,20 @@ public:
 		return *this;
 	}
 
-	TaskVariant(Task &&aTask);
+	TaskVariant(Task &&aTask, TaskPrio aPrio);
 	TaskVariant(const TaskVariant &) = delete;
 	TaskVariant &operator=(const TaskVariant &) = delete;
 	~TaskVariant();
 	bool operator()();
+	inline TaskPrio priority() const
+	{
+		return prio;
+	}
 private:
 	void moveImpl(TaskVariant &&);
 private:
 	Task task;
+	TaskPrio prio;
 };
 
 }  // namespace Wq
