@@ -16,6 +16,7 @@
 #include "utility/LogSection.hpp"
 #include "utility/time.hpp"
 #include "utility/cont/CircularBuffer.hpp"
+#include "utility/thr/WorkQueue.hpp"
 #include <embmosse/Mosse.hpp>
 
 namespace Trk {
@@ -112,7 +113,16 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
-				tracker->update(imageWorkingArea, true);
+
+				// TODO: sync
+				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
+					// Detach from the current thread to release the buffer
+					Ut::Thr::Wq::MediumPriority::getInstance().push(
+						[this, imageWorkingArea]() mutable {tracker->update(imageWorkingArea, true);},
+						Ut::Thr::Wq::TaskPrio::Tracker);
+					vTaskDelay(1);
+				}
+
 				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
 
 				if (tracker->lastPsr() < kPsrThreshold) {
