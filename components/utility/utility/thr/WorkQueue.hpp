@@ -16,6 +16,7 @@
 #include "utility/thr/wq/Types.hpp"
 #include <mapbox/variant.hpp>
 #include "utility/thr/wq/TaskVariantQueue.hpp"
+#include "utility/thr/wq/PrioTaskVariantQueue.hpp"
 #include <sdkconfig.h>
 #include <chrono>
 #include <esp_log.h>
@@ -52,7 +53,7 @@ public:
 	///
 	void push(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
-		queue[static_cast<std::size_t>(aPrio)].push({std::move(aTask), aPrio});
+		queue.push({std::move(aTask), aPrio});
 		resume();
 	}
 
@@ -116,29 +117,21 @@ public:
 	void run() override
 	{
 		while (true) {
-			bool executed = false;
+			TaskVariant task;
 
-			for (auto &q : queue) {
-				TaskVariant task;
-
-				if (q.pop(task)) {
-					executed = true;
-
-					if (task()) {
-						q.push(std::move(task));
-						vTaskDelay(2);
-					}
+			if (queue.pop(task)) {
+				if (task()) {
+					queue.push(std::move(task));
+					vTaskDelay(2);
 				}
-			}
-
-			if (!executed) {
+			} else {
 				suspend();
 			}
 		}
 	}
 
 private:
-	std::array<TaskVariantQueue, static_cast<std::size_t>(TaskPrio::N)> queue;
+	PrioTaskVariantQueue queue;
 };
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
