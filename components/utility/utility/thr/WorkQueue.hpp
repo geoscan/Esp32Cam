@@ -14,6 +14,7 @@
 #include "utility/al/Time.hpp"
 #include "utility/time.hpp"
 #include "utility/thr/wq/Types.hpp"
+#include <mapbox/variant.hpp>
 #include "utility/thr/wq/Queue.hpp"
 #include <sdkconfig.h>
 #include <chrono>
