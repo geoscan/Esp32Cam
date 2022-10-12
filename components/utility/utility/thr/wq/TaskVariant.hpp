@@ -10,13 +10,24 @@
 
 #include "utility/thr/wq/Types.hpp"
 
+namespace mapbox {
+namespace util {
+
+template <class ...Ts>
+class variant;
+
+}  // namespace util
+}  // namespace mapbox
+
 namespace Ut {
 namespace Thr {
 namespace Wq {
 
 class TaskVariant final {
+private:
+	using Variant = mapbox::util::variant<Task, ContinuousTask>;
 public:
-	inline TaskVariant()
+	inline TaskVariant() : prio{TaskPrio::Lowest}
 	{
 	}
 	inline TaskVariant(TaskVariant &&aTask)
@@ -42,7 +53,7 @@ public:
 private:
 	void moveImpl(TaskVariant &&);
 private:
-	Task task;
+	Variant variant;
 	TaskPrio prio;
 };
 
