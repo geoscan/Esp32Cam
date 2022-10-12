@@ -5,6 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include <mapbox/variant.hpp>
 #include "Queue.hpp"
 
 namespace Ut {
