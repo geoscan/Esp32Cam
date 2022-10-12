@@ -35,6 +35,9 @@ void init()
 {
 	apiInit();
 	logInit();
+#if CONFIG_TRACKING_RUN_PROFILE
+	profileInit();
+#endif
 }
 
 void profileInit()
