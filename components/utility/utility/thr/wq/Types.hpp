@@ -22,6 +22,7 @@ enum class TaskPrio {
 	Lowest = 0,
 	Default,
 	Tracker,
+	N,
 };
 
 }  // namespace Wq
