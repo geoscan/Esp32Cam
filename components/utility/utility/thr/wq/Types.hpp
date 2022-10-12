@@ -19,7 +19,8 @@ using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept in
 
 /// \brief Named enumeration that establishes relative priorities b/w tasks
 enum class TaskPrio {
-	Default = 0,
+	Lowest = 0,
+	Default,
 	Tracker,
 };
 
