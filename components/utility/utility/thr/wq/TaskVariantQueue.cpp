@@ -6,24 +6,24 @@
 //
 
 #include <mapbox/variant.hpp>
-#include "Queue.hpp"
+#include "TaskVariantQueue.hpp"
 
 namespace Ut {
 namespace Thr {
 namespace Wq {
 
-Queue::Queue() : queue{}
+TaskVariantQueue::TaskVariantQueue() : queue{}
 {
 }
 
-void Queue::push(TaskVariant &&aTask)
+void TaskVariantQueue::push(TaskVariant &&aTask)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
 	queue.emplace_back(std::move(aTask));
 }
 
-bool Queue::pop(TaskVariant &aTask)
+bool TaskVariantQueue::pop(TaskVariant &aTask)
 {
 	std::lock_guard<std::mutex> lock{mutex};
 	(void)lock;
