@@ -15,7 +15,7 @@
 #include "utility/time.hpp"
 #include "utility/thr/wq/Types.hpp"
 #include <mapbox/variant.hpp>
-#include "utility/thr/wq/Queue.hpp"
+#include "utility/thr/wq/TaskVariantQueue.hpp"
 #include <sdkconfig.h>
 #include <chrono>
 #include <esp_log.h>
@@ -138,7 +138,7 @@ public:
 	}
 
 private:
-	std::array<Queue, static_cast<std::size_t>(TaskPrio::N)> queue;
+	std::array<TaskVariantQueue, static_cast<std::size_t>(TaskPrio::N)> queue;
 };
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
