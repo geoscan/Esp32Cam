@@ -134,6 +134,9 @@ typedef struct {
     QueueHandle_t data_ready;
     QueueHandle_t fb_in;
     QueueHandle_t fb_out;
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+    bool fb_consumed;  ///< Signals `dma_task` that the buffer has been consumed, and it is safe to acquire the next one. Read `Kconfig.projbuild` for more info
+#endif
 
     SemaphoreHandle_t frame_ready;
     TaskHandle_t dma_filter_task;
@@ -783,6 +786,18 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
             if (buf_idx == SIZE_MAX) {
                 //this is the end of the frame
                 dma_finish_frame();
+
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+                // Disabled I2S (`rx_start`) means that the frame has been received successfully.
+                if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
+                    // Wait until the frame is consumed. After that, wait for VSYNC, enable i2s, and receive the next one
+                    while (!s_state->fb_consumed) {
+                        vTaskDelay(1);
+                    }
+                    s_state->fb_consumed = 0;
+                    i2s_run();
+                }
+#endif
             } else {
                 dma_filter_buffer(buf_idx);
             }
@@ -972,6 +987,10 @@ esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera
     if (!s_state) {
         return ESP_ERR_NO_MEM;
     }
+
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+    s_state->fb_consumed = 0;
+#endif
 
     ESP_LOGD(TAG, "Enabling XCLK output");
     camera_enable_out_clock(config);
@@ -1436,7 +1455,7 @@ camera_fb_t* esp_camera_fb_get()
         return NULL;
     }
 
-    if(!I2S0.conf.rx_start) {
+    if(!I2S0.conf.rx_start && !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE) {
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
         }
@@ -1490,6 +1509,9 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 void esp_camera_fb_return(camera_fb_t * fb)
 {
     if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+        s_state->fb_consumed = true;
+#endif
         return;
     }
     xQueueSend(s_state->fb_in, &fb, portMAX_DELAY);
