@@ -19,6 +19,11 @@ TaskVariant::TaskVariant(Task &&aTask, TaskPrio aPrio) : variant{std::move(aTask
 {
 }
 
+TaskVariant::TaskVariant(ContinuousTask &&aContinuousTask, TaskPrio aPrio) : variant{std::move(aContinuousTask)},
+	prio{aPrio}
+{
+}
+
 TaskVariant::~TaskVariant()
 {
 }

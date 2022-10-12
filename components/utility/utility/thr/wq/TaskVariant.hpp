@@ -42,6 +42,7 @@ public:
 	}
 
 	TaskVariant(Task &&aTask, TaskPrio aPrio);
+	TaskVariant(ContinuousTask &&aContinuousTask, TaskPrio aPrio);
 	TaskVariant(const TaskVariant &) = delete;
 	TaskVariant &operator=(const TaskVariant &) = delete;
 	~TaskVariant();
