@@ -117,4 +117,20 @@ config DRIVER_OV2640_DEBUG_LEVEL
 	default 4 if DRIVER_OV2640_DEBUG_LEVEL_DEBUG
 	default 5 if DRIVER_OV2640_DEBUG_LEVEL_VERBOSE
 
+config OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+	bool "Trigger acquisition of the next buffer on `esp_camera_fb_return` call"
+	default n
+	help
+		When using 1 frame buffer, OV2640 driver works according to the
+		following sequence.
+		1. On `esp_camera_fb_get`, it (1) waits for the falling edge on VSYNC
+		pin, (2) starts I2S, which (3) triggers DMA, which (4) signals to "dma
+		task" to pack acquired buffers.
+		2. When a frame is received, I2S gets stopped;
+		3. User code invokes `esp_camera_fb_return`
+		4(3). User code calls `esp_camera_fb_get`.
+
+		Enable this option to trigger acquisition of a new frame on
+		`esp_camera_fb_get` call.
+
 endmenu
