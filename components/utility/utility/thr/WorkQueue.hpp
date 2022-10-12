@@ -58,14 +58,14 @@ public:
 
 	/// \brief Push task into the queue and wait for it to finish. Enables synchronized execution of tasks.
 	///
-	void pushWait(Task &&aTask)
+	void pushWait(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		Ut::Thr::Semaphore<1, 0> sem{};
 		push([&sem, &aTask]()
 			{
 				aTask();
 				sem.release();
-			});
+			}, aPrio);
 		resume();
 		vTaskDelay(1);
 		sem.acquire();
@@ -75,7 +75,7 @@ public:
 	///
 	/// \details The task will be continuously polled and rescheduled for as long as it returns true
 	///
-	void pushContinuous(ContinuousTask &&aTask)
+	void pushContinuous(ContinuousTask &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		push([this, aTask]() mutable
 			{
@@ -91,7 +91,7 @@ public:
 
 	/// \brief Push a continuous task into the queue and wait for it to finish
 	///
-	void pushContinuousWait(ContinuousTask &&aTask)
+	void pushContinuousWait(ContinuousTask &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([&sem, &aTask]()
@@ -105,7 +105,7 @@ public:
 				}
 
 				return f;
-			});
+			}, aPrio);
 		resume();
 		vTaskDelay(1);
 		sem.acquire();
