@@ -52,7 +52,7 @@ public:
 	///
 	void push(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
-		queue.push({std::move(aTask), aPrio});
+		queue[static_cast<std::size_t>(aPrio)].push({std::move(aTask), aPrio});
 		resume();
 	}
 
@@ -116,18 +116,29 @@ public:
 	void run() override
 	{
 		while (true) {
-			TaskVariant task;
+			bool executed = false;
 
-			if (queue.pop(task)) {
-				task();
-			} else {
+			for (auto &q : queue) {
+				TaskVariant task;
+
+				if (q.pop(task)) {
+					executed = true;
+
+					if (task()) {
+						q.push(std::move(task));
+						vTaskDelay(2);
+					}
+				}
+			}
+
+			if (!executed) {
 				suspend();
 			}
 		}
 	}
 
 private:
-	Queue queue;  ///< Task storage
+	std::array<Queue, static_cast<std::size_t>(TaskPrio::N)> queue;
 };
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
