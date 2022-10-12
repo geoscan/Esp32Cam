@@ -47,6 +47,6 @@ extern "C" int app_main(void)
 	Bdg::init();
 	Sock::start();
 	Uart::start();
-	Trk::profileInit();
+	Trk::init();
 	return 0;
 }
