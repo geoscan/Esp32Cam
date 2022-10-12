@@ -30,4 +30,11 @@ menu "[tracking]"
 		default 4 if TRACKING_DEBUG_LEVEL_DEBUG
 		default 5 if TRACKING_DEBUG_LEVEL_VERBOSE
 
+	config TRACKING_RUN_PROFILE
+		bool "Run profiler"
+		default n
+		help
+			Run profile sequence (for debugging purposes). It will transfer the
+			camera into b/w mode, and start processing frames from it.
+
 endmenu
