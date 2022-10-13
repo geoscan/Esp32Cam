@@ -1455,7 +1455,8 @@ camera_fb_t* esp_camera_fb_get()
         return NULL;
     }
 
-    if(!I2S0.conf.rx_start && !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE) {
+#if !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+    if(!I2S0.conf.rx_start) {
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
         }
@@ -1466,6 +1467,8 @@ camera_fb_t* esp_camera_fb_get()
             return NULL;
         }
     }
+#endif
+
     bool need_yield = false;
     if (s_state->config.fb_count == 1) {
         if (xSemaphoreTake(s_state->frame_ready, FB_GET_TIMEOUT) != pdTRUE){
