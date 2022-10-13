@@ -33,6 +33,8 @@ public:
 	Profile();
 	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
 private:
+	void outputProfile();
+private:
 	Mosse::Tracker *tracker;
 	State state;
 	Key key;
