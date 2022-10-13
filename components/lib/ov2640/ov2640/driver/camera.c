@@ -1511,12 +1511,7 @@ void esp_camera_fb_return(camera_fb_t * fb)
 
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
         size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
-        BaseType_t higher_priority_task_woken;
-        xQueueSend(s_state->data_ready, &val, &higher_priority_task_woken);
-
-        if (higher_priority_task_woken) {
-            portYIELD();
-        }
+        xQueueSend(s_state->data_ready, &val, portMAX_DELAY);
 
         return;
 #endif
