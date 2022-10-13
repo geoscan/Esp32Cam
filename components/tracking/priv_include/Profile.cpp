@@ -118,7 +118,12 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 					// Detach from the current thread to release the buffer
 					Ut::Thr::Wq::MediumPriority::getInstance().push(
-						[this, imageWorkingArea]() mutable {tracker->update(imageWorkingArea, true);},
+						[this, imageWorkingArea]() mutable
+						{
+							ESP_LOGV(Trk::kDebugTag, "Profile: updating tracker");
+							tracker->update(imageWorkingArea, true);
+							ESP_LOGV(Trk::kDebugTag, "Profile: updated tracker");
+						},
 						Ut::Thr::Wq::TaskPrio::Tracker);
 				}
 
