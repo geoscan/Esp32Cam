@@ -1442,6 +1442,8 @@ esp_err_t esp_camera_deinit()
 
 camera_fb_t* esp_camera_fb_get()
 {
+    ESP_LOGV(TAG, "esp_camera_fb_get: getting frame");
+
     if (NULL == s_state_mutex) {  // In case esp_camera_fb_get will be called before camera initialization due to erroneous initialization order
         return NULL;
     }
@@ -1470,8 +1472,9 @@ camera_fb_t* esp_camera_fb_get()
     bool need_yield = false;
     if (s_state->config.fb_count == 1) {
         if (xSemaphoreTake(s_state->frame_ready, FB_GET_TIMEOUT) != pdTRUE){
+            ESP_LOGD(TAG, "esp_camera_fb_get: stopping I2S (1)");
             i2s_stop(&need_yield);
-            ESP_LOGE(TAG, "Failed to get the frame on time!");
+            ESP_LOGE(TAG, "Failed to get the frame on time! (1)");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
@@ -1481,8 +1484,9 @@ camera_fb_t* esp_camera_fb_get()
     camera_fb_int_t * fb = NULL;
     if(s_state->fb_out) {
         if (xQueueReceive(s_state->fb_out, &fb, FB_GET_TIMEOUT) != pdTRUE) {
+            ESP_LOGD(TAG, "esp_camera_fb_get: stopping I2S (2)");
             i2s_stop(&need_yield);
-            ESP_LOGE(TAG, "Failed to get the frame on time!");
+            ESP_LOGE(TAG, "Failed to get the frame on time! (2)");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
@@ -1509,6 +1513,8 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 
 void esp_camera_fb_return(camera_fb_t * fb)
 {
+    ESP_LOGV(TAG, "esp_camera_fb_return: releasing frame");
+
 // TODO: acquire lock in case reconfiguration happens
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
     if (s_state != NULL && s_state->config.fb_count == 1 && fb != NULL) {
