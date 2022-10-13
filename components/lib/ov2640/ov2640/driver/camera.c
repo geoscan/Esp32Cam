@@ -83,6 +83,10 @@ static const char* TAG = "camera";
 static const char* CAMERA_SENSOR_NVS_KEY = "sensor";
 static const char* CAMERA_PIXFORMAT_NVS_KEY = "pixformat";
 
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+static const int DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED = SIZE_MAX - 1;
+#endif
+
 typedef void (*dma_filter_t)(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 
 typedef struct camera_fb_s {
@@ -134,9 +138,6 @@ typedef struct {
     QueueHandle_t data_ready;
     QueueHandle_t fb_in;
     QueueHandle_t fb_out;
-#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
-    bool fb_consumed;  ///< Signals `dma_task` that the buffer has been consumed, and it is safe to acquire the next one. Read `Kconfig.projbuild` for more info
-#endif
 
     SemaphoreHandle_t frame_ready;
     TaskHandle_t dma_filter_task;
@@ -788,16 +789,14 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
                 dma_finish_frame();
 
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
-                // Disabled I2S (`rx_start`) means that the frame has been received successfully.
-                if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
-                    // Wait until the frame is consumed. After that, wait for VSYNC, enable i2s, and receive the next one
-                    while (!s_state->fb_consumed) {
-                        vTaskDelay(1);
+            } else if (buf_idx == DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED) {
+                if (!I2S0.conf.rx_start) {
+                    if (i2s_run() != 0) {
+                        ESP_LOGE(TAG, "dma_filter_task: i2s_run() failure");
                     }
-                    s_state->fb_consumed = 0;
-                    i2s_run();
                 }
 #endif
+
             } else {
                 dma_filter_buffer(buf_idx);
             }
@@ -987,10 +986,6 @@ esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera
     if (!s_state) {
         return ESP_ERR_NO_MEM;
     }
-
-#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
-    s_state->fb_consumed = 0;
-#endif
 
     ESP_LOGD(TAG, "Enabling XCLK output");
     camera_enable_out_clock(config);
@@ -1511,12 +1506,23 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 
 void esp_camera_fb_return(camera_fb_t * fb)
 {
+// TODO: acquire lock in case reconfiguration happens
     if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
+
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
-        s_state->fb_consumed = true;
-#endif
+        size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
+        BaseType_t higher_priority_task_woken;
+        xQueueSend(s_state->data_ready, &val, &higher_priority_task_woken);
+
+        if (higher_priority_task_woken) {
+            portYIELD();
+        }
+
         return;
+#endif
+
     }
+
     xQueueSend(s_state->fb_in, &fb, portMAX_DELAY);
 }
 
