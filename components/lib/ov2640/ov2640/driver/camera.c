@@ -790,7 +790,7 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
 
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
             } else if (buf_idx == DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED) {
-                if (!I2S0.conf.rx_start) {
+                if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
                     if (i2s_run() != 0) {
                         ESP_LOGE(TAG, "dma_filter_task: i2s_run() failure");
                     }
