@@ -127,11 +127,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 						Ut::Thr::Wq::TaskPrio::Tracker);
 				}
 
-				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
-
-				if (tracker->lastPsr() < kPsrThreshold) {
-					ESP_LOGE(Trk::kDebugTag, "PSR lower threshold has been exceeded");
-				}
+				outputProfile();
 			}
 
 			break;
@@ -139,6 +135,15 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		default:
 			ESP_LOGI(Trk::kDebugTag, "Profile: Skipping frame");
 			break;
+	}
+}
+
+void Profile::outputProfile()
+{
+	ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
+
+	if (tracker->lastPsr() < kPsrThreshold) {
+		ESP_LOGE(Trk::kDebugTag, "PSR lower threshold has been exceeded");
 	}
 }
 
