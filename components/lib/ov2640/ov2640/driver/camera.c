@@ -1507,15 +1507,16 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 void esp_camera_fb_return(camera_fb_t * fb)
 {
 // TODO: acquire lock in case reconfiguration happens
-    if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
-
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
-        size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
+    if (s_state != NULL && s_state->config.fb_count == 1 && fb != NULL) {
+        static const size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
         xQueueSend(s_state->data_ready, &val, portMAX_DELAY);
-
         return;
+    }
 #endif
 
+    if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
+        return;
     }
 
     xQueueSend(s_state->fb_in, &fb, portMAX_DELAY);
