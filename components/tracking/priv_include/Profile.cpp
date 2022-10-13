@@ -113,6 +113,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 					aFrame.get()->width()};
 				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
 
+#if CONFIG_TRACKING_RUN_PROFILE_TYPE_FULL
 				// TODO: sync
 				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 					// Detach from the current thread to release the buffer
@@ -127,6 +128,21 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				}
 
 				outputProfile();
+#elif CONFIG_TRACKING_RUN_PROFILE_TYPE_TRACKER
+
+				while (true) {
+					constexpr std::size_t kDelayCounterReset = 10;
+
+					for (std::size_t i = 0; i < kDelayCounterReset; ++i) {
+						ESP_LOGV(Trk::kDebugTag, "Profile: updating tracker");
+						tracker->update(imageWorkingArea, true);
+						ESP_LOGV(Trk::kDebugTag, "Profile: updated tracker");
+						outputProfile();
+					}
+
+					vTaskDelay(1);
+				}
+#endif
 			}
 
 			break;
