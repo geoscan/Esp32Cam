@@ -37,4 +37,20 @@ menu "[tracking]"
 			Run profile sequence (for debugging purposes). It will transfer the
 			camera into b/w mode, and start processing frames from it.
 
+	if TRACKING_RUN_PROFILE
+
+		choice TRACKING_RUN_PROFILE_TYPE
+			prompt "[tracking] Select profile sequence type"
+			default TRACKING_RUN_PROFILE_TYPE_FULL
+
+			config TRACKING_RUN_PROFILE_TYPE_FULL
+				bool "Complete sequence: Tracker + Camera driver + Work queue"
+
+			config TRACKING_RUN_PROFILE_TYPE_TRACKER
+				bool "Short sequence: Tracker"
+
+		endchoice
+
+	endif
+
 endmenu
