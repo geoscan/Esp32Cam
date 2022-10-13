@@ -801,7 +801,6 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
 #endif
 
             } else {
-                ESP_LOGV(TAG, "dma_filter_task: filtering buffer");
                 dma_filter_buffer(buf_idx);
             }
         }
