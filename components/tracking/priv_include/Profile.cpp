@@ -120,7 +120,6 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 					Ut::Thr::Wq::MediumPriority::getInstance().push(
 						[this, imageWorkingArea]() mutable {tracker->update(imageWorkingArea, true);},
 						Ut::Thr::Wq::TaskPrio::Tracker);
-					vTaskDelay(1);
 				}
 
 				ESP_LOGI(Trk::kDebugTag, "Profile: psr %.4f fps %.2f", tracker->lastPsr(), sFpsCounter.onFrame());
