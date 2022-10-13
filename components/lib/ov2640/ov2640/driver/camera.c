@@ -786,11 +786,14 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
         if(xQueueReceive(s_state->data_ready, &buf_idx, portMAX_DELAY) == pdTRUE) {
             if (buf_idx == SIZE_MAX) {
                 //this is the end of the frame
+                ESP_LOGV(TAG, "dma_filter_task: finishing frame");
                 dma_finish_frame();
 
 #if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
             } else if (buf_idx == DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED) {
                 if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
+                    ESP_LOGV(TAG, "dma_filter_task: starting I2S");
+
                     if (i2s_run() != 0) {
                         ESP_LOGE(TAG, "dma_filter_task: i2s_run() failure");
                     }
@@ -798,6 +801,7 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
 #endif
 
             } else {
+                ESP_LOGV(TAG, "dma_filter_task: filtering buffer");
                 dma_filter_buffer(buf_idx);
             }
         }
