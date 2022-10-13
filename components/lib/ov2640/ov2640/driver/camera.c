@@ -1479,6 +1479,7 @@ camera_fb_t* esp_camera_fb_get()
             return NULL;
         }
         xSemaphoreGiveRecursive(s_state_mutex);
+        ESP_LOGV(TAG, "esp_camera_fb_get: got frame");
         return (camera_fb_t*)s_state->fb;
     }
     camera_fb_int_t * fb = NULL;
