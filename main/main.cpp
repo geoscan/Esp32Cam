@@ -38,7 +38,9 @@ extern "C" int app_main(void)
 	esp_event_loop_create_default();
 	wifiStart();
 	httpStart();
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
 	cameraThreadInit();
+#endif
 	cameraStreamerStart(context);
 	Mav::init();
 	Bdg::init();
