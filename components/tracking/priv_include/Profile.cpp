@@ -135,6 +135,11 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				}
 
 				outputProfile();
+#elif CONFIG_TRACKING_RUN_PROFILE_TYPE_TRACKER_CAMERA
+				ESP_LOGV(Trk::kDebugTag, "Profile: updating tracker");
+				tracker->update(image, true);
+				ESP_LOGV(Trk::kDebugTag, "Profile: updated tracker");
+				outputProfile();
 #elif CONFIG_TRACKING_RUN_PROFILE_TYPE_TRACKER
 				while (true) {
 					constexpr std::size_t kDelayCounterReset = 10;
