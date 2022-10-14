@@ -6,6 +6,7 @@
 #include "Ov2640.hpp"
 #include "esp_camera.h"
 #include "utility/system/NvsWrap.hpp"
+#include "sub/Cam.hpp"
 
 using namespace std;
 
@@ -89,6 +90,7 @@ static const char *pixformatToStr(pixformat_t aPixformat)
 Ov2640::Ov2640() :
 	Mod::ModuleBase{Mod::Module::Camera}
 {
+	esp_camera_add_hook_on_frame(hookOnFrame);
 }
 
 void Ov2640::init()
@@ -339,6 +341,17 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 		default:
 			break;
 	}
+}
+
+/// \brief Invokes subscribers on camera frames that a new frame has been received
+///
+void Ov2640::hookOnFrame(camera_fb_t *aFrame)
+{
+	ESP_LOGI(kTag, "hookOnFrame");
+	return;
+	static Sub::Key::NewFrame key;
+	std::shared_ptr<Cam::Frame> frame{new Ov2640::Frame{aFrame}};
+	key.notify(frame);
 }
 
 // ------------ Ov2640::Frame ------------ //

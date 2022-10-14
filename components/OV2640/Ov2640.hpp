@@ -34,7 +34,7 @@ private:
 protected:
 	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 	void setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback) override;
-
+	static void hookOnFrame(camera_fb_t *);
 private:
 	void cameraConfigLoad();
 	void reinit();
