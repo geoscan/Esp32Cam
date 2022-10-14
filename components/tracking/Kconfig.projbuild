@@ -34,8 +34,13 @@ menu "[tracking]"
 		bool "Run profiler"
 		default n
 		help
-			Run profile sequence (for debugging purposes). It will transfer the
-			camera into b/w mode, and start processing frames from it.
+			Profiler is a small hook on the "on-frame" event that performs
+			frame processing (tracking) and outputs FPS. It is used for debugging
+			purposes.
+
+			Profiler comes in various flavors, oncluding one that profiles time
+			expenses of the cycle without the tracking itself. See
+			`TRACKING_RUN_PROFILE` for more info.
 
 	if TRACKING_RUN_PROFILE
 
@@ -46,12 +51,15 @@ menu "[tracking]"
 			config TRACKING_RUN_PROFILE_TYPE_FULL
 				bool "Complete sequence: Tracker + Camera driver + Work queue"
 
+			config TRACKING_RUN_PROFILE_TYPE_TRACKER_CAMERA
+				bool "Short sequence: Tracker + Camera driver"
+
 			config TRACKING_RUN_PROFILE_TYPE_TRACKER
 				bool "Short sequence: Tracker"
 
 			config TRACKING_RUN_PROFILE_TYPE_CAMERA
 				bool "Short sequence: Camera driver (Measure camera performance)"
-
+			
 		endchoice
 
 	endif
