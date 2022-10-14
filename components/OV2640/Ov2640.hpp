@@ -18,9 +18,7 @@ public:
 	Ov2640();
 	void init() override;
 	std::shared_ptr<Cam::Frame> getFrame() override;
-
 private:
-
 	class Frame : public Cam::Frame {
 		camera_fb_t *fb;
 	public:
@@ -33,7 +31,6 @@ private:
 		int width() override;
 		int height() override;
 	};
-
 protected:
 	void getFieldValue(Mod::Fld::Req, Mod::Fld::OnResponseCallback) override;
 	void setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback) override;
@@ -41,7 +38,6 @@ protected:
 private:
 	void cameraConfigLoad();
 	void reinit();
-
 private:
 	struct {
 		bool initialized = false;
