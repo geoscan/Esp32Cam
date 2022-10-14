@@ -63,18 +63,25 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	switch (state) {
 		ESP_LOGI(Trk::kDebugTag, "Profile, onFrame");
 		case State::CamConfStart: {  // Initialize the camera, switch it to grayscale mode
-			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>("grayscale",
-				[this](const Mod::Fld::WriteResp &aWriteResp)
-				{
-					if (aWriteResp.isOk()) {
-						ESP_LOGI(Trk::kDebugTag, "Profile: switched camera to grayscale mode");
-						state = State::TrackerInit;
-					} else {
-						ESP_LOGE(Trk::kDebugTag, "Profile: failed to switch the camera to grayscale mode %s",
-							aWriteResp.resultAsCstr());
-						state = State::CamConfFailed;
-					}
-				});
+			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
+				Ut::Thr::Wq::MediumPriority::getInstance().push(
+					[this]()
+					{
+						Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
+							"grayscale",
+							[this](const Mod::Fld::WriteResp &aWriteResp)
+							{
+								if (aWriteResp.isOk()) {
+									ESP_LOGI(Trk::kDebugTag, "Profile: switched camera to grayscale mode");
+									state = State::TrackerInit;
+								} else {
+									ESP_LOGE(Trk::kDebugTag, "Profile: failed to switch the camera to grayscale mode %s",
+										aWriteResp.resultAsCstr());
+									state = State::CamConfFailed;
+								}
+							});
+					});
+			}
 
 			break;
 		}
