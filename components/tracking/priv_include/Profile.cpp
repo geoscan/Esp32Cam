@@ -122,6 +122,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 #if CONFIG_TRACKING_RUN_PROFILE_TYPE_FULL
 				while (spinlock == Spinlock::Wait) {
+					ESP_LOGV(Trk::kDebugTag, "Profiler: waiting for spinlock");
 					// empty
 				}
 
