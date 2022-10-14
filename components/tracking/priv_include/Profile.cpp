@@ -33,7 +33,8 @@ static constexpr std::size_t knMosseThreads = 2;
 Profile::Profile() :
 	tracker{nullptr},
 	state{State::CamConfStart},
-	key{{&Profile::onFrame, this}}
+	key{{&Profile::onFrame, this}},
+	spinlock{Spinlock::Done}
 {
 }
 
@@ -118,9 +119,15 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			if (static_cast<bool>(aFrame)) {
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
-				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
 
 #if CONFIG_TRACKING_RUN_PROFILE_TYPE_FULL
+				while (spinlock == Spinlock::Wait) {
+					// empty
+				}
+
+				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
+				spinlock = Spinlock::Wait;
+
 				// TODO: sync
 				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 					// Detach from the current thread to release the buffer
@@ -129,6 +136,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 						{
 							ESP_LOGV(Trk::kDebugTag, "Profile: updating tracker");
 							tracker->update(imageWorkingArea, true);
+							spinlock = Spinlock::Done;
 							ESP_LOGV(Trk::kDebugTag, "Profile: updated tracker");
 						},
 						Ut::Thr::Wq::TaskPrio::Tracker);
@@ -141,6 +149,7 @@ void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				ESP_LOGV(Trk::kDebugTag, "Profile: updated tracker");
 				outputProfile();
 #elif CONFIG_TRACKING_RUN_PROFILE_TYPE_TRACKER
+				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
 				while (true) {
 					constexpr std::size_t kDelayCounterReset = 10;
 

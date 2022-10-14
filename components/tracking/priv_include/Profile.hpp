@@ -20,6 +20,11 @@ namespace Trk {
 
 class Profile {
 private:
+	enum class Spinlock {
+		Wait,
+		Done,
+	};
+private:
 	struct Key {  ///< Profile waits for camera frames routed through a subscription mechanism
 		Sub::Key::NewFrame newFrame;
 	};
@@ -38,6 +43,7 @@ private:
 	Mosse::Tracker *tracker;
 	State state;
 	Key key;
+	Spinlock spinlock;
 };
 
 }  // namespace Trk
