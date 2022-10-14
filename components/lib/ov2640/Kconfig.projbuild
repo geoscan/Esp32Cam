@@ -133,4 +133,13 @@ config OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
 		Enable this option to trigger acquisition of a new frame on
 		`esp_camera_fb_get` call.
 
+config DRIVER_OV2640_USE_HOOKS
+	bool "Use hooks on driver events"
+	help
+		Using hooks allows to tap directly into the driver's workflow cutting
+		off context switching expenses through using callbacks.
+
+		Warning: When enabled, `esp_camera_fb_get` and `esp_camera_fb_return`
+		API calls will cease to work.
+
 endmenu
