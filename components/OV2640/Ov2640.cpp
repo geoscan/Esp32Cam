@@ -90,7 +90,7 @@ static const char *pixformatToStr(pixformat_t aPixformat)
 Ov2640::Ov2640() :
 	Mod::ModuleBase{Mod::Module::Camera}
 {
-	esp_camera_add_hook_on_frame(hookOnFrame);
+	esp_camera_add_hook_on_frame(hookOnFrame);  // The way it implemented, the hook will just be replaced, so it safe to set a hook without any checks
 }
 
 void Ov2640::init()
