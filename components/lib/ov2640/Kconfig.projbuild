@@ -143,4 +143,7 @@ config DRIVER_OV2640_USE_HOOKS
 		Warning: When enabled, `esp_camera_fb_get` and `esp_camera_fb_return`
 		API calls will cease to work.
 
+		Warning: when used with multiple camera buffers (`fb_count`), the
+		behavior is undefined.
+
 endmenu
