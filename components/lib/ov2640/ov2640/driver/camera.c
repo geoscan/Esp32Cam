@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "time.h"
 #include "sys/time.h"
 #include "freertos/FreeRTOS.h"
@@ -143,9 +144,16 @@ typedef struct {
     TaskHandle_t dma_filter_task;
 } camera_state_t;
 
+typedef struct {
+    esp_camera_hook_on_frame_t on_frame;
+} camera_hooks_t;
+
 camera_state_t* s_state = NULL;
 SemaphoreHandle_t s_state_mutex;
 camera_fb_int_t **s_managed_buffers;
+static camera_hooks_t s_hooks = {
+    .on_frame = NULL,
+};
 
 static void i2s_init();
 static int i2s_run();
@@ -160,6 +168,7 @@ static void dma_filter_yuyv(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* 
 static void dma_filter_yuyv_highspeed(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 static void dma_filter_jpeg(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 static void i2s_stop(bool* need_yield);
+static void hooks_invoke_on_frame();
 
 static bool is_hs_mode()
 {
@@ -631,10 +640,18 @@ static void IRAM_ATTR camera_fb_done()
     camera_fb_int_t * fb = NULL, * fb2 = NULL;
     BaseType_t taskAwoken = 0;
 
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
+        i2s_run();
+        hooks_invoke_on_frame();
+        return;
+    }
+#else
     if(s_state->config.fb_count == 1) {
         xSemaphoreGive(s_state->frame_ready);
         return;
     }
+#endif
 
     fb = s_state->fb;
     if(!fb->ref && fb->len) {
@@ -1348,8 +1365,22 @@ fail:
     return err;
 }
 
+esp_err_t esp_camera_add_hook_on_frame(esp_camera_hook_on_frame_t hook)
+{
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    s_hooks.on_frame = hook;
+
+    return ESP_OK;
+#else
+    return ESP_ERR_NOT_SUPPORTED;
+#endif
+}
+
 esp_err_t esp_camera_init(const camera_config_t* config)
 {
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    assert(config->fb_count == 1);
+#endif
     esp_log_level_set(TAG, (esp_log_level_t)CONFIG_DRIVER_OV2640_DEBUG_LEVEL);
     if (NULL == s_state_mutex) {
         static StaticSemaphore_t sem;
@@ -1468,7 +1499,7 @@ camera_fb_t* esp_camera_fb_get()
             return NULL;
         }
     }
-# endif
+# endif  // CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
 
     bool need_yield = false;
     if (s_state->config.fb_count == 1) {
@@ -1499,7 +1530,7 @@ camera_fb_t* esp_camera_fb_get()
     return (camera_fb_t*)fb;
 #else
     return NULL;
-#endif
+#endif  // CONFIG_DRIVER_OV2640_USE_HOOKS
 }
 
 camera_fb_t* esp_camera_nfb_get(size_t n)
@@ -1632,4 +1663,11 @@ esp_err_t esp_camera_load_from_nvs(const char *key)
       ESP_LOGW(TAG,"Error (%d) opening nvs key \"%s\"",ret,key);
       return ret;
   }
+}
+
+void hooks_invoke_on_frame()
+{
+    if (s_hooks.on_frame && s_state->fb) {
+        s_hooks.on_frame((camera_fb_t*)s_state->fb);
+    }
 }
