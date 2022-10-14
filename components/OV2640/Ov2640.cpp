@@ -348,7 +348,6 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 void Ov2640::hookOnFrame(camera_fb_t *aFrame)
 {
 	ESP_LOGI(kTag, "hookOnFrame");
-	return;
 	static Sub::Key::NewFrame key;
 	std::shared_ptr<Cam::Frame> frame{new Ov2640::Frame{aFrame}};
 	key.notify(frame);
