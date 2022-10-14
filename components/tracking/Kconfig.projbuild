@@ -49,6 +49,9 @@ menu "[tracking]"
 			config TRACKING_RUN_PROFILE_TYPE_TRACKER
 				bool "Short sequence: Tracker"
 
+			config TRACKING_RUN_PROFILE_TYPE_CAMERA
+				bool "Short sequence: Camera driver (Measure camera performance)"
+
 		endchoice
 
 	endif
