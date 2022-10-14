@@ -1442,6 +1442,7 @@ esp_err_t esp_camera_deinit()
 
 camera_fb_t* esp_camera_fb_get()
 {
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
     ESP_LOGV(TAG, "esp_camera_fb_get: getting frame");
 
     if (NULL == s_state_mutex) {  // In case esp_camera_fb_get will be called before camera initialization due to erroneous initialization order
@@ -1455,7 +1456,7 @@ camera_fb_t* esp_camera_fb_get()
         return NULL;
     }
 
-#if !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+# if !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
     if(!I2S0.conf.rx_start) {
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
@@ -1467,7 +1468,7 @@ camera_fb_t* esp_camera_fb_get()
             return NULL;
         }
     }
-#endif
+# endif
 
     bool need_yield = false;
     if (s_state->config.fb_count == 1) {
@@ -1496,6 +1497,9 @@ camera_fb_t* esp_camera_fb_get()
 
     assert(fb != NULL);
     return (camera_fb_t*)fb;
+#else
+    return NULL;
+#endif
 }
 
 camera_fb_t* esp_camera_nfb_get(size_t n)
@@ -1514,22 +1518,24 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 
 void esp_camera_fb_return(camera_fb_t * fb)
 {
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
     ESP_LOGV(TAG, "esp_camera_fb_return: releasing frame");
 
 // TODO: acquire lock in case reconfiguration happens
-#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+# if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
     if (s_state != NULL && s_state->config.fb_count == 1 && fb != NULL) {
         static const size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
         xQueueSend(s_state->data_ready, &val, portMAX_DELAY);
         return;
     }
-#endif
+# endif
 
     if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
         return;
     }
 
     xQueueSend(s_state->fb_in, &fb, portMAX_DELAY);
+#endif
 }
 
 sensor_t * esp_camera_sensor_get()
