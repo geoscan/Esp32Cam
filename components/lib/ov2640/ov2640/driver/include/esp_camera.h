@@ -121,11 +121,21 @@ typedef struct {
     struct timeval timestamp;   /*!< Timestamp since boot of the first DMA buffer of the frame */
 } camera_fb_t;
 
+typedef void (*esp_camera_hook_on_frame_t)(camera_fb_t *);
+
 #define ESP_ERR_CAMERA_BASE 0x20000
 #define ESP_ERR_CAMERA_NOT_DETECTED             (ESP_ERR_CAMERA_BASE + 1)
 #define ESP_ERR_CAMERA_FAILED_TO_SET_FRAME_SIZE (ESP_ERR_CAMERA_BASE + 2)
 #define ESP_ERR_CAMERA_FAILED_TO_SET_OUT_FORMAT (ESP_ERR_CAMERA_BASE + 3)
 #define ESP_ERR_CAMERA_NOT_SUPPORTED            (ESP_ERR_CAMERA_BASE + 4)
+
+/**
+ * @brief esp_camera_add_hook_on_frame When set, the hook will get triggered each time a frame is acquired
+ *
+ * @param hook Callback function
+ * @return Error code indicating whether hook setting was successful
+ */
+esp_err_t esp_camera_add_hook_on_frame(esp_camera_hook_on_frame_t hook);
 
 /**
  * @brief Initialize the camera driver
