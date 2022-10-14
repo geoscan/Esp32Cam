@@ -1421,6 +1421,10 @@ esp_err_t esp_camera_init(const camera_config_t* config)
     }
 
     xSemaphoreGiveRecursive(s_state_mutex);
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    // Initialize acquisition of the first frame
+    i2s_run();
+#endif
     return ESP_OK;
 
 fail:
