@@ -16,12 +16,16 @@ namespace Sys {
 template <class Trep, class Tperiod>
 esp_err_t HrTimer::startOnce(const std::chrono::duration<Trep, Tperiod> &aDuration)
 {
+	esp_timer_stop(handle);
+
 	return esp_timer_start_once(handle, std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count());
 }
 
 template <class Trep, class Tperiod>
 esp_err_t HrTimer::startPeriodic(const std::chrono::duration<Trep, Tperiod> &aDuration)
 {
+	esp_timer_stop(handle);
+
 	return esp_timer_start_periodic(handle, std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count());
 }
 
