@@ -58,6 +58,7 @@ private:
 		std::pair<int, int> frameSize;
 
 		bool update();
+		bool apply();  ///< Restores camera state
 	};
 public:
 	Tracking();
