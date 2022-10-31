@@ -92,9 +92,10 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 			break;
 		}
-		case State::TrackerRunningFirst:  // Falls through
+		case State::TrackerRunningFirst:
 			cameraState.currentInit();
 			state = State::TrackerRunning;
+			// Fall through
 		case State::TrackerRunning: {
 			if (static_cast<bool>(aFrame)) {
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
