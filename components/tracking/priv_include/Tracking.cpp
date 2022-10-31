@@ -279,6 +279,15 @@ bool Tracking::CameraState::snapshotInit()
 	return nfields == knFieldsExpected;
 }
 
+void Tracking::CameraState::currentInit()
+{
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[this](const std::pair<int, int> &aFrameSize)
+		{
+			current.frameSize = aFrameSize;
+		});
+}
+
 /// \brief Restores camera state using the module API
 bool Tracking::CameraState::apply()
 {
