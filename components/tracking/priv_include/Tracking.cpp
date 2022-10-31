@@ -82,7 +82,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
-				Mosse::Tp::Roi r = this->roi.absolute();
+				Mosse::Tp::Roi r = this->roi.asAbsolute();
 				ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI");
 				tracker->init(image, r);
 				state = State::TrackerRunning;
@@ -214,7 +214,7 @@ bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 ///
 /// \brief This kind of scaling is required, because the camera's frame size may (and will) change during its
 /// reconfiguration for the needs of tracking.
-Mosse::Tp::Roi Tracking::Roi::absolute()
+Mosse::Tp::Roi Tracking::Roi::asAbsolute()
 {
 	constexpr int kUninitialized = 0;
 	std::pair<int, int> frameSize{kUninitialized, kUninitialized};

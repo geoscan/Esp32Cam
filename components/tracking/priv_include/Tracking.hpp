@@ -40,7 +40,7 @@ private:
 		} normalized = {0.0f, 0.0f, 0.0f, 0.0f};
 
 		bool normalizedInit(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
-		Mosse::Tp::Roi absolute();  ///< Converts normalized to absolute ROI using the currently used frame size
+		Mosse::Tp::Roi asAbsolute();  ///< Converts normalized to absolute ROI using the currently used frame size
 	};
 	struct Key {
 		Sub::Key::NewFrame newFrame;
