@@ -31,8 +31,7 @@ private:
 		Done,
 	};
 	struct Roi {
-		/// \brief Frame size before and after camera reconfiguration might change. Normalized ROI enables transforming
-		/// the ROI
+		/// \brief Intermediate inter-state scaled representation
 		struct Normalized {
 			float row;
 			float col;
