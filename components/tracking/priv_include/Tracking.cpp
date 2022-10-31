@@ -33,7 +33,7 @@ static constexpr std::size_t knMosseThreads = 2;
 Tracking::Tracking() :
 	ModuleBase{Mod::Module::Tracking},
 	tracker{nullptr},
-	state{State::CamConfStart},
+	state{State::Disabled},
 	key{{&Tracking::onFrame, this}},
 	spinlock{Spinlock::Done}
 {
@@ -135,6 +135,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
 
 			if (!initialized) {
+				state = State::Disabled;
 				// TODO: restore camera frame size
 				// TODO: restore camera pixformat
 				// TODO: deinitialize the tracker
