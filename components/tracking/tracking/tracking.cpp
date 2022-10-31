@@ -11,11 +11,14 @@
 #include <esp_log.h>
 #include "tracking.hpp"
 #include "Profile.hpp"
+#include "Tracking.hpp"
 #include "port/OsApi.hpp"
 #include <embmosse/Mosse.hpp>
 #include <esp_log.h>
 
 namespace Trk {
+
+static void trackingInit();
 
 static void logInit()
 {
@@ -37,13 +40,19 @@ void init()
 	logInit();
 #if CONFIG_TRACKING_RUN_PROFILE
 	profileInit();
+#else
+	trackingInit();
 #endif
+}
+
+static void trackingInit()
+{
+	static Trk::Tracking tracking;
+	(void)tracking;
 }
 
 void profileInit()
 {
-	logInit();
-	apiInit();
 	static Profile profile;
 	(void)profile;
 }
