@@ -156,4 +156,34 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 	}
 }
 
+void Tracking::Roi::initNormalized(const Mosse::Tp::Roi &absolute)
+{
+	constexpr int kUninitialized = 0;
+	std::pair<int, int> frameSize{kUninitialized, kUninitialized};
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[&frameSize](std::pair<int, int> aFrameSize) mutable { frameSize = aFrameSize; });
+
+	// TODO bounds check
+	if (frameSize.first != kUninitialized) {
+		normalized.row = static_cast<float>(absolute.origin(0)) / static_cast<float>(absolute.size(0));
+		normalized.col = static_cast<float>(absolute.origin(1)) / static_cast<float>(absolute.size(1));
+	}
+}
+
+Mosse::Tp::Roi Tracking::Roi::absolute()
+{
+	constexpr int kUninitialized = 0;
+	std::pair<int, int> frameSize{kUninitialized, kUninitialized};
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[&frameSize](std::pair<int, int> aFrameSize) mutable { frameSize = aFrameSize; });
+	Mosse::Tp::Roi roi{{0, 0}, {0, 0}};
+
+	if (frameSize.first != kUninitialized) {
+		roi.origin(0) = static_cast<Eigen::Index>(frameSize.second * normalized.row);
+		roi.origin(1) = static_cast<Eigen::Index>(frameSize.first * normalized.col);
+	}
+
+	return roi;
+}
+
 }  // namespace Trk
