@@ -255,10 +255,19 @@ bool Tracking::CameraState::update()
 
 bool Tracking::CameraState::apply()
 {
-	// TODO: restore camera frame size
-	// TODO: restore camera pixformat
+	bool success = true;
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(frameSize,
+		[this, &success](Mod::Fld::WriteResp aResp)
+		{
+			success = success && aResp.isOk();
+		});
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(pixformat,
+		[this, &success](Mod::Fld::WriteResp aResp)
+		{
+			success = success && aResp.isOk();
+		});
 
-	return false;
+	return success;
 }
 
 }  // namespace Trk
