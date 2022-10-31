@@ -99,7 +99,6 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 				while (spinlock == Spinlock::Wait) {
 					ESP_LOGV(Trk::kDebugTag, "Tracking: waiting for spinlock");
-					// empty
 				}
 
 				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
