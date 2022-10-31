@@ -148,16 +148,61 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
 				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
-			const bool success = roi.initNormalized(roiAbsoluteRchw);
-			// TODO: save camera size
-			// TODO: save camera pixframe
-			// TODO: set state
+			bool success;
+
+			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::Initialized>(
+				[&success](bool aInitialized) {
+					success = aInitialized;
+				});
+
+			if (!success) {
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Camera was not initialized"});
+
+				break;
+			}
+
+			success = false;
+			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+				[this, &success](const std::pair<int, int> &aFrameSize)
+				{
+					cameraState.frameSize = aFrameSize;
+					success = true;
+				});
+
+			if (!success) {
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Unable to get frame size"});
+
+				break;
+			}
+
+			success = false;
+			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
+				[this, &success](const std::tuple<std::uint8_t, const char *> &aFrameFormat)
+				{
+					cameraState.pixformat = std::get<1>(aFrameFormat);
+					success = true;
+				});
+
+			if (!success) {
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Unable to get frame format"});
+
+				break;
+			}
+
+			success = roi.initNormalized(roiAbsoluteRchw);
 
 			if (success) {
-				state = State::CamConfStart;
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
 			} else {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other});
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "ROI error"});
+
+				break;
+			}
+
+			if (stateIsCameraConfigured()) {
+				state = State::TrackerInit;
+			} else {
+				state = State::CamConfStart;
 			}
 
 			break;

@@ -53,17 +53,27 @@ private:
 		TrackerInit,  ///< Initialize tracker with a first ROI
 		TrackerRunning
 	};
+	struct CameraState {
+		const char *pixformat;
+		std::pair<int, int> frameSize;
+	};
 public:
 	Tracking();
 	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
 protected:
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
 private:
+	inline bool stateIsCameraConfigured() const
+	{
+		return state > State::CamConfFailed;
+	}
+private:
 	Mosse::Tracker *tracker;
 	State state;
 	Key key;
 	Spinlock spinlock;
 	Roi roi;
+	CameraState cameraState;
 };
 
 }  // namespace Trk
