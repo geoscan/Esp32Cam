@@ -29,8 +29,6 @@ Mosse::Port::Thread &mosseThreadApi()
 	return thr;
 }
 
-static constexpr std::size_t knMosseThreads = 2;
-
 Tracking::Tracking() :
 	ModuleBase{Mod::Module::Tracking},
 	tracker{nullptr},
