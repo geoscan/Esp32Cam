@@ -37,6 +37,8 @@ private:
 		struct Normalized {
 			float row;
 			float col;
+			float nrows;
+			float ncols;
 		} normalized = {0.0f, 0.0f};
 
 		void initNormalized(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
