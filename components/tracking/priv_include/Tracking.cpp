@@ -128,4 +128,22 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	}
 }
 
+void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb)
+{
+	switch (aReq.field) {
+		case Mod::Fld::Field::Initialized: {
+			const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
+
+			if (!initialized) {
+				// TODO: restore camera frame size
+				// TODO: restore camera pixformat
+				// TODO: deinitialize the tracker
+			}
+		}
+		case Mod::Fld::Field::Roi: {
+			// TODO: reset the tracker, set ROI
+		}
+	}
+}
+
 }  // namespace Trk
