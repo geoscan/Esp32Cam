@@ -9,6 +9,7 @@
 #define TRACKING_PRIV_INCLUDE_TRACKING_HPP_
 
 #include "sub/Subscription.hpp"
+#include "module/ModuleBase.hpp"
 
 namespace Mosse {
 
@@ -18,7 +19,7 @@ class Tracker;
 
 namespace Trk {
 
-class Tracking {
+class Tracking : Mod::ModuleBase {
 private:
 	enum class Spinlock {
 		Wait,

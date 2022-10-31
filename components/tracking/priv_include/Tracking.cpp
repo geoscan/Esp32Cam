@@ -31,6 +31,7 @@ Mosse::Port::Thread &mosseThreadApi()
 static constexpr std::size_t knMosseThreads = 2;
 
 Tracking::Tracking() :
+	ModuleBase{Mod::Module::Tracking},
 	tracker{nullptr},
 	state{State::CamConfStart},
 	key{{&Tracking::onFrame, this}},
