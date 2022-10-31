@@ -38,6 +38,8 @@ private:
 public:
 	Tracking();
 	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
+protected:
+	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
 private:
 	Mosse::Tracker *tracker;
 	State state;
