@@ -18,6 +18,10 @@ class Tracker;
 
 namespace Trk {
 
+///\brief Testing / debugging / optimization playground.
+///
+/// Used to play with various ways of pinning tasks to threads, employing various in-built tracker optimization
+/// mechanisms, etc.
 class Profile {
 private:
 	enum class Spinlock {
