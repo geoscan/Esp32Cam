@@ -22,12 +22,7 @@
 
 namespace Trk {
 
-Mosse::Port::Thread &mosseThreadApi()
-{
-	static Thread thr;
-
-	return thr;
-}
+extern Mosse::Port::Thread &mosseThreadApi();
 
 Tracking::Tracking() :
 	ModuleBase{Mod::Module::Tracking},
