@@ -105,7 +105,6 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
 				spinlock = Spinlock::Wait;
 
-				// TODO: sync
 				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 					// Detach from the current thread to release the buffer
 					Ut::Thr::Wq::MediumPriority::getInstance().push(
