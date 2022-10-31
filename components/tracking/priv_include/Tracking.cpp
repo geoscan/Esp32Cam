@@ -139,6 +139,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				// TODO: restore camera frame size
 				// TODO: restore camera pixformat
 				// TODO: deinitialize the tracker
+				// TODO: response
 			}
 
 			break;
@@ -147,8 +148,14 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
 				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
-			roi.initNormalized(roiAbsoluteRchw);
-			state = State::CamConfStart;
+			const bool success = roi.initNormalized(roiAbsoluteRchw);
+
+			if (success) {
+				state = State::CamConfStart;
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
+			} else {
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other});
+			}
 
 			break;
 		}
