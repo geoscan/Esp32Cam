@@ -39,6 +39,7 @@ Tracking::Tracking() :
 {
 }
 
+/// \brief When in tracking mode, processes the new frame searching for the new ROI center.
 void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
 	assert(nullptr != aFrame.get());
@@ -127,6 +128,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	}
 }
 
+/// \brief Implements tracker control API: deinitialize, initialize (a.k.a set ROI)
 void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb)
 {
 	switch (aReq.field) {
@@ -187,6 +189,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 	}
 }
 
+/// \brief Initializes relative (`normalized`) ROI from the absolute one, using the current frame size into account
 bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 {
 	constexpr int kUninitialized = 0;
@@ -207,6 +210,10 @@ bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 	return ret;
 }
 
+/// \brief Converts relative (`normalized`) ROI to the absolute one, taking the current frame size into account.
+///
+/// \brief This kind of scaling is required, because the camera's frame size may (and will) change during its
+/// reconfiguration for the needs of tracking.
 Mosse::Tp::Roi Tracking::Roi::absolute()
 {
 	constexpr int kUninitialized = 0;
@@ -225,6 +232,7 @@ Mosse::Tp::Roi Tracking::Roi::absolute()
 	return roi;
 }
 
+/// \brief Saves fields which will be used for restoring camera state, when the tracker is being deinitialized
 bool Tracking::CameraState::initSnapshot()
 {
 	constexpr int knFieldsExpected = 3;
@@ -252,6 +260,7 @@ bool Tracking::CameraState::initSnapshot()
 	return nfields == knFieldsExpected;
 }
 
+/// \brief Restores camera state using the module API
 bool Tracking::CameraState::apply()
 {
 	bool success = true;
