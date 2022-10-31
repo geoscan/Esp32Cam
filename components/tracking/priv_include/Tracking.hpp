@@ -53,8 +53,13 @@ private:
 		TrackerRunning
 	};
 	struct CameraState {
-		const char *pixformat;
-		std::pair<int, int> frameSize;
+		struct {
+			const char *pixformat;
+			std::pair<int, int> frameSize;
+		} snapshot;
+		struct {
+			std::pair<int, int> frameSize;
+		} current;
 
 		bool snapshotInit();
 		bool apply();  ///< Restores camera state

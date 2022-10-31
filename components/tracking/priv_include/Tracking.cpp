@@ -16,6 +16,7 @@
 #include "utility/time.hpp"
 #include "utility/cont/CircularBuffer.hpp"
 #include "utility/thr/WorkQueue.hpp"
+#include "sub/Tracking.hpp"
 #include <embmosse/Mosse.hpp>
 #include "Tracking.hpp"
 
@@ -113,6 +114,22 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 							ESP_LOGV(Trk::kDebugTag, "Tracking: updating tracker");
 							tracker->update(imageWorkingArea, true);
 							spinlock = Spinlock::Done;
+							auto nextRoi = tracker->roi();
+							Sub::Trk::MosseTrackerUpdate mosseTrackerUpdate{
+								cameraState.current.frameSize.second,  // frameHeight
+								cameraState.current.frameSize.first,  // frameWidth
+								nextRoi.origin(1),  // roiX (col)
+								nextRoi.origin(0),  // roiY (row)
+								nextRoi.size(1),  // roiWidth (# of rows)
+								nextRoi.size(1),  // roiHeight (# of columns)
+								tracker->lastPsr()  // psr
+							};
+							// Notify through WQ to spare stack expenses
+							Ut::Thr::Wq::MediumPriority::getInstance().push(
+								[mosseTrackerUpdate]()
+								{
+									Sub::Trk::OnMosseTrackerUpdate::notify(mosseTrackerUpdate);
+								});
 							ESP_LOGV(Trk::kDebugTag, "Tracking: updated tracker");
 						},
 						Ut::Thr::Wq::TaskPrio::Tracker);
@@ -245,14 +262,14 @@ bool Tracking::CameraState::snapshotInit()
 	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
 		[this, &nfields](const std::pair<int, int> &aFrameSize)
 		{
-			frameSize = aFrameSize;
+			snapshot.frameSize = aFrameSize;
 			nfields += 1;
 		});
 
 	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
 		[this, &nfields](const std::tuple<std::uint8_t, const char *> &aFrameFormat)
 		{
-			pixformat = std::get<1>(aFrameFormat);
+			snapshot.pixformat = std::get<1>(aFrameFormat);
 			nfields += 1;
 		});
 
@@ -263,12 +280,12 @@ bool Tracking::CameraState::snapshotInit()
 bool Tracking::CameraState::apply()
 {
 	bool success = true;
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(frameSize,
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(snapshot.frameSize,
 		[this, &success](Mod::Fld::WriteResp aResp)
 		{
 			success = success && aResp.isOk();
 		});
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(pixformat,
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(snapshot.pixformat,
 		[this, &success](Mod::Fld::WriteResp aResp)
 		{
 			success = success && aResp.isOk();
