@@ -149,6 +149,9 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
 			const bool success = roi.initNormalized(roiAbsoluteRchw);
+			// TODO: save camera size
+			// TODO: save camera pixframe
+			// TODO: set state
 
 			if (success) {
 				state = State::CamConfStart;
