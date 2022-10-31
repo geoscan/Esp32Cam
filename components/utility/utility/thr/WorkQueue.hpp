@@ -51,6 +51,7 @@ public:
 
 	/// \brief Push task into the queue
 	///
+	/// \param[in] `aPrio` Priority which will be assigned to the task. Not to be confused w/ the scheduler priority
 	void push(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		queue.push({std::move(aTask), aPrio});
