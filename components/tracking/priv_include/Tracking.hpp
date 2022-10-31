@@ -47,6 +47,7 @@ private:
 		Sub::Key::NewFrame newFrame;
 	};
 	enum class State {
+		Disabled,
 		CamConfStart,  ///< Tracker will only work with u8 frames, so the camera has to be configured appropriately
 		CamConfFailed,
 		TrackerInit,  ///< Initialize tracker with a first ROI
