@@ -291,12 +291,12 @@ void Tracking::CameraState::currentInit()
 bool Tracking::CameraState::apply()
 {
 	bool success = true;
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(snapshot.frameSize,
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(snapshot.pixformat,
 		[this, &success](Mod::Fld::WriteResp aResp)
 		{
 			success = success && aResp.isOk();
 		});
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(snapshot.pixformat,
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(snapshot.frameSize,
 		[this, &success](Mod::Fld::WriteResp aResp)
 		{
 			success = success && aResp.isOk();
