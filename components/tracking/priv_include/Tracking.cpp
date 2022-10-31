@@ -273,6 +273,7 @@ bool Tracking::CameraState::snapshotInit()
 	return nfields == knFieldsExpected;
 }
 
+/// \brief Captures the relevant parts of the current camera state
 void Tracking::CameraState::currentInit()
 {
 	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
