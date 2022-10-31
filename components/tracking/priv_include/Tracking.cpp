@@ -143,10 +143,6 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				} else {
 					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
 				}
-
-				// TODO: restore camera frame size
-				// TODO: restore camera pixformat
-				// TODO: response
 			}
 
 			break;
@@ -255,6 +251,14 @@ bool Tracking::CameraState::update()
 		});
 
 	return nfields == knFieldsExpected;
+}
+
+bool Tracking::CameraState::apply()
+{
+	// TODO: restore camera frame size
+	// TODO: restore camera pixformat
+
+	return false;
 }
 
 }  // namespace Trk
