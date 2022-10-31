@@ -86,7 +86,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				Mosse::Tp::Roi r = this->roi.asAbsolute();
 				ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI");
 				tracker->init(image, r);
-				state = State::TrackerRunning;
+				state = State::TrackerRunningFirst;
 				ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
 			} else {
 				ESP_LOGW(Trk::kDebugTag, "Tracking: nullptr frame");
@@ -94,6 +94,9 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 			break;
 		}
+		case State::TrackerRunningFirst:  // Falls through
+			cameraState.currentInit();
+			state = State::TrackerRunning;
 		case State::TrackerRunning: {
 			if (static_cast<bool>(aFrame)) {
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
