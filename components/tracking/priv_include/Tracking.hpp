@@ -40,7 +40,7 @@ private:
 			float ncols;
 		} normalized = {0.0f, 0.0f, 0.0f, 0.0f};
 
-		bool initNormalized(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
+		bool normalizedInit(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
 		Mosse::Tp::Roi absolute();  ///< Converts normalized to absolute ROI using the currently used frame size
 	};
 	struct Key {
