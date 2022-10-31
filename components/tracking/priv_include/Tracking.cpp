@@ -81,9 +81,9 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
-				Mosse::Tp::Roi roi{{0, 0}, {64, 64}};  // TODO Missing frame size bounds check
+				Mosse::Tp::Roi r = this->roi.absolute();
 				ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI");
-				tracker->init(image, roi);
+				tracker->init(image, r);
 				state = State::TrackerRunning;
 				ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
 			} else {
@@ -139,10 +139,20 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				// TODO: restore camera pixformat
 				// TODO: deinitialize the tracker
 			}
+
+			break;
 		}
 		case Mod::Fld::Field::Roi: {
-			// TODO: reset the tracker, set ROI
+			std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
+				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
+			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
+			roi.initNormalized(roiAbsoluteRchw);
+			state = State::CamConfStart;
+
+			break;
 		}
+		default:
+			break;
 	}
 }
 
