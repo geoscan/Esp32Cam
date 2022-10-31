@@ -50,7 +50,7 @@ private:
 		CamConfStart,  ///< Tracker will only work with u8 frames, so the camera has to be configured appropriately
 		CamConfFailed,
 		TrackerInit,  ///< Initialize tracker with a first ROI
-		TrackerRunningFirst,
+		TrackerRunningFirst,  ///< Certain set-up routines have to be performed before tracking can be started. Hence the use of an additional state
 		TrackerRunning
 	};
 	struct CameraState {
