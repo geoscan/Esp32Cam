@@ -56,6 +56,8 @@ private:
 	struct CameraState {
 		const char *pixformat;
 		std::pair<int, int> frameSize;
+
+		bool update();
 	};
 public:
 	Tracking();
