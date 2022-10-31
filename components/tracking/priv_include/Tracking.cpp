@@ -148,12 +148,17 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
 				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
-			bool success;
+			bool success = true;
 
-			success = cameraState.update();
+			// Make a snapshot of the camera state, if it has not been reconfigured yet (i.e. the tracker is called for the first time)
+			if (!stateIsCameraConfigured()) {
+				success = cameraState.update();
 
-			if (!success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
+				if (!success) {
+					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
+
+					break;
+				}
 			}
 
 			success = roi.initNormalized(roiAbsoluteRchw);
@@ -165,8 +170,6 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 
 				break;
 			}
-
-			// TODO update camera state depending on the current state
 
 			if (stateIsCameraConfigured()) {
 				state = State::TrackerInit;
