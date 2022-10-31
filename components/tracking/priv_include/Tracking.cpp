@@ -156,7 +156,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 
 			// Make a snapshot of the camera state, if it has not been reconfigured yet (i.e. the tracker is called for the first time)
 			if (!stateIsCameraConfigured()) {
-				success = cameraState.initSnapshot();
+				success = cameraState.snapshotInit();
 
 				if (!success) {
 					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
@@ -233,7 +233,7 @@ Mosse::Tp::Roi Tracking::Roi::absolute()
 }
 
 /// \brief Saves fields which will be used for restoring camera state, when the tracker is being deinitialized
-bool Tracking::CameraState::initSnapshot()
+bool Tracking::CameraState::snapshotInit()
 {
 	constexpr int knFieldsExpected = 3;
 	int nfields = 0;

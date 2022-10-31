@@ -57,7 +57,7 @@ private:
 		const char *pixformat;
 		std::pair<int, int> frameSize;
 
-		bool initSnapshot();
+		bool snapshotInit();
 		bool apply();  ///< Restores camera state
 	};
 public:
