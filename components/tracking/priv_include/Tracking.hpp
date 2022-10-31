@@ -30,7 +30,6 @@ private:
 		Wait,
 		Done,
 	};
-
 	struct Roi {
 		/// \brief Frame size before and after camera reconfiguration might change. Normalized ROI enables transforming
 		/// the ROI
@@ -44,7 +43,6 @@ private:
 		void initNormalized(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
 		Mosse::Tp::Roi absolute();  ///< Converts normalized to absolute ROI using the currently used frame size
 	};
-private:
 	struct Key {
 		Sub::Key::NewFrame newFrame;
 	};
