@@ -134,11 +134,18 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 		case Mod::Fld::Field::Initialized: {
 			const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
 
-			if (!initialized) {
+			if (!initialized) {  // Request to deinitialize the tracker
 				state = State::Disabled;
+				bool success = cameraState.apply();  // Restore the camera's previous state
+
+				if (!success) {
+					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to restore camera state"});
+				} else {
+					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
+				}
+
 				// TODO: restore camera frame size
 				// TODO: restore camera pixformat
-				// TODO: deinitialize the tracker
 				// TODO: response
 			}
 
