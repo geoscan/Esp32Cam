@@ -167,6 +167,8 @@ void Tracking::Roi::initNormalized(const Mosse::Tp::Roi &absolute)
 	if (frameSize.first != kUninitialized) {
 		normalized.row = static_cast<float>(absolute.origin(0)) / static_cast<float>(absolute.size(0));
 		normalized.col = static_cast<float>(absolute.origin(1)) / static_cast<float>(absolute.size(1));
+		normalized.nrows = static_cast<float>(absolute.size(0)) / static_cast<float>(frameSize.second);
+		normalized.ncols = static_cast<float>(absolute.size(1)) / static_cast<float>(frameSize.first);
 	}
 }
 
@@ -181,6 +183,8 @@ Mosse::Tp::Roi Tracking::Roi::absolute()
 	if (frameSize.first != kUninitialized) {
 		roi.origin(0) = static_cast<Eigen::Index>(frameSize.second * normalized.row);
 		roi.origin(1) = static_cast<Eigen::Index>(frameSize.first * normalized.col);
+		roi.size(0) = static_cast<Eigen::Index>(normalized.nrows * frameSize.second);
+		roi.size(1) = static_cast<Eigen::Index>(normalized.ncols * frameSize.first);
 	}
 
 	return roi;
