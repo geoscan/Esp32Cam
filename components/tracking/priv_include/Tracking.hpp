@@ -26,10 +26,16 @@ namespace Trk {
 
 class Tracking : Mod::ModuleBase {
 private:
+	/// \brief Binary spinlock variable
+	///
+	/// \details It's been established experimentally that frame capturing and frame processing take roughly the same
+	/// time. So a spinlock can be used without risking priority inversion.
 	enum class Spinlock {
 		Wait,
 		Done,
 	};
+
+	/// \brief
 	struct Roi {
 		/// \brief Intermediate inter-state scaled representation
 		struct Normalized {
@@ -42,9 +48,13 @@ private:
 		bool normalizedInit(const Mosse::Tp::Roi &absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
 		Mosse::Tp::Roi asAbsolute();  ///< Converts normalized to absolute ROI using the currently used frame size
 	};
+
+	/// \brief Subscription keys
 	struct Key {
 		Sub::Key::NewFrame newFrame;
 	};
+
+	/// \brief States of the tracking process
 	enum class State {
 		Disabled,
 		CamConfStart,  ///< Tracker will only work with u8 frames, so the camera has to be configured appropriately
@@ -53,6 +63,8 @@ private:
 		TrackerRunningFirst,  ///< Certain set-up routines have to be performed before tracking can be started. Hence the use of an additional state
 		TrackerRunning
 	};
+
+	/// \brief Encapsulation of the camera state. Cached state enables state restoring after tracking is done
 	struct CameraState {
 		struct {
 			const char *pixformat;
