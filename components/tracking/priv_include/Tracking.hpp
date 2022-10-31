@@ -25,11 +25,11 @@ private:
 		Done,
 	};
 private:
-	struct Key {  ///< Profile waits for camera frames routed through a subscription mechanism
+	struct Key {
 		Sub::Key::NewFrame newFrame;
 	};
 	enum class State {
-		CamConfStart,  ///< Tracker will only work with camera switched to grayscale mode
+		CamConfStart,  ///< Tracker will only work with u8 frames, so the camera has to be configured appropriately
 		CamConfFailed,
 		TrackerInit,  ///< Initialize tracker with a first ROI
 		TrackerRunning
