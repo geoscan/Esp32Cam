@@ -164,7 +164,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				}
 			}
 
-			success = roi.initNormalized(roiAbsoluteRchw);
+			success = roi.normalizedInit(roiAbsoluteRchw);
 
 			// The (re)initialization has completed. Notify the caller
 			if (success) {
@@ -188,7 +188,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 	}
 }
 
-bool Tracking::Roi::initNormalized(const Mosse::Tp::Roi &absolute)
+bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 {
 	constexpr int kUninitialized = 0;
 	std::pair<int, int> frameSize{kUninitialized, kUninitialized};
