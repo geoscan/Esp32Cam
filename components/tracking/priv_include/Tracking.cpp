@@ -163,6 +163,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 
 			success = roi.initNormalized(roiAbsoluteRchw);
 
+			// The (re)initialization has completed. Notify the caller
 			if (success) {
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
 			} else {
