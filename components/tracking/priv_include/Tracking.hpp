@@ -15,6 +15,11 @@ namespace Mosse {
 
 class Tracker;
 
+namespace Tp {
+
+class Roi;
+
+}  // namespace Tp
 }  // namespace Mosse
 
 namespace Trk {
@@ -24,6 +29,20 @@ private:
 	enum class Spinlock {
 		Wait,
 		Done,
+	};
+
+	struct Roi {
+		/// \brief Frame size before and after camera reconfiguration might change. Normalized ROI enables transforming
+		/// the ROI
+		struct Normalized {
+			float row;
+			float col;
+			float nrows;
+			float ncols;
+		} normalized = {0.0f, 0.0f, 0.0f, 0.0f};
+
+		void initNormalized(Mosse::Tp::Roi absolute);  ///< Converts absolute to normalized ROI using the currently used frame size
+		Mosse::Tp::Roi absolute();  ///< Converts normalized to absolute ROI using the currently used frame size
 	};
 private:
 	struct Key {
@@ -45,6 +64,7 @@ private:
 	State state;
 	Key key;
 	Spinlock spinlock;
+	Roi roi;
 };
 
 }  // namespace Trk
