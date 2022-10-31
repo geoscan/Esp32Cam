@@ -106,7 +106,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				spinlock = Spinlock::Wait;
 
 				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
-					// Detach from the current thread to release the buffer
+					// Detach from the current thread to release the buffer (the frame buffer is synchronized w/ a mutex)
 					Ut::Thr::Wq::MediumPriority::getInstance().push(
 						[this, imageWorkingArea]() mutable
 						{
