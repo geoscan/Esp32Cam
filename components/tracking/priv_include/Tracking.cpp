@@ -150,43 +150,10 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
 			bool success;
 
-			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::Initialized>(
-				[&success](bool aInitialized) {
-					success = aInitialized;
-				});
+			success = cameraState.update();
 
 			if (!success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Camera was not initialized"});
-
-				break;
-			}
-
-			success = false;
-			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
-				[this, &success](const std::pair<int, int> &aFrameSize)
-				{
-					cameraState.frameSize = aFrameSize;
-					success = true;
-				});
-
-			if (!success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Unable to get frame size"});
-
-				break;
-			}
-
-			success = false;
-			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
-				[this, &success](const std::tuple<std::uint8_t, const char *> &aFrameFormat)
-				{
-					cameraState.pixformat = std::get<1>(aFrameFormat);
-					success = true;
-				});
-
-			if (!success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Unable to get frame format"});
-
-				break;
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
 			}
 
 			success = roi.initNormalized(roiAbsoluteRchw);
@@ -198,6 +165,8 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 
 				break;
 			}
+
+			// TODO update camera state depending on the current state
 
 			if (stateIsCameraConfigured()) {
 				state = State::TrackerInit;
@@ -248,6 +217,33 @@ Mosse::Tp::Roi Tracking::Roi::absolute()
 	}
 
 	return roi;
+}
+
+bool Tracking::CameraState::update()
+{
+	constexpr int knFieldsExpected = 3;
+	int nfields = 0;
+
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::Initialized>(
+		[&nfields](bool aInitialized) {
+			nfields += static_cast<int>(aInitialized);
+		});
+
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[this, &nfields](const std::pair<int, int> &aFrameSize)
+		{
+			frameSize = aFrameSize;
+			nfields += 1;
+		});
+
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
+		[this, &nfields](const std::tuple<std::uint8_t, const char *> &aFrameFormat)
+		{
+			pixformat = std::get<1>(aFrameFormat);
+			nfields += 1;
+		});
+
+	return nfields == knFieldsExpected;
 }
 
 }  // namespace Trk
