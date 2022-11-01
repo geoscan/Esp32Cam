@@ -34,14 +34,14 @@ Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aM
 			case kTrackingDisable:
 				// Disable event response
 				key.onMosseTrackerUpdate.setEnabled(false);
-				ret = Microservice::Ret::NoResponse;
+				ret = Microservice::Ret::Response;
 
 				break;
 
 			case kTrackingEnablePerFrame:
 				// Enable event response
 				key.onMosseTrackerUpdate.setEnabled(true);
-				ret = Microservice::Ret::NoResponse;
+				ret = Microservice::Ret::Response;
 
 				break;
 
