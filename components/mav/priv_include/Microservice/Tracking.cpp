@@ -17,6 +17,11 @@ Tracking::Tracking() : key{{&Tracking::onMosseTrackerUpdate, this, false}}
 {
 }
 
+Tracking::~Tracking()
+{
+	key.onMosseTrackerUpdate.setEnabled(false);
+}
+
 /// \brief The MAVLink tracking info message ("debug vector") only gets sent, when a tracker emits an event stating
 /// that a frame has been processed successfully. `processSetMessageInterval` enables / disables response to that
 /// event, and sends ACK according to the "command protocol".
