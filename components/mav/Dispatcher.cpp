@@ -33,7 +33,6 @@ Mav::Dispatcher::Dispatcher() :
 
 void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 {
-	// Warn. Do not replace iteration w/ RR's Key<...>::notify(), because locking order matters
 	Bdg::Receiver::notifyAs({Bdg::NamedEndpoint::Mavlink,
 		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }
