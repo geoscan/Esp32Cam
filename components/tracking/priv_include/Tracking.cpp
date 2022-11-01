@@ -202,7 +202,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 	}
 }
 
-/// \brief Initializes relative (`normalized`) ROI from the absolute one, using the current frame size into account
+/// \brief Initializes relative (`normalized`) ROI from the absolute one, taking the current frame size into account
 bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 {
 	constexpr int kUninitialized = 0;
