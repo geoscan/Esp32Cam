@@ -8,6 +8,7 @@
 #include "Tracking.hpp"
 #include "Globals.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
+#include "utility/time.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -57,6 +58,17 @@ Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aM
 	}
 
 	return ret;
+}
+
+/// \brief Emits DEBUG_VECT messages containing info on tracking process
+void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUpdate)
+{
+	mavlink_debug_vect_t mavlinkDebugVect = debugVectMakeFrom(aMosseTrackerUpdate);  // TODO: move to "mav helper" ??
+	mavlink_message_t mavlinkMessage;
+	const auto systemId = Globals::getSysId();
+	const auto compId = Globals::getCompIdTracker();
+	mavlink_msg_debug_vect_encode(systemId, compId, &mavlinkMessage, &mavlinkDebugVect);
+	notify(mavlinkMessage);
 }
 
 }  // namespace Mic
