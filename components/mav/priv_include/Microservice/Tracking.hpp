@@ -30,6 +30,7 @@ public:
 	Ret processRequestMessage(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onHrTimer() override;
+	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
 private:
 	Key key;
 };
