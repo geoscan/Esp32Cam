@@ -7,6 +7,7 @@
 
 #include "Tracking.hpp"
 #include "Globals.hpp"
+#include "Helper/MavlinkCommandLong.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
 #include "utility/time.hpp"
 
@@ -20,6 +21,35 @@ Tracking::Tracking() : key{{&Tracking::onMosseTrackerUpdate, this, false}}
 Tracking::~Tracking()
 {
 	key.onMosseTrackerUpdate.setEnabled(false);
+}
+
+/// \brief Dispatches messages by message type. Decomposition method to make the code more comprehensible.
+Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	auto ret = Ret::Ignored;
+
+	switch (aMessage.msgid) {
+		case MAVLINK_MSG_ID_COMMAND_LONG:  // Falls through
+		case MAVLINK_MSG_ID_COMMAND_INT: {
+			mavlink_command_long_t mavlinkCommandLong = Hlpr::MavlinkCommandLong::makeFrom(aMessage);
+
+			if (mavlinkCommandLong.target_component == Globals::getCompIdTracker()
+					&& mavlinkCommandLong.target_system == Globals::getSysId()) {
+				switch (mavlinkCommandLong.command) {
+					case MAV_CMD_SET_MESSAGE_INTERVAL:
+						ret = processSetMessageInterval(mavlinkCommandLong, aMessage, aOnResponse);
+
+						break;
+
+					default:
+						break;
+				}
+
+			}
+		}
+	}
+
+	return ret;
 }
 
 /// \brief The MAVLink tracking info message ("debug vector") only gets sent, when a tracker emits an event stating
