@@ -136,7 +136,6 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			break;
 		}
 		default:
-			ESP_LOGI(Trk::kDebugTag, "Tracking: Skipping frame");
 			break;
 	}
 }
