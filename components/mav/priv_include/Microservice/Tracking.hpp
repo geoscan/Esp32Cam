@@ -40,7 +40,7 @@ namespace Mic {
 ///   - bits [0; 15] - ROI center, y
 ///   - bits [16, 31] - frame size, y
 /// 'z' - PSR value (Peak-to-Sidelobe ratio, google MOSSE tracker)
-class Tracking final : public Microservice, public Ut::Sys::HrTimer, public Mav::DelayedSend {
+class Tracking final : public Microservice, public Mav::DelayedSend {
 private:
 	/// \brief Event keys
 	struct Key {
@@ -52,7 +52,6 @@ public:
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override;
 	Ret processRequestMessage(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
-	void onHrTimer() override;
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
 private:
 	Key key;

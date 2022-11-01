@@ -10,7 +10,7 @@
 namespace Mav {
 namespace Mic {
 
-Tracking::Tracking() : HrTimer{ESP_TIMER_TASK, "MavTracking", true}, key{{&Tracking::onMosseTrackerUpdate, this}}
+Tracking::Tracking() : key{{&Tracking::onMosseTrackerUpdate, this, false}}
 {
 }
 
