@@ -43,6 +43,11 @@ public:
 		return MAV_COMP_ID_CAMERA;
 	}
 
+	static constexpr unsigned char getCompIdTracker()
+	{
+		return MAV_COMP_ID_CAMERA2;
+	}
+
 	template <class TmavlinkMessage>
 	static constexpr std::size_t getMaxMessageLength()
 	{
