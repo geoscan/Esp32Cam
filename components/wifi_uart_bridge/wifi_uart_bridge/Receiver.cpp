@@ -175,7 +175,7 @@ void Receiver::notifyAsImpl(ReceiverImpl::Route aRoute, NotifyCtx aCtx)
 						"forwarded, initializing new notification cycle...");
 					notifyAsImpl(aRoute, {reduced, outBuffer, outRespondCb});
 				}
-			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // A receiver either slices buffer or leaves it unscathed. In the former case, it will be notified until the buffer is sliced to `size()==0`
+			} while (bufferSlice.size() > 0 && bufferSlice.data() != aCtx.buffer.data());  // A receiver either slices buffer, replaces it, or leaves unscathed. In the former case, it will be notified until the buffer is sliced to `size()==0`
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl, "finished forwarding");
 		} else {
 			GS_UTILITY_LOGV_METHOD(Bdg::kDebugTag, Receiver, notifyAsImpl,
