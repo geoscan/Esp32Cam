@@ -56,6 +56,8 @@ public:
 	}
 
 	/// \brief Notifies subscribers upon a module field's change
+	///
+	/// \details Notifying subscribers is a responsibility of the module implementing the API.
 	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
 
 	template <Module Im, Fld::Field If>
