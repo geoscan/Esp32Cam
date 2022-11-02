@@ -137,14 +137,25 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 	return Ret::Response;
 }
 
+/// \brief Stops tracking, if any takes place
 Microservice::Ret Tracking::processCmdCameraStopTracking(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	(void)aMavlinkCommandLong;
-	(void)aMessage;
-	(void)aOnResponse;
+	auto result = MAV_RESULT_FAILED;
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Initialized>(false,
+		[&result](Mod::Fld::WriteResp aResp) mutable
+		{
+			if (aResp.isOk()) {
+				result = MAV_RESULT_ACCEPTED;
+			}
+		});
+	{
+		auto ack = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, result);
+		ack.packInto(aMessage, Globals::getCompIdTracker());
+		aOnResponse(aMessage);
+	}
 
-	return Ret::Ignored;
+	return Ret::Response;
 }
 
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
