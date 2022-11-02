@@ -38,7 +38,7 @@ Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::O
 					&& mavlinkCommandLong.target_system == Globals::getSysId()) {
 				switch (mavlinkCommandLong.command) {
 					case MAV_CMD_SET_MESSAGE_INTERVAL:
-						ret = processSetMessageInterval(mavlinkCommandLong, aMessage, aOnResponse);
+						ret = processCmdSetMessageInterval(mavlinkCommandLong, aMessage, aOnResponse);
 
 						break;
 
@@ -56,7 +56,7 @@ Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::O
 /// \brief The MAVLink tracking info message ("debug vector") only gets sent, when a tracker emits an event stating
 /// that a frame has been processed successfully. `processSetMessageInterval` enables / disables response to that
 /// event, and sends ACK according to the "command protocol".
-Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aMavlinkCommandLong,
+Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	auto ret = Microservice::Ret::Ignored;
