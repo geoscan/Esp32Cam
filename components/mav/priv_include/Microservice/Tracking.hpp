@@ -59,7 +59,6 @@ private:
 	/// \brief Event keys
 	struct Key {
 		Sub::Trk::OnMosseTrackerUpdate onMosseTrackerUpdate;
-		Sub::Mod::OnModuleFieldUpdate onModuleFieldUpdate;
 	};
 
 	/// \brief Relevant cached parts of the camera's state (configuration)
@@ -80,7 +79,6 @@ public:
 	Ret processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
-	void onModuleFieldUpdate(typename Sub::Mod::OnModuleFieldUpdate::Arg<0>);
 private:
 	Key key;
 	CameraState cameraState;
