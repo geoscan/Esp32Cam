@@ -16,7 +16,7 @@ namespace Mod {
 
 /// \brief A part of module API. This event gets triggered each time a module's field is successfully updated as a
 /// result of a set request. \sa `Mod::ModuleBase`.
-using OnModuleFieldSetUpdate = IndKey<void(const ::Mod::Fld::ModuleField &)>;
+using OnModuleFieldUpdate = IndKey<void(const ::Mod::Fld::ModuleField &)>;
 
 }  // namespace Mod
 }  // namespace Sub
