@@ -98,46 +98,12 @@ Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aM
 /// \brief Emits DEBUG_VECT messages containing info on tracking process
 void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUpdate)
 {
-	mavlink_debug_vect_t mavlinkDebugVect = debugVectMakeFrom(aMosseTrackerUpdate);  // TODO: move to "mav helper" ??
+	mavlink_debug_vect_t mavlinkDebugVect{};
 	mavlink_message_t mavlinkMessage;
 	const auto systemId = Globals::getSysId();
 	const auto compId = Globals::getCompIdTracker();
 	mavlink_msg_debug_vect_encode(systemId, compId, &mavlinkMessage, &mavlinkDebugVect);
 	notify(mavlinkMessage);
-}
-
-/// \brief Constructs `mavlink_debug_vect_t` instance according to the description provided in (\see
-/// `Microservice::Tracking`)
-mavlink_debug_vect_t Tracking::debugVectMakeFrom(const Sub::Trk::MosseTrackerUpdate &aOnMosseTrackerUpdate)
-{
-	union FieldMap {
-		struct {
-			// Center
-			std::uint16_t coord;
-			// Roi size along the dimension
-			std::uint16_t size;
-		} decomposed __attribute__((packed));
-		float f32;
-		static_assert(sizeof(decomposed) == sizeof(float), "");
-	};
-
-	mavlink_debug_vect_t mavlinkDebugVect;
-	mavlinkDebugVect.time_usec = Ut::bootTimeUs();
-	{
-		FieldMap fieldMap;
-		fieldMap.decomposed.coord = aOnMosseTrackerUpdate.roiX + aOnMosseTrackerUpdate.roiWidth / 2;
-		fieldMap.decomposed.size = aOnMosseTrackerUpdate.frameWidth;
-		mavlinkDebugVect.x = fieldMap.f32;
-	}
-	{
-		FieldMap fieldMap;
-		fieldMap.decomposed.coord = aOnMosseTrackerUpdate.roiY + aOnMosseTrackerUpdate.roiHeight / 2;
-		fieldMap.decomposed.size = aOnMosseTrackerUpdate.frameHeight;
-		mavlinkDebugVect.y = fieldMap.f32;
-	}
-	mavlinkDebugVect.z = aOnMosseTrackerUpdate.psr;  // TODO: clamp PSR
-
-	return mavlinkDebugVect;
 }
 
 }  // namespace Mic
