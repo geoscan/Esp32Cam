@@ -268,8 +268,7 @@ void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback 
 
 		case Fld::Field::FrameFormat: {
 			if (status.initialized) {
-				aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameFormat>(status.pixformat,
-					pixformatToStr(status.pixformat)));
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameFormat>(pixformatToStr(status.pixformat)));
 			}
 
 			break;
