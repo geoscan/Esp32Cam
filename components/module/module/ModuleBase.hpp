@@ -55,6 +55,9 @@ public:
 		return identity.type;
 	}
 
+	/// \brief Notifies subscribers upon a module field's change
+	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
+
 	template <Module Im, Fld::Field If>
 	using Field = typename Fld::GetType<If, Im>::Type;
 
