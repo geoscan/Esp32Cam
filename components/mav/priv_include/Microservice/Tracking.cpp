@@ -137,6 +137,16 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 	return Ret::Response;
 }
 
+Microservice::Ret Tracking::processCmdCameraStopTracking(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	(void)aMavlinkCommandLong;
+	(void)aMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
+}
+
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
 void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUpdate)
 {
