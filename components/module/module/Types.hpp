@@ -139,8 +139,23 @@ struct WriteResp {
 	constexpr WriteResp(RequestResult::Result aRes, const char *aErrorMessage) : result{aRes}, errorMessage{aErrorMessage}
 	{
 	}
-
 };
+
+/// \brief Stores the value of a field, and its unique composite identifier. \sa `Sub::Mod::OnModuleFieldSetUpdate`
+struct ModuleField {
+	// Unique identifier
+	Module module;
+	Field field;
+	// Value storage
+	Mod::Fld::FieldVariant variant;
+
+	template <Mod::Module M, Mod::Fld::Field F>
+	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked()
+	{
+		return variant.template getUnchecked<M, F>();
+	}
+};
+
 
 using OnWriteResponseCallback = typename std::function<void(WriteResp)>;
 
