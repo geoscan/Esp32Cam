@@ -16,11 +16,7 @@
 namespace Mav {
 namespace Mic {
 
-Tracking::Tracking() :
-	key{
-		{&Tracking::onMosseTrackerUpdate, this, false},
-		{&Tracking::onModuleFieldUpdate, this, true}
-	}
+Tracking::Tracking() : key{{&Tracking::onMosseTrackerUpdate, this, false}}
 {
 }
 
