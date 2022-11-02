@@ -67,7 +67,7 @@ public:
 		OnResponseSignature aOnResponse);
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
 private:
-	static mavlink_debug_vect_t debugVectMakeFrom(const Sub::Trk::MosseTrackerUpdate &aOnosseTrackerUpdate);
+	static mavlink_debug_vect_t debugVectMakeFrom(const Sub::Trk::MosseTrackerUpdate &aOnMosseTrackerUpdate);
 private:
 	Key key;
 };
