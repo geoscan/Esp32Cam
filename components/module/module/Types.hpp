@@ -76,14 +76,8 @@ template <Module I> struct GetType<Field::VersionSoftwareMinor, I> : StoreType<u
 template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
-template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<std::tuple<std::uint8_t, const char *>> {};  ///< (identifier, human-readable name)
+template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
-
-/// \brief Compile-time selector of field types for set operations.
-///
-/// \details Enables overriding of field types for get and set operations.
-template <Field F, Module M = Module::All> struct SetType : GetType<F, M> {};
-template <> struct SetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};
 
 /// \brief Variant type operating as the storage for the aforementioned types.
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
@@ -104,9 +98,9 @@ struct SetFieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
 
 	template <Module M, Field F>
-	const typename SetType<F, M>::Type &getUnchecked()
+	const typename GetType<F, M>::Type &getUnchecked()
 	{
-		return FieldVariantBase::get_unchecked<typename SetType<F, M>::Type>();
+		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
 	}
 };
 
