@@ -13,6 +13,7 @@
 #define SUB_INCLUDE_SUB_SYS_HPP_
 
 #include "Types.hpp"
+#include "utility/thr/Semaphore.hpp"
 #include <Rr/Util/Module.hpp>
 #include <mutex>
 #include <list>
