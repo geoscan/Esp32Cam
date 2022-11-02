@@ -88,7 +88,7 @@ struct FieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
 
 	template <Module M, Field F>
-	const typename GetType<F, M>::Type &getUnchecked()
+	const typename GetType<F, M>::Type &getUnchecked() const
 	{
 		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
 	}
@@ -154,12 +154,12 @@ struct ModuleField {
 	Module module;
 	Field field;
 	// Value storage
-	Mod::Fld::FieldVariant variant;
+	Mod::Fld::FieldVariant fieldVariant;
 
 	template <Mod::Module M, Mod::Fld::Field F>
-	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked()
+	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked() const
 	{
-		return variant.template getUnchecked<M, F>();
+		return fieldVariant.template getUnchecked<M, F>();
 	}
 
 	/// \brief Infers the underlying type and constructs an instance
