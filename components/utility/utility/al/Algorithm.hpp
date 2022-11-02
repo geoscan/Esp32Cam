@@ -27,13 +27,26 @@ bool in(const T &object, const Args &...values)
 
 /// \brief Normalizes the value
 /// \tparam T Input value type
-/// \tparam O Output value type (float or double)
+/// \tparam O Output value type
 template <typename T, typename O = float>
 O normalize(T val, T from, T to)
 {
 	assert(to - from > std::numeric_limits<float>::epsilon());
 
 	return static_cast<O>(val - from) / static_cast<O>(to - from);
+}
+
+/// \brief Fits the value in a specified range
+/// \tparam T Input value type
+/// \tparam O Output value type
+template <typename T, typename O = T>
+O clamp(T val, T from, T to)
+{
+	assert(to - from > std::numeric_limits<float>::epsilon());
+
+	return static_cast<O>(val) < static_cast<O>(from) ? static_cast<O>(from) :
+		static_cast<O>(val) > static_cast<O>(to) ? to :
+		val;
 }
 
 }  // namespace Al
