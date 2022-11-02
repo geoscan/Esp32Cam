@@ -148,14 +148,14 @@ void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUp
 	notify(mavlinkMessage);
 }
 
-void Tracking::onModuleFieldUpdate(typename Sub::Mod::OnModuleFieldUpdate::Arg<0> aFrameSize)
+void Tracking::CameraState::fetch()
 {
-	if (aFrameSize.field == Mod::Fld::Field::FrameSize && aFrameSize.module == Mod::Module::Camera) {
-		cameraState.frameWidth = std::get<0>(aFrameSize.fieldVariant.getUnchecked<Mod::Module::Camera,
-			Mod::Fld::Field::FrameSize>());
-		cameraState.frameHeight = std::get<1>(aFrameSize.fieldVariant.getUnchecked<Mod::Module::Camera,
-			Mod::Fld::Field::FrameSize>());
-	}
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[this](std::pair<int, int> aFrameSize)
+		{
+			frameWidth = std::get<0>(aFrameSize);
+			frameHeight = std::get<1>(aFrameSize);
+		});
 }
 
 }  // namespace Mic

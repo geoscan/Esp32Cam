@@ -65,10 +65,18 @@ private:
 	struct CameraState {
 		int frameWidth = 0;
 		int frameHeight = 0;
-		inline void isInitialized() const
+		inline bool isInitialized() const
 		{
 			return frameWidth != 0 && frameHeight != 0;
 		}
+		/// \brief Flushes the cached state
+		inline void reset()
+		{
+			frameWidth = 0;
+			frameHeight = 0;
+		}
+		/// \brief Renews the cached state
+		void fetch();
 	};
 public:
 	Tracking();
