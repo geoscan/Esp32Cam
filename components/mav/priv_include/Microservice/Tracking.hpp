@@ -13,6 +13,7 @@
 #include "utility/system/HrTimer.hpp"
 #include "utility/cont/CircularBuffer.hpp"
 #include "sub/Tracking.hpp"
+#include "sub/Module.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -58,6 +59,13 @@ private:
 	/// \brief Event keys
 	struct Key {
 		Sub::Trk::OnMosseTrackerUpdate onMosseTrackerUpdate;
+		Sub::Mod::OnModuleFieldUpdate onModuleFieldUpdate;
+	};
+
+	/// \brief Relevant cached parts of the camera's state (configuration)
+	struct CameraState {
+		int frameWidth;
+		int frameHeight;
 	};
 public:
 	Tracking();
@@ -68,8 +76,10 @@ public:
 	Ret processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
+	void onModuleFieldUpdate(typename Sub::Mod::OnModuleFieldUpdate::Arg<0>);
 private:
 	Key key;
+	CameraState cameraState;
 };
 
 }  // namespace Mic
