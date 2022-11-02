@@ -102,6 +102,7 @@ void Ov2640::init()
 	// Guardrails to prevent buffer allocation failures
 	if (cameraConfig.frame_size >= resolutionLimit) {
 		cameraConfig.frame_size = static_cast<framesize_t>(resolutionLimit - 1);
+		notifyFieldAsync({Mod::Module::Camera, Mod::Fld::Field::FrameSize, kFrameSizeModeMap[cameraConfig.frame_size]});
 	}
 
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
@@ -307,6 +308,7 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 					} else {
 						aCb({Mod::Fld::RequestResult::Ok});
 						reinit();
+						notifyFieldAsync({Mod::Module::Camera, Mod::Fld::Field::FrameSize, {frameSize}});
 					}
 				} else {
 					aCb({Mod::Fld::RequestResult::OutOfRange});
@@ -328,7 +330,6 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 				if (strcmp(std::get<1>(format), frameFormatStr) == 0) {
 					status.pixformat = std::get<0>(format);
 					aCb({Mod::Fld::RequestResult::Ok});
-					// TODO: automatically change aspect ratio for grayscale
 					reinit();
 					return;
 				}
