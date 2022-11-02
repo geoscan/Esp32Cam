@@ -33,6 +33,26 @@ namespace Mic {
 /// 	- Used as per the protocol
 /// - CAMERA_TRACKING_IMAGE_STATUS (https://mavlink.io/en/messages/common.html#CAMERA_TRACKING_IMAGE_STATUS)
 /// 	- Used as per the protocol
+/// - MAV_CMD_SET_MESSAGE_INTERVAL (https://mavlink.io/en/messages/common.html#MAV_CMD_SET_MESSAGE_INTERVAL)
+/// 	- `param2`: only `-1` and `0` values are supported
+/// 		- `-1` - Do not track
+/// 		- `0` - Send message on every frame
+/// - MAV_CMD_ACK (https://mavlink.io/en/messages/common.html#MAV_CMD_ACK)
+/// 	- Used as per the protocol
+///
+/// Sequence to start tracking:
+/// - Client sends MAV_CMD_CAMERA_TRACK_RECTANGLE
+/// - Tracker responds MAV_CMD_ACK
+/// - Tracker starts sending CAMERA_TRACKING_IMAGE_STATUS
+///
+/// Sequence to stop tracking:
+/// - Cilent sends MAV_CMD_CAMERA_STOP_TRACKING
+/// - Tracker responds MAV_CMD_ACK
+/// - Tracker stops sending CAMERA_TRACKING_IMAGE_STATUS, if it has not already been disabled
+///
+/// Sequence to control the flow of CAMERA_TRACKING_IMAGE_STATUS messages
+/// - Client sends MAV_CMD_SET_MESSAGE_INTERVAL
+/// - Tracker adjusts frequency appropriately
 class Tracking final : public Microservice, public Mav::DelayedSend {
 private:
 	/// \brief Event keys
