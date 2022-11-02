@@ -64,8 +64,12 @@ private:
 
 	/// \brief Relevant cached parts of the camera's state (configuration)
 	struct CameraState {
-		int frameWidth;
-		int frameHeight;
+		int frameWidth = 0;
+		int frameHeight = 0;
+		inline void isInitialized() const
+		{
+			return frameWidth != 0 && frameHeight != 0;
+		}
 	};
 public:
 	Tracking();
