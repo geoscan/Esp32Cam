@@ -94,16 +94,6 @@ struct FieldVariant : public FieldVariantBase {
 	}
 };
 
-struct SetFieldVariant : public FieldVariantBase {
-	using FieldVariantBase::FieldVariantBase;
-
-	template <Module M, Field F>
-	const typename GetType<F, M>::Type &getUnchecked()
-	{
-		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
-	}
-};
-
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
@@ -118,7 +108,7 @@ using OnResponseCallback = typename std::function<void(Resp)>;
 
 struct WriteReq {
 	Field field;  ///< Requested field
-	SetFieldVariant variant;
+	FieldVariant variant;
 };
 
 struct RequestResult {
