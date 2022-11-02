@@ -102,7 +102,6 @@ void Ov2640::init()
 	// Guardrails to prevent buffer allocation failures
 	if (cameraConfig.frame_size >= resolutionLimit) {
 		cameraConfig.frame_size = static_cast<framesize_t>(resolutionLimit - 1);
-		notifyFieldAsync({Mod::Module::Camera, Mod::Fld::Field::FrameSize, kFrameSizeModeMap[cameraConfig.frame_size]});
 	}
 
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
@@ -308,7 +307,6 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 					} else {
 						aCb({Mod::Fld::RequestResult::Ok});
 						reinit();
-						notifyFieldAsync({Mod::Module::Camera, Mod::Fld::Field::FrameSize, {frameSize}});
 					}
 				} else {
 					aCb({Mod::Fld::RequestResult::OutOfRange});
