@@ -105,7 +105,36 @@ Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t 
 Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	return Ret::NoResponse;
+	auto result = MAV_RESULT_ACCEPTED;
+
+	if (!cameraState.isInitialized()) {
+		cameraState.fetch();
+		const auto topLeftX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param1, 0,
+			cameraState.frameWidth));
+		const auto topLeftY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param2, 0,
+			cameraState.frameHeight));
+		const auto bottomRightX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param3, 0,
+			cameraState.frameWidth));
+		const auto bottomRightY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param4, 0,
+			cameraState.frameHeight));
+		std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY, static_cast<std::uint16_t>(bottomRightX - topLeftX),
+			static_cast<std::uint16_t>(bottomRightY - topLeftY)}};
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
+			[&result](Mod::Fld::WriteResp aResp) mutable
+			{
+				if (!aResp.isOk()) {
+					result = MAV_RESULT_FAILED;
+				}
+			});
+	}
+
+	{
+		auto ack = Hlpr::MavlinkCommandAck::makeFrom(aMessage, aMavlinkCommandLong.command, result);
+		ack.packInto(aMessage, Globals::getCompIdTracker());
+		aOnResponse(aMessage);
+	}
+
+	return Ret::Response;
 }
 
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
