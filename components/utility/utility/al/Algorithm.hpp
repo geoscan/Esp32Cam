@@ -10,6 +10,8 @@
 
 #include <array>
 #include <algorithm>
+#include <cassert>
+#include <numeric>
 
 namespace Ut {
 namespace Al {
@@ -21,6 +23,17 @@ bool in(const T &object, const Args &...values)
 	std::array<bool, sizeof...(values)> comparisons{{(object == values)...}};
 
 	return std::any_of(comparisons.begin(), comparisons.end(), [](bool f){return f;});
+}
+
+/// \brief Normalizes the value
+/// \tparam T Input value type
+/// \tparam O Output value type (float or double)
+template <typename T, typename O = float>
+O normalize(T val, T from, T to)
+{
+	assert(to - from > std::numeric_limits<float>::epsilon());
+
+	return static_cast<O>(val - from) / static_cast<O>(to - from);
 }
 
 }  // namespace Al
