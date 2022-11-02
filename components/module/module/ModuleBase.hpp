@@ -56,11 +56,6 @@ public:
 		return identity.type;
 	}
 
-	/// \brief Notifies subscribers upon a module field's change
-	///
-	/// \details Notifying subscribers is a responsibility of the module implementing the API.
-	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
-
 	template <Module Im, Fld::Field If>
 	using Field = typename Fld::GetType<If, Im>::Type;
 
@@ -109,6 +104,15 @@ protected:
 
 	/// \brief Asynchronous setter, subject to implementation.
 	virtual void setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb);
+private:
+
+	///\brief Notifies subscribers upon a module field's change
+	///
+	/// \details Notifying subscribers is a responsibility of the module implementing the API.
+	///
+	/// \note It's been decided to not to use it yet. However, it has not been scrapped either, because
+	/// it may turn out to be useful at some point in the future. Hence the placement in the `private` section
+	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
 private:
 	struct {
 		Module type;
