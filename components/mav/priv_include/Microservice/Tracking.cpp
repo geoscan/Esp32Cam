@@ -42,6 +42,11 @@ Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::O
 
 						break;
 
+					case  MAV_CMD_CAMERA_TRACK_RECTANGLE:
+						ret = processCmdCameraTrackRectangle(mavlinkCommandLong, aMessage, aOnResponse);
+
+						break;
+
 					default:
 						break;
 				}
@@ -94,6 +99,16 @@ Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t 
 	}
 
 	return ret;
+}
+
+Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong,
+	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+{
+	(void)aMavlinkCommandLong;
+	(void)aMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
 }
 
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
