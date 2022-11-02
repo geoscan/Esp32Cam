@@ -263,9 +263,9 @@ bool Tracking::CameraState::snapshotInit()
 		});
 
 	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
-		[this, &nfields](const std::tuple<std::uint8_t, const char *> &aFrameFormat)
+		[this, &nfields](const char *aFrameFormat)
 		{
-			snapshot.pixformat = std::get<1>(aFrameFormat);
+			snapshot.pixformat = aFrameFormat;
 			nfields += 1;
 		});
 
