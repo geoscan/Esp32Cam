@@ -63,21 +63,21 @@ Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aM
 	constexpr int kTrackingEnablePerFrame = 0;  // Default frequency (https://mavlink.io/en/messages/common.html#MAV_CMD_SET_MESSAGE_INTERVAL)
 	auto result = MAV_RESULT_ACCEPTED;
 
-	if (static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_DEBUG_VECT
+	if (static_cast<int>(aMavlinkCommandLong.param1) == MAVLINK_MSG_ID_CAMERA_TRACKING_IMAGE_STATUS
 			&& aMavlinkCommandLong.target_component == Globals::getCompIdTracker()
 			&& aMavlinkCommandLong.target_system == Globals::getSysId()) {
+		ret = Microservice::Ret::Response;
+
 		switch (static_cast<int>(aMavlinkCommandLong.param2)) {
 			case kTrackingDisable:
 				// Disable event response
 				key.onMosseTrackerUpdate.setEnabled(false);
-				ret = Microservice::Ret::Response;
 
 				break;
 
 			case kTrackingEnablePerFrame:
 				// Enable event response
 				key.onMosseTrackerUpdate.setEnabled(true);
-				ret = Microservice::Ret::Response;
 
 				break;
 
