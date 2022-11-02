@@ -65,6 +65,8 @@ public:
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override;
 	Ret processCmdSetMessageInterval(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
+	Ret processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+		OnResponseSignature aOnResponse);
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
 private:
 	Key key;
