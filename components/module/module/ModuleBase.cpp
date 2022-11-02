@@ -25,7 +25,7 @@ void ModuleBase::notifyFieldAsync(const Fld::ModuleField &moduleField)
 		Ut::Thr::Wq::MediumPriority::getInstance().push(
 			[moduleField]()
 			{
-				Sub::Mod::OnModuleFieldSetUpdate::notify(moduleField);
+				Sub::Mod::OnModuleFieldUpdate::notify(moduleField);
 			});
 	}
 }
