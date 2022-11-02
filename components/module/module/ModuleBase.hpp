@@ -46,6 +46,10 @@ class ModuleBase :
 public:
 	ModuleBase(Module aModule);
 	virtual ~ModuleBase() = default;
+
+	/// \brief A distributed module is identified w/ an enum entry.
+	///
+	/// \note A necessity to distinguish modules by their IDs may arise.
 	inline Module getModule() const
 	{
 		return identity.type;
@@ -54,6 +58,8 @@ public:
 	template <Module Im, Fld::Field If>
 	using Field = typename Fld::GetType<If, Im>::Type;
 
+	/// \brief Iterates through registered modules and forwards the request to update a field. The requestor is
+	/// notified through use of a callback (`aCb`)
 	template <Module Im, Fld::Field If>
 	static void moduleFieldWriteIter(const typename Fld::GetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
 	{
@@ -64,6 +70,8 @@ public:
 		}
 	}
 
+	/// \brief Iterates through registered modules and forwards the request to get a field. The requestor is notified
+	/// through use of a callback (`aCb`)
 	template <Module Im, Fld::Field If>
 	static void moduleFieldReadIter(std::function<void(typename Fld::GetType<If, Im>::Type)> aCb)
 	{
@@ -82,15 +90,19 @@ public:
 	}
 
 protected:
+	/// \brief Helper constructor that initializes the "field variant" of a `Fld::Resp` instance.
+	/// \sa `Mod::Fld::GetType`
 	template <Module Im, Fld::Field If, class ...Ts>
 	typename Fld::Resp makeResponse(Ts &&...aValue)
 	{
 		return typename Fld::Resp{typename Fld::template GetType<If, Im>::Type{std::forward<Ts>(aValue)...}};
 	}
 
+	/// \brief Asynchronous getter, subject to implementation.
 	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);
-	virtual void setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb);
 
+	/// \brief Asynchronous setter, subject to implementation.
+	virtual void setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb);
 private:
 	struct {
 		Module type;
