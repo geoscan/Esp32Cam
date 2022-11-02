@@ -11,11 +11,16 @@
 #include "Helper/MavlinkCommandAck.hpp"
 #include "utility/time.hpp"
 #include "utility/al/Algorithm.hpp"
+#include "module/ModuleBase.hpp"
 
 namespace Mav {
 namespace Mic {
 
-Tracking::Tracking() : key{{&Tracking::onMosseTrackerUpdate, this, false}}
+Tracking::Tracking() :
+	key{
+		{&Tracking::onMosseTrackerUpdate, this, false},
+		{&Tracking::onModuleFieldUpdate, this, true}
+	}
 {
 }
 
@@ -104,11 +109,7 @@ Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t 
 Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	(void)aMavlinkCommandLong;
-	(void)aMessage;
-	(void)aOnResponse;
-
-	return Ret::Ignored;
+	return Ret::NoResponse;
 }
 
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
@@ -149,6 +150,16 @@ void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUp
 		&mavlinkCameraTrackingImageStatus);
 	// Send
 	notify(mavlinkMessage);
+}
+
+void Tracking::onModuleFieldUpdate(typename Sub::Mod::OnModuleFieldUpdate::Arg<0> aFrameSize)
+{
+	if (aFrameSize.field == Mod::Fld::Field::FrameSize && aFrameSize.module == Mod::Module::Camera) {
+		cameraState.frameWidth = std::get<0>(aFrameSize.fieldVariant.getUnchecked<Mod::Module::Camera,
+			Mod::Fld::Field::FrameSize>());
+		cameraState.frameHeight = std::get<1>(aFrameSize.fieldVariant.getUnchecked<Mod::Module::Camera,
+			Mod::Fld::Field::FrameSize>());
+	}
 }
 
 }  // namespace Mic
