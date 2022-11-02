@@ -10,6 +10,7 @@
 #include "Helper/MavlinkCommandLong.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
 #include "utility/time.hpp"
+#include "utility/al/Algorithm.hpp"
 
 namespace Mav {
 namespace Mic {
@@ -95,14 +96,43 @@ Microservice::Ret Tracking::processSetMessageInterval(mavlink_command_long_t &aM
 	return ret;
 }
 
-/// \brief Emits DEBUG_VECT messages containing info on tracking process
+/// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
 void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUpdate)
 {
-	mavlink_debug_vect_t mavlinkDebugVect{};
+	mavlink_camera_tracking_image_status_t mavlinkCameraTrackingImageStatus{};
+	// Init the message
+	mavlinkCameraTrackingImageStatus.rec_bottom_x = Ut::Al::normalize(aMosseTrackerUpdate.roiX, 0,
+		aMosseTrackerUpdate.frameWidth);
+	mavlinkCameraTrackingImageStatus.rec_bottom_y = Ut::Al::normalize(aMosseTrackerUpdate.roiY, 0,
+		aMosseTrackerUpdate.frameHeight);
+	mavlinkCameraTrackingImageStatus.rec_top_x = Ut::Al::normalize(aMosseTrackerUpdate.roiX
+		+ aMosseTrackerUpdate.roiWidth, 0, aMosseTrackerUpdate.frameWidth);
+	mavlinkCameraTrackingImageStatus.rec_top_y = Ut::Al::normalize(aMosseTrackerUpdate.roiY
+		+ aMosseTrackerUpdate.roiHeight, 0, aMosseTrackerUpdate.frameHeight);
+	mavlinkCameraTrackingImageStatus.rec_bottom_x = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_bottom_x, 0.0f,
+		1.0f);
+	mavlinkCameraTrackingImageStatus.rec_bottom_y = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_bottom_y, 0.0f,
+		1.0f);
+	mavlinkCameraTrackingImageStatus.rec_top_x = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_top_x, 0.0f, 1.0f);
+	mavlinkCameraTrackingImageStatus.rec_bottom_x = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_bottom_x, 0.0f,
+		1.0f);
+	mavlinkCameraTrackingImageStatus.rec_bottom_y = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_bottom_y, 0.0f,
+		1.0f);
+	mavlinkCameraTrackingImageStatus.rec_top_y = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_top_y, 0.0f, 1.0f);
+	// TODO PSR to infer tracking status
+	mavlinkCameraTrackingImageStatus.tracking_status = CAMERA_TRACKING_STATUS_FLAGS_ACTIVE;
+	mavlinkCameraTrackingImageStatus.tracking_mode = CAMERA_TRACKING_MODE_RECTANGLE;
+	mavlinkCameraTrackingImageStatus.target_data = CAMERA_TRACKING_TARGET_DATA_IN_STATUS;
+	mavlinkCameraTrackingImageStatus.point_x = std::numeric_limits<float>::quiet_NaN();
+	mavlinkCameraTrackingImageStatus.point_y = std::numeric_limits<float>::quiet_NaN();
+	mavlinkCameraTrackingImageStatus.radius = std::numeric_limits<float>::quiet_NaN();
+	// Pack the message
 	mavlink_message_t mavlinkMessage;
 	const auto systemId = Globals::getSysId();
 	const auto compId = Globals::getCompIdTracker();
-	mavlink_msg_debug_vect_encode(systemId, compId, &mavlinkMessage, &mavlinkDebugVect);
+	mavlink_msg_camera_tracking_image_status_encode(systemId, compId, &mavlinkMessage,
+		&mavlinkCameraTrackingImageStatus);
+	// Send
 	notify(mavlinkMessage);
 }
 
