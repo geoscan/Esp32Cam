@@ -63,7 +63,7 @@ public:
 	Tracking();
 	~Tracking();
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override;
-	Ret processSetMessageInterval(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
+	Ret processCmdSetMessageInterval(mavlink_command_long_t &aMavlinkCommandLong, mavlink_message_t &aMessage,
 		OnResponseSignature aOnResponse);
 	void onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate);
 private:
