@@ -92,6 +92,13 @@ struct FieldVariant : public FieldVariantBase {
 	{
 		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
 	}
+
+	/// \brief Infers the underlying type and constructs an instance
+	template <Module M, Field F, class ...Ts>
+	static inline FieldVariant make(Ts &&...aArgs)
+	{
+		return FieldVariant{M, F, typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
+	}
 };
 
 /// \brief Encapsulates responses produced by a module.
@@ -153,6 +160,13 @@ struct ModuleField {
 	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked()
 	{
 		return variant.template getUnchecked<M, F>();
+	}
+
+	/// \brief Infers the underlying type and constructs an instance
+	template <Module M, Field F, class ...Ts>
+	static inline Module make(Ts &&...aArgs)
+	{
+		return Module{M, F, typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
 	}
 };
 
