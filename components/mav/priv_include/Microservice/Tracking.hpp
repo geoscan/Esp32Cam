@@ -19,27 +19,20 @@ namespace Mic {
 
 /// \brief Provides MAVLink API to the tracking functionality.
 ///
-/// \details MAVLink protocol provides relevant messages for interfacing w/ a tracking implementor. However, as per
-/// 2022-11-01, its API is unstable (WIP), and its use is discrouraged.
+/// \note By 2022-11-02, MAVLink tracking functionality is still WIP. However, I've been told that tracking-related
+/// messages are here to stay.
+/// Link 1: https://github.com/mavlink/mavlink/issues/1669
+/// Link 2: https://groups.google.com/g/mavlink/c/riVSIkXLek0
+/// This API is not 100% stable, but no major changes are expected in it.
+/// Dmtiry Murashov
 ///
-/// The following messages are used for tracking control:
-///
-/// MAV_CMD_SET_MESSAGE_INTERVAL (https://mavlink.io/en/messages/common.html#MAV_CMD_SET_MESSAGE_INTERVAL)
-/// Parameters:
-/// `param 1` - Message ID - id of the message. Should be 250 (DEBUG_VECT)
-/// `param 2` - Interval.
-///    - `-1` for disabling the tracker
-///    - `0` for sending the message on a per-frame basis
-///
-/// DEBUG_VECT(https://mavlink.io/en/messages/common.html#DEBUG_VECT)
-/// `time_usec` - as per protocol
-/// `x` - packed field containing 2 x u16 values
-///   - bits [0; 15] - ROI center, x
-///   - bits [16; 32] - frame size, x
-/// 'y' - packed field containing 2 x u16 values
-///   - bits [0; 15] - ROI center, y
-///   - bits [16, 31] - frame size, y
-/// 'z' - PSR value (Peak-to-Sidelobe ratio, google MOSSE tracker)
+/// \details The following messages are implemented:
+/// - MAV_CMD_CAMERA_TRACK_RECTANGLE (https://mavlink.io/en/messages/common.html#MAV_CMD_CAMERA_TRACK_RECTANGLE)
+/// 	-  Used as per the protocol
+/// - MAV_CMD_CAMERA_STOP_TRACKING (https://mavlink.io/en/messages/common.html#MAV_CMD_CAMERA_TRACK_RECTANGLE)
+/// 	- Used as per the protocol
+/// - CAMERA_TRACKING_IMAGE_STATUS (https://mavlink.io/en/messages/common.html#CAMERA_TRACKING_IMAGE_STATUS)
+/// 	- Used as per the protocol
 class Tracking final : public Microservice, public Mav::DelayedSend {
 private:
 	/// \brief Event keys
