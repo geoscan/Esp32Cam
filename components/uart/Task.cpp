@@ -59,14 +59,14 @@ void Task::taskRead()
 					swap.pushFull(buffer);
 				} else {
 					swap.pushFree(buffer);
-					Ut::waitMs(20);
+					vTaskDelay(1);
 				}
 
 				GS_UTILITY_LOG_EVERY_N_TURNS(100, GS_UTILITY_LOGD_CLASS_ASPECT(Uart::kDebugTag, Uart::Task,
 					LogAspect::BufferManagement, "free buffers %d", swap.swap.countFree());)
 			} else {
 				ESP_LOGW(Uart::kDebugTag, "taskRead(): Could not pop a free buffer");
-				Ut::waitMs(20);
+				vTaskDelay(1);
 			}
 		}
 	}
@@ -91,8 +91,9 @@ void Task::taskProcess()
 					buffer->device->write(aCtx.buffer);
 				}});
 			swap.pushFree(buffer);  // The buffer has been processed
+			vTaskDelay(1);
 		} else {
-			Ut::waitMs(20);  // To prevent resource starvation.
+			vTaskDelay(1);
 		}
 	}
 }
