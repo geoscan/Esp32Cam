@@ -20,6 +20,9 @@
 #include <embmosse/Mosse.hpp>
 #include "Tracking.hpp"
 
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
+
 namespace Trk {
 
 extern Mosse::Port::Thread &mosseThreadApi();
@@ -39,6 +42,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	switch (state) {
 		case State::CamConfStart: {
+			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
 			cameraState.snapshotInit();
 			// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
 			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
@@ -66,6 +70,8 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 		}
 		// TODO: Handle CamConfFailed
 		case State::TrackerInit: {
+			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerInit");
+
 			if (static_cast<bool>(aFrame)) {
 
 				assert(aFrame.get()->data() != nullptr);
@@ -105,10 +111,13 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			break;
 		}
 		case State::TrackerRunningFirst:
+			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerRunningFirst");
 			cameraState.currentInit();
 			state = State::TrackerRunning;
 			// Fall through
 		case State::TrackerRunning: {
+			GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerRunning");
+
 			if (static_cast<bool>(aFrame)) {
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
