@@ -22,6 +22,8 @@
 
 GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "messaging", 1);
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "messaging", 1);
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "other", 1);
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "other", 1);
 
 namespace Mav {
 namespace Mic {
@@ -193,6 +195,7 @@ Microservice::Ret Tracking::processCmdCameraStopTracking(mavlink_command_long_t 
 /// \brief Emits CAMERA_TRACKING_IMAGE_STATUS messages containing info on tracking process
 void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUpdate)
 {
+	GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Tracking, "other", "onMosseTrackerUpdate");
 	mavlink_camera_tracking_image_status_t mavlinkCameraTrackingImageStatus{};
 	// Init the message
 	mavlinkCameraTrackingImageStatus.rec_bottom_x = Ut::Al::normalize(aMosseTrackerUpdate.roiX, 0,
