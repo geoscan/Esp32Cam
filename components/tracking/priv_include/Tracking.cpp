@@ -263,6 +263,10 @@ Mosse::Tp::Roi Tracking::Roi::asAbsolute()
 /// \brief Saves fields which will be used for restoring camera state, when the tracker is being deinitialized
 bool Tracking::CameraState::snapshotInit()
 {
+	if (snapshot.initialized) {
+		return true;
+	}
+
 	constexpr int knFieldsExpected = 3;
 	int nfields = 0;
 
