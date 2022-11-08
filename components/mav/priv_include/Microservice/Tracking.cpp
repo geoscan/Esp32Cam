@@ -133,31 +133,31 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 		ESP_LOGW(Mav::kDebugTag, "Tracking: failed geometry check");
 		result = MAV_RESULT_DENIED;
 	} else {
-		if (!cameraState.isInitialized()) {
-			cameraState.fetch();
-			// TODO: process fetch failure
-			const auto topLeftX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param1, 0,
-				cameraState.frameWidth));
-			const auto topLeftY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param2, 0,
-				cameraState.frameHeight));
-			const auto bottomRightX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param3, 0,
-				cameraState.frameWidth));
-			const auto bottomRightY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param4, 0,
-				cameraState.frameHeight));
-			std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY,
-				static_cast<std::uint16_t>(bottomRightX - topLeftX),
-				static_cast<std::uint16_t>(bottomRightY - topLeftY)}};
-			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
-				"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
-				bottomRightX, bottomRightY, cameraState.frameHeight, cameraState.frameWidth);
-			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
-				[&result](Mod::Fld::WriteResp aResp) mutable
-				{
-					if (!aResp.isOk()) {
-						result = MAV_RESULT_FAILED;
-					}
-				});
-		}
+		cameraState.fetch();
+		// TODO: process fetch failure
+		// Convert normalized values to the absolute ones
+		const auto topLeftX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param1, 0,
+			cameraState.frameWidth));
+		const auto topLeftY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param2, 0,
+			cameraState.frameHeight));
+		const auto bottomRightX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param3, 0,
+			cameraState.frameWidth));
+		const auto bottomRightY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param4, 0,
+			cameraState.frameHeight));
+		// Prepare and set module field
+		std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY,
+			static_cast<std::uint16_t>(bottomRightX - topLeftX),
+			static_cast<std::uint16_t>(bottomRightY - topLeftY)}};
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
+			"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
+			bottomRightX, bottomRightY, cameraState.frameHeight, cameraState.frameWidth);
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
+			[&result](Mod::Fld::WriteResp aResp) mutable
+			{
+				if (!aResp.isOk()) {
+					result = MAV_RESULT_FAILED;
+				}
+			});
 	}
 
 	{
