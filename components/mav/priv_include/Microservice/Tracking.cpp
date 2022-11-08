@@ -124,8 +124,8 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 
 	if (!(aMavlinkCommandLong.param1 < aMavlinkCommandLong.param3
 			&& aMavlinkCommandLong.param2 < aMavlinkCommandLong.param4
-			&& aMavlinkCommandLong.param3 =< 1.0f
-			&& aMavlinkCommandLong.param4 =< 1.0f
+			&& aMavlinkCommandLong.param3 <= 1.0f
+			&& aMavlinkCommandLong.param4 <= 1.0f
 			&& aMavlinkCommandLong.param1 >= 0.0f
 			&& aMavlinkCommandLong.param2 >= 0.0f
 			&& aMavlinkCommandLong.param3 >= 0.0f
@@ -144,7 +144,8 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 				cameraState.frameWidth));
 			const auto bottomRightY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param4, 0,
 				cameraState.frameHeight));
-			std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY, static_cast<std::uint16_t>(bottomRightX - topLeftX),
+			std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY,
+				static_cast<std::uint16_t>(bottomRightX - topLeftX),
 				static_cast<std::uint16_t>(bottomRightY - topLeftY)}};
 			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
 				"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
