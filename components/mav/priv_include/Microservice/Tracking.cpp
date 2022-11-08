@@ -5,13 +5,23 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "Tracking.hpp"
 #include "Globals.hpp"
 #include "Helper/MavlinkCommandLong.hpp"
 #include "Helper/MavlinkCommandAck.hpp"
 #include "utility/time.hpp"
 #include "utility/al/Algorithm.hpp"
+#include "utility/LogSection.hpp"
 #include "module/ModuleBase.hpp"
+#include "mav/mav.hpp"
+
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "messaging", 1);
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Tracking, "messaging", 1);
 
 namespace Mav {
 namespace Mic {
@@ -34,6 +44,9 @@ Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::O
 		case MAVLINK_MSG_ID_COMMAND_LONG:  // Falls through
 		case MAVLINK_MSG_ID_COMMAND_INT: {
 			mavlink_command_long_t mavlinkCommandLong = Hlpr::MavlinkCommandLong::makeFrom(aMessage);
+			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging", "Command long "
+				"target system %d  target component %d  command id %d", mavlinkCommandLong.target_system,
+				mavlinkCommandLong.target_component, mavlinkCommandLong.command);
 
 			if (mavlinkCommandLong.target_component == Globals::getCompIdTracker()
 					&& mavlinkCommandLong.target_system == Globals::getSysId()) {
@@ -105,6 +118,9 @@ Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t 
 Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
+
+	ESP_LOGI(Mav::kDebugTag, "Tracking: track rectangle request  left %.3ff  top %.3f  right %.3f  bottom %.3f",
+		aMavlinkCommandLong.param1, aMavlinkCommandLong.param2, aMavlinkCommandLong.param3, aMavlinkCommandLong.param4);
 	auto result = MAV_RESULT_ACCEPTED;
 
 	if (!cameraState.isInitialized()) {
