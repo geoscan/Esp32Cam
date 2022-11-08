@@ -220,9 +220,16 @@ bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 {
 	constexpr int kUninitialized = 0;
 	std::pair<int, int> frameSize{kUninitialized, kUninitialized};
-	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
-		[&frameSize](std::pair<int, int> aFrameSize) mutable { frameSize = aFrameSize; });
 	bool ret = false;
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
+		[&frameSize, &ret](std::pair<int, int> aFrameSize) mutable {
+			frameSize = aFrameSize;
+			ret = true;
+		});
+
+	if (!ret) {  // Was unable to acquire frame size
+		return false;
+	}
 
 	// TODO bounds check
 	if (frameSize.first != kUninitialized && absolute.size(0) != 0 && absolute.size(1) != 0 && frameSize.second != 0) {
