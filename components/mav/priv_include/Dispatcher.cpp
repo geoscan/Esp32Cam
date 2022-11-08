@@ -16,6 +16,7 @@
 #include "Unmarshalling.hpp"
 #include "Microservice/GsNetwork.hpp"
 #include "Microservice/Camera.hpp"
+#include "Microservice/Tracking.hpp"
 #include "Dispatcher.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
 #include "mav/mav.hpp"
