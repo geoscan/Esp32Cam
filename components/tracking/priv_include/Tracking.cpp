@@ -77,10 +77,23 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
 					aFrame.get()->width()};
 				Mosse::Tp::Roi r = this->roi.asAbsolute();
-				ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI");
-				tracker->init(image, r);
-				state = State::TrackerRunningFirst;
-				ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
+
+				// The ROI has to fit frame size
+				if (!(r.origin(0) > 0 && r.origin(1) > 0 && r.size(0) > 0 && r.size(1) > 0
+						&& r.origin(0) + r.size(0) < aFrame.get()->width()
+						&& r.origin(1) + r.size(1) < aFrame.get()->height())) {
+					ESP_LOGW(Trk::kDebugTag, "Tracking: failed to initialize tracker, as ROI does not fit the frame"
+						"left up (%d, %d)  right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1),
+						r.origin(0) + r.size(0), r.origin(1) + r.size(1),
+						aFrame.get()->width(), aFrame.get()->height());
+				} else {
+					ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI  left up (%d, %d)  "
+						"right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1), r.origin(0) + r.size(0),
+						r.origin(1) + r.size(1), aFrame.get()->width(), aFrame.get()->height());
+					tracker->init(image, r);
+					state = State::TrackerRunningFirst;
+					ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
+				}
 			} else {
 				ESP_LOGW(Trk::kDebugTag, "Tracking: nullptr frame");
 			}
