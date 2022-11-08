@@ -37,9 +37,7 @@ Tracking::Tracking() :
 void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
 	assert(nullptr != aFrame.get());
-	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
-		ESP_LOGI(Trk::kDebugTag, "Profile, onFrame");
 		case State::CamConfStart: {
 			// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
 			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
