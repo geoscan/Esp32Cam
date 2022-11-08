@@ -269,7 +269,15 @@ bool Tracking::CameraState::snapshotInit()
 			nfields += 1;
 		});
 
-	return nfields == knFieldsExpected;
+	const bool success = (nfields == knFieldsExpected);
+
+	if (success) {
+		ESP_LOGI(Trk::kDebugTag, "Caching camera configuration: success");
+	} else {
+		ESP_LOGW(Trk::kDebugTag, "Caching camera configuration: failure");
+	}
+
+	return success;
 }
 
 /// \brief Captures the relevant parts of the current camera state
@@ -296,6 +304,12 @@ bool Tracking::CameraState::apply()
 		{
 			success = success && aResp.isOk();
 		});
+
+	if (success) {
+		ESP_LOGI(Trk::kDebugTag, "Restoring camera configuration: success");
+	} else {
+		ESP_LOGW(Trk::kDebugTag, "Restoring camera configuration: failure");
+	}
 
 	return success;
 }
