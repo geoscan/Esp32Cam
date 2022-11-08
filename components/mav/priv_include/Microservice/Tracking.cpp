@@ -118,13 +118,13 @@ Microservice::Ret Tracking::processCmdSetMessageInterval(mavlink_command_long_t 
 Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_t &aMavlinkCommandLong,
 	mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-
 	ESP_LOGI(Mav::kDebugTag, "Tracking: track rectangle request  left %.3ff  top %.3f  right %.3f  bottom %.3f",
 		aMavlinkCommandLong.param1, aMavlinkCommandLong.param2, aMavlinkCommandLong.param3, aMavlinkCommandLong.param4);
 	auto result = MAV_RESULT_ACCEPTED;
 
 	if (!cameraState.isInitialized()) {
 		cameraState.fetch();
+		// TODO: process fetch failure
 		const auto topLeftX = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param1, 0,
 			cameraState.frameWidth));
 		const auto topLeftY = static_cast<std::uint16_t>(Ut::Al::scale(aMavlinkCommandLong.param2, 0,
@@ -135,13 +135,23 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 			cameraState.frameHeight));
 		std::array<std::uint16_t, 4> rect = {{topLeftX, topLeftY, static_cast<std::uint16_t>(bottomRightX - topLeftX),
 			static_cast<std::uint16_t>(bottomRightY - topLeftY)}};
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
-			[&result](Mod::Fld::WriteResp aResp) mutable
-			{
-				if (!aResp.isOk()) {
-					result = MAV_RESULT_FAILED;
-				}
-			});
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
+			"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
+			bottomRightX, bottomRightY, cameraState.frameHeight, cameraState.frameWidth);
+
+		if (!(topLeftX < bottomRightX && topLeftY < bottomRightY)) {
+			result = MAV_RESULT_DENIED;
+			ESP_LOGW(Mav::kDebugTag, "Tracking: failed geometry check left %d  top %d  right %d  bottom %d", topLeftX,
+				topLeftY, bottomRightX, bottomRightY);
+		} else {
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
+				[&result](Mod::Fld::WriteResp aResp) mutable
+				{
+					if (!aResp.isOk()) {
+						result = MAV_RESULT_FAILED;
+					}
+				});
+		}
 	}
 
 	{
