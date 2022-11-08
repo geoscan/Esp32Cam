@@ -40,7 +40,8 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	// TODO: push into work queue, probably will cause stack overflow
 	switch (state) {
 		ESP_LOGI(Trk::kDebugTag, "Profile, onFrame");
-		case State::CamConfStart: {  // Initialize the camera, switch it to grayscale mode
+		case State::CamConfStart: {
+			// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
 			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 				Ut::Thr::Wq::MediumPriority::getInstance().push(
 					[this]()
@@ -53,7 +54,8 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 									ESP_LOGI(Trk::kDebugTag, "Tracking: switched camera to grayscale mode");
 									state = State::TrackerInit;
 								} else {
-									ESP_LOGE(Trk::kDebugTag, "Tracking: failed to switch the camera to grayscale mode %s",
+									ESP_LOGE(Trk::kDebugTag,
+										"Tracking: failed to switch the camera to grayscale mode %s",
 										aWriteResp.resultAsCstr());
 									state = State::CamConfFailed;
 								}
