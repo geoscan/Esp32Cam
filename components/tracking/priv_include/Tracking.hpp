@@ -67,11 +67,12 @@ private:
 	/// \brief Encapsulation of the camera state. Cached state enables state restoring after tracking is done
 	struct CameraState {
 		struct {
-			const char *pixformat;
-			std::pair<int, int> frameSize;
+			const char *pixformat = nullptr;
+			std::pair<int, int> frameSize = {};
+			bool initialized = false;
 		} snapshot;
 		struct {
-			std::pair<int, int> frameSize;
+			std::pair<int, int> frameSize = {};
 		} current;
 
 		bool snapshotInit();
