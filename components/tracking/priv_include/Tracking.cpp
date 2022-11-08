@@ -65,6 +65,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 			break;
 		}
+		// TODO: Handle CamConfFailed
 		case State::TrackerInit: {
 			if (static_cast<bool>(aFrame)) {
 
@@ -88,6 +89,8 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 						"left up (%d, %d)  right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1),
 						r.origin(0) + r.size(0), r.origin(1) + r.size(1),
 						aFrame.get()->width(), aFrame.get()->height());
+					state = State::Disabled;
+					cameraState.apply();  /// Restore camera state
 				} else {
 					ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI  left up (%d, %d)  "
 						"right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1), r.origin(0) + r.size(0),
