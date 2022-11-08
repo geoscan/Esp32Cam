@@ -122,6 +122,19 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 		aMavlinkCommandLong.param1, aMavlinkCommandLong.param2, aMavlinkCommandLong.param3, aMavlinkCommandLong.param4);
 	auto result = MAV_RESULT_ACCEPTED;
 
+	if (!(aMavlinkCommandLong.param1 < aMavlinkCommandLong.param3
+			&& aMavlinkCommandLong.param2 < aMavlinkCommandLong.param4
+			&& aMavlinkCommandLong.param3 =< 1.0f
+			&& aMavlinkCommandLong.param4 =< 1.0f
+			&& aMavlinkCommandLong.param1 >= 0.0f
+			&& aMavlinkCommandLong.param2 >= 0.0f
+			&& aMavlinkCommandLong.param3 >= 0.0f
+			&& aMavlinkCommandLong.param4 >= 0.0f)) {
+		ESP_LOGW(Mav::kDebugTag, "Tracking: failed geometry check");
+	} else {
+
+	}
+
 	if (!cameraState.isInitialized()) {
 		cameraState.fetch();
 		// TODO: process fetch failure
