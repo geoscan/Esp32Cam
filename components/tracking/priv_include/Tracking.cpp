@@ -234,8 +234,9 @@ bool Tracking::Roi::normalizedInit(const Mosse::Tp::Roi &absolute)
 	// TODO bounds check
 	if (frameSize.first != kUninitialized && absolute.size(0) != 0 && absolute.size(1) != 0 && frameSize.second != 0) {
 		ret = true;
-		normalized.row = static_cast<float>(absolute.origin(0)) / static_cast<float>(absolute.size(0));
-		normalized.col = static_cast<float>(absolute.origin(1)) / static_cast<float>(absolute.size(1));
+		// Normalize to frame boundaries
+		normalized.row = static_cast<float>(absolute.origin(0)) / static_cast<float>(frameSize.second);
+		normalized.col = static_cast<float>(absolute.origin(1)) / static_cast<float>(frameSize.first);
 		normalized.nrows = static_cast<float>(absolute.size(0)) / static_cast<float>(frameSize.second);
 		normalized.ncols = static_cast<float>(absolute.size(1)) / static_cast<float>(frameSize.first);
 	}
