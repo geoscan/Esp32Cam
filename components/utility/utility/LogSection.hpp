@@ -7,7 +7,7 @@
 
 // Enables section-wide debug output.
 
-/// \file
+#include "utility/al/Checksum.hpp"
 
 #ifndef UTILITY_UTILITY_LOGSECTION_HPP_
 #define UTILITY_UTILITY_LOGSECTION_HPP_
@@ -143,11 +143,11 @@ do { \
 
 #define GS_UTILITY_LOG_CLASS_ASPECT_DEFINE(level, cls, aspectid, en) \
 	GS_UTILITY_LOG_METHOD_STRUCT_DEFINE_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-	GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspectid), en)
+	GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, GS_UTILITY_STRTOCRC32(#aspectid)), en)
 
 #define GS_UTILITY_LOG_CLASS_ASPECT_CALL(level, tag, cls, aspect, ...) \
 	GS_UTILITY_LOG_METHOD_STRUCT_CALL_IMPL(GS_UTILITY_LOG_DEF_APPEND(GsUtilityLogMethod, level), \
-	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, aspect), \
+	GS_UTILITY_LOG_DEF_APPEND(ESP_LOG, level), GS_UTILITY_LOG_CLASS_ASPECT_MARKER_TYPE(cls, GS_UTILITY_STRTOCRC32(#aspect)), \
 	tag, #cls "(" #aspect ") " __VA_ARGS__)
 
 // Utility macros
