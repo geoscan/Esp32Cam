@@ -39,6 +39,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	switch (state) {
 		case State::CamConfStart: {
+			cameraState.snapshotInit();
 			// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
 			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
 				Ut::Thr::Wq::MediumPriority::getInstance().push(
@@ -181,16 +182,13 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
 			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
 			bool success = true;
+			// Make a snapshot of the camera state, if it has not been reconfigured yet
+			success = cameraState.snapshotInit();
 
-			// Make a snapshot of the camera state, if it has not been reconfigured yet (i.e. the tracker is called for the first time)
-			if (!stateIsCameraConfigured()) {
-				success = cameraState.snapshotInit();
+			if (!success) {
+				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
 
-				if (!success) {
-					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
-
-					break;
-				}
+				break;
 			}
 
 			success = roi.normalizedInit(roiAbsoluteRchw);
@@ -292,6 +290,7 @@ bool Tracking::CameraState::snapshotInit()
 	const bool success = (nfields == knFieldsExpected);
 
 	if (success) {
+		snapshot.initialized = true;
 		ESP_LOGI(Trk::kDebugTag, "Caching camera configuration: success");
 	} else {
 		ESP_LOGW(Trk::kDebugTag, "Caching camera configuration: failure");
