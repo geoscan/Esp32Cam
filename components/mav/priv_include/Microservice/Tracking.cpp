@@ -7,6 +7,9 @@
 
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+
+// TODO: tracking does not always start right away
+
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
 #include <esp_log.h>
 
@@ -17,6 +20,7 @@
 #include "utility/time.hpp"
 #include "utility/al/Algorithm.hpp"
 #include "utility/LogSection.hpp"
+#include "utility/thr/WorkQueue.hpp"
 #include "module/ModuleBase.hpp"
 #include "mav/mav.hpp"
 
@@ -153,13 +157,18 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
 			"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
 			bottomRightX, bottomRightY, cameraState.frameHeight, cameraState.frameWidth);
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
+		const auto nnotified = Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
 			[&result](Mod::Fld::WriteResp aResp) mutable
 			{
 				if (!aResp.isOk()) {
 					result = MAV_RESULT_FAILED;
 				}
 			});
+
+		if (nnotified == 0) {
+			ESP_LOGW(Mav::kDebugTag, "Unable to access tracking module");
+			result = MAV_RESULT_FAILED;
+		}
 	}
 
 	{
