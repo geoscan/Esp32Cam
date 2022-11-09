@@ -207,6 +207,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
 			} else {
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "ROI error"});
+				ESP_LOGW(Trk::kDebugTag, "Failed to initialize ROI");
 
 				break;
 			}
