@@ -177,6 +177,14 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 		aOnResponse(aMessage);
 	}
 
+	if (result == MAV_RESULT_ACCEPTED && Ut::Thr::Wq::MediumPriority::checkInstance()) {
+		Ut::Thr::Wq::MediumPriority::getInstance().push(
+			[this]()
+			{
+				key.onMosseTrackerUpdate.setEnabled(true);  // TODO it causes deadlock
+			});
+	}
+
 	return Ret::Response;
 }
 
