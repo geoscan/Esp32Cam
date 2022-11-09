@@ -33,6 +33,7 @@ Mav::Dispatcher::Dispatcher() :
 {
 }
 
+/// \brief A delayed message is sent through the callback-based subscription mechanism.
 void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 {
 	Bdg::Receiver::notifyAs({Bdg::NamedEndpoint::Mavlink,
