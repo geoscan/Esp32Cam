@@ -8,8 +8,9 @@ idf_component_register(
 	SRC_DIRS
 		"."
 		"priv_include/Microservice/"
-		"Microservice/"
-		"Helper/"
+		"priv_include/Helper"
+		"priv_include"
+		"include/mav"
 	PRIV_INCLUDE_DIRS
 		"priv_include"
 	INCLUDE_DIRS
