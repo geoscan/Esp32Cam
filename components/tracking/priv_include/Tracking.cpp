@@ -22,6 +22,8 @@
 
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
 GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "frame", 1);
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "frame", 1);
 
 namespace Trk {
 
@@ -40,6 +42,8 @@ Tracking::Tracking() :
 void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 {
 	assert(nullptr != aFrame.get());
+	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "frame", "onFrame");
+
 	switch (state) {
 		case State::CamConfStart: {
 			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
@@ -68,6 +72,10 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 
 			break;
 		}
+		case State::TrackerInitFirst:
+			state = State::TrackerInit;
+
+			break;
 		// TODO: Handle CamConfFailed
 		case State::TrackerInit: {
 			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerInit");
