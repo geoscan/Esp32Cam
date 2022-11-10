@@ -47,26 +47,19 @@ struct DelayedSendAsyncCtx {
 class DelayedSendHandle {
 public:
 	virtual void onSubscription(const mavlink_message_t &) = 0;
+	/// \brief Same as `onSubscription(const mavlink_message_t &)`, but prepares the messages to be send at the time
+	/// when the messaging "pipeline" becomes available.
+	///
+	/// \details The current communication scheme uses a work queue to dispatch messages between recepients, and MAVLink
+	/// is one of the many participants. It is sometimes required to send a message FROM the context of a work queue,
+	/// which would cause a deadlock. \sa `Mav::DelayedSendAsyncCtx` for more info.
+	virtual void onSubscription(DelayedSendAsyncCtx delayedSendAsyncCtx) = 0;
 	virtual ~DelayedSendHandle() = default;
-};
-
-/// \brief Same as `DelayedSendHandle`, but prepares the messages to be send at the time when the messaging "pipeline"
-/// becomes available.
-///
-/// \details The current communication scheme uses a work queue to dispatch messages between recepients, and MAVLink is
-/// one of the many participants. It is sometimes required to send a message FROM the context of a work queue, which
-/// would cause a deadlock. \sa `Mav::DelayedSendAsyncCtx` for more info.
-class AsyncDelayedSendHandle {
-public:
-	virtual void onSubscription(DelayedSendAsyncCtx DelayedSendAsyncCtx) = 0;
-	virtual ~AsyncDelayedSendHandle() = default;
 };
 
 /// \brief Enables one to send a MAVLink message outside the request/response scheme. Useful for implementing telemetry
 /// messages sending
 using DelayedSend = Ut::Sub::Sender1to1<DelayedSendHandle>;
-/// \brief Same as `DelayedSend`, but works asynchronously. \sa `AsyncDelayedSendHandle`, `DelayedSendAsyncCtx`
-using AsyncDelayedSend = Ut::Sub::Sender1to1<AsyncDelayedSendHandle>;
 
 }  // namespace Mav
 
