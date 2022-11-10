@@ -38,6 +38,34 @@ void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }
 
+/// \brief Pushes a lightweight buffer producer into the notification chain.
+///
+/// \details When the current sender's turn comes, it will get notified, and
+/// will be expected to produce a buffer. No synchronization is required, as
+/// the message pipeline will have already been locked by that moment.
+void Mav::Dispatcher::onSubscription(DelayedSendAsyncCtx delayedSendAsyncCtx)
+{
+	Bdg::Receiver::notifyAsAsync({
+		Bdg::NamedEndpoint::Mavlink,
+		[this, delayedSendAsyncCtx]()
+		{
+			mavlink_message_t mavlinkMessage{};
+			delayedSendAsyncCtx.delayedSendAsyncVariant.match(
+				[&mavlinkMessage](const mavlink_camera_tracking_image_status_t &aPack)
+				{
+					mavlink_msg_camera_tracking_image_status_encode(0, 0, &mavlinkMessage, &aPack);
+				});
+			mavlinkMessage.sysid = delayedSendAsyncCtx.sysId;
+			mavlinkMessage.compid = delayedSendAsyncCtx.compId;
+			const auto nPacked = Marshalling::push(mavlinkMessage, resp.buffer);
+			Ut::Cont::ConstBuffer ret = {resp.buffer, nPacked};
+
+			return ret;
+		},
+		[](Bdg::RespondCtx) {}
+	});
+}
+
 Mav::Microservice::Ret Mav::Dispatcher::process(Ut::Cont::ConstBuffer aBuffer, int &anProcessed)
 {
 	auto ret = Microservice::Ret::Ignored;
