@@ -157,15 +157,19 @@ Microservice::Ret Tracking::processCmdCameraTrackRectangle(mavlink_command_long_
 		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Tracking, "messaging",
 			"Tracking: left %d  top %d  right %d  bottom %d  frame height %d  frame width %d", topLeftX, topLeftY,
 			bottomRightX, bottomRightY, cameraState.frameHeight, cameraState.frameWidth);
-		const auto nnotified = Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
-			[&result](Mod::Fld::WriteResp aResp) mutable
+		bool notified = false;
+		// The tracking module is not async, safe to not to implement a waiting routine
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Tracking, Mod::Fld::Field::Roi>(rect,
+			[&result, &notified](Mod::Fld::WriteResp aResp) mutable
 			{
+				notified = true;
+
 				if (!aResp.isOk()) {
 					result = MAV_RESULT_FAILED;
 				}
 			});
 
-		if (nnotified == 0) {
+		if (!notified) {
 			ESP_LOGW(Mav::kDebugTag, "Unable to access tracking module");
 			result = MAV_RESULT_FAILED;
 		}
