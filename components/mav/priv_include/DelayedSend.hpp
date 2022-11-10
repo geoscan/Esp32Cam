@@ -39,6 +39,11 @@ struct DelayedSendAsyncCtx {
 	}
 };
 
+/// \brief The receiver in a primitive subscriber / receiver scheme.
+///
+/// \details Delayed send enables sending messages outside the "request / response" communication scheme. It allows
+/// sending periodic or sporadic messages, while leaving the handling of those to the receiver (in that case - an
+/// instance of `Mav::Dispatcher`.
 class DelayedSendHandle {
 public:
 	virtual void onSubscription(const mavlink_message_t &) = 0;
