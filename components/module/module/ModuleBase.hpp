@@ -61,37 +61,23 @@ public:
 
 	/// \brief Iterates through registered modules and forwards the request to update a field. The requestor is
 	/// notified through use of a callback (`aCb`)
-	///
-	/// \return Number of modules that have been invoked during the notification process. Note: this does not mean that
-	/// the module has produced a response.
 	template <Module Im, Fld::Field If>
-	static std::size_t moduleFieldWriteIter(const typename Fld::GetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
+	static void moduleFieldWriteIter(const typename Fld::GetType<If, Im>::Type &field, Fld::OnWriteResponseCallback aCb)
 	{
-		std::size_t moduleCounter = 0;
-
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
 				mod.setFieldValue({If, field}, aCb);
-				moduleCounter += 1;
 			}
 		}
-
-		return moduleCounter;
 	}
 
 	/// \brief Iterates through registered modules and forwards the request to get a field. The requestor is notified
 	/// through use of a callback (`aCb`)
-	///
-	/// \return Number of modules that have been invoked during the notification process. Note: this does not mean that
-	/// the module has produced a response.
 	template <Module Im, Fld::Field If>
-	static std::size_t moduleFieldReadIter(std::function<void(typename Fld::GetType<If, Im>::Type)> aCb)
+	static void moduleFieldReadIter(std::function<void(typename Fld::GetType<If, Im>::Type)> aCb)
 	{
-		std::size_t moduleCounter = 0;
-
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
-				moduleCounter += 1;
 				mod.getFieldValue(
 					{If},
 					[aCb](typename Fld::Resp aResp)
@@ -102,8 +88,6 @@ public:
 				);
 			}
 		}
-
-		return moduleCounter;
 	}
 
 protected:
