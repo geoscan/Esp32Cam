@@ -65,6 +65,8 @@ public:
 /// \brief Enables one to send a MAVLink message outside the request/response scheme. Useful for implementing telemetry
 /// messages sending
 using DelayedSend = Ut::Sub::Sender1to1<DelayedSendHandle>;
+/// \brief Same as `DelayedSend`, but works asynchronously. \sa `AsyncDelayedSendHandle`, `DelayedSendAsyncCtx`
+using AsyncDelayedSend = Ut::Sub::Sender1to1<AsyncDelayedSendHandle>;
 
 }  // namespace Mav
 
