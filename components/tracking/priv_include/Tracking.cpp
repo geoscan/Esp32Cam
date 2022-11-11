@@ -380,7 +380,7 @@ void Tracking::Quality::update(float aPsr)
 void Tracking::Quality::reset()
 {
 	psr = 0.0f;
-	ok = false;
+	ok = true;
 }
 
 }  // namespace Trk
