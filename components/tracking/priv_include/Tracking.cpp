@@ -23,7 +23,7 @@
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
 GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "state machine", 1);
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "frame", 1);
-GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "frame", 1);
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Trk::Tracking, "frame", 0);
 
 namespace Trk {
 
