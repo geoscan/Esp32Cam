@@ -52,14 +52,13 @@ void Mav::Dispatcher::onSubscription(DelayedSendAsyncCtx delayedSendAsyncCtx)
 		{
 			mavlink_message_t mavlinkMessage{};
 			delayedSendAsyncCtx.delayedSendAsyncVariant.match(
-				[&mavlinkMessage](const mavlink_camera_tracking_image_status_t &aPack)
+				[&mavlinkMessage, &delayedSendAsyncCtx](const mavlink_camera_tracking_image_status_t &aPack)
 				{
 					GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Dispatcher, "async",
 						"Packing mavlink_camera_tracking_image_status_t");
-					mavlink_msg_camera_tracking_image_status_encode(0, 0, &mavlinkMessage, &aPack);
+					mavlink_msg_camera_tracking_image_status_encode(delayedSendAsyncCtx.sysId,
+						delayedSendAsyncCtx.compId, &mavlinkMessage, &aPack);
 				});
-			mavlinkMessage.sysid = delayedSendAsyncCtx.sysId;
-			mavlinkMessage.compid = delayedSendAsyncCtx.compId;
 			const auto nPacked = Marshalling::push(mavlinkMessage, resp.buffer);
 			GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Dispatcher, "async",
 				"packed %d bytes", nPacked);
