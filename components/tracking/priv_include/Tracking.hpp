@@ -24,12 +24,17 @@ class Roi;
 
 namespace Trk {
 
+/// \brief Wrapper over implementation of MOSSE tracking algorithms. Provides system API for accessing tracking
+/// features.
+///
+/// \details For more information please refer to the MOSSE paper
+/// https://ieeexplore.ieee.org/abstract/document/5539960, or the underlying implementation.
 class Tracking : Mod::ModuleBase {
 private:
 	/// \brief Binary spinlock variable
 	///
 	/// \details It's been established experimentally that frame capturing and frame processing take roughly the same
-	/// time. So a spinlock can be used without risking priority inversion.
+	/// time. So using a spinlock does not entail the risk of priority inversion.
 	enum class Spinlock {
 		Wait,
 		Done,
