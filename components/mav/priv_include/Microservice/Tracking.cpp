@@ -240,7 +240,7 @@ void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUp
 	mavlinkCameraTrackingImageStatus.point_x = std::numeric_limits<float>::quiet_NaN();
 	mavlinkCameraTrackingImageStatus.point_y = std::numeric_limits<float>::quiet_NaN();
 	mavlinkCameraTrackingImageStatus.radius = std::numeric_limits<float>::quiet_NaN();
-	notify(DelayedSendAsyncCtx{Globals::getSysId(), Globals::getCompId(), mavlinkCameraTrackingImageStatus});
+	notify(DelayedSendAsyncCtx{Globals::getSysId(), Globals::getCompIdTracker(), mavlinkCameraTrackingImageStatus});
 }
 
 void Tracking::CameraState::fetch()
