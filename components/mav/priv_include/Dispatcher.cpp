@@ -23,6 +23,7 @@
 
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mav::Dispatcher, onReceive, 0)
 GS_UTILITY_LOGD_METHOD_SET_ENABLED(Mav::Dispatcher, process, 1)
+GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Mav::Dispatcher, "async", 1);
 
 Mav::Dispatcher::Dispatcher() :
 	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink, "Mavlink dispatcher"},
@@ -51,13 +52,16 @@ void Mav::Dispatcher::onSubscription(DelayedSendAsyncCtx delayedSendAsyncCtx)
 		{
 			mavlink_message_t mavlinkMessage{};
 			delayedSendAsyncCtx.delayedSendAsyncVariant.match(
-				[&mavlinkMessage](const mavlink_camera_tracking_image_status_t &aPack)
+				[&mavlinkMessage, &delayedSendAsyncCtx](const mavlink_camera_tracking_image_status_t &aPack)
 				{
-					mavlink_msg_camera_tracking_image_status_encode(0, 0, &mavlinkMessage, &aPack);
+					GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Dispatcher, "async",
+						"Packing mavlink_camera_tracking_image_status_t");
+					mavlink_msg_camera_tracking_image_status_encode(delayedSendAsyncCtx.sysId,
+						delayedSendAsyncCtx.compId, &mavlinkMessage, &aPack);
 				});
-			mavlinkMessage.sysid = delayedSendAsyncCtx.sysId;
-			mavlinkMessage.compid = delayedSendAsyncCtx.compId;
 			const auto nPacked = Marshalling::push(mavlinkMessage, resp.buffer);
+			GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Dispatcher, "async",
+				"packed %d bytes", nPacked);
 			Ut::Cont::ConstBuffer ret = {resp.buffer, nPacked};
 
 			return ret;
