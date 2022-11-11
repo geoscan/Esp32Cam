@@ -23,7 +23,7 @@ struct MosseTrackerUpdate {
 	int roiY;
 	int roiWidth;
 	int roiHeight;
-	/// False means tracker has lost the target. It can be updated w/ a new ROI.
+	/// False means the tracker has lost the target. It can be updated w/ a new ROI.
 	bool stateOk;
 };
 
