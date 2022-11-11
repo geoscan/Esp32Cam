@@ -369,6 +369,10 @@ void Tracking::Quality::update(float aPsr)
 	psr = Ut::Al::clamp(aPsr, 0.0f, std::numeric_limits<float>::infinity());
 
 	if (psr < lowerThreshold()) {
+		if (ok) {
+			ESP_LOGW(Trk::kDebugTag, "Tracking: threshold PSR %.3f, current PSR %.3f", lowerThreshold(), psr);
+		}
+
 		ok = false;
 	}
 }
