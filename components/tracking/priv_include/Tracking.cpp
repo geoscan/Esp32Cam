@@ -360,4 +360,20 @@ bool Tracking::CameraState::apply()
 	return success;
 }
 
+void Tracking::Quality::update(float aPsr)
+{
+	// TODO. W/ current optimization settings, the PSR differs drastically from that of non-optimized code. Hence the need for clamping
+	psr = Ut::Al::clamp(aPsr, 0.0f, std::numeric_limits<float>::infinity());
+
+	if (psr < lowerThreshold()) {
+		ok = false;
+	}
+}
+
+void Tracking::Quality::reset()
+{
+	psr = 0.0f;
+	ok = false;
+}
+
 }  // namespace Trk

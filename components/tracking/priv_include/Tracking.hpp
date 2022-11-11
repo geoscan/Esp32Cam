@@ -85,6 +85,24 @@ private:
 		void currentInit();
 		bool apply();  ///< Restores camera state
 	};
+
+	/// \brief Encapsulates quiality monitoring
+	struct Quality {
+		/// \brief peak-to-sidelobe ratio
+		float psr;
+		/// \brief Latch. Once the lower quality threshold has been exceeded, this value must be reset.
+		bool ok;
+		void update(float aPsr);
+		inline void reset();
+		inline bool isOk() const
+		{
+			return ok;
+		}
+		float lowerThreshold() const
+		{
+			return 0.5f;
+		}
+	};
 public:
 	Tracking();
 	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
