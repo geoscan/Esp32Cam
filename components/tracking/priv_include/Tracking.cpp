@@ -164,7 +164,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 								{
 									Sub::Trk::OnMosseTrackerUpdate::notify(mosseTrackerUpdate);
 								});
-							ESP_LOGV(Trk::kDebugTag, "Tracking: updated tracker");
+							ESP_LOGV(Trk::kDebugTag, "Tracking: updated tracker, psr %.3f", tracker->lastPsr());
 						},
 						Ut::Thr::Wq::TaskPrio::Tracker);
 				}
