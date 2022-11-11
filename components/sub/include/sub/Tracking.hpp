@@ -13,7 +13,7 @@
 namespace Sub {
 namespace Trk {
 
-/// \brief Encapsulates tracking info which will be distributed among receivers.
+/// \brief Encapsulates tracking info
 struct MosseTrackerUpdate {
 	// Frame
 	int frameHeight;
