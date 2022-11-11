@@ -44,6 +44,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "frame", "onFrame");
 
+	// TODO: Refactoring: place each case processing routine in a separate method
 	switch (state) {
 		case State::CamConfStart: {
 			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
