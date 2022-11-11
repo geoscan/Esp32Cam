@@ -23,8 +23,8 @@ struct MosseTrackerUpdate {
 	int roiY;
 	int roiWidth;
 	int roiHeight;
-	/// Peak-to-sidelobe ratio
-	float psr;
+	/// False means tracker has lost the target. It can be updated w/ a new ROI.
+	bool stateOk;
 };
 
 using OnMosseTrackerUpdate = IndKey<void(MosseTrackerUpdate)>;
