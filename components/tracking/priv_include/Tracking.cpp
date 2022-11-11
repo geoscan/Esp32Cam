@@ -34,7 +34,8 @@ Tracking::Tracking() :
 	tracker{nullptr},
 	state{State::Disabled},
 	key{{&Tracking::onFrame, this}},
-	spinlock{Spinlock::Done}
+	spinlock{Spinlock::Done},
+	quality{0.0f, true}
 {
 }
 
@@ -147,6 +148,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 							tracker->update(imageWorkingArea, true);
 							spinlock = Spinlock::Done;
 							auto nextRoi = tracker->roi();
+							quality.update(tracker->lastPsr());
 							Sub::Trk::MosseTrackerUpdate mosseTrackerUpdate{
 								cameraState.current.frameSize.second,  // frameHeight
 								cameraState.current.frameSize.first,  // frameWidth
@@ -154,7 +156,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 								nextRoi.origin(0),  // roiY (row)
 								nextRoi.size(1),  // roiWidth (# of rows)
 								nextRoi.size(1),  // roiHeight (# of columns)
-								tracker->lastPsr()  // psr
+								quality.isOk()  // stateOk
 							};
 							// Notify through WQ to spare stack expenses
 							Ut::Thr::Wq::MediumPriority::getInstance().push(
@@ -214,6 +216,7 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			// The (re)initialization has completed. Notify the caller
 			if (success) {
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
+				quality.reset();
 			} else {
 				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "ROI error"});
 				ESP_LOGW(Trk::kDebugTag, "Failed to initialize ROI");

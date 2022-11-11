@@ -120,6 +120,7 @@ private:
 	Spinlock spinlock;
 	Roi roi;
 	CameraState cameraState;
+	Quality quality;
 };
 
 }  // namespace Trk
