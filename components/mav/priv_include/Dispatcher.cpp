@@ -61,6 +61,8 @@ void Mav::Dispatcher::onSubscription(DelayedSendAsyncCtx delayedSendAsyncCtx)
 			mavlinkMessage.sysid = delayedSendAsyncCtx.sysId;
 			mavlinkMessage.compid = delayedSendAsyncCtx.compId;
 			const auto nPacked = Marshalling::push(mavlinkMessage, resp.buffer);
+			GS_UTILITY_LOGV_CLASS_ASPECT(Mav::kDebugTag, Dispatcher, "async",
+				"packed %d bytes", nPacked);
 			Ut::Cont::ConstBuffer ret = {resp.buffer, nPacked};
 
 			return ret;
