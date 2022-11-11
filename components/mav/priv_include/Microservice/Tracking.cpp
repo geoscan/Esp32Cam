@@ -234,7 +234,13 @@ void Tracking::onMosseTrackerUpdate(Sub::Trk::MosseTrackerUpdate aMosseTrackerUp
 		1.0f);
 	mavlinkCameraTrackingImageStatus.rec_top_y = Ut::Al::clamp(mavlinkCameraTrackingImageStatus.rec_top_y, 0.0f, 1.0f);
 	// TODO PSR to infer tracking status
-	mavlinkCameraTrackingImageStatus.tracking_status = CAMERA_TRACKING_STATUS_FLAGS_ACTIVE;
+
+	if (aMosseTrackerUpdate.stateOk) {
+		mavlinkCameraTrackingImageStatus.tracking_status = CAMERA_TRACKING_STATUS_FLAGS_ACTIVE;
+	} else {
+		mavlinkCameraTrackingImageStatus.tracking_status = CAMERA_TRACKING_STATUS_FLAGS_ERROR;
+	}
+
 	mavlinkCameraTrackingImageStatus.tracking_mode = CAMERA_TRACKING_MODE_RECTANGLE;
 	mavlinkCameraTrackingImageStatus.target_data = CAMERA_TRACKING_TARGET_DATA_IN_STATUS;
 	mavlinkCameraTrackingImageStatus.point_x = std::numeric_limits<float>::quiet_NaN();
