@@ -90,7 +90,7 @@ using GetBufferCb = std::function<Ut::Cont::ConstBuffer()>;
 /// \brief Context encapsulation. See `OnReceiveCtx` for details.
 ///
 struct AsyncNotifyCtx {
-	const EndpointVariant &endpointVariant;
+	EndpointVariant endpointVariant;
 	GetBufferCb getBufferCb;
 	RespondCb respondCb;
 };
