@@ -35,7 +35,7 @@ private:
 		Done,
 	};
 
-	/// \brief
+	/// \brief Stores a universal representation of a ROI and provides an API for conversions
 	struct Roi {
 		/// \brief Intermediate inter-state scaled representation
 		struct Normalized {
