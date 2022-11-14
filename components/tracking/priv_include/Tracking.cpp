@@ -197,69 +197,75 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 {
 	switch (aReq.field) {
 		case Mod::Fld::Field::Initialized: {
-			const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
-
-			if (!initialized) {  // Request to deinitialize the tracker
-				bool success = true;
-				auto requestResult = Mod::Fld::RequestResult::Ok;
-				const char *resultMessage = nullptr;
-
-				if (state != State::Disabled) {
-					state = State::Disabled;
-					success = cameraState.apply();  // Restore the camera's previous state
-
-					if (!success) {
-						resultMessage = "Failed to restore camera state";
-					}
-				} else {
-					requestResult = Mod::Fld::RequestResult::Other;
-					resultMessage = "Ignoring tracking stop request, as it is already stopped";
-					ESP_LOGW(Trk::kDebugTag, "%s", resultMessage);
-					success = false;
-				}
-
-				aCb(Mod::Fld::WriteResp{requestResult, resultMessage});
-			}
-
+			setFieldValueInitialized(aReq, aCb);
 			break;
 		}
 		case Mod::Fld::Field::Roi: {
-			std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
-				Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
-			Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
-			bool success = true;
-			// Make a snapshot of the camera state, if it has not been reconfigured yet
-			success = cameraState.snapshotInit();
-
-			if (!success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
-
-				break;
-			}
-
-			success = roi.normalizedInit(roiAbsoluteRchw);
-
-			// The (re)initialization has completed. Notify the caller
-			if (success) {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
-				quality.reset();
-			} else {
-				aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "ROI error"});
-				ESP_LOGW(Trk::kDebugTag, "Failed to initialize ROI");
-
-				break;
-			}
-
-			if (stateIsCameraConfigured()) {
-				state = State::TrackerInit;
-			} else {
-				state = State::CamConfStart;
-			}
+			setFieldValueRoi(aReq, aCb);
 
 			break;
 		}
 		default:
 			break;
+	}
+}
+
+void Tracking::setFieldValueInitialized(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb)
+{
+	const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
+
+	if (!initialized) {  // Request to deinitialize the tracker
+		bool success = true;
+		auto requestResult = Mod::Fld::RequestResult::Ok;
+		const char *resultMessage = nullptr;
+
+		if (state != State::Disabled) {
+			state = State::Disabled;
+			success = cameraState.apply();  // Restore the camera's previous state
+
+			if (!success) {
+				resultMessage = "Failed to restore camera state";
+			}
+		} else {
+			requestResult = Mod::Fld::RequestResult::Other;
+			resultMessage = "Ignoring tracking stop request, as it is already stopped";
+			ESP_LOGW(Trk::kDebugTag, "%s", resultMessage);
+			success = false;
+		}
+
+		aCb(Mod::Fld::WriteResp{requestResult, resultMessage});
+	}
+
+}
+
+void Tracking::setFieldValueRoi(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb)
+{
+	std::array<std::uint16_t, 4> rectXywh = aReq.variant.getUnchecked<
+		Mod::Module::Tracking, Mod::Fld::Field::Roi>();  // (x, y, width, height)
+	Mosse::Tp::Roi roiAbsoluteRchw{{rectXywh[1], rectXywh[0]}, {rectXywh[3], rectXywh[2]}};  // (row, col, nrows=height, ncols=width)
+	bool success = true;
+	// Make a snapshot of the camera state, if it has not been reconfigured yet
+	success = cameraState.snapshotInit();
+
+	if (!success) {
+		aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to get camera state"});
+	}
+
+	success = roi.normalizedInit(roiAbsoluteRchw);
+
+	// The (re)initialization has completed. Notify the caller
+	if (success) {
+		aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
+		quality.reset();
+	} else {
+		aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "ROI error"});
+		ESP_LOGW(Trk::kDebugTag, "Failed to initialize ROI");
+	}
+
+	if (stateIsCameraConfigured()) {
+		state = State::TrackerInit;
+	} else {
+		state = State::CamConfStart;
 	}
 }
 

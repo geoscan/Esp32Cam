@@ -119,6 +119,10 @@ private:
 	void onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame);
 	/// \brief Delegate function. \sa `Tracking::onFrame`
 	void onFrameTrackerRunning(const std::shared_ptr<Cam::Frame> &aFrame);
+	/// \brief Delegate function. \sa `Tracking::setFieldValue`
+	void setFieldValueInitialized(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb);
+	/// \brief Delegate function. \sa `Tracking::setFieldValue`
+	void setFieldValueRoi(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb);
 private:
 	Mosse::Tracker *tracker;
 	State state;
