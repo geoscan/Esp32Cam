@@ -185,14 +185,25 @@ void Tracking::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseC
 			const bool initialized = aReq.variant.getUnchecked<Mod::Module::Tracking, Mod::Fld::Field::Initialized>();
 
 			if (!initialized) {  // Request to deinitialize the tracker
-				state = State::Disabled;
-				bool success = cameraState.apply();  // Restore the camera's previous state
+				bool success = true;
+				auto requestResult = Mod::Fld::RequestResult::Ok;
+				const char *resultMessage = nullptr;
 
-				if (!success) {
-					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Other, "Failed to restore camera state"});
+				if (state != State::Disabled) {
+					state = State::Disabled;
+					success = cameraState.apply();  // Restore the camera's previous state
+
+					if (!success) {
+						resultMessage = "Failed to restore camera state";
+					}
 				} else {
-					aCb(Mod::Fld::WriteResp{Mod::Fld::RequestResult::Ok});
+					requestResult = Mod::Fld::RequestResult::Other;
+					resultMessage = "Ignoring tracking stop request, as it is already stopped";
+					ESP_LOGW(Trk::kDebugTag, "%s", resultMessage);
+					success = false;
 				}
+
+				aCb(Mod::Fld::WriteResp{requestResult, resultMessage});
 			}
 
 			break;
