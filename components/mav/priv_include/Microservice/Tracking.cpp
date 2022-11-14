@@ -67,6 +67,11 @@ Microservice::Ret Tracking::process(mavlink_message_t &aMessage, Microservice::O
 
 						break;
 
+					case MAV_CMD_CAMERA_STOP_TRACKING:
+						ret = processCmdCameraStopTracking(mavlinkCommandLong, aMessage, aOnResponse);
+
+						break;
+
 					default:
 						break;
 				}
