@@ -13,11 +13,12 @@
 #include "utility/thr/Threading.hpp"
 #include "utility/al/Time.hpp"
 #include "utility/time.hpp"
+#include "utility/thr/wq/Types.hpp"
+#include <mapbox/variant.hpp>
+#include "utility/thr/wq/TaskVariantQueue.hpp"
+#include "utility/thr/wq/PrioTaskVariantQueue.hpp"
 #include <sdkconfig.h>
-#include <functional>
 #include <chrono>
-#include <mutex>
-#include <deque>
 #include <esp_log.h>
 
 #if 0
@@ -29,9 +30,6 @@
 namespace Ut {
 namespace Thr {
 namespace Wq {
-
-using Task = std::function<void()>;  ///< Regular tasks are removed from the queue after they are invoked.
-using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept invoked iteratively for as long as they return true
 
 /// \brief Work queue is a separate thread that receives functor objects, enqueues them for execution, picks them from the
 /// queue and invokes.
@@ -46,95 +44,32 @@ using ContinuousTask = std::function<bool()>;  ///< Continuous tasks are kept in
 ///
 template <int Istack, int Iprio, FreertosTask::CorePin Icore>
 class WorkQueue : public MakeSingleton<WorkQueue<Istack, Iprio, Icore>>, public FreertosTask {
-private:
-	struct Queue {
-		using QueueType = std::deque<Task>;
-		QueueType queue;
-		std::mutex mutex;
-
-		Queue() : queue(32)
-		{
-			queue.clear();
-		}
-
-		void push(Task &&aTask)
-		{
-			WQ_DEBUG("push()");
-			std::lock_guard<std::mutex> lock{mutex};
-			(void)lock;
-			if (queue.size() == queue.max_size()) {
-				ESP_LOGW("WQ", "work queue capacity will be extended");
-			}
-			queue.push_back(aTask);
-		}
-
-		bool pop(Task &aTask)
-		{
-			WQ_DEBUG("pop()");
-			std::lock_guard<std::mutex> lock{mutex};
-			(void)lock;
-			bool ret = !queue.empty();
-
-			if (ret) {
-				aTask = std::move(queue.front());
-				queue.pop_front();
-			}
-
-			return ret;
-		}
-	};
-
 public:
-	template <class Trep, class Tper>
-	static ContinuousTask makeContinuousTimed(ContinuousTask aTask, const std::chrono::duration<Trep, Tper> &aDuration)
-	{
-		const auto start{Ut::bootTimeUs()};
-		const auto timeout = std::chrono::duration_cast<std::chrono::microseconds>(aDuration).count();
-		return [aTask, start, timeout]()
-			{
-				return aTask() && !Ut::Al::expired(start, timeout);
-			};
-	}
-
 	WorkQueue() : FreertosTask("WorkQueue", Istack, Iprio, Icore)
 	{
 	}
 
 	/// \brief Push task into the queue
 	///
-	void push(Task &&aTask)
+	/// \param[in] `aPrio` Priority which will be assigned to the task. Not to be confused w/ the scheduler priority
+	void push(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
-		queue.push(std::move(aTask));
+		queue.push({std::move(aTask), aPrio});
 		resume();
-	}
-
-	/// \brief Push task into the queue and wait for it to finish for a given timespan. Returns true, if the semaphore has
-	/// been released in the given time.
-	///
-	template <class Trep, class Tper>
-	bool pushWaitFor(Task &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
-	{
-		Ut::Thr::Semaphore<1, 0> sem{};
-		push([sem, aTask]() mutable
-			{
-				aTask();
-				sem.release();
-			});
-		resume();
-		return sem.try_acquire_for(aTimeout);
 	}
 
 	/// \brief Push task into the queue and wait for it to finish. Enables synchronized execution of tasks.
 	///
-	void pushWait(Task &&aTask)
+	void pushWait(Task &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		Ut::Thr::Semaphore<1, 0> sem{};
 		push([&sem, &aTask]()
 			{
 				aTask();
 				sem.release();
-			});
+			}, aPrio);
 		resume();
+		vTaskDelay(1);
 		sem.acquire();
 	}
 
@@ -142,7 +77,7 @@ public:
 	///
 	/// \details The task will be continuously polled and rescheduled for as long as it returns true
 	///
-	void pushContinuous(ContinuousTask &&aTask)
+	void pushContinuous(ContinuousTask &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		push([this, aTask]() mutable
 			{
@@ -158,7 +93,7 @@ public:
 
 	/// \brief Push a continuous task into the queue and wait for it to finish
 	///
-	void pushContinuousWait(ContinuousTask &&aTask)
+	void pushContinuousWait(ContinuousTask &&aTask, TaskPrio aPrio = TaskPrio::Default)
 	{
 		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
 		pushContinuous([&sem, &aTask]()
@@ -172,30 +107,10 @@ public:
 				}
 
 				return f;
-			});
+			}, aPrio);
 		resume();
+		vTaskDelay(1);
 		sem.acquire();
-	}
-
-	/// \brief Push a continuous task into the queue and wait for it to finish for a given timespan.
-	///
-	template <class Trep, class Tper>
-	bool pushContinuousWaitFor(ContinuousTask &&aTask, const std::chrono::duration<Trep, Tper> &aTimeout)
-	{
-		Ut::Thr::Semaphore<1, 0> sem;  // Initialize a busy semaphore
-		pushContinuous([sem, aTask]() mutable
-			{
-				bool f = aTask();
-
-				if (!f) {
-					sem.release();
-				}
-
-				return f;
-			});
-		resume();
-
-		return sem.try_acquire_for(aTimeout);
 	}
 
 	/// \brief Run the queue
@@ -203,10 +118,13 @@ public:
 	void run() override
 	{
 		while (true) {
-			Task task;
+			TaskVariant task;
 
 			if (queue.pop(task)) {
-				task();
+				if (task()) {
+					queue.push(std::move(task));
+					vTaskDelay(2);
+				}
 			} else {
 				suspend();
 			}
@@ -214,11 +132,8 @@ public:
 	}
 
 private:
-	static Queue queue;  ///< Task storage
+	PrioTaskVariantQueue queue;
 };
-
-template <int Istack, int Iprio, FreertosTask::CorePin Icore>
-typename WorkQueue<Istack, Iprio, Icore>::Queue WorkQueue<Istack, Iprio, Icore>::queue{};
 
 using MediumPriority = WorkQueue<CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT + 7000, FreertosTask::PriorityMedium,
 	FreertosTask::CorePin::Core1>;

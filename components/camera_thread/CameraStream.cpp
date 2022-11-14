@@ -7,12 +7,11 @@
 
 #include <esp_timer.h>
 #include <freertos/FreeRTOS.h>
-
 #include <memory>
-
 #include "CameraStream.hpp"
 #include "utility/time.hpp"
 #include "Ov2640.hpp"
+#include <esp_log.h>
 
 using asio::ip::udp;
 using namespace std;
@@ -32,19 +31,30 @@ void CameraStream::operator()()
 	Time lastSend = 0;
 
 	while(true) {
-		if (fps > 0) {
-			lastSend = Ut::bootTimeUs() / 1000;
-		}
+		if (!img.get()) {
+			ESP_LOGW("[camera_thread]", "skipping nullptr frame");
+			img.reset();
+			img = Cam::Camera::getInstance().getFrame();
+		} else if (!img.get()->valid()) {
+			ESP_LOGW("[camera_thread]", "skipping invalid frame");
+			img.reset();
+			img = Cam::Camera::getInstance().getFrame();
+		} else {
+			if (fps > 0) {
+				lastSend = Ut::bootTimeUs() / 1000;
+			}
 
-		key.notify(img);
-		img.reset();
-		img = Cam::Camera::getInstance().getFrame();
+			key.notify(img);
+			img.reset();
+			img = Cam::Camera::getInstance().getFrame();
 
-		if (fps > 0) {
-			// Timer counter overflow and high latency are taken into account
-			auto timeDelta = Ut::bootTimeUs() / 1000 - lastSend;
-			auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
-			Ut::waitMs(timeWait);
+			if (fps > 0) {
+				// Timer counter overflow and high latency are taken into account
+				auto timeDelta = Ut::bootTimeUs() / 1000 - lastSend;
+				auto timeWait = (timeDelta > 0 && timeDelta < kWaitMs) ? kWaitMs - timeDelta : 0;
+				Ut::waitMs(timeWait);
+			}
+
 		}
 	}
 }

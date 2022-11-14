@@ -25,6 +25,7 @@
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "socket/socket.hpp"
 #include "wq/wq.hpp"
+#include "tracking/tracking.hpp"
 #include <nvs_flash.h>
 
 static asio::io_context context(3);
@@ -38,11 +39,14 @@ extern "C" int app_main(void)
 	esp_event_loop_create_default();
 	wifiStart();
 	httpStart();
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
 	cameraThreadInit();
+#endif
 	cameraStreamerStart(context);
 	Mav::init();
 	Bdg::init();
 	Sock::start();
 	Uart::start();
+	Trk::init();
 	return 0;
 }

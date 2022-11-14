@@ -8,7 +8,7 @@ namespace Ut {
 
 void waitMs(unsigned timeWaitMs)
 {
-	vTaskDelay((timeWaitMs) / portTICK_PERIOD_MS);
+	vTaskDelay(pdMS_TO_TICKS(timeWaitMs));
 }
 
 // Microseconds

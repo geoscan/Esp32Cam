@@ -8,13 +8,22 @@
 #include "CameraStream.hpp"
 #include "camera_thread/camera_thread.hpp"
 #include "utility/thr/Threading.hpp"
+#include <sdkconfig.h>
 
 using namespace CameraThread;
 
+static void cameraThreadTask(void *)
+{
+	static CameraStream cameraStream;
+	cameraStream();
+}
+
 void cameraThreadInit()
 {
-		static CameraStream cameraStream;
-
-		Ut::Thr::setThreadCoreAffinity(1);
-		static std::thread threadCameraStream(&CameraStream::operator(), &cameraStream);
+	static TaskHandle_t taskHandle;
+	constexpr std::size_t kStackSize = 1024 * 3;
+	constexpr void *kArg = nullptr;
+	constexpr UBaseType_t kPriority = Ut::Thr::FreertosTask::PriorityLowest + 1;
+	xTaskCreatePinnedToCore(cameraThreadTask, "camera_thread", kStackSize, kArg, kPriority, &taskHandle,
+		CONFIG_CAMERA_THREAD_PIN_TO_CORE);
 }

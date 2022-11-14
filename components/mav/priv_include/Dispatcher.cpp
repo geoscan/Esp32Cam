@@ -16,6 +16,7 @@
 #include "Unmarshalling.hpp"
 #include "Microservice/GsNetwork.hpp"
 #include "Microservice/Camera.hpp"
+#include "Microservice/Tracking.hpp"
 #include "Dispatcher.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
 #include "mav/mav.hpp"
@@ -32,9 +33,9 @@ Mav::Dispatcher::Dispatcher() :
 {
 }
 
+/// \brief A delayed message is sent through the callback-based subscription mechanism.
 void Mav::Dispatcher::onSubscription(const mavlink_message_t &aMavlinkMessage)
 {
-	// Warn. Do not replace iteration w/ RR's Key<...>::notify(), because locking order matters
 	Bdg::Receiver::notifyAs({Bdg::NamedEndpoint::Mavlink,
 		{resp.buffer, Marshalling::push(aMavlinkMessage, resp.buffer)}, [](Bdg::RespondCtx){}});
 }

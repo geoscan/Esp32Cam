@@ -10,6 +10,8 @@
 
 #include <array>
 #include <algorithm>
+#include <cassert>
+#include <numeric>
 
 namespace Ut {
 namespace Al {
@@ -21,6 +23,41 @@ bool in(const T &object, const Args &...values)
 	std::array<bool, sizeof...(values)> comparisons{{(object == values)...}};
 
 	return std::any_of(comparisons.begin(), comparisons.end(), [](bool f){return f;});
+}
+
+/// \brief Normalizes the value
+/// \tparam T Input value type
+/// \tparam O Output value type
+template <typename T, typename O = float>
+O normalize(T val, T from, T to)
+{
+	assert(to - from > std::numeric_limits<T>::epsilon());
+
+	return static_cast<O>(val - from) / static_cast<O>(to - from);
+}
+
+/// \brief De-normalizes the value
+/// \tparam T Input value type
+/// \tparam O Output value type
+template <class T, class O>
+O scale(T val, O from, O to)
+{
+	assert(to - from > std::numeric_limits<T>::epsilon());
+
+	return static_cast<O>((static_cast<T>(to) - static_cast<T>(from)) * val + static_cast<T>(from));
+}
+
+/// \brief Fits the value in a specified range
+/// \tparam T Input value type
+/// \tparam O Output value type
+template <typename T, typename O = T>
+O clamp(T val, T from, T to)
+{
+	assert(to - from > std::numeric_limits<float>::epsilon());
+
+	return static_cast<O>(val) < static_cast<O>(from) ? static_cast<O>(from) :
+		static_cast<O>(val) > static_cast<O>(to) ? to :
+		val;
 }
 
 }  // namespace Al

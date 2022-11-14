@@ -1,6 +1,6 @@
 idf_component_register(
 	SRC_DIRS
-		"ov2640/."
+		"ov2640/"
 		"ov2640/driver"
 		"ov2640/conversions"
 		"ov2640/sensors"

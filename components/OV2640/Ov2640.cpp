@@ -6,6 +6,7 @@
 #include "Ov2640.hpp"
 #include "esp_camera.h"
 #include "utility/system/NvsWrap.hpp"
+#include "sub/Cam.hpp"
 
 using namespace std;
 
@@ -14,7 +15,30 @@ using namespace std;
 static constexpr const char *kTag = "[OV2640]";
 static constexpr const char *kNvsKey = "Ov2640";
 static constexpr const char *kNvsFrameSize = "FrameSize";
-static constexpr auto kResolutionLimit = FRAMESIZE_SVGA;
+
+/// \brief Memory constraints necessitate the use of frame size limitations
+///
+/// \details Format: (pixformat, "lt" limitation)
+///
+static constexpr std::array<std::tuple<pixformat_t, framesize_t>, 2> kResolutionLimit{{
+	{PIXFORMAT_JPEG, FRAMESIZE_SVGA},
+	{PIXFORMAT_GRAYSCALE, FRAMESIZE_QVGA}
+}};
+
+/// \brief Finds max. frame size for a pixformat being used currently.
+///
+static framesize_t pixformatToResolutionLimit(pixformat_t aPixformat)
+{
+	static constexpr framesize_t kFramesizeDefault = FRAMESIZE_240X240;
+
+	for (const auto &fmtSzPair : kResolutionLimit) {
+		if (std::get<0>(fmtSzPair) == aPixformat) {
+			return std::get<1>(fmtSzPair);
+		}
+	}
+
+	return kFramesizeDefault;
+}
 
 using FrameSizeModeMap = std::pair<int, int>;
 
@@ -43,14 +67,43 @@ static constexpr std::array<FrameSizeModeMap, 22> kFrameSizeModeMap {{
 	{2560, 1920},
 }};
 
+/// \brief Maps pixformat ID to a human-readable representation
+///
+static constexpr std::array<std::tuple<pixformat_t, const char *>, 2> kFramePixformat {{
+	{PIXFORMAT_JPEG, "jpeg"},
+	{PIXFORMAT_GRAYSCALE, "grayscale"},
+}};
+
+/// \brief Converts pixformat to a human-readable representation
+///
+static const char *pixformatToStr(pixformat_t aPixformat)
+{
+	for (const auto &format : kFramePixformat) {
+		if (std::get<0>(format) == aPixformat) {
+			return std::get<1>(format);
+		}
+	}
+
+	return "";
+}
+
 Ov2640::Ov2640() :
 	Mod::ModuleBase{Mod::Module::Camera}
 {
+	esp_camera_add_hook_on_frame(hookOnFrame);  // The way it implemented, the hook will just be replaced, so it safe to set a hook without any checks
 }
 
 void Ov2640::init()
 {
 	cameraConfigLoad();
+	cameraConfig.pixel_format = status.pixformat;
+	auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+	// Guardrails to prevent buffer allocation failures
+	if (cameraConfig.frame_size >= resolutionLimit) {
+		cameraConfig.frame_size = static_cast<framesize_t>(resolutionLimit - 1);
+	}
+
 	status.initialized = (esp_camera_init(&cameraConfig) == ESP_OK);
 	status.frame.w = std::get<0>(kFrameSizeModeMap[cameraConfig.frame_size]);
 	status.frame.h = std::get<1>(kFrameSizeModeMap[cameraConfig.frame_size]);
@@ -115,10 +168,12 @@ void Ov2640::cameraConfigLoad()
 	esp_err_t err = Ut::Sys::nvsGet(kNvsKey, kNvsFrameSize, frame);
 
 	if (ESP_OK == err) {
-		if (frame < kResolutionLimit) {
+		const auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+		if (frame < resolutionLimit) {
 			cameraConfig.frame_size = static_cast<framesize_t>(frame);
 		} else {
-			cameraConfig.frame_size = kResolutionLimit;
+			cameraConfig.frame_size = resolutionLimit;
 			ESP_LOGW(kTag, "Unsupported frame size %d", static_cast<int>(cameraConfig.frame_size));
 		}
 	}
@@ -171,6 +226,7 @@ std::shared_ptr<Cam::Frame> Ov2640::getFrame()
 	auto fb = esp_camera_fb_get();
 
 	if (!fb) {
+		ESP_LOGW(kTag, "Got nullptr frame");
 		return std::make_shared<Cam::Frame>();
 	}
 
@@ -210,6 +266,13 @@ void Ov2640::getFieldValue(Mod::Fld::Req aRequest, Mod::Fld::OnResponseCallback 
 
 			break;
 
+		case Fld::Field::FrameFormat: {
+			if (status.initialized) {
+				aOnResponse(makeResponse<Module::Camera, Fld::Field::FrameFormat>(pixformatToStr(status.pixformat)));
+			}
+
+			break;
+		}
 		default:
 			break;
 
@@ -233,7 +296,9 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 			}
 
 			if (mapped) {
-				if (mode < kResolutionLimit) {
+				const auto resolutionLimit = pixformatToResolutionLimit(status.pixformat);
+
+				if (mode < resolutionLimit) {
 					auto err = Ut::Sys::nvsSet(kNvsKey, kNvsFrameSize, mode);
 
 					if (err != ESP_OK) {
@@ -246,8 +311,8 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 				} else {
 					aCb({Mod::Fld::RequestResult::OutOfRange});
 					ESP_LOGW(kTag, "Resolution %dx%d exceeds threshold %dx%d", std::get<0>(frameSize),
-						std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[kResolutionLimit - 1]),
-						std::get<1>(kFrameSizeModeMap[kResolutionLimit - 1]));
+						std::get<1>(frameSize), std::get<0>(kFrameSizeModeMap[resolutionLimit - 1]),
+						std::get<1>(kFrameSizeModeMap[resolutionLimit - 1]));
 				}
 			} else {
 				ESP_LOGW(kTag, "Incompatible frame size %dx%d", std::get<0>(frameSize), std::get<1>(frameSize));
@@ -256,9 +321,33 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 
 			break;
 		}
+		case Mod::Fld::Field::FrameFormat: {  // Change current camera mode and reconfigure the sensor
+			const char *frameFormatStr = aReq.variant.getUnchecked<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>();
+
+			for (auto &format : kFramePixformat) {
+				if (strcmp(std::get<1>(format), frameFormatStr) == 0) {
+					status.pixformat = std::get<0>(format);
+					aCb({Mod::Fld::RequestResult::Ok});
+					reinit();
+					return;
+				}
+			}
+
+			aCb({Mod::Fld::RequestResult::Other, "Unsupported pixframe"});
+
+		}
 		default:
 			break;
 	}
+}
+
+/// \brief Invokes subscribers on camera frames that a new frame has been received
+///
+void Ov2640::hookOnFrame(camera_fb_t *aFrame)
+{
+	static Sub::Key::NewFrame key;
+	std::shared_ptr<Cam::Frame> frame{new Ov2640::Frame{aFrame}};
+	key.notify(frame);
 }
 
 // ------------ Ov2640::Frame ------------ //

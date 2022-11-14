@@ -21,4 +21,5 @@ idf_component_register(
 		socket
 		wq
 		module
+		tracking
 )

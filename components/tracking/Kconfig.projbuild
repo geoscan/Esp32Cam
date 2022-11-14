@@ -1,0 +1,67 @@
+menu "[tracking]"
+
+	choice TRACKING_DEBUG_LEVEL
+		prompt "[tracking] module debug level"
+		default TRACKING_DEBUG_LEVEL_INFO
+
+		config TRACKING_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config TRACKING_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config TRACKING_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config TRACKING_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config TRACKING_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config TRACKING_DEBUG_LEVEL
+		int
+		default 1 if TRACKING_DEBUG_LEVEL_ERROR
+		default 2 if TRACKING_DEBUG_LEVEL_WARN
+		default 3 if TRACKING_DEBUG_LEVEL_INFO
+		default 4 if TRACKING_DEBUG_LEVEL_DEBUG
+		default 5 if TRACKING_DEBUG_LEVEL_VERBOSE
+
+	config TRACKING_RUN_PROFILE
+		bool "Run profiler"
+		default n
+		help
+			Profiler is a small hook on the "on-frame" event that performs
+			frame processing (tracking) and outputs FPS. It is used for debugging
+			purposes.
+
+			Profiler comes in various flavors, oncluding one that profiles time
+			expenses of the cycle without the tracking itself. See
+			`TRACKING_RUN_PROFILE` for more info.
+
+	if TRACKING_RUN_PROFILE
+
+		choice TRACKING_RUN_PROFILE_TYPE
+			prompt "[tracking] Select profile sequence type"
+			default TRACKING_RUN_PROFILE_TYPE_FULL
+
+			config TRACKING_RUN_PROFILE_TYPE_FULL
+				bool "Complete sequence: Tracker + Camera driver + Work queue"
+
+			config TRACKING_RUN_PROFILE_TYPE_TRACKER_CAMERA
+				bool "Short sequence: Tracker + Camera driver"
+
+			config TRACKING_RUN_PROFILE_TYPE_TRACKER
+				bool "Short sequence: Tracker"
+
+			config TRACKING_RUN_PROFILE_TYPE_CAMERA
+				bool "Short sequence: Camera driver (Measure camera performance)"
+			
+		endchoice
+
+	endif
+
+endmenu

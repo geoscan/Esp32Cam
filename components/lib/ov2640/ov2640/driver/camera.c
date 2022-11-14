@@ -11,9 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_DRIVER_OV2640_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "time.h"
 #include "sys/time.h"
 #include "freertos/FreeRTOS.h"
@@ -77,6 +84,10 @@ static const char* TAG = "camera";
 static const char* CAMERA_SENSOR_NVS_KEY = "sensor";
 static const char* CAMERA_PIXFORMAT_NVS_KEY = "pixformat";
 
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+static const int DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED = SIZE_MAX - 1;
+#endif
+
 typedef void (*dma_filter_t)(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 
 typedef struct camera_fb_s {
@@ -133,9 +144,16 @@ typedef struct {
     TaskHandle_t dma_filter_task;
 } camera_state_t;
 
+typedef struct {
+    esp_camera_hook_on_frame_t on_frame;
+} camera_hooks_t;
+
 camera_state_t* s_state = NULL;
 SemaphoreHandle_t s_state_mutex;
 camera_fb_int_t **s_managed_buffers;
+static camera_hooks_t s_hooks = {
+    .on_frame = NULL,
+};
 
 static void i2s_init();
 static int i2s_run();
@@ -150,6 +168,7 @@ static void dma_filter_yuyv(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* 
 static void dma_filter_yuyv_highspeed(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 static void dma_filter_jpeg(const dma_elem_t* src, lldesc_t* dma_desc, uint8_t* dst);
 static void i2s_stop(bool* need_yield);
+static void hooks_invoke_on_frame();
 
 static bool is_hs_mode()
 {
@@ -621,10 +640,18 @@ static void IRAM_ATTR camera_fb_done()
     camera_fb_int_t * fb = NULL, * fb2 = NULL;
     BaseType_t taskAwoken = 0;
 
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
+        i2s_run();
+        hooks_invoke_on_frame();
+        return;
+    }
+#else
     if(s_state->config.fb_count == 1) {
         xSemaphoreGive(s_state->frame_ready);
         return;
     }
+#endif
 
     fb = s_state->fb;
     if(!fb->ref && fb->len) {
@@ -776,7 +803,20 @@ static void IRAM_ATTR dma_filter_task(void *pvParameters)
         if(xQueueReceive(s_state->data_ready, &buf_idx, portMAX_DELAY) == pdTRUE) {
             if (buf_idx == SIZE_MAX) {
                 //this is the end of the frame
+                ESP_LOGV(TAG, "dma_filter_task: finishing frame");
                 dma_finish_frame();
+
+#if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+            } else if (buf_idx == DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED) {
+                if (!I2S0.conf.rx_start && s_state->config.fb_count == 1) {
+                    ESP_LOGV(TAG, "dma_filter_task: starting I2S");
+
+                    if (i2s_run() != 0) {
+                        ESP_LOGE(TAG, "dma_filter_task: i2s_run() failure");
+                    }
+                }
+#endif
+
             } else {
                 dma_filter_buffer(buf_idx);
             }
@@ -1325,8 +1365,23 @@ fail:
     return err;
 }
 
+esp_err_t esp_camera_add_hook_on_frame(esp_camera_hook_on_frame_t hook)
+{
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    s_hooks.on_frame = hook;
+
+    return ESP_OK;
+#else
+    return ESP_ERR_NOT_SUPPORTED;
+#endif
+}
+
 esp_err_t esp_camera_init(const camera_config_t* config)
 {
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    assert(config->fb_count == 1);
+#endif
+    esp_log_level_set(TAG, (esp_log_level_t)CONFIG_DRIVER_OV2640_DEBUG_LEVEL);
     if (NULL == s_state_mutex) {
         static StaticSemaphore_t sem;
         s_state_mutex = xSemaphoreCreateRecursiveMutexStatic(&sem);
@@ -1366,6 +1421,12 @@ esp_err_t esp_camera_init(const camera_config_t* config)
     }
 
     xSemaphoreGiveRecursive(s_state_mutex);
+    ESP_LOGI(TAG, "esp_camera_init: completed successfully");
+#if CONFIG_DRIVER_OV2640_USE_HOOKS
+    // Initialize acquisition of the first frame
+    assert(i2s_run() == 0);
+    ESP_LOGI(TAG, "esp_camera_init: finished first frame acquisition");
+#endif
     return ESP_OK;
 
 fail:
@@ -1418,48 +1479,64 @@ esp_err_t esp_camera_deinit()
 
 camera_fb_t* esp_camera_fb_get()
 {
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
+    ESP_LOGV(TAG, "esp_camera_fb_get: getting frame");
+
     if (NULL == s_state_mutex) {  // In case esp_camera_fb_get will be called before camera initialization due to erroneous initialization order
         return NULL;
     }
 
     xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
     if (s_state == NULL) {
+        ESP_LOGW(TAG, "esp_camera_fb_get Camera is uninitialized");
         xSemaphoreGiveRecursive(s_state_mutex);
         return NULL;
     }
 
+# if !CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
     if(!I2S0.conf.rx_start) {
         if(s_state->config.fb_count > 1) {
             ESP_LOGD(TAG, "i2s_run");
         }
+        ESP_LOGV(TAG, "starting i2s");
         if (i2s_run() != 0) {
+            ESP_LOGW(TAG, "esp_camera_fb_get i2s_run - failure");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
     }
+# endif  // CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+
     bool need_yield = false;
     if (s_state->config.fb_count == 1) {
         if (xSemaphoreTake(s_state->frame_ready, FB_GET_TIMEOUT) != pdTRUE){
+            ESP_LOGD(TAG, "esp_camera_fb_get: stopping I2S (1)");
             i2s_stop(&need_yield);
-            ESP_LOGE(TAG, "Failed to get the frame on time!");
+            ESP_LOGE(TAG, "Failed to get the frame on time! (1)");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
         xSemaphoreGiveRecursive(s_state_mutex);
+        ESP_LOGV(TAG, "esp_camera_fb_get: got frame");
         return (camera_fb_t*)s_state->fb;
     }
     camera_fb_int_t * fb = NULL;
     if(s_state->fb_out) {
         if (xQueueReceive(s_state->fb_out, &fb, FB_GET_TIMEOUT) != pdTRUE) {
+            ESP_LOGD(TAG, "esp_camera_fb_get: stopping I2S (2)");
             i2s_stop(&need_yield);
-            ESP_LOGE(TAG, "Failed to get the frame on time!");
+            ESP_LOGE(TAG, "Failed to get the frame on time! (2)");
             xSemaphoreGiveRecursive(s_state_mutex);
             return NULL;
         }
     }
     xSemaphoreGiveRecursive(s_state_mutex);
 
+    assert(fb != NULL);
     return (camera_fb_t*)fb;
+#else
+    return NULL;
+#endif  // CONFIG_DRIVER_OV2640_USE_HOOKS
 }
 
 camera_fb_t* esp_camera_nfb_get(size_t n)
@@ -1478,10 +1555,24 @@ camera_fb_t* esp_camera_nfb_get(size_t n)
 
 void esp_camera_fb_return(camera_fb_t * fb)
 {
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
+    ESP_LOGV(TAG, "esp_camera_fb_return: releasing frame");
+
+// TODO: acquire lock in case reconfiguration happens
+# if CONFIG_OV2640_TRIGGER_RECEIVE_ON_BUFFER_RELEASE
+    if (s_state != NULL && s_state->config.fb_count == 1 && fb != NULL) {
+        static const size_t val = DMA_FILTER_TASK_SIGNAL_BUF_CONSUMED;
+        xQueueSend(s_state->data_ready, &val, portMAX_DELAY);
+        return;
+    }
+# endif
+
     if(fb == NULL || s_state == NULL || s_state->config.fb_count == 1 || s_state->fb_in == NULL) {
         return;
     }
+
     xQueueSend(s_state->fb_in, &fb, portMAX_DELAY);
+#endif
 }
 
 sensor_t * esp_camera_sensor_get()
@@ -1578,4 +1669,11 @@ esp_err_t esp_camera_load_from_nvs(const char *key)
       ESP_LOGW(TAG,"Error (%d) opening nvs key \"%s\"",ret,key);
       return ret;
   }
+}
+
+void hooks_invoke_on_frame()
+{
+    if (s_hooks.on_frame && s_state->fb) {
+        s_hooks.on_frame((camera_fb_t*)s_state->fb);
+    }
 }

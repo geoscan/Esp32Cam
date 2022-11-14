@@ -15,9 +15,19 @@ const char *RequestResult::toCstr(Mod::Fld::RequestResult::Result aResult)
 	static constexpr std::array<const char *, static_cast<unsigned>(Result::N)> names {{
 		"Ok",
 		"Storage error",
-		"Value is out of range, or unacceptible"
+		"Value is out of range, or unacceptible",
+		"",
 	}};
 	return names[static_cast<unsigned>(aResult)];
+}
+
+const char *WriteResp::resultAsCstr() const
+{
+	if (RequestResult::Other == result) {
+		return errorMessage;
+	} else {
+		return RequestResult::toCstr(result);
+	}
 }
 
 }  // namespace Fld

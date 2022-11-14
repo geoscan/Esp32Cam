@@ -1,0 +1,8 @@
+menu "[camera_thread]"
+
+config CAMERA_THREAD_PIN_TO_CORE
+	int "PIN_TO_CORE: # of core to pin the task"
+	range 0 1
+	default 1
+
+endmenu
