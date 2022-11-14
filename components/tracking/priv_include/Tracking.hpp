@@ -100,7 +100,7 @@ private:
 		}
 		float lowerThreshold() const
 		{
-			return 0.5f;
+			return 0.1;
 		}
 	};
 public:
