@@ -113,6 +113,12 @@ private:
 	{
 		return state > State::CamConfFailed;
 	}
+	/// \brief Delegate function. \sa `Tracking::onFrame`
+	void onFrameCamConfStart(const std::shared_ptr<Cam::Frame> &aFrame);
+	/// \brief Delegate function. \sa `Tracking::onFrame`
+	void onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame);
+	/// \brief Delegate function. \sa `Tracking::onFrame`
+	void onFrameTrackerRunning(const std::shared_ptr<Cam::Frame> &aFrame);
 private:
 	Mosse::Tracker *tracker;
 	State state;

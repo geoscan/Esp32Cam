@@ -45,32 +45,9 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	assert(nullptr != aFrame.get());
 	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "frame", "onFrame");
 
-	// TODO: Refactoring: place each case processing routine in a separate method
 	switch (state) {
 		case State::CamConfStart: {
-			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
-			cameraState.snapshotInit();
-			// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
-			if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
-				Ut::Thr::Wq::MediumPriority::getInstance().push(
-					[this]()
-					{
-						Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
-							"grayscale",
-							[this](const Mod::Fld::WriteResp &aWriteResp)
-							{
-								if (aWriteResp.isOk()) {
-									ESP_LOGI(Trk::kDebugTag, "Tracking: switched camera to grayscale mode");
-									state = State::TrackerInit;
-								} else {
-									ESP_LOGE(Trk::kDebugTag,
-										"Tracking: failed to switch the camera to grayscale mode %s",
-										aWriteResp.resultAsCstr());
-									state = State::CamConfFailed;
-								}
-							});
-					});
-			}
+			onFrameCamConfStart(aFrame);
 
 			break;
 		}
@@ -80,43 +57,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			break;
 		// TODO: Handle CamConfFailed
 		case State::TrackerInit: {
-			GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerInit");
-
-			if (static_cast<bool>(aFrame)) {
-
-				assert(aFrame.get()->data() != nullptr);
-				if (tracker == nullptr) {
-					ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker. Frame size: %dx%d", aFrame.get()->width(),
-						aFrame.get()->height());
-					tracker = &Mosse::getFp16AbRawF32BufDynAlloc();
-				}
-
-				ESP_LOGI(Trk::kDebugTag, "initializing tracker");
-				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
-					aFrame.get()->width()};
-				Mosse::Tp::Roi r = this->roi.asAbsolute();
-
-				// The ROI has to fit frame size
-				if (!(r.origin(0) > 0 && r.origin(1) > 0 && r.size(0) > 0 && r.size(1) > 0
-						&& r.origin(0) + r.size(0) < aFrame.get()->width()
-						&& r.origin(1) + r.size(1) < aFrame.get()->height())) {
-					ESP_LOGW(Trk::kDebugTag, "Tracking: failed to initialize tracker, as ROI does not fit the frame"
-						"left up (%d, %d)  right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1),
-						r.origin(0) + r.size(0), r.origin(1) + r.size(1),
-						aFrame.get()->width(), aFrame.get()->height());
-					state = State::Disabled;
-					cameraState.apply();  /// Restore camera state
-				} else {
-					ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI  left up (%d, %d)  "
-						"right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1), r.origin(0) + r.size(0),
-						r.origin(1) + r.size(1), aFrame.get()->width(), aFrame.get()->height());
-					tracker->init(image, r);
-					state = State::TrackerRunningFirst;
-					ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
-				}
-			} else {
-				ESP_LOGW(Trk::kDebugTag, "Tracking: nullptr frame");
-			}
+			onFrameTrackerInit(aFrame);
 
 			break;
 		}
@@ -126,54 +67,128 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 			state = State::TrackerRunning;
 			// Fall through
 		case State::TrackerRunning: {
-			GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerRunning");
-
-			if (static_cast<bool>(aFrame)) {
-				Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
-					aFrame.get()->width()};
-
-				while (spinlock == Spinlock::Wait) {
-					ESP_LOGV(Trk::kDebugTag, "Tracking: waiting for spinlock");
-				}
-
-				auto imageWorkingArea = tracker->imageCropWorkingArea(image);
-				spinlock = Spinlock::Wait;
-
-				if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
-					// Detach from the current thread to release the buffer (the frame buffer is synchronized w/ a mutex)
-					Ut::Thr::Wq::MediumPriority::getInstance().push(
-						[this, imageWorkingArea]() mutable
-						{
-							ESP_LOGV(Trk::kDebugTag, "Tracking: updating tracker");
-							tracker->update(imageWorkingArea, true);
-							spinlock = Spinlock::Done;
-							auto nextRoi = tracker->roi();
-							quality.update(tracker->lastPsr());
-							Sub::Trk::MosseTrackerUpdate mosseTrackerUpdate{
-								cameraState.current.frameSize.second,  // frameHeight
-								cameraState.current.frameSize.first,  // frameWidth
-								nextRoi.origin(1),  // roiX (col)
-								nextRoi.origin(0),  // roiY (row)
-								nextRoi.size(1),  // roiWidth (# of rows)
-								nextRoi.size(1),  // roiHeight (# of columns)
-								quality.isOk()  // stateOk
-							};
-							// Notify through WQ to spare stack expenses
-							Ut::Thr::Wq::MediumPriority::getInstance().push(
-								[mosseTrackerUpdate]()
-								{
-									Sub::Trk::OnMosseTrackerUpdate::notify(mosseTrackerUpdate);
-								});
-							ESP_LOGV(Trk::kDebugTag, "Tracking: updated tracker, psr %.3f", tracker->lastPsr());
-						},
-						Ut::Thr::Wq::TaskPrio::Tracker);
-				}
-			}
+			onFrameTrackerRunning(aFrame);
 
 			break;
 		}
 		default:
 			break;
+	}
+}
+
+void Tracking::onFrameCamConfStart(const std::shared_ptr<Cam::Frame> &)
+{
+	GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
+	cameraState.snapshotInit();
+
+	// Initialize the camera, switch it to grayscale mode, because this is the only format the algorithm can work with
+	if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
+		Ut::Thr::Wq::MediumPriority::getInstance().push(
+			[this]()
+			{
+				Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameFormat>(
+					"grayscale",
+					[this](const Mod::Fld::WriteResp &aWriteResp)
+					{
+						if (aWriteResp.isOk()) {
+							ESP_LOGI(Trk::kDebugTag, "Tracking: switched camera to grayscale mode");
+							state = State::TrackerInit;
+						} else {
+							ESP_LOGE(Trk::kDebugTag,
+								"Tracking: failed to switch the camera to grayscale mode %s",
+								aWriteResp.resultAsCstr());
+							state = State::CamConfFailed;
+						}
+					});
+			});
+	}
+}
+
+void Tracking::onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame)
+{
+	GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerInit");
+
+	if (static_cast<bool>(aFrame)) {
+
+		assert(aFrame.get()->data() != nullptr);
+		if (tracker == nullptr) {
+			ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker. Frame size: %dx%d", aFrame.get()->width(),
+				aFrame.get()->height());
+			tracker = &Mosse::getFp16AbRawF32BufDynAlloc();
+		}
+
+		ESP_LOGI(Trk::kDebugTag, "initializing tracker");
+		Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
+			aFrame.get()->width()};
+		Mosse::Tp::Roi r = this->roi.asAbsolute();
+
+		// The ROI has to fit frame size
+		if (!(r.origin(0) > 0 && r.origin(1) > 0 && r.size(0) > 0 && r.size(1) > 0
+				&& r.origin(0) + r.size(0) < aFrame.get()->width()
+				&& r.origin(1) + r.size(1) < aFrame.get()->height())) {
+			ESP_LOGW(Trk::kDebugTag, "Tracking: failed to initialize tracker, as ROI does not fit the frame"
+				"left up (%d, %d)  right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1),
+				r.origin(0) + r.size(0), r.origin(1) + r.size(1),
+				aFrame.get()->width(), aFrame.get()->height());
+			state = State::Disabled;
+			cameraState.apply();  /// Restore camera state
+		} else {
+			ESP_LOGI(Trk::kDebugTag, "Tracking: initializing tracker w/ a new ROI  left up (%d, %d)  "
+				"right bottom (%d, %d)  frame size (%d, %d)", r.origin(0), r.origin(1), r.origin(0) + r.size(0),
+				r.origin(1) + r.size(1), aFrame.get()->width(), aFrame.get()->height());
+			tracker->init(image, r);
+			state = State::TrackerRunningFirst;
+			ESP_LOGI(Trk::kDebugTag, "Tracking: initialized tracker w/ a new ROI");
+		}
+	} else {
+		ESP_LOGW(Trk::kDebugTag, "Tracking: nullptr frame");
+	}
+}
+
+void Tracking::onFrameTrackerRunning(const std::shared_ptr<Cam::Frame> &aFrame)
+{
+	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerRunning");
+
+	if (static_cast<bool>(aFrame)) {
+		Mosse::Tp::Image image{static_cast<std::uint8_t *>(aFrame.get()->data()), aFrame.get()->height(),
+			aFrame.get()->width()};
+
+		while (spinlock == Spinlock::Wait) {
+			ESP_LOGV(Trk::kDebugTag, "Tracking: waiting for spinlock");
+		}
+
+		auto imageWorkingArea = tracker->imageCropWorkingArea(image);
+		spinlock = Spinlock::Wait;
+
+		if (Ut::Thr::Wq::MediumPriority::checkInstance()) {
+			// Detach from the current thread to release the buffer (the frame buffer is synchronized w/ a mutex)
+			Ut::Thr::Wq::MediumPriority::getInstance().push(
+				[this, imageWorkingArea]() mutable
+				{
+					ESP_LOGV(Trk::kDebugTag, "Tracking: updating tracker");
+					tracker->update(imageWorkingArea, true);
+					spinlock = Spinlock::Done;
+					auto nextRoi = tracker->roi();
+					quality.update(tracker->lastPsr());
+					Sub::Trk::MosseTrackerUpdate mosseTrackerUpdate{
+						cameraState.current.frameSize.second,  // frameHeight
+						cameraState.current.frameSize.first,  // frameWidth
+						nextRoi.origin(1),  // roiX (col)
+						nextRoi.origin(0),  // roiY (row)
+						nextRoi.size(1),  // roiWidth (# of rows)
+						nextRoi.size(1),  // roiHeight (# of columns)
+						quality.isOk()  // stateOk
+					};
+					// Notify through WQ to spare stack expenses
+					Ut::Thr::Wq::MediumPriority::getInstance().push(
+						[mosseTrackerUpdate]()
+						{
+							Sub::Trk::OnMosseTrackerUpdate::notify(mosseTrackerUpdate);
+						});
+					ESP_LOGV(Trk::kDebugTag, "Tracking: updated tracker, psr %.3f", tracker->lastPsr());
+				},
+				Ut::Thr::Wq::TaskPrio::Tracker);
+		}
 	}
 }
 
