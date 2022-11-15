@@ -120,7 +120,7 @@ bool sdFatDeinit()
 		return true;
 	}
 
-	initialized = (sdmmc_host_deinit() == ESP_OK);
+	initialized = !(sdmmc_host_deinit() == ESP_OK);
 
 	if (!initialized) {
 		ESP_LOGI(kTag, "deinitializing SD card -- success");
