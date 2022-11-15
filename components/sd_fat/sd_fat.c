@@ -24,6 +24,72 @@ static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
 static bool initialized = false;
 static const char *kTag = "[sd_fat]";
 
+/// \brief SD card peripheral uses the same output pins as JTAG does. This
+/// function reconfigures the pins, so they can be used for JTAG debugging. \sa
+/// `sdFatDeinit`. Reset pins 12 through 15, so they can be used for JTAG
+/// connection.
+///
+/// \details More info on how "GPIO_MUX" and GPIO Matrix work in this manual:
+/// https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf#iomuxgpio
+static esp_err_t pinsDeinit()
+{
+	const gpio_num_t kGpioNums[] = {
+		GPIO_NUM_12,
+		GPIO_NUM_13,
+		GPIO_NUM_14,
+		GPIO_NUM_15
+	};
+	// Restores pin default configuration. Refer to
+	// https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf#iomuxgpio
+	// table "4-3" for the complete list of pin default configurations.
+	const gpio_config_t kGpioConfigs[] = {
+		{
+			.pin_bit_mask = BIT64(kGpioNums[0]),
+			.mode = GPIO_MODE_INPUT,
+			.pull_up_en = false,
+			.pull_down_en = true,
+			.intr_type = GPIO_INTR_DISABLE
+		},
+		{
+			.pin_bit_mask = BIT64(kGpioNums[1]),
+			.mode = GPIO_MODE_INPUT,
+			.pull_up_en = false,
+			.pull_down_en = true,
+			.intr_type = GPIO_INTR_DISABLE
+		},
+		{
+			.pin_bit_mask = BIT64(kGpioNums[2]),
+			.mode = GPIO_MODE_INPUT,
+			.pull_up_en = true,
+			.pull_down_en = false,
+			.intr_type = GPIO_INTR_DISABLE
+		},
+		{
+			.pin_bit_mask = BIT64(kGpioNums[3]),
+			.mode = GPIO_MODE_INPUT,
+			.pull_up_en = true,
+			.pull_down_en = false,
+			.intr_type = GPIO_INTR_DISABLE
+		},
+	};
+	const int knPins = sizeof(kGpioConfigs) / sizeof(gpio_config_t);
+	esp_err_t result = ESP_OK;
+
+	for (int i = 0; i < knPins; ++i) {
+		const int kFunctionIdMt = 0;  // The configured pins provide "MTDI", "MTCK", "MTMS", and "MTDO" as alternative functions. Coincidentally, each one of these functions has index "0"
+		const bool fInvert = false;
+		result = gpio_config(&kGpioConfigs[i]);
+
+		if (result != ESP_OK) {
+			break;
+		}
+
+		gpio_iomux_out(kGpioNums[i], kFunctionIdMt, fInvert);
+	}
+
+	return result;
+}
+
 static esp_err_t initializeSlot()
 {
 	static const sdmmc_slot_config_t slotConfig = {
@@ -121,6 +187,7 @@ bool sdFatDeinit()
 	}
 
 	initialized = !(sdmmc_host_deinit() == ESP_OK);
+	pinsDeinit();
 
 	if (!initialized) {
 		ESP_LOGI(kTag, "deinitializing SD card -- success");
