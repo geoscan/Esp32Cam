@@ -152,7 +152,7 @@ static esp_err_t unmountFat()
 	esp_err_t err = f_mount(fatfs, fatDrivePath, MountRightNow);
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "unmountFat -- error (f_mount) %d", err);
+		ESP_LOGE(kTag, "unmountFat -- error (f_mount) %d %s", err, esp_err_to_name(err));
 	}
 
 	if (err == ESP_OK) {
