@@ -124,21 +124,31 @@ static esp_err_t mountFat()
 
 	esp_err_t err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
 
-	if (err != ESP_OK && err == FF_DRV_NOT_USED) {
-		return ESP_ERR_NO_MEM;
-	}
-	fatDrivePath[0] = (char)('0' + pdrv);
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
 
-	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
-
-	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
-	if (err != ESP_ERR_INVALID_STATE && err != ESP_OK) {
 		return err;
 	}
 
-	err = f_mount(sFatfs, fatDrivePath, MountRightNow) == FR_OK ? ESP_OK : ESP_FAIL;
+	fatDrivePath[0] = (char)('0' + pdrv);
+	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
+	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 
-	return err;
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "mountFat -- error (register FAT) %d %s", err, esp_err_to_name(err));
+
+		return err;
+	}
+
+	err = f_mount(sFatfs, fatDrivePath, MountRightNow);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "mountFat -- error (f_mount) %d %s", err, esp_err_to_name(err));
+
+		return err;
+	}
+
+	return ESP_OK;
 }
 
 /// \brief Implements SD deinitialization sequence, as described here:
