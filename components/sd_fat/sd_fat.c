@@ -222,8 +222,6 @@ bool sdFatInit()
 
 bool sdFatDeinit()
 {
-	ESP_LOGI(kTag, "deinitializing SD card");
-
 	esp_err_t err = ESP_OK;
 
 	{
@@ -262,6 +260,8 @@ bool sdFatDeinit()
 
 	if (err == ESP_OK) {
 		ESP_LOGI(kTag, "sdFatDeinit -- success");
+	} else {
+		ESP_LOGE(kTag, "sdFatDeinit -- error %d %s", err, esp_err_to_name(err));
 	}
 
 	return (err == ESP_OK);
