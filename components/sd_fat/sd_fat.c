@@ -21,7 +21,6 @@
 static const int kSlotId = 1;
 static sdmmc_card_t *cardConfig = NULL;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
-static bool initialized = false;
 static const char *kTag = "[sd_fat]";
 static FATFS *sFatfs = NULL;
 static char fatDrivePath[] = {'\0', ':', '\0'};
