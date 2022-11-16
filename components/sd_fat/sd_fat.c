@@ -125,9 +125,14 @@ static esp_err_t mountFat()
 	esp_err_t err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
+		if (err == ESP_ERR_INVALID_STATE) {
+			ESP_LOGW(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
+			err = ESP_OK;
+		} else {
+			ESP_LOGE(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
 
-		return err;
+			return err;
+		}
 	}
 
 	fatDrivePath[0] = (char)('0' + pdrv);
@@ -135,9 +140,14 @@ static esp_err_t mountFat()
 	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "mountFat -- error (register FAT) %d %s", err, esp_err_to_name(err));
+		if (err == ESP_ERR_INVALID_STATE) {
+			ESP_LOGW(kTag, "mountFat -- error (vfs_fat_register) %d %s", err, esp_err_to_name(err));
+			err = ESP_OK;
+		} else {
+			ESP_LOGE(kTag, "mountFat -- error (vfs_fat_register) %d %s", err, esp_err_to_name(err));
 
-		return err;
+			return err;
+		}
 	}
 
 	err = f_mount(sFatfs, fatDrivePath, MountRightNow);
