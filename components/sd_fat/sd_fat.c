@@ -212,14 +212,13 @@ bool sdFatInit()
 		}
 	}
 
-	initialized = (err == ESP_OK);
-	if (initialized) {
+	if (err == ESP_OK) {
 		ESP_LOGI(kTag, "initializing SD card -- success");
 	} else {
 		ESP_LOGE(kTag, "initalizing SD card -- FAILED");
 	}
 
-	return initialized;
+	return (err == ESP_OK);
 }
 
 bool sdFatDeinit()
