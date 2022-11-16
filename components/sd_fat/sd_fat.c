@@ -237,6 +237,7 @@ bool sdFatDeinit()
 
 	initialized = !(sdmmc_host_deinit() == ESP_OK);
 	pinsDeinit();
+	unmountFat();
 
 	if (!initialized) {
 		ESP_LOGI(kTag, "deinitializing SD card -- success");
