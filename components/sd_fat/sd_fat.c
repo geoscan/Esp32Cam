@@ -19,11 +19,12 @@
 #endif
 
 static const int kSlotId = 1;
-static sdmmc_card_t *cardConfig;
+static sdmmc_card_t *cardConfig = NULL;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
 static bool initialized = false;
 static const char *kTag = "[sd_fat]";
 static FATFS *sFatfs = NULL;
+static char fatDrivePath[] = {'\0', ':', '\0'};
 
 /// \brief SD card peripheral uses the same output pins as JTAG does. This
 /// function reconfigures the pins, so they can be used for JTAG debugging. \sa
@@ -118,10 +119,8 @@ static esp_err_t mountFat()
 		MountRightNow = 1
 	};
 
-	char fatDrivePath[] = {'\0', ':', '\0'};
-	esp_err_t err;
+	esp_err_t err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
 
-	err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
 	if (err != ESP_OK && err == FF_DRV_NOT_USED) {
 		return ESP_ERR_NO_MEM;
 	}
@@ -135,6 +134,40 @@ static esp_err_t mountFat()
 	}
 
 	err = f_mount(sFatfs, fatDrivePath, MountRightNow) == FR_OK ? ESP_OK : ESP_FAIL;
+
+	return err;
+}
+
+/// \brief Implements SD deinitialization sequence, as described here:
+/// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/fatfs.html
+static esp_err_t unmountFat()
+{
+	// Arguments to `f_mount`
+	enum {
+		MountOnFirstAccess = 0,
+		MountRightNow = 1
+	};
+
+	FATFS *fatfs = NULL;
+	esp_err_t err = f_mount(fatfs, fatDrivePath, MountRightNow);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "unmountFat -- error (f_mount) %d", err);
+	}
+
+	if (err == ESP_OK) {
+		sdmmc_card_t *sdmmcCard = NULL;
+		ff_diskio_register_sdmmc(pdrv, sdmmcCard);
+	}
+
+	if (err == ESP_OK) {
+		err = esp_vfs_fat_unregister_path(fatDrivePath);
+		free(sFatfs);
+
+		if (err != ESP_OK) {
+			ESP_LOGE(kTag, "unmountFat -- error (unregister path) %d", err);
+		}
+	}
 
 	return err;
 }
