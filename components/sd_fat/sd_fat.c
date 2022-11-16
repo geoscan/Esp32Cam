@@ -184,7 +184,7 @@ bool sdFatInit()
 	err = sdmmc_host_init();
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "sdFatInit - fail (init host) %d", err);
+		ESP_LOGE(kTag, "sdFatInit - fail (init host) %d %s", err, esp_err_to_name(err));
 	}
 
 	if (err == ESP_OK) {
