@@ -80,10 +80,14 @@ static esp_err_t pinsDeinit()
 	for (int i = 0; i < knPins; ++i) {
 		const int kFunctionIdMt = 0;  // The configured pins provide "MTDI", "MTCK", "MTMS", and "MTDO" as alternative functions. Coincidentally, each one of these functions has index "0"
 		const bool fInvert = false;
-		result = gpio_config(&kGpioConfigs[i]);
+		esp_err_t err = gpio_config(&kGpioConfigs[i]);
 
-		if (result != ESP_OK) {
-			break;
+		if (err != ESP_OK) {
+			ESP_LOGE(kTag, "pinsDeinit -- error, pin #%d, error %d %s", kGpioNums[i], err, esp_err_to_name(err));
+		}
+
+		if (result == ESP_OK) {
+			result = err;
 		}
 
 		gpio_iomux_out(kGpioNums[i], kFunctionIdMt, fInvert);
