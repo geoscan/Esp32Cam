@@ -181,14 +181,6 @@ static esp_err_t unmountFat()
 
 bool sdFatInit()
 {
-	ESP_LOGI(kTag, "initializing SD card");
-
-	if (initialized) {
-		ESP_LOGI(kTag, "initializing SD card -- success (already initialized)");
-
-		return true;
-	}
-
 	esp_err_t err = ESP_OK;
 	err = sdmmc_host_init();
 
