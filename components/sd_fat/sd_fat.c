@@ -225,22 +225,47 @@ bool sdFatDeinit()
 {
 	ESP_LOGI(kTag, "deinitializing SD card");
 
-	if (!initialized) {
-		ESP_LOGI(kTag, "deinitializing SD card -- success (already deinitialized)");
-		return true;
+	esp_err_t err = ESP_OK;
+
+	{
+		esp_err_t errUnmount = unmountFat();
+
+		if (err == ESP_OK) {
+			err = errUnmount;
+		}
+
+		if (errUnmount != ESP_OK) {
+			ESP_LOGE(kTag, "sdFatDeinit -- error (unmount fat) %d %s", errUnmount, esp_err_to_name(errUnmount));
+		}
+	}
+	{
+		esp_err_t errHostDeinit = sdmmc_host_deinit();
+
+		if (err == ESP_OK) {
+			err = errHostDeinit;
+		}
+
+		if (errHostDeinit != ESP_OK) {
+			ESP_LOGE(kTag, "sdFatDeinit -- error (host deinit) %d %s", errHostDeinit, esp_err_to_name(errHostDeinit));
+		}
+	}
+	{
+		esp_err_t errPinsDeinit = pinsDeinit();
+
+		if (err == ESP_OK) {
+			err = errPinsDeinit;
+		}
+
+		if (errPinsDeinit != ESP_OK) {
+			ESP_LOGE(kTag, "sdFatDeinit -- error (pinsDeinit) %d %s", errPinsDeinit, esp_err_to_name(errPinsDeinit));
+		}
 	}
 
-	initialized = !(sdmmc_host_deinit() == ESP_OK);
-	pinsDeinit();
-	unmountFat();
-
-	if (!initialized) {
-		ESP_LOGI(kTag, "deinitializing SD card -- success");
-	} else {
-		ESP_LOGE(kTag, "deinitalizing SD card -- FAILED");
+	if (err == ESP_OK) {
+		ESP_LOGI(kTag, "sdFatDeinit -- success");
 	}
 
-	return !initialized;
+	return (err == ESP_OK);
 }
 
 void sdFatWriteTest()
