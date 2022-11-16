@@ -185,37 +185,35 @@ bool sdFatInit()
 
 	if (err != ESP_OK) {
 		ESP_LOGE(kTag, "sdFatInit - fail (init host) %d %s", err, esp_err_to_name(err));
+
+		return err;
 	}
 
-	if (err == ESP_OK) {
-		err = initializeSlot();
+	err = initializeSlot();
 
-		if (err != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatInit - fail (init slot) %d", err);
-		}
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "sdFatInit - fail (init slot) %d", err);
+
+		return err;
 	}
 
-	if (err == ESP_OK) {
-		err = initializeCard();
+	err = initializeCard();
 
-		if (err != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatInit - fail (init card) %d", err);
-		}
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "sdFatInit - fail (init card) %d", err);
+
+		return err;
 	}
 
-	if (err == ESP_OK) {
-		err = mountFat();
+	err = mountFat();
 
-		if (err != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatInit - fail (mount FAT) %d", err);
-		}
+	if (err != ESP_OK) {
+		ESP_LOGE(kTag, "sdFatInit - fail (mount FAT) %d", err);
+
+		return err;
 	}
 
-	if (err == ESP_OK) {
-		ESP_LOGI(kTag, "initializing SD card -- success");
-	} else {
-		ESP_LOGE(kTag, "initalizing SD card -- FAILED");
-	}
+	ESP_LOGI(kTag, "initializing SD card -- success");
 
 	return (err == ESP_OK);
 }
