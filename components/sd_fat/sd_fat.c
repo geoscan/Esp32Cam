@@ -23,6 +23,7 @@ static sdmmc_card_t *cardConfig;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
 static bool initialized = false;
 static const char *kTag = "[sd_fat]";
+static FATFS *sFatfs = NULL;
 
 /// \brief SD card peripheral uses the same output pins as JTAG does. This
 /// function reconfigures the pins, so they can be used for JTAG debugging. \sa
@@ -117,7 +118,6 @@ static esp_err_t mountFat()
 		MountRightNow = 1
 	};
 
-	FATFS *fs = NULL;
 	char fatDrivePath[] = {'\0', ':', '\0'};
 	esp_err_t err;
 
@@ -129,12 +129,12 @@ static esp_err_t mountFat()
 
 	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
 
-	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &fs);  // Connect FAT FS to VFS
+	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 	if (err != ESP_ERR_INVALID_STATE && err != ESP_OK) {
 		return err;
 	}
 
-	err = f_mount(fs, fatDrivePath, MountRightNow) == FR_OK ? ESP_OK : ESP_FAIL;
+	err = f_mount(sFatfs, fatDrivePath, MountRightNow) == FR_OK ? ESP_OK : ESP_FAIL;
 
 	return err;
 }
