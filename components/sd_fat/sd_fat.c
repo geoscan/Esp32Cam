@@ -25,6 +25,14 @@ static const char *kTag = "[sd_fat]";
 static FATFS *sFatfs = NULL;
 static char fatDrivePath[] = {'\0', ':', '\0'};
 
+static esp_err_t deinitializeSlot();
+static esp_err_t mountFat();
+static esp_err_t pinsDeinit();
+static esp_err_t initializeSlot();
+static esp_err_t mountFat();
+static esp_err_t unmountFat();
+void sdFatWriteTest();
+
 /// \brief Boilerplate reducer
 static inline void logError(const char *method, const char *context, esp_err_t err)
 {
@@ -154,6 +162,38 @@ static esp_err_t initializeSlot()
 	return ESP_OK;
 }
 
+/// \brief Hardware deinitialization
+static esp_err_t deinitializeSlot()
+{
+	esp_err_t err = ESP_OK;
+	{
+		esp_err_t errHostDeinit = sdmmc_host_deinit();
+
+		if (err == ESP_OK) {
+			err = errHostDeinit;
+		}
+
+		if (errHostDeinit != ESP_OK) {
+			logError("sdFatDeinit", "host deinit", err);
+			err = errHostDeinit;
+		}
+	}
+	{
+		esp_err_t errPinsDeinit = pinsDeinit();
+
+		if (err == ESP_OK) {
+			err = errPinsDeinit;
+		}
+
+		if (errPinsDeinit != ESP_OK) {
+			logError("sdFatDeinit", "pins deinit", err);
+			err = errPinsDeinit;
+		}
+	}
+
+	return err;
+}
+
 static esp_err_t mountFat()
 {
 	enum {
@@ -261,7 +301,6 @@ bool sdFatInit()
 bool sdFatDeinit()
 {
 	esp_err_t err = ESP_OK;
-
 	{
 		esp_err_t errUnmount = unmountFat();
 
@@ -274,25 +313,14 @@ bool sdFatDeinit()
 		}
 	}
 	{
-		esp_err_t errHostDeinit = sdmmc_host_deinit();
+		esp_err_t errSlotDeinit = deinitializeSlot();
 
 		if (err == ESP_OK) {
-			err = errHostDeinit;
+			err = errSlotDeinit;
 		}
 
-		if (errHostDeinit != ESP_OK) {
-			logError("sdFatDeinit", "host deinit", err);
-		}
-	}
-	{
-		esp_err_t errPinsDeinit = pinsDeinit();
-
-		if (err == ESP_OK) {
-			err = errPinsDeinit;
-		}
-
-		if (errPinsDeinit != ESP_OK) {
-			logError("sdFatDeinit", "pins deinit", err);
+		if (errSlotDeinit != ESP_OK) {
+			logError("sdFatDeinit", "slot deinit", err);
 		}
 	}
 
