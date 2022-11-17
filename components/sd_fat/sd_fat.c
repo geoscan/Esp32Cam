@@ -31,7 +31,7 @@ static esp_err_t pinsDeinit();
 static esp_err_t initializeSlot();
 static esp_err_t mountFat();
 static esp_err_t unmountFat();
-void sdFatWriteTest();
+esp_err_t sdFatWriteTest();
 
 /// \brief Boilerplate reducer
 static inline void logError(const char *method, const char *context, esp_err_t err)
