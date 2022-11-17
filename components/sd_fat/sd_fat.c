@@ -95,16 +95,28 @@ static esp_err_t pinsDeinit()
 	return result;
 }
 
+/// \brief Hardware initialization
 static esp_err_t initializeSlot()
 {
-	static const sdmmc_slot_config_t slotConfig = {
-		.gpio_cd = -1,  // No card detect (CD)
-		.gpio_wp = -1,  // No write protect (WP)
-		.width   =  0,
-		.flags   =  0,
-	};
+	esp_err_t err = ESP_OK;
 
-	return sdmmc_host_init_slot(kSlotId, &slotConfig);
+	{
+		static const sdmmc_slot_config_t slotConfig = {
+			.gpio_cd = -1,  // No card detect (CD)
+			.gpio_wp = -1,  // No write protect (WP)
+			.width   =  0,
+			.flags   =  0,
+		};
+		err = sdmmc_host_init_slot(kSlotId, &slotConfig);
+
+		if (err != ESP_OK) {
+			ESP_LOGE(kTag, "initializeSlot -- error (init SDMMC host) %d %s", err, esp_err_to_name(err));
+
+			return err;
+		}
+	}
+
+	return ESP_OK;
 }
 
 static esp_err_t initializeCard()
