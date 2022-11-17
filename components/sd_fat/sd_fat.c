@@ -253,18 +253,20 @@ static esp_err_t unmountFat()
 		logError("unmountFat", "f_mount", err);
 	}
 
-	if (err == ESP_OK) {
-		ff_diskio_unregister(pdrv);
-	}
+	ff_diskio_unregister(pdrv);
+	{
+		ESP_LOGI(kTag, "unmountFat. Unregistering path %s", fatDrivePath);
+		esp_err_t errStage = esp_vfs_fat_unregister_path(fatDrivePath);
 
-	if (err == ESP_OK) {
-		err = esp_vfs_fat_unregister_path(fatDrivePath);
-		free(sFatfs);
+		if (errStage != ESP_OK) {
+			logError("unmountFat", "unregister path", errStage);
+		}
 
-		if (err != ESP_OK) {
-			logError("unmountFat", "unregister path", err);
+		if (err == ESP_OK) {
+			err = errStage;
 		}
 	}
+	free(sFatfs);
 
 	return err;
 }
