@@ -31,7 +31,7 @@ static esp_err_t pinsDeinit();
 static esp_err_t initializeSlot();
 static esp_err_t mountFat();
 static esp_err_t unmountFat();
-esp_err_t sdFatWriteTest();
+static esp_err_t sdFatWriteTest();
 
 /// \brief Boilerplate reducer
 static inline void logError(const char *method, const char *context, esp_err_t err)
@@ -344,7 +344,7 @@ bool sdFatDeinit()
 }
 
 /// \brief Attemps to write to a file. May be used as an indication that configuration has completed successfully.
-esp_err_t sdFatWriteTest()
+static esp_err_t sdFatWriteTest()
 {
 	FILE *file = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
 
