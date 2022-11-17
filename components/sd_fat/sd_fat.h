@@ -17,7 +17,7 @@ extern "C" {
 
 bool sdFatInit();
 bool sdFatDeinit();
-void sdFatWriteTest();
+esp_err_t sdFatWriteTest();
 
 #ifdef __cplusplus
 }
