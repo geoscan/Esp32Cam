@@ -25,6 +25,18 @@ static const char *kTag = "[sd_fat]";
 static FATFS *sFatfs = NULL;
 static char fatDrivePath[] = {'\0', ':', '\0'};
 
+/// \brief Boilerplate reducer
+static inline void logError(const char *method, const char *context, esp_err_t err)
+{
+	ESP_LOGE(kTag, "%s (%s) -- error %d (%s)", method, context, err, esp_err_to_name(err));
+}
+
+/// \brief Boilerplate reducer
+static inline void logWarning(const char *method, const char *context, esp_err_t err)
+{
+	ESP_LOGW(kTag, "%s (%s) -- error %d (%s)", method, context, err, esp_err_to_name(err));
+}
+
 /// \brief SD card peripheral uses the same output pins as JTAG does. This
 /// function reconfigures the pins, so they can be used for JTAG debugging. \sa
 /// `sdFatDeinit`. Reset pins 12 through 15, so they can be used for JTAG
@@ -110,7 +122,7 @@ static esp_err_t initializeSlot()
 		err = sdmmc_host_init_slot(kSlotId, &slotConfig);
 
 		if (err != ESP_OK) {
-			ESP_LOGE(kTag, "initializeSlot -- error (init SDMMC host) %d %s", err, esp_err_to_name(err));
+			logError("initializeSlot", "init SDMMC host", err);
 
 			return err;
 		}
@@ -138,10 +150,10 @@ static esp_err_t mountFat()
 
 	if (err != ESP_OK) {
 		if (err == ESP_ERR_INVALID_STATE) {
-			ESP_LOGW(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
+			logWarning("mountFat", "diskio get drive", err);
 			err = ESP_OK;
 		} else {
-			ESP_LOGE(kTag, "mountFat -- error (diskio get drive) %d %s", err, esp_err_to_name(err));
+			logError("mountFat", "diskio get drive", err);
 
 			return err;
 		}
@@ -153,10 +165,10 @@ static esp_err_t mountFat()
 
 	if (err != ESP_OK) {
 		if (err == ESP_ERR_INVALID_STATE) {
-			ESP_LOGW(kTag, "mountFat -- error (vfs_fat_register) %d %s", err, esp_err_to_name(err));
+			logWarning("mountFat", "register VFS FAT", err);
 			err = ESP_OK;
 		} else {
-			ESP_LOGE(kTag, "mountFat -- error (vfs_fat_register) %d %s", err, esp_err_to_name(err));
+			logError("mountFat", "register VFS FAT", err);
 
 			return err;
 		}
@@ -165,7 +177,7 @@ static esp_err_t mountFat()
 	err = f_mount(sFatfs, fatDrivePath, MountRightNow);
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "mountFat -- error (f_mount) %d %s", err, esp_err_to_name(err));
+		logError("mountFat", "f_mount", err);
 
 		return err;
 	}
@@ -187,7 +199,7 @@ static esp_err_t unmountFat()
 	esp_err_t err = f_mount(fatfs, fatDrivePath, MountRightNow);
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "unmountFat -- error (f_mount) %d %s", err, esp_err_to_name(err));
+		logError("unmountFat", "f_mount", err);
 	}
 
 	if (err == ESP_OK) {
@@ -200,7 +212,7 @@ static esp_err_t unmountFat()
 		free(sFatfs);
 
 		if (err != ESP_OK) {
-			ESP_LOGE(kTag, "unmountFat -- error (unregister path) %d", err);
+			logError("unmountFat", "unregister path", err);
 		}
 	}
 
@@ -216,7 +228,7 @@ bool sdFatInit()
 	err = sdmmc_host_init();
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "sdFatInit - fail (init host) %d %s", err, esp_err_to_name(err));
+		logError("sdFatInit", "init host", err);
 
 		return err;
 	}
@@ -224,7 +236,7 @@ bool sdFatInit()
 	err = initializeSlot();
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "sdFatInit - fail (init slot) %d", err);
+		logError("sdFatInit", "init slot", err);
 
 		return err;
 	}
@@ -232,7 +244,7 @@ bool sdFatInit()
 	err = initializeCard();
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "sdFatInit - fail (init card) %d", err);
+		logError("sdFatInit", "init card", err);
 
 		return err;
 	}
@@ -240,7 +252,7 @@ bool sdFatInit()
 	err = mountFat();
 
 	if (err != ESP_OK) {
-		ESP_LOGE(kTag, "sdFatInit - fail (mount FAT) %d", err);
+		logError("sdFatInit", "mount FAT", err);
 
 		return err;
 	}
@@ -262,7 +274,7 @@ bool sdFatDeinit()
 		}
 
 		if (errUnmount != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatDeinit -- error (unmount fat) %d %s", errUnmount, esp_err_to_name(errUnmount));
+			logError("sdFatDeinit", "unmount FAT", err);
 		}
 	}
 	{
@@ -273,7 +285,7 @@ bool sdFatDeinit()
 		}
 
 		if (errHostDeinit != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatDeinit -- error (host deinit) %d %s", errHostDeinit, esp_err_to_name(errHostDeinit));
+			logError("sdFatDeinit", "host deinit", err);
 		}
 	}
 	{
@@ -284,14 +296,14 @@ bool sdFatDeinit()
 		}
 
 		if (errPinsDeinit != ESP_OK) {
-			ESP_LOGE(kTag, "sdFatDeinit -- error (pinsDeinit) %d %s", errPinsDeinit, esp_err_to_name(errPinsDeinit));
+			logError("sdFatDeinit", "pins deinit", err);
 		}
 	}
 
 	if (err == ESP_OK) {
 		ESP_LOGI(kTag, "sdFatDeinit -- success");
 	} else {
-		ESP_LOGE(kTag, "sdFatDeinit -- error %d %s", err, esp_err_to_name(err));
+		logError("sdFatDeinit", "", err);
 	}
 
 	return (err == ESP_OK);
