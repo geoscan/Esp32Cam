@@ -110,8 +110,18 @@ static esp_err_t pinsDeinit()
 /// \brief Hardware initialization
 static esp_err_t initializeSlot()
 {
+	static const char *ctx = "initializeSlot";
 	esp_err_t err = ESP_OK;
+	// Init host
+	err = sdmmc_host_init();
 
+	if (err != ESP_OK) {
+		logError(ctx, "init SDMMC host", err);
+
+		return err;
+	}
+
+	// Init slot
 	{
 		static const sdmmc_slot_config_t slotConfig = {
 			.gpio_cd = -1,  // No card detect (CD)
@@ -122,7 +132,20 @@ static esp_err_t initializeSlot()
 		err = sdmmc_host_init_slot(kSlotId, &slotConfig);
 
 		if (err != ESP_OK) {
-			logError("initializeSlot", "init SDMMC host", err);
+			logError(ctx, "init SDMMC host", err);
+
+			return err;
+		}
+	}
+
+	// Init card
+	{
+		static sdmmc_host_t hostConfig = SDMMC_HOST_DEFAULT();
+		cardConfig = malloc(sizeof(sdmmc_card_t));
+		err = sdmmc_card_init(&hostConfig, cardConfig);
+
+		if (err != ESP_OK) {
+			logError(ctx, "init SDMMC card", err);
 
 			return err;
 		}
@@ -225,26 +248,10 @@ static esp_err_t unmountFat()
 bool sdFatInit()
 {
 	esp_err_t err = ESP_OK;
-	err = sdmmc_host_init();
-
-	if (err != ESP_OK) {
-		logError("sdFatInit", "init host", err);
-
-		return err;
-	}
-
 	err = initializeSlot();
 
 	if (err != ESP_OK) {
 		logError("sdFatInit", "init slot", err);
-
-		return err;
-	}
-
-	err = initializeCard();
-
-	if (err != ESP_OK) {
-		logError("sdFatInit", "init card", err);
 
 		return err;
 	}
