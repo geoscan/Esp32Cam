@@ -242,9 +242,6 @@ static esp_err_t unmountFat()
 	return err;
 }
 
-// Initializes SD card, it relies on presence of FAT-family filesystem on the
-// card.
-
 bool sdFatInit()
 {
 	esp_err_t err = ESP_OK;
