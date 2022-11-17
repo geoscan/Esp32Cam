@@ -145,7 +145,6 @@ static esp_err_t initializeSlot()
 			return err;
 		}
 	}
-
 	// Init card
 	{
 		static sdmmc_host_t hostConfig = SDMMC_HOST_DEFAULT();
