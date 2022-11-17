@@ -215,7 +215,6 @@ static esp_err_t mountFat()
 	}
 
 	fatDrivePath[0] = (char)('0' + pdrv);
-	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
 	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 
 	if (err != ESP_OK) {
@@ -228,7 +227,7 @@ static esp_err_t mountFat()
 			return err;
 		}
 	}
-
+	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
 	err = f_mount(sFatfs, fatDrivePath, MountRightNow);
 
 	if (err != ESP_OK) {
