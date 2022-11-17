@@ -214,6 +214,7 @@ static esp_err_t mountFat()
 		}
 	}
 
+	ESP_LOGI(kTag, "mountFat. Assigned drive number %d", pdrv);
 	fatDrivePath[0] = (char)('0' + pdrv);
 	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 
