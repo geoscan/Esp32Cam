@@ -154,14 +154,6 @@ static esp_err_t initializeSlot()
 	return ESP_OK;
 }
 
-static esp_err_t initializeCard()
-{
-	static sdmmc_host_t hostConfig = SDMMC_HOST_DEFAULT();
-	cardConfig = malloc(sizeof(sdmmc_card_t));
-
-	return sdmmc_card_init(&hostConfig, cardConfig);
-}
-
 static esp_err_t mountFat()
 {
 	enum {
