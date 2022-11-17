@@ -295,6 +295,14 @@ bool sdFatInit()
 		return err;
 	}
 
+	err = sdFatWriteTest();
+
+	if (err != ESP_OK) {
+		logError("sdFatInit", "test file output", err);
+
+		return err;
+	}
+
 	ESP_LOGI(kTag, "initializing SD card -- success");
 
 	return (err == ESP_OK);
