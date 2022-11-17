@@ -284,7 +284,7 @@ bool sdFatInit()
 	if (err != ESP_OK) {
 		logError("sdFatInit", "init slot", err);
 
-		return err;
+		return false;
 	}
 
 	err = mountFat();
@@ -292,7 +292,7 @@ bool sdFatInit()
 	if (err != ESP_OK) {
 		logError("sdFatInit", "mount FAT", err);
 
-		return err;
+		return false;
 	}
 
 	err = sdFatWriteTest();
@@ -300,12 +300,12 @@ bool sdFatInit()
 	if (err != ESP_OK) {
 		logError("sdFatInit", "test file output", err);
 
-		return err;
+		return false;
 	}
 
 	ESP_LOGI(kTag, "initializing SD card -- success");
 
-	return (err == ESP_OK);
+	return true;
 }
 
 bool sdFatDeinit()
