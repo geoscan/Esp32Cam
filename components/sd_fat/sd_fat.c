@@ -266,7 +266,6 @@ static esp_err_t unmountFat()
 			err = errStage;
 		}
 	}
-	free(sFatfs);
 
 	return err;
 }
