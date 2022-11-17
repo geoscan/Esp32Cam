@@ -193,6 +193,7 @@ static esp_err_t deinitializeSlot()
 	return err;
 }
 
+/// \brief Software initialization
 static esp_err_t mountFat()
 {
 	enum {
@@ -239,7 +240,9 @@ static esp_err_t mountFat()
 	return ESP_OK;
 }
 
-/// \brief Implements SD deinitialization sequence, as described here:
+/// \brief Software deinitialization
+///
+/// \details Implements SD deinitialization sequence, as described here:
 /// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/fatfs.html
 static esp_err_t unmountFat()
 {
@@ -332,6 +335,7 @@ bool sdFatDeinit()
 	return (err == ESP_OK);
 }
 
+/// \brief Attemps to write to a file. May be used as an indication that configuration has completed successfully.
 void sdFatWriteTest()
 {
 	FILE *f = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
