@@ -246,22 +246,15 @@ static esp_err_t mountFat()
 /// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/fatfs.html
 static esp_err_t unmountFat()
 {
-	// Arguments to `f_mount`
-	enum {
-		MountOnFirstAccess = 0,
-		MountRightNow = 1
-	};
-
-	FATFS *fatfs = NULL;
-	esp_err_t err = f_mount(fatfs, fatDrivePath, MountRightNow);
+	esp_err_t err = ESP_OK;
+	err = f_unmount(fatDrivePath);
 
 	if (err != ESP_OK) {
 		logError("unmountFat", "f_mount", err);
 	}
 
 	if (err == ESP_OK) {
-		sdmmc_card_t *sdmmcCard = NULL;
-		ff_diskio_register_sdmmc(pdrv, sdmmcCard);
+		ff_diskio_unregister(pdrv);
 	}
 
 	if (err == ESP_OK) {
