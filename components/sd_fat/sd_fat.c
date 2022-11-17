@@ -338,11 +338,14 @@ bool sdFatDeinit()
 /// \brief Attemps to write to a file. May be used as an indication that configuration has completed successfully.
 void sdFatWriteTest()
 {
-	FILE *f = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
-	if (f == NULL) {
+	FILE *file = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
+
+	if (file == NULL) {
+		logError("sdFatWriteTest", "open file", ESP_FAIL);
+
 		return;
 	}
 
-	fprintf(f, "Geoscan :)");
-	fclose(f);
+	fprintf(file, "Geoscan :)");
+	fclose(file);
 }
