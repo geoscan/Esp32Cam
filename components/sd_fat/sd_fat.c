@@ -255,8 +255,8 @@ static esp_err_t unmountFat()
 
 	ff_diskio_unregister(pdrv);
 	{
-		ESP_LOGI(kTag, "unmountFat. Unregistering path %s", fatDrivePath);
-		esp_err_t errStage = esp_vfs_fat_unregister_path(fatDrivePath);
+		ESP_LOGI(kTag, "unmountFat. Unregistering path %s", CONFIG_SD_FAT_MOUNT_POINT);
+		esp_err_t errStage = esp_vfs_fat_unregister_path(CONFIG_SD_FAT_MOUNT_POINT);
 
 		if (errStage != ESP_OK) {
 			logError("unmountFat", "unregister path", errStage);
