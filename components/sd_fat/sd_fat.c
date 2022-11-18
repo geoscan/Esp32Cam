@@ -19,10 +19,31 @@
 #endif
 
 static const int kSlotId = 1;
-static sdmmc_card_t *cardConfig;
+static sdmmc_card_t *cardConfig = NULL;
 static BYTE pdrv = FF_DRV_NOT_USED;  // Not Used
-static bool initialized = false;
 static const char *kTag = "[sd_fat]";
+static FATFS *sFatfs = NULL;
+static char fatDrivePath[] = {'\0', ':', '\0'};
+
+static esp_err_t deinitializeSlot();
+static esp_err_t mountFat();
+static esp_err_t pinsDeinit();
+static esp_err_t initializeSlot();
+static esp_err_t mountFat();
+static esp_err_t unmountFat();
+static esp_err_t sdFatWriteTest();
+
+/// \brief Boilerplate reducer
+static inline void logError(const char *method, const char *context, esp_err_t err)
+{
+	ESP_LOGE(kTag, "%s (%s) -- error %d (%s)", method, context, err, esp_err_to_name(err));
+}
+
+/// \brief Boilerplate reducer
+static inline void logWarning(const char *method, const char *context, esp_err_t err)
+{
+	ESP_LOGW(kTag, "%s (%s) -- error %d (%s)", method, context, err, esp_err_to_name(err));
+}
 
 /// \brief SD card peripheral uses the same output pins as JTAG does. This
 /// function reconfigures the pins, so they can be used for JTAG debugging. \sa
@@ -78,10 +99,14 @@ static esp_err_t pinsDeinit()
 	for (int i = 0; i < knPins; ++i) {
 		const int kFunctionIdMt = 0;  // The configured pins provide "MTDI", "MTCK", "MTMS", and "MTDO" as alternative functions. Coincidentally, each one of these functions has index "0"
 		const bool fInvert = false;
-		result = gpio_config(&kGpioConfigs[i]);
+		esp_err_t err = gpio_config(&kGpioConfigs[i]);
 
-		if (result != ESP_OK) {
-			break;
+		if (err != ESP_OK) {
+			ESP_LOGE(kTag, "pinsDeinit -- error, pin #%d, error %d %s", kGpioNums[i], err, esp_err_to_name(err));
+		}
+
+		if (result == ESP_OK) {
+			result = err;
 		}
 
 		gpio_iomux_out(kGpioNums[i], kFunctionIdMt, fInvert);
@@ -90,26 +115,85 @@ static esp_err_t pinsDeinit()
 	return result;
 }
 
+/// \brief Hardware initialization
 static esp_err_t initializeSlot()
 {
-	static const sdmmc_slot_config_t slotConfig = {
-		.gpio_cd = -1,  // No card detect (CD)
-		.gpio_wp = -1,  // No write protect (WP)
-		.width   =  0,
-		.flags   =  0,
-	};
+	static const char *ctx = "initializeSlot";
+	esp_err_t err = ESP_OK;
+	// Init host
+	err = sdmmc_host_init();
 
-	return sdmmc_host_init_slot(kSlotId, &slotConfig);
+	if (err != ESP_OK) {
+		logError(ctx, "init SDMMC host", err);
+
+		return err;
+	}
+
+	// Init slot
+	{
+		static const sdmmc_slot_config_t slotConfig = {
+			.gpio_cd = -1,  // No card detect (CD)
+			.gpio_wp = -1,  // No write protect (WP)
+			.width   =  0,
+			.flags   =  0,
+		};
+		err = sdmmc_host_init_slot(kSlotId, &slotConfig);
+
+		if (err != ESP_OK) {
+			logError(ctx, "init SDMMC host", err);
+
+			return err;
+		}
+	}
+	// Init card
+	{
+		static sdmmc_host_t hostConfig = SDMMC_HOST_DEFAULT();
+		cardConfig = malloc(sizeof(sdmmc_card_t));
+		err = sdmmc_card_init(&hostConfig, cardConfig);
+
+		if (err != ESP_OK) {
+			logError(ctx, "init SDMMC card", err);
+
+			return err;
+		}
+	}
+
+	return ESP_OK;
 }
 
-static esp_err_t initializeCard()
+/// \brief Hardware deinitialization
+static esp_err_t deinitializeSlot()
 {
-	static sdmmc_host_t hostConfig = SDMMC_HOST_DEFAULT();
-	cardConfig = malloc(sizeof(sdmmc_card_t));
+	esp_err_t err = ESP_OK;
+	{
+		esp_err_t errHostDeinit = sdmmc_host_deinit();
 
-	return sdmmc_card_init(&hostConfig, cardConfig);
+		if (err == ESP_OK) {
+			err = errHostDeinit;
+		}
+
+		if (errHostDeinit != ESP_OK) {
+			logError("sdFatDeinit", "host deinit", err);
+			err = errHostDeinit;
+		}
+	}
+	{
+		esp_err_t errPinsDeinit = pinsDeinit();
+
+		if (err == ESP_OK) {
+			err = errPinsDeinit;
+		}
+
+		if (errPinsDeinit != ESP_OK) {
+			logError("sdFatDeinit", "pins deinit", err);
+			err = errPinsDeinit;
+		}
+	}
+
+	return err;
 }
 
+/// \brief Software initialization
 static esp_err_t mountFat()
 {
 	enum {
@@ -117,94 +201,155 @@ static esp_err_t mountFat()
 		MountRightNow = 1
 	};
 
-	FATFS *fs = NULL;
-	char fatDrivePath[] = {'\0', ':', '\0'};
-	esp_err_t err;
+	esp_err_t err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
 
-	err = ff_diskio_get_drive(&pdrv);  // connect SDMMC driver to FATFS
-	if (err != ESP_OK && err == FF_DRV_NOT_USED) {
-		return ESP_ERR_NO_MEM;
+	if (err != ESP_OK) {
+		if (err == ESP_ERR_INVALID_STATE) {
+			logWarning("mountFat", "diskio get drive", err);
+			err = ESP_OK;
+		} else {
+			logError("mountFat", "diskio get drive", err);
+
+			return err;
+		}
 	}
+
+	ESP_LOGI(kTag, "mountFat. Assigned drive number %d", pdrv);
 	fatDrivePath[0] = (char)('0' + pdrv);
+	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &sFatfs);  // Connect FAT FS to VFS
 
+	if (err != ESP_OK) {
+		if (err == ESP_ERR_INVALID_STATE) {
+			logWarning("mountFat", "register VFS FAT", err);
+			err = ESP_OK;
+		} else {
+			logError("mountFat", "register VFS FAT", err);
+
+			return err;
+		}
+	}
 	ff_diskio_register_sdmmc(pdrv, cardConfig);  // Register driver
+	err = f_mount(sFatfs, fatDrivePath, MountRightNow);
 
-	err = esp_vfs_fat_register(CONFIG_SD_FAT_MOUNT_POINT, fatDrivePath, CONFIG_SD_FAT_MAX_OPENED_FILES, &fs);  // Connect FAT FS to VFS
-	if (err != ESP_ERR_INVALID_STATE && err != ESP_OK) {
+	if (err != ESP_OK) {
+		logError("mountFat", "f_mount", err);
+
 		return err;
 	}
 
-	err = f_mount(fs, fatDrivePath, MountRightNow) == FR_OK ? ESP_OK : ESP_FAIL;
+	return ESP_OK;
+}
+
+/// \brief Software deinitialization
+///
+/// \details Implements SD deinitialization sequence, as described here:
+/// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/fatfs.html
+static esp_err_t unmountFat()
+{
+	esp_err_t err = ESP_OK;
+	err = f_unmount(fatDrivePath);
+
+	if (err != ESP_OK) {
+		logError("unmountFat", "f_mount", err);
+	}
+
+	ff_diskio_unregister(pdrv);
+	{
+		ESP_LOGI(kTag, "unmountFat. Unregistering path %s", CONFIG_SD_FAT_MOUNT_POINT);
+		esp_err_t errStage = esp_vfs_fat_unregister_path(CONFIG_SD_FAT_MOUNT_POINT);
+
+		if (errStage != ESP_OK) {
+			logError("unmountFat", "unregister path", errStage);
+		}
+
+		if (err == ESP_OK) {
+			err = errStage;
+		}
+	}
 
 	return err;
 }
 
-// Initializes SD card, it relies on presence of FAT-family filesystem on the
-// card.
-
 bool sdFatInit()
 {
-	ESP_LOGI(kTag, "initializing SD card");
-
-	if (initialized) {
-		ESP_LOGI(kTag, "initializing SD card -- success (already initialized)");
-		return true;
-	}
-
 	esp_err_t err = ESP_OK;
+	err = initializeSlot();
 
-	err = sdmmc_host_init();
+	if (err != ESP_OK) {
+		logError("sdFatInit", "init slot", err);
 
-	if (err == ESP_OK) {
-		err = initializeSlot();
+		return false;
 	}
 
-	if (err == ESP_OK) {
-		err = initializeCard();
+	err = mountFat();
+
+	if (err != ESP_OK) {
+		logError("sdFatInit", "mount FAT", err);
+
+		return false;
 	}
 
-	if (err == ESP_OK) {
-		err = mountFat();
+	err = sdFatWriteTest();
+
+	if (err != ESP_OK) {
+		logError("sdFatInit", "test file output", err);
+
+		return false;
 	}
 
-	initialized = (err == ESP_OK);
-	if (initialized) {
-		ESP_LOGI(kTag, "initializing SD card -- success");
-	} else {
-		ESP_LOGE(kTag, "initalizing SD card -- FAILED");
-	}
+	ESP_LOGI(kTag, "initializing SD card -- success");
 
-	return initialized;
+	return true;
 }
 
 bool sdFatDeinit()
 {
-	ESP_LOGI(kTag, "deinitializing SD card");
+	esp_err_t err = ESP_OK;
+	{
+		esp_err_t errUnmount = unmountFat();
 
-	if (!initialized) {
-		ESP_LOGI(kTag, "deinitializing SD card -- success (already deinitialized)");
-		return true;
+		if (err == ESP_OK) {
+			err = errUnmount;
+		}
+
+		if (errUnmount != ESP_OK) {
+			logError("sdFatDeinit", "unmount FAT", err);
+		}
+	}
+	{
+		esp_err_t errSlotDeinit = deinitializeSlot();
+
+		if (err == ESP_OK) {
+			err = errSlotDeinit;
+		}
+
+		if (errSlotDeinit != ESP_OK) {
+			logError("sdFatDeinit", "slot deinit", err);
+		}
 	}
 
-	initialized = !(sdmmc_host_deinit() == ESP_OK);
-	pinsDeinit();
-
-	if (!initialized) {
-		ESP_LOGI(kTag, "deinitializing SD card -- success");
+	if (err == ESP_OK) {
+		ESP_LOGI(kTag, "sdFatDeinit -- success");
 	} else {
-		ESP_LOGE(kTag, "deinitalizing SD card -- FAILED");
+		logError("sdFatDeinit", "", err);
 	}
 
-	return !initialized;
+	return (err == ESP_OK);
 }
 
-void sdFatWriteTest()
+/// \brief Attemps to write to a file. May be used as an indication that configuration has completed successfully.
+static esp_err_t sdFatWriteTest()
 {
-	FILE *f = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
-	if (f == NULL) {
-		return;
+	FILE *file = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
+
+	if (file == NULL) {
+		logError("sdFatWriteTest", "open file", ESP_FAIL);
+
+		return ESP_FAIL;
 	}
 
-	fprintf(f, "Geoscan, Geoscan, Geoscan. Geoscan!");
-	fclose(f);
+	fprintf(file, "Geoscan :)");
+	fclose(file);
+
+	return ESP_OK;
 }
