@@ -44,6 +44,19 @@ bool RecFrame::start(const char *aFilename)
 
 		return false;
 	}
+
+	// Open the file to save the frame into
+	{
+		std::lock_guard<std::mutex> lock(sync.mut);
+		file = fopen(aFilename, "wb");
+		ESP_LOGD(kDebugTag, "start. opening file \"%s\"", aFilename);
+
+		if (!file) {
+			ESP_LOGW(kDebugTag, "start. Photo -- unable to open the file %s. Capture is aborted", aFilename);
+
+			return false;
+		}
+	}
 	// Switch the camera to a higher resolution
 	{
 		ESP_LOGD(kDebugTag, "start. Initializing frame size %dx%d", kFrameSizePhoto.first, kFrameSizePhoto.second);
@@ -64,23 +77,6 @@ bool RecFrame::start(const char *aFilename)
 			return false;
 		}
 		ESP_LOGD(kDebugTag, "start. Frame size initialization succeeded");
-	}
-	// Open the file to save the frame into
-	{
-		std::lock_guard<std::mutex> lock(sync.mut);
-		file = fopen(aFilename, "wb");
-		ESP_LOGD(kDebugTag, "start. opening file \"%s\"", aFilename);
-
-		if (!file) {
-			ESP_LOGW(kDebugTag, "start. Photo -- unable to open the file %s", aFilename);
-			ESP_LOGW(kDebugTag, "start. Failed to open file %s. Restoring previous frame size %dx%d", aFilename,
-				frameSizePrev.first, frameSizePrev.second);
-			// Restore previous frame size
-			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
-				frameSizePrev, [](Mod::Fld::WriteResp){});
-
-			return false;
-		}
 	}
 	// First try to acquire an image from the frame stream
 	ESP_LOGD(kDebugTag, "start. Enabling frame subcription, acquiring a frame");
