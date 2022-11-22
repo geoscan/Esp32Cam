@@ -40,7 +40,7 @@ bool RecFrame::start(const char *aFilename)
 		[&frameSizePrev](std::pair<int, int> aFrameSize) {frameSizePrev = aFrameSize; });
 
 	if (frameSizePrev.first == 0) {  // The camera module has not produced a response
-		ESP_LOGW(kTag, "start -- fail (camera current frame size acquisition)");
+		ESP_LOGW(kTag, "start -- fail (camera's current frame size acquisition)");
 
 		return false;
 	}
