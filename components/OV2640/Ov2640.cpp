@@ -21,7 +21,7 @@ static constexpr const char *kNvsFrameSize = "FrameSize";
 /// \details Format: (pixformat, "lt" limitation)
 ///
 static constexpr std::array<std::tuple<pixformat_t, framesize_t>, 2> kResolutionLimit{{
-	{PIXFORMAT_JPEG, FRAMESIZE_SVGA},
+	{PIXFORMAT_JPEG, FRAMESIZE_XGA},
 	{PIXFORMAT_GRAYSCALE, FRAMESIZE_QVGA}
 }};
 

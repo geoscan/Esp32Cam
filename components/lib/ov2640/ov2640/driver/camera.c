@@ -1439,6 +1439,7 @@ fail:
 
 esp_err_t esp_camera_deinit()
 {
+    i2s_stop_bus();
     xSemaphoreTakeRecursive(s_state_mutex, portMAX_DELAY);
     if (s_state == NULL) {
         xSemaphoreGiveRecursive(s_state_mutex);
