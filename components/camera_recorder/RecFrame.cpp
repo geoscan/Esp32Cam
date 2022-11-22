@@ -76,7 +76,7 @@ bool RecFrame::start(const char *aFilename)
 			ESP_LOGW(kDebugTag, "start. Frame size initialization failed");
 			return false;
 		}
-		ESP_LOGD(kDebugTag, "start. Frame size initialization succeeded");
+		ESP_LOGI(kDebugTag, "start. Switched frame size to %dx%d", kFrameSizePhoto.first, kFrameSizePhoto.second);
 	}
 	// First try to acquire an image from the frame stream
 	ESP_LOGD(kDebugTag, "start. Enabling frame subcription, acquiring a frame");
@@ -105,7 +105,7 @@ bool RecFrame::start(const char *aFilename)
 	}
 
 	// Restore previous frame size
-	ESP_LOGW(kDebugTag, "start. restoring previous frame size %dx%d", frameSizePrev.first, frameSizePrev.second);
+	ESP_LOGI(kDebugTag, "start. restoring previous frame size %dx%d", frameSizePrev.first, frameSizePrev.second);
 	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::Camera, Mod::Fld::Field::FrameSize>(
 		frameSizePrev, [](Mod::Fld::WriteResp){});
 
