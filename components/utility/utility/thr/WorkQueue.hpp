@@ -69,7 +69,6 @@ public:
 				sem.release();
 			}, aPrio);
 		resume();
-		vTaskDelay(1);
 		sem.acquire();
 	}
 
@@ -109,7 +108,6 @@ public:
 				return f;
 			}, aPrio);
 		resume();
-		vTaskDelay(1);
 		sem.acquire();
 	}
 
@@ -123,7 +121,6 @@ public:
 			if (queue.pop(task)) {
 				if (task()) {
 					queue.push(std::move(task));
-					vTaskDelay(2);
 				}
 			} else {
 				suspend();
