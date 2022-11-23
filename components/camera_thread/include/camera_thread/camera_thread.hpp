@@ -10,4 +10,10 @@
 
 void cameraThreadInit();
 
+namespace CameraThread {
+
+extern const char *kDebugTag;
+
+}  // namespace CameraThread
+
 #endif  // CAMERA_THREAD_CAMERA_THREAD_HPP

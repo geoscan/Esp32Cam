@@ -12,6 +12,12 @@
 
 using namespace CameraThread;
 
+namespace CameraThread {
+
+const char *kDebugTag = "[camera_thread]";
+
+}  // namespace CameraThread
+
 static void cameraThreadTask(void *)
 {
 	static CameraStream cameraStream;
@@ -20,6 +26,7 @@ static void cameraThreadTask(void *)
 
 void cameraThreadInit()
 {
+	ESP_LOGI(kDebugTag, "Initializing");
 	static TaskHandle_t taskHandle;
 	constexpr std::size_t kStackSize = 1024 * 3;
 	constexpr void *kArg = nullptr;
