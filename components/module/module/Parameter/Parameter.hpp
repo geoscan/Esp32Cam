@@ -12,12 +12,16 @@ namespace Mod {
 namespace Par {
 
 class MemoryProvider;
+class Variant;
 
 /// \brief An encapulation of a value stored in a permanent storage (SD card or
 /// NVS)
 class Parameter {
 public:
 	void setMemoryProvider(MemoryProvider &);
+	/// \brief Save the current value into non-volatile storage
+	void sync();
+	void set(const Variant &);
 private:
 	MemoryProvider *memoryProvider;
 };
