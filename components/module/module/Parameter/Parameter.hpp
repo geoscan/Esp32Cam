@@ -13,7 +13,8 @@ namespace Par {
 
 class MemoryProvider;
 
-/// \brief
+/// \brief An encapulation of a value stored in a permanent storage (SD card or
+/// NVS)
 class Parameter {
 public:
 	void setMemoryProvider(MemoryProvider &);
