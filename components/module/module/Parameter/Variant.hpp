@@ -8,10 +8,15 @@
 #if !defined(MODULE_MODULE_PARAMETER_PARAMETERVALUESTORAGE_HPP_)
 #define MODULE_MODULE_PARAMETER_PARAMETERVALUESTORAGE_HPP_
 
+#include <mapbox/variant.hpp>
+#include <string>
+
 namespace Mod {
 namespace Par {
 
-class Variant {
+using VariantBase = mapbox::util::variant<std::string, std::int32_t>;
+
+class Variant : public VariantBase {
 };
 
 }  // namespace Par
