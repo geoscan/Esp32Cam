@@ -13,9 +13,10 @@ namespace Par {
 
 class MemoryProvider;
 
+/// \brief
 class Parameter {
 public:
-	void setProvider(MemoryProvider &);
+	void setMemoryProvider(MemoryProvider &);
 private:
 	MemoryProvider *memoryProvider;
 };
