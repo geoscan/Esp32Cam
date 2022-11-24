@@ -1,5 +1,5 @@
 //
-// Provider.hpp
+// MemoryProvider.hpp
 //
 // Created on: Nov 24, 2022
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
@@ -12,7 +12,7 @@ namespace Mod {
 namespace Par {
 
 /// \brief Provides an API to a non-volatile storage (SD card or NVS)
-class Provider {
+class MemoryProvider {
 };
 
 }  // namespace Par
