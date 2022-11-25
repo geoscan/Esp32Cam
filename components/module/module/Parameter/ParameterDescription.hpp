@@ -20,7 +20,7 @@ enum class ParameterType {
 };
 
 /// \brief Defines the type of a non-volatile provider
-enum class ParameterProvider {
+enum class MemoryProviderType {
 	Sd,  // SD card
 	Nvs,  // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/storage/nvs_flash.html
 };
@@ -37,7 +37,7 @@ struct ParameterDescription {
 	Mod::Module module;
 	Mod::Fld::Field field;
 	/// \brief Physical medium which will store the value
-	ParameterProvider parameterProvider;
+	MemoryProviderType memoryProviderType;
 };
 
 }  // namespace Par
