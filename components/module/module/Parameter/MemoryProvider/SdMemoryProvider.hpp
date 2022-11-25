@@ -9,6 +9,7 @@
 #define MODULE_MODULE_PARAMETER_MEMORYPROVIDER_HPP_
 
 #include "module/Parameter/MemoryProvider.hpp"
+#include <memory>
 
 namespace Mod {
 namespace Par {
@@ -19,6 +20,10 @@ class SdMemoryProvider : public MemoryProvider {
 public:
 	Result load(const ParameterDescription &, Variant &) override;
 	Result save(const ParameterDescription &, const Variant &value) override;
+private:
+	static void configFileEnsure();
+	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
+private:
 };
 
 }  // namespace Par
