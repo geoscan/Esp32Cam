@@ -41,7 +41,7 @@ Api::Api() : Ut::MakeSingleton<Api>{*this}
 {
 }
 
-Result Api::toId(Module module, Fld::Field field, std::size_t oId)
+bool Api::toId(Module module, Fld::Field field, std::size_t &oId)
 {
 	bool res = false;
 	auto it = std::find_if(std::begin(kParameterDescriptions), std::end(kParameterDescriptions),
