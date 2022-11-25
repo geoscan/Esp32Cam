@@ -15,4 +15,5 @@ idf_component_register(
 		freertos
 		rr
 		sub
+		sd_fat
 )
