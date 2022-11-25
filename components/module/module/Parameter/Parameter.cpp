@@ -24,7 +24,7 @@ struct ParameterDescriptionStorage {
 			ParameterType::Str,
 			Mod::Module::WifiAp,
 			Mod::Fld::Field::StringIdentifier,
-			ParameterProvider::Sd,
+			MemoryProviderType::Sd,
 		}
 	}};
 
