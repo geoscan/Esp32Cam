@@ -23,14 +23,17 @@ public:
 	Parameter(Mod::Module module, Mod::Fld::Field field);
 	void fetch();
 	void commit();
+	inline std::size_t id() const
+	{
+		return mId;
+	}
 private:
 	/// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
 	/// \returns True, if found. Sets `oId`
 	static bool toId(Mod::Module module, Mod::Fld::Field field, std::size_t &oId);
 	static MemoryProvider &memoryProvider(std::size_t id);
-	MemoryProvider &memoryProvider();
 private:
-	std::size_t id;
+	std::size_t mId;
 };
 
 }  // namespace Par
