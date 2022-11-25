@@ -11,7 +11,6 @@
 #include "module/Parameter/Result.hpp"
 #include "module/Parameter/Variant.hpp"
 #include "module/Types.hpp"
-#include <memory>
 
 namespace Mod {
 namespace Par {
@@ -32,14 +31,10 @@ public:
 	Parameter &operator=(Parameter &&) = delete;
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
-	Parameter *instance(Mod::Module module, Mod::Fld::Field);
-private:
-	/// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
-	/// \returns True, if found. Sets `oId`
-	static bool toId(Mod::Module module, Mod::Fld::Field field, std::size_t &oId);
-	static MemoryProvider &memoryProvider(std::size_t id);
+	static Parameter *instance(Mod::Module module, Mod::Fld::Field);
 private:
 	std::size_t mId;
+	MemoryProvider *memoryProvider;
 };
 
 }  // namespace Par

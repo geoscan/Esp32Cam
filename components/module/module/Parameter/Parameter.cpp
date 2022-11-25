@@ -10,6 +10,7 @@
 #include <array>
 #include <algorithm>
 #include "Parameter.hpp"
+#include <memory>
 
 namespace Mod {
 namespace Par {
@@ -34,28 +35,36 @@ struct ParameterDescriptionStorage {
 			true :
 			Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && validateStrlen(pos + 1);
 	}
+
+	/// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
+	/// \returns True, if found. Sets `oId`
+	static bool toId(Module module, Fld::Field field, std::size_t &oId)
+	{
+		bool res = false;
+		auto it = std::find_if(std::begin(ParameterDescriptionStorage::kParameterDescriptions),
+			std::end(ParameterDescriptionStorage::kParameterDescriptions),
+			[module, field](const ParameterDescription &aDescription)
+			{
+				return module == aDescription.module && field == aDescription.field;
+			});
+
+		if (it != std::end(ParameterDescriptionStorage::kParameterDescriptions)) {
+			res = true;
+			oId = it->id;
+		}
+
+		return res;
+	}
 };
 
 static_assert(ParameterDescriptionStorage::validateStrlen(), "A parameter's name length has been exceeded");
 
-bool Parameter::toId(Module module, Fld::Field field, std::size_t &oId)
-{
-	bool res = false;
-	auto it = std::find_if(std::begin(ParameterDescriptionStorage::kParameterDescriptions),
-		std::end(ParameterDescriptionStorage::kParameterDescriptions),
-		[module, field](const ParameterDescription &aDescription)
-		{
-			return module == aDescription.module && field == aDescription.field;
-		});
+/// \brief Static parameter instances storage.
+struct InstanceStorage {
+	std::array<std::unique_ptr<Parameter>, ParameterDescriptionStorage::kParameterDescriptions.size()> instances;
+};
 
-	if (it != std::end(ParameterDescriptionStorage::kParameterDescriptions)) {
-		res = true;
-		oId = it->id;
-	}
-
-	return res;
-}
-
+static InstanceStorage sInstanceStorage;
 
 }  // namespace Par
 }  // namespace Mod
