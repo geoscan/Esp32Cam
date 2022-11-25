@@ -8,6 +8,7 @@
 #include "Fs.hpp"
 
 namespace Ut {
+namespace Sys {
 namespace Fs {
 
 std::size_t fileSize(FILE *fp)
@@ -21,4 +22,5 @@ std::size_t fileSize(FILE *fp)
 }
 
 }  // namespace Fs
+}  // namespace Sys
 }  // namespace Ut

@@ -12,6 +12,7 @@
 #include <cstdint>
 
 namespace Ut {
+namespace Sys {
 namespace Fs {
 
 /// \brief Returns file size
@@ -20,6 +21,7 @@ namespace Fs {
 std::size_t fileSize(FILE *fp);
 
 }  // namespace Fs
+}  // namespace Sys
 }  // namespace Ut
 
 #endif // UTILITY_UTILITY_SYSTEM_FS_HPP_
