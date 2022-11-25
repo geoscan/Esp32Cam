@@ -19,7 +19,9 @@ class MemoryProvider;
 
 class Parameter : public Variant {
 public:
+	/// \brief Make an attempt to load the value from a storage
 	Result fetch();
+	/// \brief Make an attempt to load the value into a storage
 	Result commit();
 	inline std::size_t id() const
 	{
