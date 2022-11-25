@@ -36,6 +36,8 @@ struct ParameterDescription {
 	// Just like field, a parameter is uniquely identified by a (MODULE, FIELD) pair.
 	Mod::Module module;
 	Mod::Fld::Field field;
+	/// \brief Physical medium which will store the value
+	ParameterProvider parameterProvider;
 };
 
 }  // namespace Par
