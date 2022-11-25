@@ -18,6 +18,8 @@ enum class Result {
 	MemoryProviderNotFound,
 	/// Could not connect to SD card, or mount FAT file system
 	SdCardError,
+	/// An error occured during reading from / writing to a file
+	FileIoError,
 };
 
 }  // namespace Par
