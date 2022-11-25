@@ -31,10 +31,9 @@ public:
 	Parameter &operator=(Parameter &&) = delete;
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
-	static Parameter *instance(Mod::Module module, Mod::Fld::Field);
+	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
 private:
 	std::size_t mId;
-	MemoryProvider *memoryProvider;
 };
 
 }  // namespace Par
