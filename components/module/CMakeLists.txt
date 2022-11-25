@@ -2,6 +2,7 @@ file(GLOB SOURCE_FILES
 		"module/*.c"
 		"module/*.cpp"
 		"module/Parameter/*.cpp"
+		"module/Parameter/MemoryProvider/*.cpp"
 		)
 
 idf_component_register(
