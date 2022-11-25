@@ -25,14 +25,14 @@ static constexpr std::array<ParameterDescription, 1> kParameterDescriptions{{
 }};
 
 /// \brief Max length of a parameter's string name. It is kept being equal 16, for compatibility w/ MAVLink
-constexpr std::size_t kParameterMaxName = 16;
+constexpr std::size_t kParameterStrlen = 16;
 
 /// \brief Compile-time validation of parameters' name length
 constexpr bool pdescValidateStrlen(std::size_t pos = 0)
 {
 	return pos >= kParameterDescriptions.size() ?
 		true :
-		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterMaxName && pdescValidateStrlen(pos + 1);
+		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && pdescValidateStrlen(pos + 1);
 }
 
 static_assert(pdescValidateStrlen(), "A parameter's name length has been exceeded");
