@@ -14,6 +14,7 @@ namespace Par {
 enum class Result {
 	/// No error has occured
 	Ok,
+	/// Could not find / initialize a memory provider for the specified id.
 	MemoryProviderNotFound,
 };
 
