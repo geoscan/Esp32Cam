@@ -28,11 +28,11 @@ enum class ParameterProvider {
 /// \brief Description of a parameter that can be used to save it into a
 /// non-volatile storage
 struct ParameterDescription {
+	/// \brief Perpetual identifier. Must not be changed between builds
+	std::uint32_t id;
 	/// \brief Human-readable name
 	const char *name;
 	ParameterType parameterType;
-	/// \brief Perpetual identifier. Must not be changed between builds
-	std::uint32_t id;
 	// Just like field, a parameter is uniquely identified by a (MODULE, FIELD) pair.
 	Mod::Module module;
 	Mod::Fld::Field field;
