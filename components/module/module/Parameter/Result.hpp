@@ -16,6 +16,8 @@ enum class Result {
 	Ok,
 	/// Could not find / initialize a memory provider for the specified id.
 	MemoryProviderNotFound,
+	/// Could not connect to SD card, or mount FAT file system
+	SdCardError,
 };
 
 }  // namespace Par
