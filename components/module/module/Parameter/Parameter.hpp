@@ -33,6 +33,8 @@ public:
 	/// if the pair is incorrect
 	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
 private:
+	Parameter(std::size_t aId);
+private:
 	std::size_t mId;
 };
 

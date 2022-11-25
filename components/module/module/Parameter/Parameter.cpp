@@ -24,8 +24,10 @@ struct ParameterDescriptionStorage {
 			ParameterType::Str,
 			Mod::Module::WifiAp,
 			Mod::Fld::Field::StringIdentifier,
+			ParameterProvider::Sd,
 		}
 	}};
+
 	/// \brief Max length of a parameter's string name. It is kept being equal 16, for compatibility w/ MAVLink
 	static constexpr std::size_t kParameterStrlen = 16;
 	/// \brief Compile-time validation of parameters' name length
@@ -55,6 +57,11 @@ struct ParameterDescriptionStorage {
 
 		return res;
 	}
+
+	static std::size_t size()
+	{
+		return kParameterDescriptions.size();
+	}
 };
 
 static_assert(ParameterDescriptionStorage::validateStrlen(), "A parameter's name length has been exceeded");
@@ -62,9 +69,61 @@ static_assert(ParameterDescriptionStorage::validateStrlen(), "A parameter's name
 /// \brief Static parameter instances storage.
 struct InstanceStorage {
 	std::array<std::unique_ptr<Parameter>, ParameterDescriptionStorage::kParameterDescriptions.size()> instances;
+
+	/// \brief Makes an attempt to construct an instance. Returns, if already constructed
+	void ensureAt(std::size_t id)
+	{
+		assert(id < instances.size());
+	}
+
+	/// \brief Returns an instance by index. `nullptr`, if the bounds have been
+	/// exceeded
+	Parameter *instanceById(std::size_t id)
+	{
+		Parameter *instance = nullptr;
+
+		if (id < instances.size()) {
+			ensureAt(id);
+			instance = instances[id].get();
+		}
+
+		return instance;
+	}
 };
 
 static InstanceStorage sInstanceStorage;
+
+/// \brief Initializes and selects a memory provider using a parameter's
+/// description
+struct MemoryProviderStorage {
+	std::unique_ptr<MemoryProvider> mSdMemoryProvider;
+	std::unique_ptr<MemoryProvider> mNvsMemoryProvider;
+
+	MemoryProvider &sdMemoryProvider()
+	{
+		assert(false);
+		return *mSdMemoryProvider.get();
+	}
+
+	MemoryProvider &nvsMemoryProvider()
+	{
+		assert(false);
+		return *mNvsMemoryProvider.get();
+	}
+
+	MemoryProvider *memoryProviderById(std::size_t id)
+	{
+		if (id < ParameterDescriptionStorage::size()) {
+//			switch (ParameterDescriptionStorage::kParameterDescriptions[id]) {
+		}
+
+		return nullptr;
+	}
+};
+
+Parameter::Parameter(std::size_t aId) : mId{aId}
+{
+}
 
 }  // namespace Par
 }  // namespace Mod
