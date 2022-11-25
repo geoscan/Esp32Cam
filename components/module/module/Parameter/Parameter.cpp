@@ -9,7 +9,7 @@
 #include "utility/al/String.hpp"
 #include <array>
 #include <algorithm>
-#include "Api.hpp"
+#include "Parameter.hpp"
 
 namespace Mod {
 namespace Par {
@@ -37,11 +37,7 @@ constexpr bool pdescValidateStrlen(std::size_t pos = 0)
 
 static_assert(pdescValidateStrlen(), "A parameter's name length has been exceeded");
 
-Api::Api() : Ut::MakeSingleton<Api>{*this}
-{
-}
-
-bool Api::toId(Module module, Fld::Field field, std::size_t &oId)
+bool Parameter::toId(Module module, Fld::Field field, std::size_t &oId)
 {
 	bool res = false;
 	auto it = std::find_if(std::begin(kParameterDescriptions), std::end(kParameterDescriptions),
