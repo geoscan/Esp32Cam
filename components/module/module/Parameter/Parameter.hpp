@@ -20,8 +20,8 @@ class MemoryProvider;
 
 class Parameter : public Variant {
 public:
-	void fetch();
-	void commit();
+	Result fetch();
+	Result commit();
 	inline std::size_t id() const
 	{
 		return mId;

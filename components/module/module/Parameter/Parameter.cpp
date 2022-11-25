@@ -14,6 +14,7 @@
 namespace Mod {
 namespace Par {
 
+/// \brief Constexpr storage of parameter descriptions.
 struct ParameterDescriptionStorage {
 	static constexpr std::array<ParameterDescription, 1> kParameterDescriptions{{
 		{
