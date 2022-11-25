@@ -22,6 +22,7 @@ public:
 	Result save(const ParameterDescription &, const Variant &value) override;
 private:
 	static void configFileEnsure();
+	/// \brief Reads the content of an entire config file into RAM buffer.
 	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
 private:
 };
