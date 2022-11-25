@@ -11,4 +11,5 @@ idf_component_register(
 	REQUIRES
 		esp_common
 		utility
+		json
 )
