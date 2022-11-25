@@ -8,6 +8,7 @@
 #include "module/Parameter/ParameterDescription.hpp"
 #include "utility/al/String.hpp"
 #include <array>
+#include <algorithm>
 #include "Api.hpp"
 
 namespace Mod {
@@ -38,6 +39,23 @@ static_assert(pdescValidateStrlen(), "A parameter's name length has been exceede
 
 Api::Api() : Ut::MakeSingleton<Api>{*this}
 {
+}
+
+Result Api::toId(Module module, Fld::Field field, std::size_t oId)
+{
+	bool res = false;
+	auto it = std::find_if(std::begin(kParameterDescriptions), std::end(kParameterDescriptions),
+		[module, field](const ParameterDescription &aDescription)
+		{
+			return module == aDescription.module && field == aDescription.field;
+		});
+
+	if (it != std::end(kParameterDescriptions)) {
+		res = true;
+		oId = it->id;
+	}
+
+	return res;
 }
 
 }  // namespace Par
