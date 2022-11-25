@@ -144,6 +144,20 @@ Result Parameter::fetch()
 	return res;
 }
 
+Result Parameter::commit()
+{
+	MemoryProvider *memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
+	Result res = Result::Ok;
+
+	if (memoryProvider == nullptr) {
+		res = Result::MemoryProviderNotFound;
+	} else {
+		res = memoryProvider->save(ParameterDescriptionStorage::kParameterDescriptions[id()], *this);
+	}
+
+	return res;
+}
+
 Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 {
 	std::size_t id;
