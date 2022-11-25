@@ -114,7 +114,13 @@ struct MemoryProviderStorage {
 	MemoryProvider *memoryProviderById(std::size_t id)
 	{
 		if (id < ParameterDescriptionStorage::size()) {
-//			switch (ParameterDescriptionStorage::kParameterDescriptions[id]) {
+			switch (ParameterDescriptionStorage::kParameterDescriptions[id].memoryProviderType) {
+				case MemoryProviderType::Nvs:
+					return &nvsMemoryProvider();
+
+				case MemoryProviderType::Sd:
+					return &sdMemoryProvider();
+			}
 		}
 
 		return nullptr;
