@@ -8,6 +8,8 @@
 #if !defined(MODULE_MODULE_PARAMETER_PARAMETER_HPP_)
 #define MODULE_MODULE_PARAMETER_PARAMETER_HPP_
 
+#include <cstdint>
+
 namespace Mod {
 namespace Par {
 
@@ -16,14 +18,14 @@ class Variant;
 
 /// \brief An encapulation of a value stored in a permanent storage (SD card or
 /// NVS)
-class Parameter {
+class Parameter : public Variant {
 public:
-	void setMemoryProvider(MemoryProvider &);
+	Parameter(std::size_t id, MemoryProvider &memoryProvider);
 	/// \brief Save the current value into non-volatile storage
 	void commit();
-	void set(const Variant &);
 private:
-	MemoryProvider *memoryProvider;
+	MemoryProvider &memoryProvider;
+	std::size_t mId;
 };
 
 }  // namespace Par
