@@ -20,7 +20,7 @@ class Parameter {
 public:
 	void setMemoryProvider(MemoryProvider &);
 	/// \brief Save the current value into non-volatile storage
-	void sync();
+	void commit();
 	void set(const Variant &);
 private:
 	MemoryProvider *memoryProvider;
