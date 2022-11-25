@@ -24,7 +24,6 @@ enum class Module : std::uint8_t {
 	Camera,
 	Autopilot,  ///< The main (autopilot) board
 	WifiStaConnection,  ///< Connection info (the ESP32 is connected to some other Access Point, AP)
-
 	/// \brief Tracking algorithm fields
 	///
 	/// \details
@@ -32,7 +31,8 @@ enum class Module : std::uint8_t {
 	/// - Initialized - set FALSE to disable tracking.
 	/// - Roi - bounding rectangle. Set to activate or reset tracking algorithm.
 	Tracking,
-
+	/// \brief Wi-Fi access point
+	WifiAp,
 	All,  ///< The request is addressed to every module
 };
 
@@ -58,6 +58,7 @@ enum class Field : std::uint8_t {
 	VersionCommitHash,  ///< Git commit hash
 	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
 	Roi,  ///< Region of Interest
+	StringIdentifier  ///< Generic string name
 };
 
 template <class T>
@@ -78,6 +79,7 @@ template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsi
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
+template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<const char *> {};
 
 /// \brief Variant type operating as the storage for the aforementioned types.
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
