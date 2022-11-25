@@ -130,6 +130,20 @@ struct MemoryProviderStorage {
 
 static MemoryProviderStorage sMemoryProviderStorage;
 
+Result Parameter::fetch()
+{
+	MemoryProvider *memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
+	Result res = Result::Ok;
+
+	if (memoryProvider == nullptr) {
+		res = Result::MemoryProviderNotFound;
+	} else {
+		res = memoryProvider->load(ParameterDescriptionStorage::kParameterDescriptions[id()], *this);
+	}
+
+	return res;
+}
+
 Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 {
 	std::size_t id;
