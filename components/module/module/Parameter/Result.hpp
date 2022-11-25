@@ -14,6 +14,7 @@ namespace Par {
 enum class Result {
 	/// No error has occured
 	Ok,
+	MemoryProviderNotFound,
 };
 
 }  // namespace Par
