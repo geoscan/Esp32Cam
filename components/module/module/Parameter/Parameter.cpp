@@ -6,11 +6,12 @@
 //
 
 #include "module/Parameter/ParameterDescription.hpp"
+#include "module/Parameter/MemoryProvider.hpp"
 #include "utility/al/String.hpp"
 #include <array>
 #include <algorithm>
-#include "Parameter.hpp"
 #include <memory>
+#include "Parameter.hpp"
 
 namespace Mod {
 namespace Par {
@@ -126,6 +127,20 @@ struct MemoryProviderStorage {
 		return nullptr;
 	}
 };
+
+static MemoryProviderStorage sMemoryProviderStorage;
+
+Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
+{
+	std::size_t id;
+	Parameter *instance = nullptr;
+
+	if (ParameterDescriptionStorage::toId(module, field, id)) {
+		instance = sInstanceStorage.instanceById(id);
+	}
+
+	return instance;
+}
 
 Parameter::Parameter(std::size_t aId) : mId{aId}
 {
