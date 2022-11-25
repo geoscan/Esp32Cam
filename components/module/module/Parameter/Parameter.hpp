@@ -20,13 +20,19 @@ class MemoryProvider;
 
 class Parameter : public Variant {
 public:
-	Parameter(Mod::Module module, Mod::Fld::Field field);
 	void fetch();
 	void commit();
 	inline std::size_t id() const
 	{
 		return mId;
 	}
+	Parameter(const Parameter &) = delete;
+	Parameter(Parameter &&) = delete;
+	Parameter &operator=(const Parameter &) = delete;
+	Parameter &operator=(Parameter &&) = delete;
+	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
+	/// if the pair is incorrect
+	Parameter *instance(Mod::Module module, Mod::Fld::Field);
 private:
 	/// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
 	/// \returns True, if found. Sets `oId`
