@@ -8,10 +8,11 @@
 #include "sd_fat.h"
 #include "utility/system/Fs.hpp"
 #include <sdkconfig.h>
+#include <cJSON.h>
 #include <stdio.h>
 #include <cstring>
-#include "SdMemoryProvider.hpp"
 #include <cassert>
+#include "SdMemoryProvider.hpp"
 
 namespace Mod {
 namespace Par {
@@ -20,7 +21,19 @@ static constexpr const char *kParametersFileName = CONFIG_SD_FAT_MOUNT_POINT "/p
 
 Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, Variant &variant)
 {
-	return Result::Ok;
+	std::unique_ptr<std::uint8_t[]> buffer;
+	Result res = configFileEnsureExists();
+	cJSON *cjson = nullptr;
+
+	if (res == Result::Ok) {
+		res = configFileRead(buffer);
+	}
+
+	if (res == Result::Ok) {
+		res = configFileEnsureFormat(buffer, &cjson);
+	}
+
+	return res;
 }
 
 Result SdMemoryProvider::configFileEnsureExists()
@@ -98,7 +111,12 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 		fclose(json);
 	}
 
-	return res;
+return res;
+}
+
+Result SdMemoryProvider::configFileEnsureFormat(const std::unique_ptr<uint8_t[]> &buffer, cJSON **cjson)
+{
+	return Result::Ok;
 }
 
 }  // namespace Par

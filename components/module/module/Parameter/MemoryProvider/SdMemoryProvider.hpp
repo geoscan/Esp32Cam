@@ -12,6 +12,8 @@
 #include <memory>
 #include <atomic>
 
+class cJSON;
+
 namespace Mod {
 namespace Par {
 
@@ -32,6 +34,9 @@ private:
 	static Result configFileEnsureExists();
 	/// \brief Reads the content of an entire config file into RAM buffer,
 	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
+	/// \brief Parses the `buffer` which supposed to store JSON. If unable to
+	/// do so, opens the file, and overwrites it with a correct stub.
+	static Result configFileEnsureFormat(const std::unique_ptr<std::uint8_t[]> &buffer, cJSON **cjson);
 };
 
 }  // namespace Par
