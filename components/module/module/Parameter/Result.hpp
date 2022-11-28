@@ -22,6 +22,9 @@ enum class Result {
 	FileIoError,
 	/// A storage has been accessed successfully, but the format cannot be recognized
 	FileFormatError,
+	/// There is no sufficient amount of memory to perform the requested
+	/// operation. E.g. not enough RAM to cache the result
+	NotEnoughMemoryError,
 };
 
 }  // namespace Par
