@@ -12,13 +12,13 @@
 
 #include "module.hpp"
 
-namespace mod {
+namespace Mod {
 
 void init()
 {
-	esp_log_level_set(mod::kDebugTag, (esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL);
-	ESP_LOGD(mod::kDebugTag, "Debug log test");
-	ESP_LOGV(mod::kDebugTag, "Verbose log test");
+	esp_log_level_set(Mod::kDebugTag, (esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL);
+	ESP_LOGD(Mod::kDebugTag, "Debug log test");
+	ESP_LOGV(Mod::kDebugTag, "Verbose log test");
 }
 
-}  // namespace mod
+}  // namespace Mod

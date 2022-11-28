@@ -5,7 +5,7 @@
 //  Author:
 //
 
-namespace mod {
+namespace Mod {
 
 void init();
 static constexpr const char *kDebugTag = "[module]";
