@@ -17,6 +17,7 @@ namespace Par {
 using VariantBase = mapbox::util::variant<std::string, std::int32_t>;
 
 class Variant : public VariantBase {
+	using VariantBase::VariantBase;
 };
 
 }  // namespace Par
