@@ -39,6 +39,8 @@ private:
 	/// \brief Makes an attempt to replace the existing file content w/ a JSON
 	/// stub (empty JSON object)
 	static void configFileWriteStub();
+	/// \brief Write JSON config into file
+	static Result configFileWrite(const char *);
 };
 
 }  // namespace Par

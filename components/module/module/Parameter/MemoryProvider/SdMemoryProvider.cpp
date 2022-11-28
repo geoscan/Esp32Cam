@@ -225,5 +225,24 @@ void SdMemoryProvider::configFileWriteStub()
 	}
 }
 
+Result SdMemoryProvider::configFileWrite(const char *buffer)
+{
+	Result res = configFileEnsureExists();
+	FILE *json = nullptr;
+
+	if (res == Result::Ok) {
+		json = fopen(kParametersFileName, "wb");
+
+		if (json == nullptr) {
+			res = Result::FileIoError;
+		} else {
+			fwrite(buffer, 1, strlen(buffer), json);
+			fclose(json);
+		}
+	}
+
+	return res;
+}
+
 }  // namespace Par
 }  // namespace Mod
