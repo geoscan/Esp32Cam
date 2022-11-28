@@ -67,6 +67,8 @@ Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, 
 
 						break;
 				}
+
+				cJSON_Delete(cjsonEntry);
 			} else {
 				res = Result::EntryNotFoundError;
 			}
