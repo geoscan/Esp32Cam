@@ -10,6 +10,7 @@
 
 #include "module/Parameter/MemoryProvider.hpp"
 #include <memory>
+#include <atomic>
 
 namespace Mod {
 namespace Par {
@@ -21,10 +22,10 @@ public:
 	Result load(const ParameterDescription &, Variant &) override;
 	Result save(const ParameterDescription &, const Variant &value) override;
 private:
-	static void configFileEnsure();
+	/// \brief Given that
+	static void configFileEnsureExists();
 	/// \brief Reads the content of an entire config file into RAM buffer.
 	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
-private:
 };
 
 }  // namespace Par

@@ -9,6 +9,7 @@
 #include "utility/system/Fs.hpp"
 #include <sdkconfig.h>
 #include <stdio.h>
+#include <cstring>
 #include "SdMemoryProvider.hpp"
 
 namespace Mod {
@@ -21,9 +22,38 @@ Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, 
 	return Result::Ok;
 }
 
+void SdMemoryProvider::configFileEnsureExists()
+{
+	FILE *json = nullptr;
+	constexpr std::size_t knAttempts = 2;
+
+	// Try to open a file. If unsuccessful, reinitialize SD/FAT, and try again
+	for (std::size_t i = 0; i < knAttempts && json == nullptr; ++i) {
+		json = fopen(kParametersFileName, "a");
+
+		if (json == nullptr) {
+			sdFatDeinit();
+			sdFatInit();
+
+			continue;
+		}
+
+		if (ftell(json) == 0) {
+			constexpr const char *buffer = "{}";
+			fwrite(buffer, 1, strlen(buffer), json);
+
+			break;
+		}
+	}
+
+	if (json != nullptr) {
+		fclose(json);
+	}
+}
+
 Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 {
-	configFileEnsure();
+	configFileEnsureExists();
 	constexpr std::size_t knAttempts = 2;
 	FILE *json = nullptr;
 	Result res = Result::Ok;
