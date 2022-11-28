@@ -7,6 +7,8 @@
 
 #include "sd_fat.h"
 #include "utility/system/Fs.hpp"
+#include "module/Parameter/ParameterDescription.hpp"
+#include "module/Parameter/Variant.hpp"
 #include <sdkconfig.h>
 #include <cJSON.h>
 #include <stdio.h>
@@ -30,7 +32,45 @@ Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, 
 	}
 
 	if (res == Result::Ok) {
-		res = configFileEnsureFormat(buffer, &cjson);
+		cjson = cJSON_Parse(buffer.get());
+
+		if (cjson == nullptr) {
+			res = Result::FileFormatError;
+			configFileWriteStub();
+		}
+	}
+
+	// Try to get the value
+	if (res == Result::Ok) {
+		res = Result::FileFormatError;
+
+		if (cJSON_IsObject(cjson)) {
+			cJSON *cjsonEntry = cJSON_GetObjectItemCaseSensitive(cjson, parameterDescription.name);
+
+			if (cjsonEntry != nullptr) {
+				switch (parameterDescription.parameterType) {
+					case ParameterType::I32:
+						if (cJSON_IsNumber(cjsonEntry)) {
+							const auto cjsonEntryValue = cJSON_GetNumberValue(cjsonEntry);
+							variant = Variant{static_cast<std::int32_t>(cjsonEntryValue)};
+							res = Result::Ok;
+						}
+
+						break;
+
+					case ParameterType::Str:
+						if (cJSON_IsString(cjsonEntry)) {
+							const auto cjsonEntryValue = cJSON_GetStringValue(cjsonEntry);
+							variant = Variant{std::string{cjsonEntryValue}};
+							res = Result::Ok;
+						}
+
+						break;
+				}
+			} else {
+				res = Result::EntryNotFoundError;
+			}
+		}
 	}
 
 	return res;
