@@ -21,7 +21,7 @@ static constexpr const char *kParametersFileName = CONFIG_SD_FAT_MOUNT_POINT "/p
 
 Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, Variant &variant)
 {
-	std::unique_ptr<std::uint8_t[]> buffer;
+	Buffer buffer;
 	Result res = configFileEnsureExists();
 	cJSON *cjson = nullptr;
 
@@ -63,7 +63,7 @@ Result SdMemoryProvider::configFileEnsureExists()
 	return res;
 }
 
-Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
+Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 {
 	// Make system checks:
 	Result res = Result::Ok;
@@ -91,7 +91,7 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 
 	// Allocate sufficient storage
 	if (res == Result::Ok) {
-		jsonBytes = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[jsonSize + 1]{0}};
+		jsonBytes = Buffer{new char[jsonSize + 1]{0}};
 
 		if (jsonBytes.get() == nullptr) {
 			res = Result::NotEnoughMemoryError;  // Could not allocate the required amount
@@ -114,9 +114,8 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 return res;
 }
 
-Result SdMemoryProvider::configFileEnsureFormat(const std::unique_ptr<uint8_t[]> &buffer, cJSON **cjson)
+void SdMemoryProvider::configFileWriteStub()
 {
-	return Result::Ok;
 }
 
 }  // namespace Par
