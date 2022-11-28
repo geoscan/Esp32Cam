@@ -105,29 +105,18 @@ Result SdMemoryProvider::save(const ParameterDescription &parameterDescription, 
 		}
 
 		// Replace the target entry's value
-
-		cJSON *cjsonEntry = cJSON_GetObjectItemCaseSensitive(cjson, parameterDescription.name);
-
 		switch (parameterDescription.parameterType) {
 			case ParameterType::I32: {
 				const double number = static_cast<double>(value.get_unchecked<std::int32_t>());
-
-				if (cjsonEntry == nullptr) {
-					cJSON_AddNumberToObject(cjson, parameterDescription.name, number);
-				} else {
-					cJSON_SetNumberValue(cjsonEntry, number);
-				}
+				cJSON_DeleteItemFromObject(cjson, parameterDescription.name);
+				cJSON_AddNumberToObject(cjson, parameterDescription.name, number);
 
 				break;
 			}
 			case ParameterType::Str: {
 				const auto &string = value.get_unchecked<std::string>();
-
-				if (cjsonEntry == nullptr) {
-					cJSON_AddStringToObject(cjson, parameterDescription.name, string.c_str());
-				} else {
-					cJSON_SetValuestring(cjsonEntry, string.c_str());
-				}
+				cJSON_DeleteItemFromObject(cjson, parameterDescription.name);
+				cJSON_AddStringToObject(cjson, parameterDescription.name, string.c_str());
 
 				break;
 			}
