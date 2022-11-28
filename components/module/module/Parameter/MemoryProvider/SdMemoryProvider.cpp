@@ -22,10 +22,11 @@ Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, 
 	return Result::Ok;
 }
 
-void SdMemoryProvider::configFileEnsureExists()
+Result SdMemoryProvider::configFileEnsureExists()
 {
 	FILE *json = nullptr;
 	constexpr std::size_t knAttempts = 2;
+	Result res = Result::Ok;
 
 	// Try to open a file. If unsuccessful, reinitialize SD/FAT, and try again
 	for (std::size_t i = 0; i < knAttempts && json == nullptr; ++i) {
@@ -34,13 +35,17 @@ void SdMemoryProvider::configFileEnsureExists()
 		if (json == nullptr) {
 			sdFatDeinit();
 			sdFatInit();
+			Result = Result::SdCardError;
 
 			continue;
 		}
 
 		if (ftell(json) == 0) {
 			constexpr const char *buffer = "{}";
-			fwrite(buffer, 1, strlen(buffer), json);
+
+			if (strlen(buffer) != fwrite(buffer, 1, strlen(buffer), json)) {
+				res = Result::FileIoError;
+			}
 
 			break;
 		}
@@ -48,7 +53,10 @@ void SdMemoryProvider::configFileEnsureExists()
 
 	if (json != nullptr) {
 		fclose(json);
+		res = Result::Ok;
 	}
+
+	return res;
 }
 
 Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
