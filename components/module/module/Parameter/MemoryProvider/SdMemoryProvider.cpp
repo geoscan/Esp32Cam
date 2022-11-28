@@ -54,22 +54,49 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 {
 	// Make system checks:
 	Result res = configFileEnsureExists();
+	constexpr const std::size_t kFileSizeUpperThreshold = 1024 * 4;  // Makes sure that the config file takes a reasonable amount of RAM
+	FILE *json = nullptr;
+	std::size_t jsonSize = 0;
 
-	// Open the file, read its content, and close it
+	// Try to open the file
 	if (res == Result::Ok) {
 		FILE *json = fopen(kParametersFileName, "rb");
-		assert(json != nullptr);  // We've already checked it exists. If it doesn't, `configFileEnsureExist` is implemented incorrectly
-		const std::size_t jsonSize = Ut::Sys::Fs::fileSize(json);
+		assert(json != nullptr);  // We've already checked it exists. If it doesn't, `configFileEnsureExist` is implemented incorrectly.
+
+		if (json == nullptr) {
+			res = Result::FileIoError;
+		}
+	}
+
+	// Check the memory threshold
+	if (res == Result::Ok) {
+		jsonSize = Ut::Sys::Fs::fileSize(json);
+
+		if (jsonSize > kFileSizeUpperThreshold) {
+			res = Result::NotEnoughMemoryError;
+		}
+	}
+
+	// Allocate sufficient storage
+	if (res == Result::Ok) {
 		jsonBytes = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[jsonSize + 1]{0}};
-		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize, json);
+
+		if (jsonBytes.get() == nullptr) {
+			res = Result::NotEnoughMemoryError;  // Could not allocate the required amount
+		}
+	}
+
+	// Read into RAM
+	if (res == Result::Ok) {
+		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize);
 
 		if (nread != jsonSize) {
 			res = Result::FileIoError;
 		}
+	}
 
-		if (json != nullptr) {
-			fclose(json);
-		}
+	if (json != nullptr) {
+		fclose(json);
 	}
 
 	return res;
