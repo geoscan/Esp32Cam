@@ -92,7 +92,7 @@ Result SdMemoryProvider::save(const ParameterDescription &parameterDescription, 
 
 	// Replace the corresponding JSON entry
 	if (res == Result::Ok) {
-		res = Result::FileFormatError;
+		// Ensure root cJSON object
 		cjson = cJSON_Parse(buffer.get());
 
 		if (cjson != nullptr && !cJSON_IsObject(cjson)) {
@@ -103,6 +103,8 @@ Result SdMemoryProvider::save(const ParameterDescription &parameterDescription, 
 		if (cjson == nullptr) {
 			cjson = cJSON_CreateObject();
 		}
+
+		// Replace the target entry's value
 
 		cJSON *cjsonEntry = cJSON_GetObjectItemCaseSensitive(cjson, parameterDescription.name);
 
@@ -130,6 +132,14 @@ Result SdMemoryProvider::save(const ParameterDescription &parameterDescription, 
 				break;
 			}
 		}
+
+		// Dump the result into file
+		char *output = cJSON_Print(cjson);
+		res = configFileWrite(output);
+		assert(cjson != nullptr);
+		// Deallocate memory
+		cJSON_free(cjson);
+		free(output);
 	}
 
 	return res;
@@ -210,7 +220,7 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 		fclose(json);
 	}
 
-return res;
+	return res;
 }
 
 void SdMemoryProvider::configFileWriteStub()
