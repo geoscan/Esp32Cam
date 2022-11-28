@@ -19,7 +19,7 @@ namespace Par {
 
 /// \brief Constexpr storage of parameter descriptions.
 struct ParameterDescriptionStorage {
-	static constexpr std::array<ParameterDescription, 1> kParameterDescriptions{{
+	static constexpr const std::array<ParameterDescription, 1> kParameterDescriptions = {{
 		{
 			0,  // id
 			"WifiApSsid",  // name
@@ -76,6 +76,10 @@ struct InstanceStorage {
 	void ensureAt(std::size_t id)
 	{
 		assert(id < instances.size());
+
+		if (!instances[id]) {
+			instances[id] = std::unique_ptr<Parameter>{new Parameter{id}};
+		}
 	}
 
 	/// \brief Returns an instance by index. `nullptr`, if the bounds have been

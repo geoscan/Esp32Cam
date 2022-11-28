@@ -19,6 +19,7 @@ class MemoryProvider;
 
 class Parameter : public Variant {
 public:
+	friend class InstanceStorage;
 	using Variant::Variant;
 	/// \brief Make an attempt to load the value from a storage
 	Result fetch();
@@ -32,7 +33,7 @@ public:
 	/// if the pair is incorrect
 	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
 private:
-	Parameter(std::size_t aId);
+	explicit Parameter(std::size_t aId);
 private:
 	std::size_t mId;
 };
