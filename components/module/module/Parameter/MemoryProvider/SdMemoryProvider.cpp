@@ -39,16 +39,6 @@ Result SdMemoryProvider::configFileEnsureExists()
 
 			continue;
 		}
-
-		if (ftell(json) == 0) {
-			constexpr const char *buffer = "{}";
-
-			if (strlen(buffer) != fwrite(buffer, 1, strlen(buffer), json)) {
-				res = Result::FileIoError;
-			}
-
-			break;
-		}
 	}
 
 	if (json != nullptr) {
