@@ -20,11 +20,14 @@ enum class Result {
 	SdCardError,
 	/// An error occured during reading from / writing to a file
 	FileIoError,
-	/// A storage has been accessed successfully, but the format cannot be recognized
+	/// A storage has been accessed successfully, but the format cannot be
+	/// recognized
 	FileFormatError,
 	/// There is no sufficient amount of memory to perform the requested
 	/// operation. E.g. not enough RAM to cache the result
 	NotEnoughMemoryError,
+	/// The config file can be read, but it contains no relevant entries
+	EntryNotFoundError,
 };
 
 }  // namespace Par
