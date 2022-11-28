@@ -20,6 +20,8 @@ enum class Result {
 	SdCardError,
 	/// An error occured during reading from / writing to a file
 	FileIoError,
+	/// A storage has been accessed successfully, but the format cannot be recognized
+	FileFormatError,
 };
 
 }  // namespace Par
