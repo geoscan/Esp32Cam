@@ -61,7 +61,6 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 	// Try to open the file
 	if (res == Result::Ok) {
 		FILE *json = fopen(kParametersFileName, "rb");
-		assert(json != nullptr);  // We've already checked it exists. If it doesn't, `configFileEnsureExist` is implemented incorrectly.
 
 		if (json == nullptr) {
 			res = Result::FileIoError;
@@ -88,7 +87,7 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 
 	// Read into RAM
 	if (res == Result::Ok) {
-		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize);
+		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize, json);
 
 		if (nread != jsonSize) {
 			res = Result::FileIoError;
