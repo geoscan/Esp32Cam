@@ -7,6 +7,7 @@
 
 #include "module/Parameter/ParameterDescription.hpp"
 #include "module/Parameter/MemoryProvider.hpp"
+#include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
 #include "utility/al/String.hpp"
 #include <array>
 #include <algorithm>
@@ -100,16 +101,18 @@ struct MemoryProviderStorage {
 	std::unique_ptr<MemoryProvider> mSdMemoryProvider;
 	std::unique_ptr<MemoryProvider> mNvsMemoryProvider;
 
-	MemoryProvider &sdMemoryProvider()
+	MemoryProvider *sdMemoryProvider()
 	{
-		assert(false);
-		return *mSdMemoryProvider.get();
+		if (!mSdMemoryProvider) {
+			mSdMemoryProvider = std::unique_ptr<MemoryProvider>{new SdMemoryProvider{}};
+		}
+
+		return mSdMemoryProvider.get();
 	}
 
-	MemoryProvider &nvsMemoryProvider()
+	MemoryProvider *nvsMemoryProvider()
 	{
-		assert(false);
-		return *mNvsMemoryProvider.get();
+		return mNvsMemoryProvider.get();
 	}
 
 	MemoryProvider *memoryProviderById(std::size_t id)
@@ -117,10 +120,10 @@ struct MemoryProviderStorage {
 		if (id < ParameterDescriptionStorage::size()) {
 			switch (ParameterDescriptionStorage::kParameterDescriptions[id].memoryProviderType) {
 				case MemoryProviderType::Nvs:
-					return &nvsMemoryProvider();
+					return nvsMemoryProvider();
 
 				case MemoryProviderType::Sd:
-					return &sdMemoryProvider();
+					return sdMemoryProvider();
 			}
 		}
 
