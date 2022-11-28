@@ -19,6 +19,7 @@ class MemoryProvider;
 
 class Parameter : public Variant {
 public:
+	using Variant::Variant;
 	/// \brief Make an attempt to load the value from a storage
 	Result fetch();
 	/// \brief Make an attempt to load the value into a storage
@@ -27,10 +28,6 @@ public:
 	{
 		return mId;
 	}
-	Parameter(const Parameter &) = delete;
-	Parameter(Parameter &&) = delete;
-	Parameter &operator=(const Parameter &) = delete;
-	Parameter &operator=(Parameter &&) = delete;
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
 	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
