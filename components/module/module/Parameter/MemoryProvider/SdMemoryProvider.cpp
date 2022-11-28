@@ -215,14 +215,7 @@ return res;
 
 void SdMemoryProvider::configFileWriteStub()
 {
-	FILE *json = fopen(kParametersFileName, "wb+");
-	constexpr const char *kStub = "{}";
-	const std::size_t stubLen = strlen(kStub);
-
-	if (json != nullptr) {
-		fwrite(kStub, 1, stubLen, json);
-		fclose(json);
-	}
+	configFileWrite("{}");
 }
 
 Result SdMemoryProvider::configFileWrite(const char *buffer)
