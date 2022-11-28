@@ -163,7 +163,7 @@ Result SdMemoryProvider::configFileEnsureExists()
 
 Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 {
-	// Make system checks:
+	// Make system checks
 	Result res = Result::Ok;
 	constexpr const std::size_t kFileSizeUpperThreshold = 1024 * 4;  // Makes sure that the config file takes a reasonable amount of RAM
 	FILE *json = nullptr;
