@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <cstring>
 #include "SdMemoryProvider.hpp"
+#include <cassert>
 
 namespace Mod {
 namespace Par {
@@ -35,7 +36,7 @@ Result SdMemoryProvider::configFileEnsureExists()
 		if (json == nullptr) {
 			sdFatDeinit();
 			sdFatInit();
-			Result = Result::SdCardError;
+			res = Result::SdCardError;
 
 			continue;
 		}
@@ -51,23 +52,13 @@ Result SdMemoryProvider::configFileEnsureExists()
 
 Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 {
-	configFileEnsureExists();
-	constexpr std::size_t knAttempts = 2;
-	FILE *json = nullptr;
-	Result res = Result::Ok;
+	// Make system checks:
+	Result res = configFileEnsureExists();
 
-	// Try to open a file. If unsuccessful, reinitialize SD/FAT, and try again
-	for (std::size_t i = 0; i < knAttempts && json == nullptr; ++i) {
-		json = fopen(kParametersFileName, "rb");
-
-		if (json != nullptr) {
-			sdFatDeinit();
-			sdFatInit();
-		}
-	}
-
-	// Allocate buffer of the appropriate size, and read the entire JSON into it.
-	if (json != nullptr) {
+	// Open the file, read its content, and close it
+	if (res == Result::Ok) {
+		FILE *json = fopen(kParametersFileName, "rb");
+		assert(json != nullptr);  // We've already checked it exists. If it doesn't, `configFileEnsureExist` is implemented incorrectly
 		const std::size_t jsonSize = Ut::Sys::Fs::fileSize(json);
 		jsonBytes = std::unique_ptr<std::uint8_t[]>{new std::uint8_t[jsonSize + 1]{0}};
 		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize, json);
@@ -76,10 +67,9 @@ Result SdMemoryProvider::configFileRead(std::unique_ptr<uint8_t[]> &jsonBytes)
 			res = Result::FileIoError;
 		}
 
-		fclose(json);
-		json = nullptr;
-	} else {
-		res = Result::SdCardError;
+		if (json != nullptr) {
+			fclose(json);
+		}
 	}
 
 	return res;

@@ -30,7 +30,7 @@ private:
 	/// 3. The config file is already present in the filesystem, or it has been
 	/// created.
 	static Result configFileEnsureExists();
-	/// \brief Reads the content of an entire config file into RAM buffer.
+	/// \brief Reads the content of an entire config file into RAM buffer,
 	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
 };
 
