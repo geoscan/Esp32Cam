@@ -29,8 +29,8 @@ private:
 	/// upon:
 	/// 1. The SD card has been mounted and initialized;
 	/// 2. The filesystem has been successfully attached;
-	/// 3. The config file is already present in the filesystem, or it has been
-	/// created.
+	/// 3. The config file is already present in the filesystem (has been
+	/// created as a result of the call)
 	static Result configFileEnsureExists();
 	/// \brief Reads the content of an entire config file into RAM buffer,
 	static Result configFileRead(std::unique_ptr<std::uint8_t[]> &buffer);
