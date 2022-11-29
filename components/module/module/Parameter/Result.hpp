@@ -28,7 +28,11 @@ enum class Result {
 	NotEnoughMemoryError,
 	/// The config file can be read, but it contains no relevant entries
 	EntryNotFoundError,
+	/// End-of-enum marker
+	N,
 };
+
+const char *resultAsStr(Result);
 
 }  // namespace Par
 }  // namespace Mod
