@@ -13,7 +13,7 @@ namespace Par {
 
 enum class Result {
 	/// No error has occured
-	Ok,
+	Ok = 0,
 	/// Could not find / initialize a memory provider for the specified id.
 	MemoryProviderNotFound,
 	/// Could not connect to SD card, or mount FAT file system
