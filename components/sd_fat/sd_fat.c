@@ -173,7 +173,7 @@ static esp_err_t deinitializeSlot()
 		}
 
 		if (errHostDeinit != ESP_OK) {
-			logError("sdFatDeinit", "host deinit", err);
+			logError("deinitializeSlot", "host deinit", err);
 			err = errHostDeinit;
 		}
 	}
@@ -185,7 +185,7 @@ static esp_err_t deinitializeSlot()
 		}
 
 		if (errPinsDeinit != ESP_OK) {
-			logError("sdFatDeinit", "pins deinit", err);
+			logError("deinitializeSlot", "pins deinit", err);
 			err = errPinsDeinit;
 		}
 	}
