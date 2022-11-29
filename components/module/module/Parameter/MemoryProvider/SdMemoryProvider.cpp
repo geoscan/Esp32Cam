@@ -187,7 +187,8 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 
 	// Try to open the file
 	if (res == Result::Ok) {
-		FILE *json = fopen(kParametersFileName, "rb");
+		ESP_LOGV(Mod::kDebugTag, "SdMemoryProvider::configFileRead: opening config file");
+		json = fopen(kParametersFileName, "rb");
 
 		if (json == nullptr) {
 			ESP_LOGW(Mod::kDebugTag, "SdMemoryProvider: unable to open config file %s", kParametersFileName);
