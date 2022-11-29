@@ -33,7 +33,8 @@ struct ParameterDescription {
 	/// \brief Human-readable name
 	const char *name;
 	ParameterType parameterType;
-	// Just like field, a parameter is uniquely identified by a (MODULE, FIELD) pair.
+	// Just like field, a parameter is uniquely identified by a (MODULE, FIELD)
+	// pair. Also, each parameter is associated w/ a module.
 	Mod::Module module;
 	Mod::Fld::Field field;
 	/// \brief Physical medium which will store the value
