@@ -198,7 +198,9 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 
 	// Check the memory threshold
 	if (res == Result::Ok) {
+		assert(json != nullptr);
 		jsonSize = Ut::Sys::Fs::fileSize(json);
+		ESP_LOGV(Mod::kDebugTag, "SdMemoryProvider::configFileRead: calculated config file size: %dB", jsonSize);
 
 		if (jsonSize > kFileSizeUpperThreshold) {
 			ESP_LOGE(Mod::kDebugTag, "SdMemoryProvider: the file size %d B exceeds the threshold %d B. Abort reading",
