@@ -162,14 +162,15 @@ Result SdMemoryProvider::configFileEnsureExists()
 			sdFatDeinit();
 			sdFatInit();
 			res = Result::SdCardError;
-
-			continue;
 		}
 	}
 
 	if (json != nullptr) {
 		fclose(json);
 		res = Result::Ok;
+	} else {
+		ESP_LOGE(Mod::kDebugTag, "SdMemoryProvider: Config file %s has not been initialized", kParametersFileName);
+		sdFatDeinit();
 	}
 
 	return res;
