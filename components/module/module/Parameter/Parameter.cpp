@@ -5,9 +5,12 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL)
+#include <esp_log.h>
 #include "module/Parameter/ParameterDescription.hpp"
 #include "module/Parameter/MemoryProvider.hpp"
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
+#include "module/module.hpp"
 #include "utility/al/String.hpp"
 #include <array>
 #include <algorithm>
@@ -70,8 +73,10 @@ struct InstanceStorage {
 	{
 		assert(id < instances.size());
 
-		if (!instances[id]) {
+		if (instances[id].get() == nullptr) {
 			instances[id] = std::unique_ptr<Parameter>{new Parameter{id}};
+			ESP_LOGV(Mod::kDebugTag, "Parameter, InstanceStorage::ensureAt() created parameter id %d",
+				instances[id]->id());
 		}
 	}
 
@@ -137,6 +142,7 @@ Result Parameter::fetch()
 
 	if (memoryProvider == nullptr) {
 		res = Result::MemoryProviderNotFound;
+		ESP_LOGW(Mod::kDebugTag, "Parameter::fetch: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
 		res = memoryProvider->load(kParameterDescriptions[id()], *this);
 	}
@@ -151,6 +157,7 @@ Result Parameter::commit()
 
 	if (memoryProvider == nullptr) {
 		res = Result::MemoryProviderNotFound;
+		ESP_LOGW(Mod::kDebugTag, "Parameter::commit: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
 		res = memoryProvider->save(kParameterDescriptions[id()], *this);
 	}
