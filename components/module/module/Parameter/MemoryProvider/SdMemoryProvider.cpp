@@ -5,16 +5,25 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL)
+#include <esp_log.h>
 #include "sd_fat.h"
 #include "utility/system/Fs.hpp"
+#include "utility/LogSection.hpp"
 #include "module/Parameter/ParameterDescription.hpp"
 #include "module/Parameter/Variant.hpp"
+#include "module/module.hpp"
 #include <sdkconfig.h>
 #include <cJSON.h>
 #include <stdio.h>
 #include <cstring>
 #include <cassert>
 #include "SdMemoryProvider.hpp"
+
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, configFileEnsureExists, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, configFileRead, 1)
+GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, load, 1)
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::SdMemoryProvider, "sdcard", 1)
 
 namespace Mod {
 namespace Par {
@@ -23,6 +32,7 @@ static constexpr const char *kParametersFileName = CONFIG_SD_FAT_MOUNT_POINT "/p
 
 Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, Variant &variant)
 {
+	GS_UTILITY_LOGV_METHOD_SECTION(Mod::kDebugTag, SdMemoryProvider, load);
 	Buffer buffer;
 	Result res = configFileEnsureExists();
 	cJSON *cjson = nullptr;
@@ -41,6 +51,7 @@ Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, 
 	}
 
 	// Try to get the value
+	ESP_LOGV(Mod::kDebugTag, "SdMemoryProvider::load: Parsing the value");
 	if (res == Result::Ok) {
 		res = Result::FileFormatError;
 
@@ -136,6 +147,7 @@ Result SdMemoryProvider::save(const ParameterDescription &parameterDescription, 
 
 Result SdMemoryProvider::configFileEnsureExists()
 {
+	GS_UTILITY_LOGV_METHOD_SECTION(Mod::kDebugTag, SdMemoryProvider, configFileEnsureExists);
 	FILE *json = nullptr;
 	constexpr std::size_t knAttempts = 2;
 	Result res = Result::Ok;
@@ -145,6 +157,8 @@ Result SdMemoryProvider::configFileEnsureExists()
 		json = fopen(kParametersFileName, "a");
 
 		if (json == nullptr) {
+			ESP_LOGW(Mod::kDebugTag, "SdMemoryProvider: unable to open config file %s, reinitializing SD card",
+				kParametersFileName);
 			sdFatDeinit();
 			sdFatInit();
 			res = Result::SdCardError;
@@ -163,6 +177,7 @@ Result SdMemoryProvider::configFileEnsureExists()
 
 Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 {
+	GS_UTILITY_LOGV_METHOD_SECTION(Mod::kDebugTag, SdMemoryProvider, configFileRead);
 	// Make system checks
 	Result res = Result::Ok;
 	constexpr const std::size_t kFileSizeUpperThreshold = 1024 * 4;  // Makes sure that the config file takes a reasonable amount of RAM
@@ -174,6 +189,7 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 		FILE *json = fopen(kParametersFileName, "rb");
 
 		if (json == nullptr) {
+			ESP_LOGW(Mod::kDebugTag, "SdMemoryProvider: unable to open config file %s", kParametersFileName);
 			res = Result::FileIoError;
 		}
 	}
@@ -183,6 +199,8 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 		jsonSize = Ut::Sys::Fs::fileSize(json);
 
 		if (jsonSize > kFileSizeUpperThreshold) {
+			ESP_LOGE(Mod::kDebugTag, "SdMemoryProvider: the file size %d B exceeds the threshold %d B. Abort reading",
+				jsonSize, kFileSizeUpperThreshold);
 			res = Result::NotEnoughMemoryError;
 		}
 	}
@@ -192,6 +210,7 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 		jsonBytes = Buffer{new char[jsonSize + 1]{0}};
 
 		if (jsonBytes.get() == nullptr) {
+			ESP_LOGE(Mod::kDebugTag, "SdMemoryProvider: could not allocate %dB, abort reading", jsonSize);
 			res = Result::NotEnoughMemoryError;  // Could not allocate the required amount
 		}
 	}
@@ -201,6 +220,8 @@ Result SdMemoryProvider::configFileRead(Buffer &jsonBytes)
 		const std::size_t nread = fread(jsonBytes.get(), 1, jsonSize, json);
 
 		if (nread != jsonSize) {
+			ESP_LOGW(Mod::kDebugTag, "SdMemoryProvider: the amount read (%dB) is not equal to estimated file size (%d)",
+				nread, jsonSize);
 			res = Result::FileIoError;
 		}
 	}
@@ -226,6 +247,8 @@ Result SdMemoryProvider::configFileWrite(const char *buffer)
 		json = fopen(kParametersFileName, "wb");
 
 		if (json == nullptr) {
+			ESP_LOGE(Mod::kDebugTag, "SdMemoryProvider: unable to open configuration file %s for writing",
+				kParametersFileName);
 			res = Result::FileIoError;
 		} else {
 			fwrite(buffer, 1, strlen(buffer), json);
