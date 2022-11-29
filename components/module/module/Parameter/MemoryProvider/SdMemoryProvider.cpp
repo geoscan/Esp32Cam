@@ -28,7 +28,7 @@ GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::SdMemoryProvider, "sdcard", 1
 namespace Mod {
 namespace Par {
 
-static constexpr const char *kParametersFileName = CONFIG_SD_FAT_MOUNT_POINT "/param.json";
+static constexpr const char *kParametersFileName = CONFIG_SD_FAT_MOUNT_POINT "/param.jsn";
 
 Result SdMemoryProvider::load(const ParameterDescription &parameterDescription, Variant &variant)
 {
