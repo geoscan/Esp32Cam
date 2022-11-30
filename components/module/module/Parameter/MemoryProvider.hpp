@@ -11,10 +11,12 @@
 #include "module/Parameter/Result.hpp"
 
 namespace Mod {
+
+class Variant;
+
 namespace Par {
 
 class ParameterDescription;
-class Variant;
 
 /// \brief Provides an API to a non-volatile storage (SD card or NVS)
 class MemoryProvider {
