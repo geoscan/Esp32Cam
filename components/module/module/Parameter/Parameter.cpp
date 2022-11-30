@@ -138,6 +138,18 @@ struct MemoryProviderStorage {
 static MemoryProviderStorage sMemoryProviderStorage;
 static std::mutex sMutex{};
 
+const ParameterDescription *Parameter::descriptionByMf(Module module, Fld::Field field)
+{
+	std::size_t id;
+	const ParameterDescription *ret = nullptr;
+
+	if (pardescToId(module, field, id)) {
+		ret = &kParameterDescriptions[id];
+	}
+
+	return ret;
+}
+
 Result Parameter::fetch()
 {
 	Result res = Result::Ok;

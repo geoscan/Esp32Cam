@@ -16,10 +16,15 @@ namespace Mod {
 namespace Par {
 
 class MemoryProvider;
+class ParameterDescription;
 
 class Parameter {
 public:
 	friend class InstanceStorage;
+	/// \brief Provides parameter description based on (MODULE_TYPE,
+	/// FIELD_TYPE) pair
+	/// \return nullptr, if not found
+	static const ParameterDescription *descriptionByMf(Mod::Module, Mod::Fld::Field);
 	virtual ~Parameter() = default;
 	/// \brief Make an attempt to read the stored value from a storage
 	Result fetch();
