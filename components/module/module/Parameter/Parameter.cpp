@@ -177,6 +177,20 @@ Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 	return instance;
 }
 
+const std::string &Parameter::asStr() const
+{
+	assert(ParameterType::Str == kParameterDescriptions[id()].parameterType);
+
+	return variant.get_unchecked<std::string>();
+}
+
+int32_t Parameter::asI32() const
+{
+	assert(ParameterType::I32 == kParameterDescriptions[id()].parameterType);
+
+	return variant.get_unchecked<std::int32_t>();
+}
+
 Parameter::Parameter(std::size_t aId) : mId{aId}
 {
 }

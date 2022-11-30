@@ -28,6 +28,12 @@ public:
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
 	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
+	/// \brief Get the underlying string. If the parameter is not of
+	/// "std::string" type, an assertion will be raised.
+	const std::string &asStr() const;
+	/// \brief Get the underlying 32-bit integer. If the parameter is not of
+	/// "std::string" type, an assertion will be raised.
+	std::int32_t asI32() const;
 
 	/// \brief Initialize the parameter w/ a particular value
 	/// \post The value will not be stored in the underlying non-volatile
@@ -37,16 +43,7 @@ public:
 		variant = aVariant;
 	}
 
-	inline const std::string &asStr() const
-	{
-		return variant.get_unchecked<std::string>();
-	}
-
-	std::int32_t asI32() const
-	{
-		return variant.get_unchecked<std::int32_t>();
-	}
-
+	/// \brief Get the parameter's unique id
 	inline std::size_t id() const
 	{
 		return mId;
