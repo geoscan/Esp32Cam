@@ -15,8 +15,8 @@
 namespace Mod {
 namespace Par {
 
-struct Variant : public Mod::Fld::FieldVariant {
-	using FieldVariant::FieldVariant;
+struct Variant : public Mod::Fld::Variant {
+	using Fld::Variant::Variant;
 };
 
 }  // namespace Par
