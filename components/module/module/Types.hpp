@@ -79,12 +79,12 @@ template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsi
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
-template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<const char *> {};
+template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 
 /// \brief Variant type operating as the storage for the aforementioned types.
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
 	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
-	std::array<std::uint16_t, 4>>;
+	std::array<std::uint16_t, 4>, std::string>;
 
 struct FieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
