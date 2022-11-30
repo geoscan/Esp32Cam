@@ -144,7 +144,7 @@ Result Parameter::fetch()
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::fetch: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
-		res = memoryProvider->load(kParameterDescriptions[id()], *this);
+		res = memoryProvider->load(kParameterDescriptions[id()], variant);
 	}
 
 	return res;
@@ -159,7 +159,7 @@ Result Parameter::commit()
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::commit: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
-		res = memoryProvider->save(kParameterDescriptions[id()], *this);
+		res = memoryProvider->save(kParameterDescriptions[id()], variant);
 	}
 
 	return res;
@@ -167,7 +167,7 @@ Result Parameter::commit()
 
 Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 {
-	std::size_t id;
+	std::size_t id = 0;
 	Parameter *instance = nullptr;
 
 	if (pardescToId(module, field, id)) {
