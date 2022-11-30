@@ -29,6 +29,7 @@ static constexpr const std::array<ParameterDescription, 1> kParameterDescription
 		Mod::Module::WifiAp,
 		Mod::Fld::Field::StringIdentifier,
 		MemoryProviderType::Sd,
+		true,  // mirrorField
 	}
 }};
 
