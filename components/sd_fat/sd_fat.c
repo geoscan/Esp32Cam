@@ -32,6 +32,8 @@ static esp_err_t initializeSlot();
 static esp_err_t mountFat();
 static esp_err_t unmountFat();
 static esp_err_t sdFatWriteTest();
+static void sdFatStateReset();
+bool sdFatStateIsReset();
 
 /// \brief Boilerplate reducer
 static inline void logError(const char *method, const char *context, esp_err_t err)
@@ -173,7 +175,7 @@ static esp_err_t deinitializeSlot()
 		}
 
 		if (errHostDeinit != ESP_OK) {
-			logError("sdFatDeinit", "host deinit", err);
+			logError("deinitializeSlot", "host deinit", err);
 			err = errHostDeinit;
 		}
 	}
@@ -185,7 +187,7 @@ static esp_err_t deinitializeSlot()
 		}
 
 		if (errPinsDeinit != ESP_OK) {
-			logError("sdFatDeinit", "pins deinit", err);
+			logError("deinitializeSlot", "pins deinit", err);
 			err = errPinsDeinit;
 		}
 	}
@@ -304,6 +306,11 @@ bool sdFatInit()
 
 bool sdFatDeinit()
 {
+	if (sdFatStateIsReset()) {  // The SD driver has already been deinitialized. W/o this check, `ff_diskio.. (pdrv < FF_VOLUMES)` assertion gets triggered
+		ESP_LOGI(kTag, "sdFatDeinit: already deinitialized");
+		return true;
+	}
+
 	esp_err_t err = ESP_OK;
 	{
 		esp_err_t errUnmount = unmountFat();
@@ -334,10 +341,13 @@ bool sdFatDeinit()
 		logError("sdFatDeinit", "", err);
 	}
 
+	sdFatStateReset();
+
 	return (err == ESP_OK);
 }
 
-/// \brief Attemps to write to a file. May be used as an indication that configuration has completed successfully.
+/// \brief Attemps to write to a file. May be used as an indication that
+/// configuration has completed successfully.
 static esp_err_t sdFatWriteTest()
 {
 	FILE *file = fopen(CONFIG_SD_FAT_MOUNT_POINT"/test.txt", "w");
@@ -352,4 +362,21 @@ static esp_err_t sdFatWriteTest()
 	fclose(file);
 
 	return ESP_OK;
+}
+
+/// \brief Restores the state of the local (static) variables, so some of them
+/// may be used as flags.
+void sdFatStateReset()
+{
+	cardConfig = NULL;
+	pdrv = FF_DRV_NOT_USED;  // Not Used
+	sFatfs = NULL;
+	fatDrivePath[0] = '\0';
+}
+
+// \brief Based on the current static variables' state, infers whether the
+// driver has been successfully initialized
+bool sdFatStateIsReset()
+{
+	return (bool)(pdrv == FF_DRV_NOT_USED);
 }
