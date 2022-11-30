@@ -9,6 +9,7 @@
 #define UTILITY_UTILITY_MOD_TYPES_HPP_
 
 #include "utility/al/Algorithm.hpp"
+#include "module/Variant.hpp"
 #include <asio.hpp>
 #include <cstdint>
 #include <mapbox/variant.hpp>
@@ -35,8 +36,6 @@ enum class Module : std::uint8_t {
 	WifiAp,
 	All,  ///< The request is addressed to every module
 };
-
-struct None {};
 
 namespace Fld {
 
@@ -81,18 +80,13 @@ template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 
-/// \brief Variant type operating as the storage for the aforementioned types.
-using VariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
-	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
-	std::array<std::uint16_t, 4>, std::string, std::int32_t>;
-
-struct Variant : public VariantBase {
-	using VariantBase::VariantBase;
+struct Variant : public Mod::Variant {
+	using Mod::Variant::Variant;
 
 	template <Module M, Field F>
 	const typename GetType<F, M>::Type &getUnchecked() const
 	{
-		return VariantBase::get_unchecked<typename GetType<F, M>::Type>();
+		return Mod::Variant::get_unchecked<typename GetType<F, M>::Type>();
 	}
 
 	/// \brief Infers the underlying type and constructs an instance
