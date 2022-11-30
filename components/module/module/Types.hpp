@@ -99,7 +99,7 @@ struct FieldVariant : public FieldVariantBase {
 	template <Module M, Field F, class ...Ts>
 	static inline FieldVariant make(Ts &&...aArgs)
 	{
-		return FieldVariant{M, F, typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
+		return FieldVariant{typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
 	}
 };
 
