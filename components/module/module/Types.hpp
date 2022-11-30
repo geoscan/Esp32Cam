@@ -84,7 +84,7 @@ template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::
 /// \brief Variant type operating as the storage for the aforementioned types.
 using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
 	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
-	std::array<std::uint16_t, 4>, std::string>;
+	std::array<std::uint16_t, 4>, std::string, std::int32_t>;
 
 struct FieldVariant : public FieldVariantBase {
 	using FieldVariantBase::FieldVariantBase;
