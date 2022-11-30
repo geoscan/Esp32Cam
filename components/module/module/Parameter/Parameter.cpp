@@ -7,6 +7,7 @@
 
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "module/Variant.hpp"
 #include "module/Parameter/ParameterDescription.hpp"
 #include "module/Parameter/MemoryProvider.hpp"
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"

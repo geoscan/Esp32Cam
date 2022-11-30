@@ -9,10 +9,12 @@
 #define MODULE_MODULE_PARAMETER_API_HPP_
 
 #include "module/Parameter/Result.hpp"
-#include "module/Parameter/Variant.hpp"
 #include "module/Types.hpp"
 
 namespace Mod {
+
+class Variant;
+
 namespace Par {
 
 class MemoryProvider;
