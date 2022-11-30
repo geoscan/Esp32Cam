@@ -47,9 +47,7 @@ class ModuleBase :
 public:
 	ModuleBase(Module aModule);
 	virtual ~ModuleBase() = default;
-
 	/// \brief A distributed module is identified w/ an enum entry.
-	///
 	/// \note A necessity to distinguish modules by their IDs may arise.
 	inline Module getModule() const
 	{
@@ -101,11 +99,9 @@ protected:
 
 	/// \brief Asynchronous getter, subject to implementation.
 	virtual void getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnResponse);
-
 	/// \brief Asynchronous setter, subject to implementation.
 	virtual void setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb);
 private:
-
 	///\brief Notifies subscribers upon a module field's change
 	///
 	/// \details Notifying subscribers is a responsibility of the module implementing the API.
@@ -113,6 +109,7 @@ private:
 	/// \note It's been decided to not to use it yet. However, it has not been scrapped either, because
 	/// it may turn out to be useful at some point in the future. Hence the placement in the `private` section
 	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
+	void fieldTryMirrorParameter(Module module, Fld::Field field, Fld::Variant fieldVariant);
 private:
 	struct {
 		Module type;
