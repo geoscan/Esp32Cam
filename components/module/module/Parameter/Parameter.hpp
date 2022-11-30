@@ -21,9 +21,9 @@ class Parameter {
 public:
 	friend class InstanceStorage;
 	virtual ~Parameter() = default;
-	/// \brief Make an attempt to load the value from a storage
+	/// \brief Make an attempt to read the stored value from a storage
 	Result fetch();
-	/// \brief Make an attempt to load the value into a storage
+	/// \brief Make an attempt to write the stored value into a storage
 	Result commit();
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
