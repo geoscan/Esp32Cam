@@ -40,7 +40,7 @@ void ModuleBase::setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback 
 {
 }
 
-void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, Fld::Variant fieldVariant)
+void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant)
 {
 	const Par::ParameterDescription *parameterDescription = Par::Parameter::descriptionByMf(module, field);
 
@@ -48,7 +48,7 @@ void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, Fld::V
 		Par::Parameter *parameter = Par::Parameter::instanceByMf(module, field);
 
 		if (parameter != nullptr) {
-//			parameter->set(fieldVariant);
+			parameter->set(variant);
 			parameter->commit();
 		}
 	}

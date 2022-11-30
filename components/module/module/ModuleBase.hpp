@@ -64,7 +64,14 @@ public:
 	{
 		for (auto &mod : ModuleBase::getIterators()) {
 			if (mod.getModule() == Im || Im == Module::All) {
-				mod.setFieldValue({If, field}, aCb);
+				mod.setFieldValue({If, field},
+					[aCb, field](Fld::WriteResp resp)
+					{
+						if (resp.isOk()) {
+							fieldTryMirrorParameter(Im, If, Fld::Variant::make<Im, If>(field));
+						}
+						aCb(resp);
+					});
 			}
 		}
 	}
@@ -109,7 +116,9 @@ private:
 	/// \note It's been decided to not to use it yet. However, it has not been scrapped either, because
 	/// it may turn out to be useful at some point in the future. Hence the placement in the `private` section
 	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
-	void fieldTryMirrorParameter(Module module, Fld::Field field, Fld::Variant fieldVariant);
+	/// \brief If field setting has been successful, and mirroring is enabled
+	/// for the field, the new value will be stored in a permanent storage
+	static void fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant);
 private:
 	struct {
 		Module type;
