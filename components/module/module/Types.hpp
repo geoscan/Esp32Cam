@@ -82,31 +82,31 @@ template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 
 /// \brief Variant type operating as the storage for the aforementioned types.
-using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
+using VariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
 	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
 	std::array<std::uint16_t, 4>, std::string, std::int32_t>;
 
-struct FieldVariant : public FieldVariantBase {
-	using FieldVariantBase::FieldVariantBase;
+struct Variant : public VariantBase {
+	using VariantBase::VariantBase;
 
 	template <Module M, Field F>
 	const typename GetType<F, M>::Type &getUnchecked() const
 	{
-		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
+		return VariantBase::get_unchecked<typename GetType<F, M>::Type>();
 	}
 
 	/// \brief Infers the underlying type and constructs an instance
 	template <Module M, Field F, class ...Ts>
-	static inline FieldVariant make(Ts &&...aArgs)
+	static inline Variant make(Ts &&...aArgs)
 	{
-		return FieldVariant{typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
+		return Variant{typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
 	}
 };
 
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
-	FieldVariant variant;  ///< The actual response
+	Variant variant;  ///< The actual response
 };
 
 struct Req {
@@ -117,7 +117,7 @@ using OnResponseCallback = typename std::function<void(Resp)>;
 
 struct WriteReq {
 	Field field;  ///< Requested field
-	FieldVariant variant;
+	Variant variant;
 };
 
 struct RequestResult {
@@ -156,7 +156,7 @@ struct ModuleField {
 	Module module;
 	Field field;
 	// Value storage
-	Mod::Fld::FieldVariant fieldVariant;
+	Mod::Fld::Variant fieldVariant;
 
 	template <Mod::Module M, Mod::Fld::Field F>
 	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked() const
