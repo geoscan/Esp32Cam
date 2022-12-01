@@ -44,7 +44,7 @@ void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, const 
 {
 	const Par::ParameterDescription *parameterDescription = Par::Parameter::descriptionByMf(module, field);
 
-	if (parameterDescription && parameterDescription->mirrorField) {
+	if (parameterDescription != nullptr && parameterDescription->mirrorField) {
 		Par::Parameter *parameter = Par::Parameter::instanceByMf(module, field);
 
 		if (parameter != nullptr) {
