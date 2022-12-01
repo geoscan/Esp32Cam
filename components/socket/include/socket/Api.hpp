@@ -35,7 +35,7 @@ private:
 		Container<asio::ip::udp::socket> udp;
 	} container;
 
-	static constexpr auto kReceiveBufferSize = 128;
+	static constexpr auto kReceiveBufferSize = 512;
 	static constexpr const char *kDebugTag = Sock::kDebugTag;
 
 public:
