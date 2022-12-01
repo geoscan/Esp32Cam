@@ -7,6 +7,7 @@
 
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL)
 #include <esp_log.h>
+#include "module/Variant.hpp"
 #include "module/Parameter/ParameterDescription.hpp"
 #include "module/Parameter/MemoryProvider.hpp"
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
@@ -16,6 +17,7 @@
 #include <algorithm>
 #include <memory>
 #include "Parameter.hpp"
+#include <mutex>
 
 namespace Mod {
 namespace Par {
@@ -28,6 +30,7 @@ static constexpr const std::array<ParameterDescription, 1> kParameterDescription
 		Mod::Module::WifiAp,
 		Mod::Fld::Field::StringIdentifier,
 		MemoryProviderType::Sd,
+		true,  // mirrorField
 	}
 }};
 
@@ -134,16 +137,34 @@ struct MemoryProviderStorage {
 };
 
 static MemoryProviderStorage sMemoryProviderStorage;
+static std::mutex sMutex{};
+
+const ParameterDescription *Parameter::descriptionByMf(Module module, Fld::Field field)
+{
+	std::size_t id;
+	const ParameterDescription *ret = nullptr;
+
+	if (pardescToId(module, field, id)) {
+		ret = &kParameterDescriptions[id];
+	}
+
+	return ret;
+}
 
 Result Parameter::fetch()
 {
-	MemoryProvider *memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
 	Result res = Result::Ok;
+	MemoryProvider *memoryProvider = nullptr;
+	{
+		std::lock_guard<std::mutex> lock{sMutex};
+		memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
+	}
 
 	if (memoryProvider == nullptr) {
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::fetch: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
+		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->load(kParameterDescriptions[id()], variant);
 	}
 
@@ -152,13 +173,18 @@ Result Parameter::fetch()
 
 Result Parameter::commit()
 {
-	MemoryProvider *memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
 	Result res = Result::Ok;
+	MemoryProvider *memoryProvider = nullptr;
+	{
+		std::lock_guard<std::mutex> lock{sMutex};
+		memoryProvider = sMemoryProviderStorage.memoryProviderById(id());
+	}
 
 	if (memoryProvider == nullptr) {
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::commit: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
+		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->save(kParameterDescriptions[id()], variant);
 	}
 
@@ -171,10 +197,25 @@ Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 	Parameter *instance = nullptr;
 
 	if (pardescToId(module, field, id)) {
+		std::lock_guard<std::mutex> lock{sMutex};
 		instance = sInstanceStorage.instanceById(id);
 	}
 
 	return instance;
+}
+
+const std::string &Parameter::asStr() const
+{
+	assert(ParameterType::Str == kParameterDescriptions[id()].parameterType);
+
+	return variant.get_unchecked<std::string>();
+}
+
+int32_t Parameter::asI32() const
+{
+	assert(ParameterType::I32 == kParameterDescriptions[id()].parameterType);
+
+	return variant.get_unchecked<std::int32_t>();
 }
 
 Parameter::Parameter(std::size_t aId) : mId{aId}

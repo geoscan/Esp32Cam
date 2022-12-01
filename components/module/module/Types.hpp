@@ -9,6 +9,7 @@
 #define UTILITY_UTILITY_MOD_TYPES_HPP_
 
 #include "utility/al/Algorithm.hpp"
+#include "module/Variant.hpp"
 #include <asio.hpp>
 #include <cstdint>
 #include <mapbox/variant.hpp>
@@ -35,8 +36,6 @@ enum class Module : std::uint8_t {
 	WifiAp,
 	All,  ///< The request is addressed to every module
 };
-
-struct None {};
 
 namespace Fld {
 
@@ -79,34 +78,29 @@ template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsi
 template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
-template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<const char *> {};
+template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 
-/// \brief Variant type operating as the storage for the aforementioned types.
-using FieldVariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
-	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
-	std::array<std::uint16_t, 4>>;
-
-struct FieldVariant : public FieldVariantBase {
-	using FieldVariantBase::FieldVariantBase;
+struct Variant : public Mod::Variant {
+	using Mod::Variant::Variant;
 
 	template <Module M, Field F>
 	const typename GetType<F, M>::Type &getUnchecked() const
 	{
-		return FieldVariantBase::get_unchecked<typename GetType<F, M>::Type>();
+		return Mod::Variant::get_unchecked<typename GetType<F, M>::Type>();
 	}
 
 	/// \brief Infers the underlying type and constructs an instance
 	template <Module M, Field F, class ...Ts>
-	static inline FieldVariant make(Ts &&...aArgs)
+	static inline Variant make(Ts &&...aArgs)
 	{
-		return FieldVariant{M, F, typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
+		return Variant{typename GetType<F, M>::Type{std::forward<Ts>(aArgs)...}};
 	}
 };
 
 /// \brief Encapsulates responses produced by a module.
 ///
 struct Resp {
-	FieldVariant variant;  ///< The actual response
+	Variant variant;  ///< The actual response
 };
 
 struct Req {
@@ -117,7 +111,7 @@ using OnResponseCallback = typename std::function<void(Resp)>;
 
 struct WriteReq {
 	Field field;  ///< Requested field
-	FieldVariant variant;
+	Variant variant;
 };
 
 struct RequestResult {
@@ -156,7 +150,7 @@ struct ModuleField {
 	Module module;
 	Field field;
 	// Value storage
-	Mod::Fld::FieldVariant fieldVariant;
+	Mod::Fld::Variant fieldVariant;
 
 	template <Mod::Module M, Mod::Fld::Field F>
 	const inline typename Mod::Fld::GetType<F, M>::Type &getUnchecked() const

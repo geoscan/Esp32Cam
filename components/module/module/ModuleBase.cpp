@@ -7,6 +7,8 @@
 
 #include "ModuleBase.hpp"
 #include "sub/Module.hpp"
+#include "module/Parameter/ParameterDescription.hpp"
+#include "module/Parameter/Parameter.hpp"
 #include "utility/thr/WorkQueue.hpp"
 
 namespace Mod {
@@ -36,6 +38,20 @@ void ModuleBase::getFieldValue(Fld::Req aReq, Fld::OnResponseCallback aOnRespons
 
 void ModuleBase::setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback aCb)
 {
+}
+
+void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant)
+{
+	const Par::ParameterDescription *parameterDescription = Par::Parameter::descriptionByMf(module, field);
+
+	if (parameterDescription != nullptr && parameterDescription->mirrorField) {
+		Par::Parameter *parameter = Par::Parameter::instanceByMf(module, field);
+
+		if (parameter != nullptr) {
+			parameter->set(variant);
+			parameter->commit();
+		}
+	}
 }
 
 }  // namespace Mod

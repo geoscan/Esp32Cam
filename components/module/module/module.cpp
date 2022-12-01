@@ -10,6 +10,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MODULE_DEBUG_LEVEL)
 #include <esp_log.h>
 #include "module.hpp"
+#include "module/ModuleBase.hpp"
 #include "module/Parameter/MemoryProvider.hpp"
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
 #include "module/Parameter/Parameter.hpp"
@@ -22,6 +23,13 @@ static void initDemoPar();
 
 void initDemoPar()
 {
+	// Set the parameter using module API through exploiting the parameters mirroring feature
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>("EchoHi",
+		[](const Fld::WriteResp &resp)
+		{
+			ESP_LOGI(Mod::kDebugTag, "Response %s", resp.resultAsCstr());
+		});
+	// Set the parameter directly using Parameter API
 	auto *instance = Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
 	assert(instance != nullptr);
 	auto res = instance->fetch();

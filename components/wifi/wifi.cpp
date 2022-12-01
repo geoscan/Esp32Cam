@@ -4,8 +4,10 @@
 #define LOG_LOCAL_LEVEL (CONFIG_WIFI_DEBUG_LEVEL)
 #include <esp_log.h>
 
+#include "module/Parameter/Parameter.hpp"
 #include "wifi.h"
 #include "wifi/Sta.hpp"
+#include "wifi/Ap.hpp"
 #include "utility/al/Algorithm.hpp"
 #include <esp_event.h>
 #include <esp_system.h>
@@ -39,6 +41,8 @@ esp_netif_t *sStaEspNetif = NULL;
 static constexpr unsigned kBitConnected = BIT0;
 static constexpr unsigned kBitDisconnected = BIT1;
 static constexpr unsigned kBitStaGotIp = BIT2;
+
+std::string userSsid();
 
 ///
 /// \brief get_ssid Decorates SSID with MAC address, using the latter as a suffix
@@ -218,29 +222,55 @@ static void wifiDriverInit()
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
 }
 
+/// \brief Make an attempt to load user SSID from SD card
+/// \returns an empty string, if failed
+std::string userSsid()
+{
+	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
+	std::string ret{};
+
+	if (parameter != nullptr) {
+		const auto result = parameter->fetch();
+
+		if (result == Mod::Par::Result::Ok) {
+			ret = parameter->asStr();
+			ESP_LOGI(Wifi::kDebugTag, "Got user SSID: \"%s\"", ret.c_str());
+		}
+	}
+
+	return ret;
+}
+
 void wifi_init_sta(void)
 {
 	esp_wifi_set_storage(WIFI_STORAGE_RAM);
 	ESP_ERROR_CHECK(esp_netif_init());
 	wifiDriverInit();
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA) );
-
 	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
+	auto ussid = userSsid();
 
-	uint8_t  *ssid;
-	unsigned ssid_len;
-	decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
-	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, (char *)ssid, CONFIG_ESP_WIFI_PASSWORD);
+	if (ussid.length() > 0 && ussid.length() <= SSID_MAX_LENGTH) {
+		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ussid.c_str(), CONFIG_ESP_WIFI_PASSWORD);
+	} else {
+		uint8_t  *ssid;
+		unsigned ssid_len;
+		decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
+		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, (char *)ssid, CONFIG_ESP_WIFI_PASSWORD);
+	}
 
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
 void wifiStart(void)
 {
+
 	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
 	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
 	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
 	static Wifi::Sta sta{&sStaEspNetif};
+	static Wifi::Ap ap{};
 	(void)sta;
+	(void)ap;
 }

@@ -39,6 +39,10 @@ struct ParameterDescription {
 	Mod::Fld::Field field;
 	/// \brief Physical medium which will store the value
 	MemoryProviderType memoryProviderType;
+	/// \brief If set, changing a module's field will also lead to an attempt
+	/// to change the parameter. Otherwise, the parameter will have to be
+	/// changed manually
+	bool mirrorField;
 };
 
 }  // namespace Par
