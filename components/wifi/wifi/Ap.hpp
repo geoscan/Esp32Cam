@@ -16,6 +16,7 @@ namespace Wifi {
 /// processing
 class Ap : public Mod::ModuleBase {
 public:
+	Ap();
 	/// \brief Serves as a stub interpcepting field setting. For now, always
 	/// returns OK, to trigger parameters mirroring.
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;

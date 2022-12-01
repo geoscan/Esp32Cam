@@ -9,6 +9,10 @@
 
 namespace Wifi {
 
+Ap::Ap() : ModuleBase{Mod::Module::WifiAp}
+{
+}
+
 void Ap::setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback onWriteResponse)
 {
 	onWriteResponse({Mod::Fld::RequestResult::Ok});
