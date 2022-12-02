@@ -15,8 +15,8 @@ namespace Mav {
 namespace Hlpr {
 
 struct MavlinkCommandLong : mavlink_command_long_t, Cmn::Impl::Pack<mavlink_command_long_t> {
-	static mavlink_command_long_t makeFrom(const mavlink_command_int_t &);
-	static mavlink_command_long_t makeFrom(const mavlink_message_t &);
+	static MavlinkCommandLong makeFrom(const mavlink_command_int_t &);
+	static MavlinkCommandLong makeFrom(const mavlink_message_t &);
 	MavlinkCommandLong &initTargetFromRequest(const mavlink_message_t &aRequest);
 	MavlinkCommandLong &initRequestMessage(unsigned aMsgid, float aParam2 = 0.0f, float aParam3 = 0.0f,
 		float aParam4 = 0.0f, float aParam5 = 0.0f);
