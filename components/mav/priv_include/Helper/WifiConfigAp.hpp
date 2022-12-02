@@ -14,7 +14,12 @@
 namespace Mav {
 namespace Hlpr {
 
-struct WifiConfigAp : mavlink_wifi_config_ap_t, Cmn::Impl::Pack<mavlink_command_long_t> {
+struct WifiConfigAp : mavlink_wifi_config_ap_t, Cmn::Impl::Pack<mavlink_wifi_config_ap_t> {
+	WifiConfigAp() = default;
+	inline WifiConfigAp(const mavlink_wifi_config_ap_t &mavlinkWifiConfigAp) :
+		mavlink_wifi_config_ap_t{mavlinkWifiConfigAp}
+	{
+	}
 };
 
 }  // namespace Hlpr
