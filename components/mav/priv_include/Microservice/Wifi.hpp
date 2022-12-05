@@ -15,6 +15,7 @@ namespace Mav {
 namespace Hlpr {
 
 class WifiConfigAp;
+class MavlinkCommandLong;
 
 }  // namespace Hlpr
 
@@ -32,6 +33,9 @@ private:
 	Ret processConfigApSetAp(mavlink_message_t &message, OnResponseSignature onResponse, Hlpr::WifiConfigAp &);
 	/// \brief Process a request to connect to / disconnect from a remote AP
 	Ret processConfigApSetSta(mavlink_message_t &message, OnResponseSignature onResponse, Hlpr::WifiConfigAp &);
+	/// \brief
+	Ret processCmdRequestMessage(mavlink_message_t &message, OnResponseSignature onResponse,
+		const Hlpr::MavlinkCommandLong &mavlinkCommandLong);
 };
 
 }  // namespace Mic

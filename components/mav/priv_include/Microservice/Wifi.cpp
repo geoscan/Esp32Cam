@@ -5,14 +5,25 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
 #include "Mavlink.hpp"
 #include "Globals.hpp"
 #include "Wifi.hpp"
 #include "module/ModuleBase.hpp"
 #include "Helper/WifiConfigAp.hpp"
+#include "Helper/MavlinkCommandLong.hpp"
+#include "Helper/MavlinkCommandAck.hpp"
 #include "Wifi.hpp"
 #include "wifi.h"
+#include "mav/mav.hpp"
+#include "utility/LogSection.hpp"
 #include <esp_wifi.h>
+
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "AP settings", 1);
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "tracing", 1);
 
 namespace Mav {
 namespace Mic {
@@ -20,17 +31,41 @@ namespace Mic {
 Microservice::Ret Wifi::process(mavlink_message_t &message, Microservice::OnResponseSignature onResponse)
 {
 	Ret ret = Ret::Ignored;
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "got message");
 
-	if (message.compid == Globals::getCompId()) {
-		switch (message.msgid) {
-			case MAVLINK_MSG_ID_WIFI_CONFIG_AP:
-				ret = processConfigAp(message, onResponse);
+	switch (message.msgid) {
+		case MAVLINK_MSG_ID_WIFI_CONFIG_AP:
+			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Mav::Mic::Wifi, "tracing", "got WIFI_CONFIG_AP");
+			ret = processConfigAp(message, onResponse);
 
-				break;
+			break;
 
-			default:
-				break;
+		case MAVLINK_MSG_ID_COMMAND_INT:
+		// falls through
+		case MAVLINK_MSG_ID_COMMAND_LONG: {
+			const auto mavlinkCommandLong = Hlpr::MavlinkCommandLong::makeFrom(message);
+			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Mav::Mic::Wifi, "tracing", "got COMMAND_LONG, sysid=%d,"
+				"compid=%d, command=%d", mavlinkCommandLong.target_system, mavlinkCommandLong.target_component,
+				mavlinkCommandLong.command);
+
+			if (mavlinkCommandLong.target_system == Globals::getSysId()
+					&& mavlinkCommandLong.target_component == Globals::getCompId()) {
+				switch (mavlinkCommandLong.command) {
+					case MAV_CMD_REQUEST_MESSAGE:
+						ret = processCmdRequestMessage(message, onResponse, mavlinkCommandLong);
+
+						break;
+
+					default:
+						break;
+				}
+			}
+
+			break;
 		}
+
+		default:
+			break;
 	}
 
 	return ret;
@@ -41,8 +76,8 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 	Ret ret = Ret::Response;
 	Hlpr::WifiConfigAp mavlinkWifiConfig;
 	mavlink_msg_wifi_config_ap_decode(&mavlinkMessage, &mavlinkWifiConfig);
+	ESP_LOGI(Mav::kDebugTag, "TEST");
 
-	// TODO: check sysid and compid
 	switch (mavlinkWifiConfig.mode) {
 		// Update AP configuration
 		case WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_AP:
@@ -107,6 +142,50 @@ Microservice::Ret Wifi::processConfigApSetSta(mavlink_message_t &message, Micros
 	}
 
 	return Ret::Response;
+}
+
+Microservice::Ret Wifi::processCmdRequestMessage(mavlink_message_t &message,
+	Microservice::OnResponseSignature onResponse, const Hlpr::MavlinkCommandLong &mavlinkCommandLong)
+{
+	auto ret = Ret::Ignored;
+	const int requestedMsgid = static_cast<int>(mavlinkCommandLong.param1);
+
+	if (requestedMsgid == MAVLINK_MSG_ID_WIFI_CONFIG_AP) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Mav::Mic::Wifi, "tracing", "got request for WIFI_CONFIG_AP");
+		ret = Ret::Response;
+		// `param2` is used as mode identifier.
+		const int mode = static_cast<int>(mavlinkCommandLong.param2);
+		Hlpr::WifiConfigAp wifiConfigAp{mavlink_wifi_config_ap_t{
+			{""},  // SSID
+			{""},  // Password
+			0,  // Mode
+			0,  // Response
+		}};
+
+		// Attempting to acquire the SSID of the AP the station is connected to
+		if (mode == WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_STATION) {
+			wifiConfigAp.mode = WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_DISABLED;
+			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(
+				[&wifiConfigAp](const std::string &identifier) mutable
+				{
+					std::copy(identifier.begin(), identifier.end(), wifiConfigAp.ssid);  // The identifier is supposed to already be of the appropriate length and format, so no checks are made
+				});
+		} else if (mode == WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_AP) {
+			// TODO: acquire the curret Wi-Fi AP SSID
+		}
+
+		// Compose ACK
+		{
+			auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
+			ack.packInto(message);
+			onResponse(message);
+		}
+		// Send the message itself
+		wifiConfigAp.packInto(message);
+		onResponse(message);
+	}
+
+	return ret;
 }
 
 }  // namespace Mic
