@@ -76,17 +76,19 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 	Ret ret = Ret::Response;
 	Hlpr::WifiConfigAp mavlinkWifiConfig;
 	mavlink_msg_wifi_config_ap_decode(&mavlinkMessage, &mavlinkWifiConfig);
-	ESP_LOGI(Mav::kDebugTag, "TEST");
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp, mode=%d", mavlinkWifiConfig.mode);
 
 	switch (mavlinkWifiConfig.mode) {
 		// Update AP configuration
 		case WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_AP:
+			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP");
 			ret = processConfigApSetAp(mavlinkMessage, onResponse, mavlinkWifiConfig);
 
 			break;
 
 		// Update STA configuration
 		case WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_STATION:
+			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting STA");
 			ret = processConfigApSetSta(mavlinkMessage, onResponse, mavlinkWifiConfig);
 
 			break;
@@ -101,6 +103,7 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 Microservice::Ret Wifi::processConfigApSetAp(mavlink_message_t &message, Microservice::OnResponseSignature onResponse,
 	Hlpr::WifiConfigAp &mavlinkWifiConfigAp)
 {
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP");
 	mavlinkWifiConfigAp.response = WIFI_CONFIG_AP_RESPONSE::WIFI_CONFIG_AP_RESPONSE_UNDEFINED;
 	// Update the field using module API
 	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>(
@@ -109,6 +112,7 @@ Microservice::Ret Wifi::processConfigApSetAp(mavlink_message_t &message, Microse
 		{
 			if (aResponse.isOk()) {
 				mavlinkWifiConfigAp.response = WIFI_CONFIG_AP_RESPONSE::WIFI_CONFIG_AP_RESPONSE_ACCEPTED;
+				ESP_LOGI(Mav::kDebugTag, "Wifi, successfully set SSID");
 			}
 		});
 	// Pack and send the response
