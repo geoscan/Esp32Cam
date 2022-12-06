@@ -110,6 +110,83 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 	return ret;
 }
 
+Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
+	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
+{
+	// Ensure null-termination when working w/ c-strings.
+	const std::string ssid{wifiConfigAp.ssid, sizeof(wifiConfigAp.ssid)};
+	const std::string password{wifiConfigAp.password, sizeof(wifiConfigAp.password)};
+
+	constexpr std::uint8_t *kIp = nullptr;
+	constexpr std::uint8_t *kGateway = nullptr;
+	constexpr std::uint8_t *kNetmask = nullptr;
+	const esp_err_t connectResult = wifiStaConnect(ssid.c_str(), password.c_str(), kIp, kGateway, kNetmask);
+	constexpr std::array<std::uint8_t, 2> kConnectError{{0x00, 0x01}};  // See the doc.
+
+	if (connectResult != ESP_OK) {
+		wifiConfigAp.ssidFillZero();
+		std::copy_n(kConnectError.begin(), kConnectError.size(), wifiConfigAp.ssid);
+	}
+
+	// Provide the response
+	wifiConfigAp.packInto(message);
+	onResponse(message);
+
+	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Wifi::processConfigApDisconnect(mavlink_message_t &mavlinkMessage,
+	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
+{
+	esp_wifi_disconnect();  // No reason to handle its result, as the operation is idempotent
+	// Provide the response
+	wifiConfigAp.packInto(mavlinkMessage);
+	onResponse(mavlinkMessage);
+
+	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Wifi::processConfigApSetSsid(mavlink_message_t &mavlinkMessage,
+	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
+{
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP SSID");
+	const std::string ssid{wifiConfigAp.ssid, sizeof(wifiConfigAp.ssid)};
+	bool success = false;
+	// Set module field
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>(ssid,
+		[&wifiConfigAp, &success](const Mod::Fld::WriteResp &writeResponse)
+		{
+			success = writeResponse.isOk();
+		});
+
+	// Initialize error code, if needed
+	if (!success) {
+		constexpr std::array<char, 2> kSetSsidError = {{0x00, 0x03}};
+		wifiConfigAp.ssidFillZero();
+		std::copy_n(kSetSsidError.begin(), kSetSsidError.size(), wifiConfigAp.ssid);
+	}
+
+	// Provide the response
+	wifiConfigAp.packInto(mavlinkMessage);
+	onResponse(mavlinkMessage);
+
+	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Wifi::processConfigApSetPassword(mavlink_message_t &mavlinkMessage,
+	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
+{
+	// The password setting functionality is yet to be implemented. Send a stub
+	constexpr std::array<char, 2> kSetPasswordError = {{0x00, 0x04}};
+	wifiConfigAp.ssidFillZero();
+	std::copy_n(kSetPasswordError.begin(), kSetPasswordError.size(), wifiConfigAp.ssid);
+	// Provide the response
+	wifiConfigAp.packInto(mavlinkMessage);
+	onResponse(mavlinkMessage);
+
+	return Microservice::Ret::Response;
+}
+
 Microservice::Ret Wifi::processConfigApSetAp(mavlink_message_t &message, Microservice::OnResponseSignature onResponse,
 	Hlpr::WifiConfigAp &mavlinkWifiConfigAp)
 {
