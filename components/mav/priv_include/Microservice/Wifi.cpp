@@ -77,24 +77,34 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 	Hlpr::WifiConfigAp mavlinkWifiConfig;
 	mavlink_msg_wifi_config_ap_decode(&mavlinkMessage, &mavlinkWifiConfig);
 	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp, mode=%d", mavlinkWifiConfig.mode);
+	// [0x00, 0xFF] is a special sequence denoting that a field is not used. Certain combinations of field values
+	// map to certain requests
+	const bool hasSsid = mavlinkWifiConfig.ssid[0] != 0x00 && mavlinkWifiConfig.ssid[1] != 0xFF;
+	const bool hasPassword = mavlinkWifiConfig.password[0] != 0x00 && mavlinkWifiConfig.password[1] != 0xFF;
 
-	switch (mavlinkWifiConfig.mode) {
-		// Update AP configuration
-		case WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_AP:
-			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP");
-			ret = processConfigApSetAp(mavlinkMessage, onResponse, mavlinkWifiConfig);
-
-			break;
-
-		// Update STA configuration
-		case WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_STATION:
-			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting STA");
+	if (mavlinkWifiConfig.mode == WIFI_CONFIG_AP_MODE_UNDEFINED) {
+		// There are 2 implementations: legacy, and modern. The legacy is a
+		// liability that has to be carried due to limitations of some
+		// application-level libraries (such as PyMAVLink). "Undefined" mode,
+		// corresponding to 0, has been decided to be used as a marker that the
+		// legacy implementation must be used. It has technical reasons: due to
+		// how the decoder works, 0 is produced as as result of decoding
+		// MAVLink 1 variant of the message.
+		if (hasSsid && hasPassword) {
+			ret = processConfigApConnect(mavlinkMessage, onResponse, mavlinkWifiConfig);
+		} else if (!hasSsid && !hasPassword) {
+			ret = processConfigApDisconnect(mavlinkMessage, onResponse, mavlinkWifiConfig);
+		} else if (hasSsid && !hasPassword) {
+			ret = processConfigApSetSsid(mavlinkMessage, onResponse, mavlinkWifiConfig);
+		} else if (!hasSsid && hasPassword) {
 			ret = processConfigApSetSta(mavlinkMessage, onResponse, mavlinkWifiConfig);
-
-			break;
-
-		default:
-			break;
+		}
+	} else {
+		if (mavlinkWifiConfig.mode == WIFI_CONFIG_AP_MODE_AP) {
+			processConfigApSetAp(mavlinkMessage, onResponse, mavlinkWifiConfig);
+		} else if (mavlinkWifiConfig.mode == WIFI_CONFIG_AP_MODE_STATION) {
+			processConfigApSetSta(mavlinkMessage, onResponse, mavlinkWifiConfig);
+		}
 	}
 
 	return ret;
