@@ -25,8 +25,8 @@ void Ap::setFieldValue(Mod::Fld::WriteReq request, Mod::Fld::OnWriteResponseCall
 
 	switch (request.field) {
 		case Mod::Fld::Field::StringIdentifier: {  // SSID
-			const std::string & ssid
-				= request.variant.getUnchecked<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>();
+			const std::string &ssid = request.variant
+				.getUnchecked<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>();
 
 			if (!(ssid.length() >= kSsidMinLength && ssid.length() <= kSsidMaxLength)) {
 				ESP_LOGW(Mod::kDebugTag, "set StringIdentifier: %s", kInvalidSsidLengthMsg);
