@@ -142,6 +142,8 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 			esp_err_to_name(connectResult));
 	} else {
 		ESP_LOGI(Mav::kDebugTag, "Wifi: connect (STA): succeeded");
+		constexpr std::size_t kMd5DigestLength = 16;
+		std::array<std::uint8_t, kMd5DigestLength> digest{{0}};
 		// Calculate MD5 digest as per the standard
 		mbedtls_md5_context mbedtlsMd5Context;
 		mbedtls_md5_init(&mbedtlsMd5Context);
@@ -149,8 +151,12 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 		mbedtls_md5_update_ret(&mbedtlsMd5Context, reinterpret_cast<const std::uint8_t *>(password.data()),
 			strlen(password.data()));
 		// Dump the digest into the returned message
+		mbedtls_md5_finish_ret(&mbedtlsMd5Context, digest.data());
 		wifiConfigAp.passwordFillZero();
-		mbedtls_md5_finish_ret(&mbedtlsMd5Context, reinterpret_cast<std::uint8_t *>(wifiConfigAp.password));
+
+		for (std::size_t i = 0; i < digest.size(); ++i) {
+			snprintf(wifiConfigAp.password + i * 2, sizeof(wifiConfigAp.password) - i * 2, "%02x", digest[i]);
+		}
 	}
 
 	// Provide the response
