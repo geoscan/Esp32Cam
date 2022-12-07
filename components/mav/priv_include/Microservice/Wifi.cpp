@@ -88,8 +88,8 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 		// application-level libraries (such as PyMAVLink). "Undefined" mode,
 		// corresponding to 0, has been decided to be used as a marker that the
 		// legacy implementation must be used. It has technical reasons: due to
-		// how the decoder works, 0 is produced as as result of decoding
-		// MAVLink 1 variant of the message.
+		// how the decoder works, 0 ("undefined mode") is produced as as result
+		// of decoding MAVLink 1 variant of the message.
 		if (hasSsid && hasPassword) {
 			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp legacy - connect, mode=%d",
 				mavlinkWifiConfig.mode);
