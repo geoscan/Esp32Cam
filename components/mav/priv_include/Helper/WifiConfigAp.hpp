@@ -22,6 +22,7 @@ struct WifiConfigAp : mavlink_wifi_config_ap_t, Cmn::Impl::Pack<mavlink_wifi_con
 	{
 	}
 	void ssidFillZero();
+	void passwordFillZero();
 };
 
 }  // namespace Hlpr
