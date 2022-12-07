@@ -135,6 +135,7 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 
 	if (connectResult != ESP_OK) {
 		wifiConfigAp.ssidFillZero();
+		wifiConfigAp.passwordFillZero();
 		std::copy_n(kConnectError.begin(), kConnectError.size(), wifiConfigAp.ssid);
 		ESP_LOGW(Mav::kDebugTag, "Wifi: connect (STA): failed, error=%d(%s)", connectResult,
 			esp_err_to_name(connectResult));
