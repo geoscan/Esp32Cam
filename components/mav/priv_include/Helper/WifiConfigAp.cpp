@@ -37,6 +37,7 @@ void WifiConfigAp::passwordIntoMd5Stringify()
 		strlen(passwordCache.data()));
 	// Dump the digest into the returned message
 	mbedtls_md5_finish_ret(&mbedtlsMd5Context, digest.data());
+	passwordFillZero();
 
 	for (std::size_t i = 0; i < digest.size(); ++i) {
 		snprintf(password + i * 2, sizeof(password) - i * 2, "%02x", digest[i]);
