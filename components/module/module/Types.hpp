@@ -57,7 +57,8 @@ enum class Field : std::uint8_t {
 	VersionCommitHash,  ///< Git commit hash
 	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
 	Roi,  ///< Region of Interest
-	StringIdentifier  ///< Generic string name
+	StringIdentifier,  ///< Generic string name
+	Password  ///< Password. Wi-Fi STA, or AP
 };
 
 template <class T>
@@ -79,6 +80,7 @@ template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::varia
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
+template <Module I> struct GetType<Field::Password, I> : StoreType<std::string> {};
 
 struct Variant : public Mod::Variant {
 	using Mod::Variant::Variant;
