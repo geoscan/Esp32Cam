@@ -146,7 +146,7 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 		mbedtls_md5_init(&mbedtlsMd5Context);
 		mbedtls_md5_starts_ret(&mbedtlsMd5Context);
 		mbedtls_md5_update_ret(&mbedtlsMd5Context, reinterpret_cast<const std::uint8_t *>(password.data()),
-			password.size());
+			strlen(password.data()));
 		// Dump the digest into the returned message
 		wifiConfigAp.passwordFillZero();
 		mbedtls_md5_finish_ret(&mbedtlsMd5Context, reinterpret_cast<std::uint8_t *>(wifiConfigAp.password));
