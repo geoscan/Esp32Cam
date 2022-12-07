@@ -160,7 +160,7 @@ Microservice::Ret Wifi::processConfigApSetSsid(mavlink_message_t &mavlinkMessage
 	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigApSetSsid");
-	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP SSID");
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "setting AP SSID, ssid=%s", wifiConfigAp.ssid);
 	const std::string ssid{wifiConfigAp.ssid, sizeof(wifiConfigAp.ssid)};
 	bool success = false;
 	// Set module field
