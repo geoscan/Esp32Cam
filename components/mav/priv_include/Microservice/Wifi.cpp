@@ -25,6 +25,7 @@
 
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "AP settings", 1);
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "tracing", 1);
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "ser/de", 1);
 
 namespace Mav {
 namespace Mic {
@@ -154,6 +155,7 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 
 	// Provide the response
 	wifiConfigAp.packInto(message);
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "ser/de", "packed mavlink message, len=%d", message.len);
 	onResponse(message);
 
 	return Microservice::Ret::Response;
