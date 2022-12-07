@@ -35,6 +35,11 @@ void Ap::setFieldValue(Mod::Fld::WriteReq request, Mod::Fld::OnWriteResponseCall
 
 			break;
 		}
+		case Mod::Fld::Field::Password: {
+			writeResp = {Mod::Fld::RequestResult::Ok};
+
+			break;
+		}
 
 		default:
 			break;
