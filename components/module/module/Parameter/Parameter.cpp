@@ -22,10 +22,19 @@
 namespace Mod {
 namespace Par {
 
-static constexpr const std::array<ParameterDescription, 1> kParameterDescriptions = {{
+static constexpr const std::array<ParameterDescription, 2> kParameterDescriptions = {{
 	{
 		0,  // id
 		"WifiApSsid",  // name
+		ParameterType::Str,
+		Mod::Module::WifiAp,
+		Mod::Fld::Field::StringIdentifier,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	{
+		1,  // id
+		"WifiApPassword",  // name
 		ParameterType::Str,
 		Mod::Module::WifiAp,
 		Mod::Fld::Field::StringIdentifier,
