@@ -21,6 +21,7 @@
 #include "mav/mav.hpp"
 #include "utility/LogSection.hpp"
 #include <esp_wifi.h>
+#include <mbedtls/md5.h>
 
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "AP settings", 1);
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mav::Mic::Wifi, "tracing", 1);
@@ -139,6 +140,15 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 			esp_err_to_name(connectResult));
 	} else {
 		ESP_LOGI(Mav::kDebugTag, "Wifi: connect (STA): succeeded");
+		// Calculate MD5 digest as per the standard
+		mbedtls_md5_context mbedtlsMd5Context;
+		mbedtls_md5_init(&mbedtlsMd5Context);
+		mbedtls_md5_starts_ret(&mbedtlsMd5Context);
+		mbedtls_md5_update_ret(&mbedtlsMd5Context, reinterpret_cast<const std::uint8_t *>(password.data()),
+			password.size());
+		// Dump the digest into the returned message
+		wifiConfigAp.passwordFillZero();
+		mbedtls_md5_finish_ret(&mbedtlsMd5Context, reinterpret_cast<std::uint8_t *>(wifiConfigAp.password));
 	}
 
 	// Provide the response
