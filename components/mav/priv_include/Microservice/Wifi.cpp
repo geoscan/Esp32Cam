@@ -135,6 +135,10 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 	if (connectResult != ESP_OK) {
 		wifiConfigAp.ssidFillZero();
 		std::copy_n(kConnectError.begin(), kConnectError.size(), wifiConfigAp.ssid);
+		ESP_LOGW(Mav::kDebugTag, "Wifi: connect (STA): failed, error=%d(%s)", connectResult,
+			esp_err_to_name(connectResult));
+	} else {
+		ESP_LOGI(Mav::kDebugTag, "Wifi: connect (STA): succeeded");
 	}
 
 	// Provide the response
@@ -149,6 +153,7 @@ Microservice::Ret Wifi::processConfigApDisconnect(mavlink_message_t &mavlinkMess
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigApDisconnect");
 	esp_wifi_disconnect();  // No reason to handle its result, as the operation is idempotent
+	ESP_LOGI(Mav::kDebugTag, "Wifi: disconnect (STA): succeeded");
 	// Provide the response
 	wifiConfigAp.packInto(mavlinkMessage);
 	onResponse(mavlinkMessage);
