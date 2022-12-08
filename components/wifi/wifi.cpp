@@ -273,7 +273,7 @@ void wifi_init_sta(void)
 	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
 	auto ussid = userSsid();
 	const char *ssid = nullptr;
-	std::string userPassword{CONFIG_ESP_WIFI_PASSWORD};
+	std::string password{CONFIG_ESP_WIFI_PASSWORD};
 
 	if (ussid.length() > 0 && ussid.length() <= SSID_MAX_LENGTH) {
 		ssid = ussid.c_str();
@@ -282,7 +282,8 @@ void wifi_init_sta(void)
 		decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
 	}
 
-	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, userPassword.c_str());
+	tryGetUserPassword(password);
+	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, password.c_str());
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
