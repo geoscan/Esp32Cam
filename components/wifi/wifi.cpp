@@ -196,9 +196,7 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid, const char *aPassword)
 {
 	esp_netif_create_default_wifi_ap();
-
 	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
-
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
@@ -206,7 +204,6 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	sApWifiConfig.ap.channel = 1;  // auto
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
-
 	strcpy((char *)&sApWifiConfig.ap.ssid, (char *)aSsid);
 	strcpy((char *)&sApWifiConfig.ap.password, aPassword);
 
