@@ -228,7 +228,7 @@ static void wifiDriverInit()
 /// \returns an empty string, if failed
 std::string userSsid()
 {
-	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::Password);
+	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
 	std::string ret{};
 
 	if (parameter != nullptr) {
@@ -249,7 +249,7 @@ std::string userSsid()
 bool tryGetUserPassword(std::string &password)
 {
 	bool ret = false;
-	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
+	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::Password);
 
 	if (parameter != nullptr) {
 		const auto result = parameter->fetch();
