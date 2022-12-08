@@ -37,7 +37,7 @@ static constexpr const std::array<ParameterDescription, 2> kParameterDescription
 		"WifiApPassword",  // name
 		ParameterType::Str,
 		Mod::Module::WifiAp,
-		Mod::Fld::Field::StringIdentifier,
+		Mod::Fld::Field::Password,
 		MemoryProviderType::Sd,
 		true,  // mirrorField
 	}
