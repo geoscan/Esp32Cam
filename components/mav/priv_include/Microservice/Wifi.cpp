@@ -201,10 +201,30 @@ Microservice::Ret Wifi::processConfigApSetPassword(mavlink_message_t &mavlinkMes
 	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigApSetPassword");
-	// The password setting functionality is yet to be implemented. Send a stub
-	constexpr std::array<char, 2> kSetPasswordError = {{0x00, 0x04}};
-	wifiConfigAp.ssidFillZero();
-	std::copy_n(kSetPasswordError.begin(), kSetPasswordError.size(), wifiConfigAp.ssid);
+	bool success = false;
+	const std::string password{wifiConfigAp.password, sizeof(wifiConfigAp.password)};
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::Password>(password,
+		[&success](const Mod::Fld::WriteResp &response)
+		{
+			success = response.isOk();
+
+			if (success) {
+				ESP_LOGI(Mav::kDebugTag, "Wifi, set password, successfully set");
+			} else {
+				ESP_LOGW(Mav::kDebugTag, "Wifi, set password, failed");
+			}
+		});
+
+	if (success) {
+		// Return the password's MD5 digest, as per the standard
+		wifiConfigAp.passwordIntoMd5Stringify();
+	} else {
+		// Initialize the error code (see the doc. for more details)
+		constexpr std::array<char, 2> kSetPasswordError = {{0x00, 0x04}};
+		wifiConfigAp.passwordFillZero();
+		std::copy_n(kSetPasswordError.begin(), kSetPasswordError.size(), wifiConfigAp.ssid);
+	}
+
 	// Provide the response
 	wifiConfigAp.packInto(mavlinkMessage);
 	onResponse(mavlinkMessage);
