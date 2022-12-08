@@ -241,6 +241,27 @@ std::string userSsid()
 	return ret;
 }
 
+/// \brief Make an attempt to load user SSID from SD card
+/// \returns True, if succeeded
+/// \arg [out] Password
+bool tryGetUserPassword(std::string &password)
+{
+	bool ret = false;
+	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
+
+	if (parameter != nullptr) {
+		const auto result = parameter->fetch();
+
+		if (result == Mod::Par::Result::Ok) {
+			password = parameter->asStr();
+			ESP_LOGI(Wifi::kDebugTag, "Got user password");
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 void wifi_init_sta(void)
 {
 	esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -250,6 +271,7 @@ void wifi_init_sta(void)
 	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
 	auto ussid = userSsid();
 	const char *ssid = nullptr;
+	std::string userPassword{CONFIG_ESP_WIFI_PASSWORD};
 
 	if (ussid.length() > 0 && ussid.length() <= SSID_MAX_LENGTH) {
 		ssid = ussid.c_str();
@@ -258,7 +280,7 @@ void wifi_init_sta(void)
 		decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
 	}
 
-	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, CONFIG_ESP_WIFI_PASSWORD);
+	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, userPassword.c_str());
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
