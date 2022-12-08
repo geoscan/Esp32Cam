@@ -107,7 +107,7 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 		} else if (!hasSsid && hasPassword) {
 			GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp legacy - set password,"
 				"mode=%d", mavlinkWifiConfig.mode);
-			ret = processConfigApSetSta(mavlinkMessage, onResponse, mavlinkWifiConfig);
+			ret = processConfigApSetPassword(mavlinkMessage, onResponse, mavlinkWifiConfig);
 		}
 	} else {
 		if (mavlinkWifiConfig.mode == WIFI_CONFIG_AP_MODE_AP) {
