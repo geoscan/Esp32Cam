@@ -27,7 +27,7 @@ void initDemoPar()
 	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>("EchoHi",
 		[](const Fld::WriteResp &resp)
 		{
-			ESP_LOGI(Mod::kDebugTag, "Response %s", resp.resultAsCstr());
+			ESP_LOGI(Mod::kDebugTag, "initDemoPar, setting SSID, response='%s'", resp.resultAsCstr());
 		});
 	// Set the parameter directly using Parameter API
 	auto *instance = Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier);
