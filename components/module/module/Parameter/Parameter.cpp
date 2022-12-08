@@ -13,11 +13,14 @@
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
 #include "module/module.hpp"
 #include "utility/al/String.hpp"
+#include "utility/LogSection.hpp"
 #include <array>
 #include <algorithm>
 #include <memory>
 #include "Parameter.hpp"
 #include <mutex>
+
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::Parameter, "tracing", 1);
 
 namespace Mod {
 namespace Par {
@@ -55,6 +58,7 @@ static constexpr bool pardescValidateStrlen(std::size_t pos = 0)
 }
 
 /// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
+/// \arg [out] oId Id of the parameter for which a decsription has been found
 /// \returns True, if found. Sets `oId`
 static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 {
@@ -67,6 +71,8 @@ static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 		});
 
 	if (it != std::end(kParameterDescriptions)) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing",
+			"found parameter, module=%d, field=%d, id=%d", static_cast<int>(module), static_cast<int>(field), it->id);
 		res = true;
 		oId = it->id;
 	}
@@ -175,6 +181,7 @@ Result Parameter::fetch()
 	} else {
 		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->load(kParameterDescriptions[id()], variant);
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing", "Loading parameter, id=%d", id());
 	}
 
 	return res;
@@ -193,6 +200,7 @@ Result Parameter::commit()
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::commit: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing", "Saving parameter, id=%d", id());
 		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->save(kParameterDescriptions[id()], variant);
 	}
