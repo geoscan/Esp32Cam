@@ -48,6 +48,12 @@ void initDemoPar()
 		ESP_LOGI(Mod::kDebugTag, "module: setting value %s, parameter id %d", kValue, instance->id());
 		instance->commit();
 	}
+
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::Password>("password",
+		[](const Fld::WriteResp &resp)
+		{
+			ESP_LOGI(Mod::kDebugTag, "initDemoPar: setting password, response='%s'", resp.resultAsCstr());
+		});
 }
 
 void init()
