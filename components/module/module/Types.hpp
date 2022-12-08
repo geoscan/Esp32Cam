@@ -58,7 +58,8 @@ enum class Field : std::uint8_t {
 	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
 	Roi,  ///< Region of Interest
 	StringIdentifier,  ///< Generic string name
-	Password  ///< Password. Wi-Fi STA, or AP
+	Password,  ///< Password. Wi-Fi STA, or AP
+	RestoreState,  ///< If set, the module will attempt to restore its state (which resides in some non-volatile storage)
 };
 
 template <class T>
@@ -81,6 +82,7 @@ template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 template <Module I> struct GetType<Field::Password, I> : StoreType<std::string> {};
+template <Module I> struct GetType<Field::RestoreState, I> : StoreType<std::int32_t> {};
 
 struct Variant : public Mod::Variant {
 	using Mod::Variant::Variant;
