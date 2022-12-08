@@ -25,7 +25,7 @@ GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::Parameter, "tracing", 1);
 namespace Mod {
 namespace Par {
 
-static constexpr const std::array<ParameterDescription, 4> kParameterDescriptions = {{
+static constexpr const std::array<ParameterDescription, 5> kParameterDescriptions = {{
 	// AP SSID (this AP)
 	{
 		0,  // id
@@ -65,6 +65,15 @@ static constexpr const std::array<ParameterDescription, 4> kParameterDescription
 		Mod::Fld::Field::Password,
 		MemoryProviderType::Sd,
 		true,  // mirrorField
+	},
+	{
+		4,  //id
+		"WifiStaAutoconn",
+		ParameterType::I32,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::RestoreState,
+		MemoryProviderType::Sd,
+		false
 	}
 }};
 
