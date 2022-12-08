@@ -77,11 +77,12 @@ Microservice::Ret Wifi::processConfigAp(mavlink_message_t &mavlinkMessage, Micro
 	Ret ret = Ret::Response;
 	Hlpr::WifiConfigAp mavlinkWifiConfig;
 	mavlink_msg_wifi_config_ap_decode(&mavlinkMessage, &mavlinkWifiConfig);
-	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp, mode=%d", mavlinkWifiConfig.mode);
 	// [0x00, 0xFF] is a special sequence denoting that a field is not used. Certain combinations of field values
 	// map to certain requests
 	const bool hasSsid = mavlinkWifiConfig.ssid[0] != 0x00 && mavlinkWifiConfig.ssid[1] != 0xFF;
 	const bool hasPassword = mavlinkWifiConfig.password[0] != 0x00 && mavlinkWifiConfig.password[1] != 0xFF;
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigAp, mode=%d, has SSID=%d,"
+		"has password=%d",  mavlinkWifiConfig.mode, hasSsid, hasPassword);
 
 	if (mavlinkWifiConfig.mode == WIFI_CONFIG_AP_MODE_UNDEFINED) {
 		// There are 2 implementations: legacy, and modern. The legacy is a
