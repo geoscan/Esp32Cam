@@ -198,6 +198,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	esp_netif_create_default_wifi_ap();
 	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
+	// TODO:  Initialize ssid_len, to prevent overflows
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
 	sApWifiConfig.ap.beacon_interval = 100;  // default
