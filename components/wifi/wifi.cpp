@@ -205,7 +205,12 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
 	strcpy((char *)&sApWifiConfig.ap.ssid, (char *)aSsid);
-	strcpy((char *)&sApWifiConfig.ap.password, aPassword);
+
+	if (usePassword) {
+		strcpy((char *)&sApWifiConfig.ap.password, aPassword);
+	} else {
+		ESP_LOGI(Wifi::kDebugTag, "Creating open Wi-Fi access point");
+	}
 
 	ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_AP, &sApWifiConfig) );
 }
