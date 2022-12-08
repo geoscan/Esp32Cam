@@ -41,9 +41,8 @@ void Ap::setFieldValue(Mod::Fld::WriteReq request, Mod::Fld::OnWriteResponseCall
 		case Mod::Fld::Field::Password: {
 			const std::string &password = request.variant.getUnchecked<Mod::Module::WifiAp, Mod::Fld::Field::Password>();
 
-			if (password.size() >= kPasswordMinLength && password.size() <= kPasswordMaxLength) {
-				writeResp = {Mod::Fld::RequestResult::Ok};
-			} else {
+			if (!(password.size() >= kPasswordMinLength && password.size() <= kPasswordMaxLength)) {
+				ESP_LOGW(Mod::kDebugTag, "set Password, length=%d. %s", password.length(), kInvalidSsidLengthMsg);
 				writeResp = {Mod::Fld::RequestResult::Other, kInvalidPasswordLength};
 			}
 
