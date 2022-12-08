@@ -50,9 +50,9 @@ std::string userSsid();
 /// \param len      Return value
 /// \param prefix   OPTIONAL: if NULL, configuration file will be used
 ///
-static void decorateSsid(uint8_t **data, unsigned *len, const char *prefix)
+static void decorateSsid(char const **data, unsigned *len, const char *prefix)
 {
-	static uint8_t ssid[SSID_MAX_LENGTH] = {'\0'};
+	static char ssid[SSID_MAX_LENGTH] = {'\0'};
 	static uint8_t mac[MAC_LENGTH]       = {'\0'};
 	const unsigned prefixlen             = strlen(prefix);
 
@@ -249,16 +249,16 @@ void wifi_init_sta(void)
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA) );
 	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
 	auto ussid = userSsid();
+	const char *ssid = nullptr;
 
 	if (ussid.length() > 0 && ussid.length() <= SSID_MAX_LENGTH) {
-		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ussid.c_str(), CONFIG_ESP_WIFI_PASSWORD);
+		ssid = ussid.c_str();
 	} else {
-		uint8_t  *ssid;
 		unsigned ssid_len;
 		decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
-		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, (char *)ssid, CONFIG_ESP_WIFI_PASSWORD);
 	}
 
+	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, CONFIG_ESP_WIFI_PASSWORD);
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
