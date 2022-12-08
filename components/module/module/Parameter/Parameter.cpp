@@ -97,6 +97,16 @@ static constexpr bool pardescValidateUniqueness(std::size_t currentId = 0)
 		pardescValidateUniquenessImpl(currentId, currentId) && pardescValidateUniqueness(currentId + 1);
 }
 
+static constexpr bool pardescEnsureSequence(std::size_t currentId = 0)
+{
+	return currentId >= kParameterDescriptions.size() ? true :
+		currentId == kParameterDescriptions[currentId].id && pardescEnsureSequence(currentId + 1);
+}
+
+static_assert(pardescValidateStrlen(), "A parameter's name length constraints have been violated");
+static_assert(pardescValidateUniqueness(), "Parameters must be unique");
+static_assert(pardescEnsureSequence(), "There is a mismatch between some parameter's position and its id.");
+
 /// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
 /// \arg [out] oId Id of the parameter for which a decsription has been found
 /// \returns True, if found. Sets `oId`
@@ -119,9 +129,6 @@ static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 
 	return res;
 }
-
-static_assert(pardescValidateStrlen(), "A parameter's name length constraints have been violated");
-static_assert(pardescValidateUniqueness(), "Parameters must be unique");
 
 /// \brief Static parameter instances storage.
 struct InstanceStorage {
