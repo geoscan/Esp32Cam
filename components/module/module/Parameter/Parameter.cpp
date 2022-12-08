@@ -25,7 +25,8 @@ GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::Parameter, "tracing", 1);
 namespace Mod {
 namespace Par {
 
-static constexpr const std::array<ParameterDescription, 2> kParameterDescriptions = {{
+static constexpr const std::array<ParameterDescription, 4> kParameterDescriptions = {{
+	// AP SSID (this AP)
 	{
 		0,  // id
 		"WifiApSsid",  // name
@@ -35,11 +36,32 @@ static constexpr const std::array<ParameterDescription, 2> kParameterDescription
 		MemoryProviderType::Sd,
 		true,  // mirrorField
 	},
+	// AP password (this AP)
 	{
 		1,  // id
 		"WifiApPassword",  // name
 		ParameterType::Str,
 		Mod::Module::WifiAp,
+		Mod::Fld::Field::Password,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	// STA SSID (remote AP)
+	{
+		2,  // id
+		"WifiStaSsid",  // name
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::StringIdentifier,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	// STA password (remote AP)
+	{
+		3,  // id
+		"WifiStaPassword",  // name
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
 		Mod::Fld::Field::Password,
 		MemoryProviderType::Sd,
 		true,  // mirrorField
