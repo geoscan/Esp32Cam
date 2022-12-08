@@ -36,6 +36,15 @@ constexpr int cxStrcpy(const char *lhs, const char *rhs, std::size_t pos = 0)
 		lhs[pos] == 0 ? 0 : cxStrcpy(lhs, rhs, pos + 1);
 }
 
+static_assert(cxStrcpy("", "") == 0, "");
+static_assert(cxStrcpy("a", "") == 1, "");
+static_assert(cxStrcpy("", "a") == -1, "");
+static_assert(cxStrcpy("echoe", "echo") == 1, "");
+static_assert(cxStrcpy("echo", "echo") == 0, "");
+static_assert(cxStrcpy("echo", "echoe") == -1, "");
+static_assert(cxStrcpy("echoa", "echoz") == -1, "");
+static_assert(cxStrcpy("echoz", "echoa") == 1, "");
+
 }  // namespace Str
 }  // namespace Al
 }  // namespace Ut
