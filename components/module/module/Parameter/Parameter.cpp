@@ -54,7 +54,25 @@ static constexpr bool pardescValidateStrlen(std::size_t pos = 0)
 {
 	return pos >= kParameterDescriptions.size() ?
 		true :
-		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && pardescValidateStrlen(pos + 1);
+		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && pardescValidateStrlen(pos + 1)
+			&& Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) > 0;
+}
+
+static constexpr bool pardescValidateUniquenessImpl(std::size_t currentId, std::size_t candidateId)
+{
+	return candidateId >= kParameterDescriptions.size() || currentId >= kParameterDescriptions.size() ? true :
+		currentId == candidateId ? pardescValidateUniquenessImpl(currentId, candidateId + 1) :
+		Ut::Al::Str::cxStrcpy(kParameterDescriptions[currentId].name, kParameterDescriptions[candidateId].name) != 0
+			&& (kParameterDescriptions[currentId].field != kParameterDescriptions[candidateId].field
+			|| kParameterDescriptions[currentId].module != kParameterDescriptions[candidateId].module)
+			&& pardescValidateUniquenessImpl(currentId, candidateId + 1);
+}
+
+/// \brief Makes sure that each parameter description is unique
+static constexpr bool pardescValidateUniqueness(std::size_t currentId = 0)
+{
+	return currentId >= kParameterDescriptions.size() ? true :
+		pardescValidateUniquenessImpl(currentId, currentId) && pardescValidateUniqueness(currentId + 1);
 }
 
 /// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
@@ -80,7 +98,8 @@ static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 	return res;
 }
 
-static_assert(pardescValidateStrlen(), "A parameter's name length has been exceeded");
+static_assert(pardescValidateStrlen(), "A parameter's name length constraints have been violated");
+static_assert(pardescValidateUniqueness(), "Parameters must be unique");
 
 /// \brief Static parameter instances storage.
 struct InstanceStorage {
