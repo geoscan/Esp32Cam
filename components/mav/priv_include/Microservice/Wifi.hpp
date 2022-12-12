@@ -54,6 +54,8 @@ private:
 	/// regarding current STA configuration. \sa `processCmdRequestMessage`
 	Ret processCmdRequestMessageStaStatus(mavlink_message_t &message, OnResponseSignature onResponse,
 		const Hlpr::MavlinkCommandLong &mavlinkCommandLong);
+	Ret processCmdRequestMessageApStatus(mavlink_message_t &message, OnResponseSignature onResponse,
+		const Hlpr::MavlinkCommandLong &mavlinkCommandLong);
 };
 
 }  // namespace Mic

@@ -320,7 +320,7 @@ Microservice::Ret Wifi::processCmdRequestMessage(mavlink_message_t &message,
 		const int wifiType = static_cast<int>(mavlinkCommandLong.param2);
 
 		if (wifiType == RequestAp) {
-			// TODO: TBD
+			ret = processCmdRequestMessageApStatus(message, onResponse, mavlinkCommandLong);
 		} else if (wifiType == RequestSta) {
 			ret = processCmdRequestMessageStaStatus(message, onResponse, mavlinkCommandLong);
 		}
@@ -358,6 +358,58 @@ Microservice::Ret Wifi::processCmdRequestMessageStaStatus(mavlink_message_t &mes
 
 	if (passwordInitialized && ssidInitialized) {
 		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessageStaStatus: ssid=%s,"
+			"password=%s", ssid.c_str(), password.c_str());
+		wifiConfigAp.ssidFillZero();
+		std::copy_n(ssid.begin(), ssid.length(), wifiConfigAp.ssid);
+		wifiConfigAp.passwordFillZero();
+		std::copy_n(password.begin(), password.length(), wifiConfigAp.password);
+
+		if (password.length() > 0) {
+			wifiConfigAp.passwordIntoMd5Stringify();
+		}
+
+		{
+			const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command,
+				MAV_RESULT_ACCEPTED);
+			ack.packInto(message);
+			onResponse(message);
+		}
+		wifiConfigAp.packInto(message);
+		onResponse(message);
+	} else {
+		const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_FAILED);
+		ack.packInto(message);
+		onResponse(message);
+	}
+
+	return Microservice::Ret::Response;
+}
+
+Microservice::Ret Wifi::processCmdRequestMessageApStatus(mavlink_message_t &message, Microservice::OnResponseSignature onResponse, const Hlpr::MavlinkCommandLong &mavlinkCommandLong)
+{
+	std::string password{};
+	std::string ssid{};
+	bool passwordInitialized = false;
+	bool ssidInitialized = false;
+	Hlpr::WifiConfigAp wifiConfigAp{};
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "request message sta status");
+
+	// Get module fields
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>(
+		[&ssid, &ssidInitialized](const std::string &aSsid)
+		{
+			ssid = aSsid;
+			ssidInitialized = true;
+		});
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiAp, Mod::Fld::Field::Password>(
+		[&password, &passwordInitialized](const std::string &aPassword)
+		{
+			password = aPassword;
+			passwordInitialized = true;
+		});
+
+	if (passwordInitialized && ssidInitialized) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessageApStatus: ssid=%s,"
 			"password=%s", ssid.c_str(), password.c_str());
 		wifiConfigAp.ssidFillZero();
 		std::copy_n(ssid.begin(), ssid.length(), wifiConfigAp.ssid);
