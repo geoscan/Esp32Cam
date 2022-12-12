@@ -19,6 +19,7 @@ public:
 	Ap();
 	/// \brief Serves as a stub interpcepting field setting.
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
+	void getFieldValue(Mod::Fld::Req req, Mod::Fld::OnResponseCallback onResponse) override;
 };
 
 }  // namespace Wifi

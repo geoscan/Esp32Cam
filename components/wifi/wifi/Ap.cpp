@@ -5,9 +5,10 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include <esp_log.h>
 #include "Ap.hpp"
 #include "module/module.hpp"
+#include <esp_log.h>
+#include <esp_wifi.h>
 
 namespace Wifi {
 
@@ -54,6 +55,33 @@ void Ap::setFieldValue(Mod::Fld::WriteReq request, Mod::Fld::OnWriteResponseCall
 	}
 
 	onWriteResponse(writeResp);
+}
+
+void Ap::getFieldValue(Mod::Fld::Req req, Mod::Fld::OnResponseCallback onResponse)
+{
+	if (req.field == Mod::Fld::Field::StringIdentifier) {
+		wifi_config_t wifiConfig;
+		const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_AP, &wifiConfig);
+
+		if (espErr == ESP_OK) {
+			const std::size_t ssidLen = wifiConfig.ap.ssid[sizeof(wifiConfig.ap.ssid) - 1] == 0 ?
+				strlen(reinterpret_cast<const char *>(wifiConfig.ap.ssid)) :
+				sizeof(wifiConfig.ap.ssid);
+			const std::string ssid{reinterpret_cast<const char *>(wifiConfig.ap.ssid), ssidLen};
+			onResponse({ssid});
+		}
+	} else if (req.field == Mod::Fld::Field::Password) {
+		wifi_config_t wifiConfig;
+		const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_AP, &wifiConfig);
+
+		if (espErr == ESP_OK) {
+			const std::size_t passwordLen = wifiConfig.ap.password[sizeof(wifiConfig.ap.password) - 1] == 0 ?
+				strlen(reinterpret_cast<const char *>(wifiConfig.ap.password)) :
+				sizeof(wifiConfig.ap.password);
+			const std::string password{reinterpret_cast<const char *>(wifiConfig.ap.password), passwordLen};
+			onResponse({password});
+		}
+	}
 }
 
 }  // namespace Wifi
