@@ -20,6 +20,7 @@ constexpr std::array<const char *, static_cast<std::size_t>(Result::N)> kResultM
 	"ERROR: Config file format violation",
 	"ERROR: Not enough memory",
 	"ERROR: Could not find config entry",
+	"ERROR: Config does not exist"
 }};
 
 const char *resultAsStr(Result result)
