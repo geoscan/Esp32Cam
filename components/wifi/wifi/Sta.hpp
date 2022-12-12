@@ -37,6 +37,7 @@ public:
 	/// storage, and connect to the AP those specify. Will only work if
 	/// autoconnect parameter is set to true.
 	bool tryFetchConnect();
+	bool isConnected() const;
 private:
 	esp_netif_t **espNetif;
 	Credentials credentials;

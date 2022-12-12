@@ -51,7 +51,7 @@ void Sta::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResp
 			wifi_config_t wifiConfig;
 			const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_STA, &wifiConfig);
 
-			if (espErr == ESP_OK) {
+			if (espErr == ESP_OK && isConnected()) {
 				const std::size_t ssidLen = wifiConfig.sta.ssid[sizeof(wifiConfig.sta.ssid) - 1] == 0 ?
 					strlen(reinterpret_cast<const char *>(wifiConfig.sta.ssid)) :
 					sizeof(wifiConfig.sta.ssid);
@@ -65,7 +65,7 @@ void Sta::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResp
 			wifi_config_t wifiConfig;
 			const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_STA, &wifiConfig);
 
-			if (espErr == ESP_OK) {
+			if (espErr == ESP_OK && isConnected()) {
 				const std::size_t passwordLen = wifiConfig.sta.password[sizeof(wifiConfig.sta.password) - 1] == 0 ?
 					strlen(reinterpret_cast<const char *>(wifiConfig.sta.password)) :
 					sizeof(wifiConfig.sta.password);
@@ -165,6 +165,14 @@ bool Sta::tryFetchConnect()
 	}
 
 	return res;
+}
+
+bool Sta::isConnected() const
+{
+	wifi_ap_record_t wifiApRecord;
+	const bool connected = (esp_wifi_sta_get_ap_info(&wifiApRecord) == ESP_OK);
+
+	return connected;
 }
 
 Mod::Par::Result Sta::Credentials::fetch()
