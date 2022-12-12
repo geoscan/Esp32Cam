@@ -127,28 +127,42 @@ Microservice::Ret Wifi::processConfigApConnect(mavlink_message_t &message,
 	// Ensure null-termination when working w/ c-strings.
 	const std::string ssid{wifiConfigAp.ssid, sizeof(wifiConfigAp.ssid)};
 	const std::string password{wifiConfigAp.password, sizeof(wifiConfigAp.password)};
+	bool success = true;
+	// Set SSID and password
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(password,
+		[&success](const Mod::Fld::WriteResp &writeResp)
+		{
+			success = success && writeResp.isOk();
+		});
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(ssid,
+		[&success](const Mod::Fld::WriteResp &writeResp)
+		{
+			success = success && writeResp.isOk();
+		});
 
-	constexpr std::uint8_t *kIp = nullptr;
-	constexpr std::uint8_t *kGateway = nullptr;
-	constexpr std::uint8_t *kNetmask = nullptr;
-	const esp_err_t connectResult = wifiStaConnect(ssid.c_str(), password.c_str(), kIp, kGateway, kNetmask);
-	constexpr std::array<std::uint8_t, 2> kConnectError{{0x00, 0x01}};  // See the doc.
+	// Try to connect
+	if (success) {
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
+			[&success](const Mod::Fld::WriteResp &writeResp)
+			{
+				success = success && writeResp.isOk();
+			});
+	}
 
-	if (connectResult != ESP_OK) {
+	if (success) {
+		ESP_LOGI(Mav::kDebugTag, "Wifi: connect (STA): succeeded");
+		wifiConfigAp.passwordIntoMd5Stringify();
+	} else {
+		constexpr std::array<std::uint8_t, 2> kConnectError{{0x00, 0x01}};
 		wifiConfigAp.ssidFillZero();
 		wifiConfigAp.passwordFillZero();
 		std::copy_n(kConnectError.begin(), kConnectError.size(), wifiConfigAp.ssid);
-		ESP_LOGW(Mav::kDebugTag, "Wifi: connect (STA): failed, error=%d(%s)", connectResult,
-			esp_err_to_name(connectResult));
-	} else {
-		ESP_LOGI(Mav::kDebugTag, "Wifi: connect (STA): succeeded");
-		wifiConfigAp.passwordIntoMd5Stringify();
+		ESP_LOGW(Mav::kDebugTag, "Wifi: connect (STA): failed");
 	}
 
-	// Provide the response
 	wifiConfigAp.packInto(message);
-	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "ser/de", "packed mavlink message, len=%d", message.len);
 	onResponse(message);
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "ser/de", "packed mavlink message, len=%d", message.len);
 
 	return Microservice::Ret::Response;
 }
