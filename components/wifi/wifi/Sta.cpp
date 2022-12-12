@@ -79,27 +79,34 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 
 		onResponse(resp);
 	} else if (writeReq.field == Mod::Fld::Field::Initialized) {  // Activate connection
-		if (!credentials.isValid()) {
-			Mod::Par::Result result = credentials.fetch();
+		bool enable = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>();
 
-			if (result != Mod::Par::Result::Ok || !credentials.isValid()) {
-				resp = {Mod::Fld::RequestResult::Other, Mod::Par::resultAsStr(result)};
+		if (enable) {
+			if (!credentials.isValid()) {
+				Mod::Par::Result result = credentials.fetch();
+
+				if (result != Mod::Par::Result::Ok || !credentials.isValid()) {
+					resp = {Mod::Fld::RequestResult::Other, Mod::Par::resultAsStr(result)};
+				}
 			}
-		}
 
-		if (resp.isOk()) {
-			constexpr std::uint8_t *kIp = nullptr;
-			constexpr std::uint8_t *kGateway = nullptr;
-			constexpr std::uint8_t *kNetmask = nullptr;
-			const esp_err_t espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp,
-				kGateway, kNetmask);
+			if (resp.isOk()) {
+				constexpr std::uint8_t *kIp = nullptr;
+				constexpr std::uint8_t *kGateway = nullptr;
+				constexpr std::uint8_t *kNetmask = nullptr;
+				const esp_err_t espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp,
+					kGateway, kNetmask);
 
-			if (espErr != ESP_OK) {
-				resp = {Mod::Fld::RequestResult::Other, esp_err_to_name(espErr)};
+				if (espErr != ESP_OK) {
+					resp = {Mod::Fld::RequestResult::Other, esp_err_to_name(espErr)};
+				}
 			}
-		}
 
-		onResponse(resp);
+			onResponse(resp);
+		} else {  // Disconnect
+			esp_wifi_disconnect();
+			onResponse(resp);
+		}
 	}
 }
 
