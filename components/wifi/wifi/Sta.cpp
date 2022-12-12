@@ -143,7 +143,7 @@ Mod::Par::Result Sta::Credentials::fetch()
 
 	if (result == Mod::Par::Result::Ok) {
 		auto *paramAutoconnect = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiStaConnection,
-			Mod::Fld::Field::RestoreState);
+			Mod::Fld::Field::Initialized);
 
 		if (paramAutoconnect != nullptr) {
 			result = paramAutoconnect->fetch();
