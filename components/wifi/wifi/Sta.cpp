@@ -134,7 +134,7 @@ Mod::Par::Result Sta::Credentials::fetch()
 			result = paramPassword->fetch();
 
 			if (result == Mod::Par::Result::Ok) {
-				password = paramSsid->asStr();
+				password = paramPassword->asStr();
 			}
 		} else {  // Should not get here
 			result = Mod::Par::Result::ConfigDoesNotExist;
