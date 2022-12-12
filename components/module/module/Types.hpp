@@ -68,7 +68,7 @@ using StoreType = typename Rr::Trait::StoreType<T>;
 /// \brief Compile-time selector of respective field types
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};  ///< Type selector
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
-template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
+template <Module I> struct GetType<Field::Initialized, I> : StoreType<std::int32_t> {};
 template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
 template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
