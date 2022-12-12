@@ -9,6 +9,7 @@
 #include "wifi/Sta.hpp"
 #include "wifi/Ap.hpp"
 #include "utility/al/Algorithm.hpp"
+#include "utility/time.hpp"
 #include <esp_event.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
@@ -290,13 +291,13 @@ void wifi_init_sta(void)
 
 void wifiStart(void)
 {
-
 	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
 	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
 	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
 	static Wifi::Sta sta{&sStaEspNetif};
 	static Wifi::Ap ap{};
+	sta.tryFetchConnect();
 	(void)sta;
 	(void)ap;
 }
