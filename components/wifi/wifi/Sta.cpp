@@ -47,6 +47,34 @@ void Sta::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResp
 
 			break;
 		}
+		case Mod::Fld::Field::StringIdentifier: {
+			wifi_config_t wifiConfig;
+			const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_STA, &wifiConfig);
+
+			if (espErr == ESP_OK) {
+				const std::size_t ssidLen = wifiConfig.sta.ssid[sizeof(wifiConfig.sta.ssid) - 1] == 0 ?
+					strlen(reinterpret_cast<const char *>(wifiConfig.sta.ssid)) :
+					sizeof(wifiConfig.sta.ssid);
+				const std::string ssid{reinterpret_cast<const char *>(wifiConfig.sta.ssid), ssidLen};
+				aOnResponse({ssid});
+			}
+
+			break;
+		}
+		case Mod::Fld::Field::Password: {
+			wifi_config_t wifiConfig;
+			const esp_err_t espErr = esp_wifi_get_config(WIFI_IF_STA, &wifiConfig);
+
+			if (espErr == ESP_OK) {
+				const std::size_t passwordLen = wifiConfig.sta.password[sizeof(wifiConfig.sta.password) - 1] == 0 ?
+					strlen(reinterpret_cast<const char *>(wifiConfig.sta.password)) :
+					sizeof(wifiConfig.sta.password);
+				const std::string password{reinterpret_cast<const char *>(wifiConfig.sta.password), passwordLen};
+				aOnResponse({password});
+			}
+
+			break;
+		}
 		case Mod::Fld::Field::Ip: {
 			wifi_ap_record_t wifiApRecord{};
 
