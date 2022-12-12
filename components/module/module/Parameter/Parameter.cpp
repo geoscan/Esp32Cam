@@ -71,7 +71,7 @@ static constexpr const std::array<ParameterDescription, 5> kParameterDescription
 		"WifiStaAutoconn",
 		ParameterType::I32,
 		Mod::Module::WifiStaConnection,
-		Mod::Fld::Field::RestoreState,
+		Mod::Fld::Field::Initialized,
 		MemoryProviderType::Sd,
 		false
 	}
