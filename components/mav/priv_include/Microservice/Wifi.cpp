@@ -171,9 +171,19 @@ Microservice::Ret Wifi::processConfigApDisconnect(mavlink_message_t &mavlinkMess
 	Microservice::OnResponseSignature onResponse, Hlpr::WifiConfigAp &wifiConfigAp)
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processConfigApDisconnect");
-	esp_wifi_disconnect();  // No reason to handle its result, as the operation is idempotent
-	ESP_LOGI(Mav::kDebugTag, "Wifi: disconnect (STA): succeeded");
-	// Provide the response
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(false,
+		[&wifiConfigAp](const Mod::Fld::WriteResp &writeResp)
+		{
+			if (!writeResp.isOk()) {
+				// Pack error sequence
+				constexpr std::array<std::uint8_t, 2> kDisconnectError {{0x00, 0x02}};
+				std::copy_n(kDisconnectError.begin(), kDisconnectError.size(), wifiConfigAp.ssid);
+				ESP_LOGW(Mav::kDebugTag, "Wifi: disconnect(STA): failed");
+			} else {
+				ESP_LOGI(Mav::kDebugTag, "Wifi: disconnect (STA): succeeded");
+			}
+		});
+
 	wifiConfigAp.packInto(mavlinkMessage);
 	onResponse(mavlinkMessage);
 
