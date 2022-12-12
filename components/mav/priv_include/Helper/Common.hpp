@@ -26,12 +26,12 @@ template <> struct CallbackEncode<mavlink_wifi_config_ap_t> {static constexpr au
 
 template <class T>
 struct Pack {
-	inline void packInto(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
+	inline void packInto(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId()) const
 	{
 		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &aMsgOut, reinterpret_cast<const T *>(this));
 	}
 
-	inline mavlink_message_t pack(std::uint8_t aCompid = Globals::getCompId())
+	inline mavlink_message_t pack(std::uint8_t aCompid = Globals::getCompId()) const
 	{
 		mavlink_message_t msgOut;
 		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &msgOut, reinterpret_cast<const T *>(this));
