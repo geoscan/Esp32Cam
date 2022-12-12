@@ -308,44 +308,81 @@ Microservice::Ret Wifi::processCmdRequestMessage(mavlink_message_t &message,
 	Microservice::OnResponseSignature onResponse, const Hlpr::MavlinkCommandLong &mavlinkCommandLong)
 {
 	auto ret = Ret::Ignored;
+	enum {
+		RequestAp = 0,
+		RequestSta = 1,
+	};
 	const int requestedMsgid = static_cast<int>(mavlinkCommandLong.param1);
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessage");
 
-	if (requestedMsgid == MAVLINK_MSG_ID_WIFI_CONFIG_AP) {
-		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Mav::Mic::Wifi, "tracing", "got request for WIFI_CONFIG_AP");
-		ret = Ret::Response;
-		// `param2` is used as mode identifier.
-		const int mode = static_cast<int>(mavlinkCommandLong.param2);
-		Hlpr::WifiConfigAp wifiConfigAp{mavlink_wifi_config_ap_t{
-			{""},  // SSID
-			{""},  // Password
-			0,  // Mode
-			0,  // Response
-		}};
+	if (MAVLINK_MSG_ID_WIFI_CONFIG_AP == requestedMsgid) {
+		ret = Microservice::Ret::Response;
+		const int wifiType = static_cast<int>(mavlinkCommandLong.param2);
 
-		// Attempting to acquire the SSID of the AP the station is connected to
-		if (mode == WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_STATION) {
-			wifiConfigAp.mode = WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_DISABLED;
-			Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(
-				[&wifiConfigAp](const std::string &identifier) mutable
-				{
-					std::copy(identifier.begin(), identifier.end(), wifiConfigAp.ssid);  // The identifier is supposed to already be of the appropriate length and format, so no checks are made
-				});
-		} else if (mode == WIFI_CONFIG_AP_MODE::WIFI_CONFIG_AP_MODE_AP) {
-			// TODO: acquire the curret Wi-Fi AP SSID
+		if (wifiType == RequestAp) {
+			// TODO: TBD
+		} else if (wifiType == RequestSta) {
+			ret = processCmdRequestMessageStaStatus(message, onResponse, mavlinkCommandLong);
 		}
-
-		// Compose ACK
-		{
-			auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
-			ack.packInto(message);
-			onResponse(message);
-		}
-		// Send the message itself
-		wifiConfigAp.packInto(message);
-		onResponse(message);
+	} else {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessage: unsupported message,"
+			"msgid=%d", requestedMsgid);
 	}
 
 	return ret;
+}
+
+Microservice::Ret Wifi::processCmdRequestMessageStaStatus(mavlink_message_t &message,
+	Microservice::OnResponseSignature onResponse, const Hlpr::MavlinkCommandLong &mavlinkCommandLong)
+{
+	std::string password{};
+	std::string ssid{};
+	bool passwordInitialized = false;
+	bool ssidInitialized = false;
+	Hlpr::WifiConfigAp wifiConfigAp{};
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "request message sta status");
+
+	// Get module fields
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(
+		[&ssid, &ssidInitialized](const std::string &aSsid)
+		{
+			ssid = aSsid;
+			ssidInitialized = true;
+		});
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(
+		[&password, &passwordInitialized](const std::string &aPassword)
+		{
+			password = aPassword;
+			passwordInitialized = true;
+		});
+
+	if (passwordInitialized && ssidInitialized) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessageStaStatus: ssid=%s,"
+			"password=%s", ssid.c_str(), password.c_str());
+		wifiConfigAp.ssidFillZero();
+		std::copy_n(ssid.begin(), ssid.length(), wifiConfigAp.ssid);
+		wifiConfigAp.passwordFillZero();
+		std::copy_n(password.begin(), password.length(), wifiConfigAp.password);
+
+		if (password.length() > 0) {
+			wifiConfigAp.passwordIntoMd5Stringify();
+		}
+
+		{
+			const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command,
+				MAV_RESULT_ACCEPTED);
+			ack.packInto(message);
+			onResponse(message);
+		}
+		wifiConfigAp.packInto(message);
+		onResponse(message);
+	} else {
+		const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_FAILED);
+		ack.packInto(message);
+		onResponse(message);
+	}
+
+	return Microservice::Ret::Response;
 }
 
 }  // namespace Mic

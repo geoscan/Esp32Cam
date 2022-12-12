@@ -47,8 +47,12 @@ private:
 	Ret processConfigApSetAp(mavlink_message_t &message, OnResponseSignature onResponse, Hlpr::WifiConfigAp &);
 	/// \brief Process a request to connect to / disconnect from a remote AP
 	Ret processConfigApSetSta(mavlink_message_t &message, OnResponseSignature onResponse, Hlpr::WifiConfigAp &);
-	/// \brief
+	/// \brief Handles message request, as defined by the standard.
 	Ret processCmdRequestMessage(mavlink_message_t &message, OnResponseSignature onResponse,
+		const Hlpr::MavlinkCommandLong &mavlinkCommandLong);
+	/// \brief Delegate. Prepares and sends WIFI_CONFIG_AP containing info
+	/// regarding current STA configuration. \sa `processCmdRequestMessage`
+	Ret processCmdRequestMessageStaStatus(mavlink_message_t &message, OnResponseSignature onResponse,
 		const Hlpr::MavlinkCommandLong &mavlinkCommandLong);
 };
 
