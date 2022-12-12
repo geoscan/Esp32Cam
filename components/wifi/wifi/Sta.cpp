@@ -17,6 +17,7 @@
 #include <esp_wifi.h>
 
 GS_UTILITY_LOGD_METHOD_SET_ENABLED(Wifi::Sta, getFieldValue, 1)
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Wifi::Sta, "tracing", 1);
 
 namespace Wifi {
 
@@ -24,7 +25,10 @@ constexpr std::size_t kSsidMinLength = 1;
 constexpr std::size_t kSsidMaxLength = 32;
 constexpr std::size_t kPasswordMinLength = 8;
 constexpr std::size_t kPasswordMaxLength = 64;
-
+// STA network-level credentials
+constexpr std::uint8_t *kIp = nullptr;
+constexpr std::uint8_t *kGateway = nullptr;
+constexpr std::uint8_t *kNetmask = nullptr;
 
 static constexpr auto kModule = Mod::Module::WifiStaConnection;
 
@@ -91,9 +95,6 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 			}
 
 			if (resp.isOk()) {
-				constexpr std::uint8_t *kIp = nullptr;
-				constexpr std::uint8_t *kGateway = nullptr;
-				constexpr std::uint8_t *kNetmask = nullptr;
 				const esp_err_t espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp,
 					kGateway, kNetmask);
 
@@ -110,20 +111,50 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 	}
 }
 
+bool Sta::tryFetchConnect()
+{
+	bool res = false;
+	esp_wifi_disconnect();
+
+	if (credentials.fetch() == Mod::Par::Result::Ok) {
+		if (credentials.autoconnect) {
+			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Sta::tryFetchConnect, SSID=%s, password=%s",
+				credentials.ssid.c_str(), credentials.password.c_str());
+			const esp_err_t espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp,
+				kGateway, kNetmask);
+
+			if (espErr == ESP_OK) {
+				res = true;
+				ESP_LOGI(Wifi::kDebugTag, "Autoconnect: succeeded");
+			} else {
+				ESP_LOGW(Wifi::kDebugTag, "Autoconnect: failed, error=%d (%s)", espErr, esp_err_to_name(espErr));
+			}
+		} else {
+			ESP_LOGI(Wifi::kDebugTag, "Autoconnect: no autoconnect required, skipping");
+		}
+	} else {
+		ESP_LOGW(Wifi::kDebugTag, "Autoconnect: unable to fetch credentials");
+	}
+
+	return res;
+}
+
 Mod::Par::Result Sta::Credentials::fetch()
 {
 	Mod::Par::Result result = Mod::Par::Result::Ok;
-	auto *paramSsid = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiStaConnection,
-		Mod::Fld::Field::StringIdentifier);
+	{
+		auto *paramSsid = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiStaConnection,
+			Mod::Fld::Field::StringIdentifier);
 
-	if (paramSsid != nullptr) {
-		result = paramSsid->fetch();
+		if (paramSsid != nullptr) {
+			result = paramSsid->fetch();
 
-		if (result == Mod::Par::Result::Ok) {
-			ssid = paramSsid->asStr();
+			if (result == Mod::Par::Result::Ok) {
+				ssid = paramSsid->asStr();
+			}
+		} else {  // Should not get here
+			result = Mod::Par::Result::ConfigDoesNotExist;
 		}
-	} else {  // Should not get here
-		result = Mod::Par::Result::ConfigDoesNotExist;
 	}
 
 	if (result == Mod::Par::Result::Ok) {
@@ -154,6 +185,10 @@ Mod::Par::Result Sta::Credentials::fetch()
 		} else {  // Should not get here
 			result = Mod::Par::Result::ConfigDoesNotExist;
 		}
+	}
+
+	if (result != Mod::Par::Result::Ok) {
+		ESP_LOGW(Wifi::kDebugTag, "Sta::fetch: error=%d (%s)", static_cast<int>(result), Mod::Par::resultAsStr(result));
 	}
 
 	return result;

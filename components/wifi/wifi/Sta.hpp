@@ -33,6 +33,10 @@ public:
 	Sta(esp_netif_t **);
 	void getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResponse);
 	void setFieldValue(Mod::Fld::WriteReq, Mod::Fld::OnWriteResponseCallback onResponse);
+	/// \brief Attempt to load STA parameters from a non-volatile parameters
+	/// storage, and connect to the AP those specify. Will only work if
+	/// autoconnect parameter is set to true.
+	bool tryFetchConnect();
 private:
 	esp_netif_t **espNetif;
 	Credentials credentials;
