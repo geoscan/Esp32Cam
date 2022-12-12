@@ -21,6 +21,7 @@ private:
 		std::string ssid;
 		/// Password of the AP the STA should connect to
 		std::string password;
+		bool autoconnect;
 		/// \brief Makes an attempt to fetch the parameters from non-volatile
 		/// parameters storage.
 		Mod::Par::Result fetch();

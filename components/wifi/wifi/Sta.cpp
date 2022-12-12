@@ -28,7 +28,7 @@ constexpr std::size_t kPasswordMaxLength = 64;
 
 static constexpr auto kModule = Mod::Module::WifiStaConnection;
 
-Sta::Sta(esp_netif_t **aEspNetif) : Mod::ModuleBase{kModule}, espNetif{aEspNetif}, credentials{"", ""}
+Sta::Sta(esp_netif_t **aEspNetif) : Mod::ModuleBase{kModule}, espNetif{aEspNetif}, credentials{"", "", false}
 {
 }
 
@@ -122,7 +122,7 @@ Mod::Par::Result Sta::Credentials::fetch()
 		if (result == Mod::Par::Result::Ok) {
 			ssid = paramSsid->asStr();
 		}
-	} else {
+	} else {  // Should not get here
 		result = Mod::Par::Result::ConfigDoesNotExist;
 	}
 
@@ -136,7 +136,22 @@ Mod::Par::Result Sta::Credentials::fetch()
 			if (result == Mod::Par::Result::Ok) {
 				password = paramSsid->asStr();
 			}
-		} else {
+		} else {  // Should not get here
+			result = Mod::Par::Result::ConfigDoesNotExist;
+		}
+	}
+
+	if (result == Mod::Par::Result::Ok) {
+		auto *paramAutoconnect = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiStaConnection,
+			Mod::Fld::Field::RestoreState);
+
+		if (paramAutoconnect != nullptr) {
+			result = paramAutoconnect->fetch();
+
+			if (result == Mod::Par::Result::Ok) {
+				autoconnect = static_cast<bool>(paramAutoconnect->asI32());
+			}
+		} else {  // Should not get here
 			result = Mod::Par::Result::ConfigDoesNotExist;
 		}
 	}
