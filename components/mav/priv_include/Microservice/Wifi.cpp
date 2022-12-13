@@ -355,32 +355,25 @@ Microservice::Ret Wifi::processCmdRequestMessageStaStatus(mavlink_message_t &mes
 			password = aPassword;
 			passwordInitialized = true;
 		});
+	wifiConfigAp.ssidFillZero();
+	wifiConfigAp.passwordFillZero();
 
 	if (passwordInitialized && ssidInitialized) {
 		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessageStaStatus: ssid=%s,"
 			"password=%s", ssid.c_str(), password.c_str());
-		wifiConfigAp.ssidFillZero();
 		std::copy_n(ssid.begin(), ssid.length(), wifiConfigAp.ssid);
-		wifiConfigAp.passwordFillZero();
 		std::copy_n(password.begin(), password.length(), wifiConfigAp.password);
 
 		if (password.length() > 0) {
 			wifiConfigAp.passwordIntoMd5Stringify();
 		}
-
-		{
-			const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command,
-				MAV_RESULT_ACCEPTED);
-			ack.packInto(message);
-			onResponse(message);
-		}
-		wifiConfigAp.packInto(message);
-		onResponse(message);
-	} else {
-		const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_FAILED);
-		ack.packInto(message);
-		onResponse(message);
 	}
+
+	const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
+	ack.packInto(message);
+	onResponse(message);
+	wifiConfigAp.packInto(message);
+	onResponse(message);
 
 	return Microservice::Ret::Response;
 }
@@ -407,32 +400,26 @@ Microservice::Ret Wifi::processCmdRequestMessageApStatus(mavlink_message_t &mess
 			password = aPassword;
 			passwordInitialized = true;
 		});
+	// Fill response message fields, if managed to initialize
+	wifiConfigAp.ssidFillZero();
+	wifiConfigAp.passwordFillZero();
 
 	if (passwordInitialized && ssidInitialized) {
 		GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "processCmdRequestMessageApStatus: ssid=%s,"
 			"password=%s", ssid.c_str(), password.c_str());
-		wifiConfigAp.ssidFillZero();
 		std::copy_n(ssid.begin(), ssid.length(), wifiConfigAp.ssid);
-		wifiConfigAp.passwordFillZero();
 		std::copy_n(password.begin(), password.length(), wifiConfigAp.password);
 
 		if (password.length() > 0) {
 			wifiConfigAp.passwordIntoMd5Stringify();
 		}
-
-		{
-			const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command,
-				MAV_RESULT_ACCEPTED);
-			ack.packInto(message);
-			onResponse(message);
-		}
-		wifiConfigAp.packInto(message);
-		onResponse(message);
-	} else {
-		const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_FAILED);
-		ack.packInto(message);
-		onResponse(message);
 	}
+
+	const auto ack = Hlpr::MavlinkCommandAck::makeFrom(message, mavlinkCommandLong.command, MAV_RESULT_ACCEPTED);
+	ack.packInto(message);
+	onResponse(message);
+	wifiConfigAp.packInto(message);
+	onResponse(message);
 
 	return Microservice::Ret::Response;
 }
