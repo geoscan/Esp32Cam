@@ -211,7 +211,28 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 
 		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
 	} else {
-		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), nullptr, nullptr, nullptr);
+		bool success = false;
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = response.isOk();
+			});
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+
+		if (success) {
+			connResult = ESP_OK;
+		} else {
+			connResult = ESP_FAIL;
+		}
 	}
 
 	switch (connResult) {
