@@ -82,8 +82,7 @@ void Sta::getFieldValue(Mod::Fld::Req aReq, Mod::Fld::OnResponseCallback aOnResp
 				esp_netif_ip_info_t espNetifIpInfo{};
 
 				if (*espNetif != nullptr && ESP_OK == esp_netif_get_ip_info(*espNetif, &espNetifIpInfo)) {
-					aOnResponse(makeResponse<kModule, Mod::Fld::Field::Ip>(
-						asio::ip::address_v4{espNetifIpInfo.ip.addr}));
+					aOnResponse(makeResponse<kModule, Mod::Fld::Field::Ip>(espNetifIpInfo.ip.addr));
 				}
 			}
 		}
