@@ -305,6 +305,41 @@ Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 	return instance;
 }
 
+Result Parameter::fetchStringByMf(Module module, Fld::Field field, std::string &oString)
+{
+	assert(descriptionByMf(module, field)->parameterType == ParameterType::Str);
+	auto *parameter = instanceByMf(module, field);
+	Result result = Result::Ok;
+
+	if (parameter != nullptr) {
+		result = parameter->fetch();
+
+		if (result == Result::Ok) {
+			oString = parameter->asStr();
+		}
+	} else {
+		result = Result::ConfigDoesNotExist;
+	}
+
+	return result;
+}
+
+Result Parameter::commitStringByMf(Module module, Fld::Field field, const std::string &aValue)
+{
+	assert(descriptionByMf(module, field)->parameterType == ParameterType::Str);
+	auto *parameter = instanceByMf(module, field);
+	Result result = Result::Ok;
+
+	if (parameter != nullptr) {
+		parameter->set({aValue});
+		result = parameter->commit();
+	} else {
+		result = Result::ConfigDoesNotExist;
+	}
+
+	return result;
+}
+
 const std::string &Parameter::asStr() const
 {
 	assert(ParameterType::Str == kParameterDescriptions[id()].parameterType);
