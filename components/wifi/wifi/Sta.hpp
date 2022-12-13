@@ -22,12 +22,22 @@ private:
 		/// Password of the AP the STA should connect to
 		std::string password;
 		bool autoconnect;
+		std::uint32_t ip;
+		std::uint32_t gateway;
+		std::uint32_t netmask;
 		/// \brief Makes an attempt to fetch the parameters from non-volatile
 		/// parameters storage.
 		Mod::Par::Result fetch();
 		bool isValid() const;
 		bool trySetPassword(const std::string &password);
 		bool trySetSsid(const std::string &ssid);
+		std::array<std::uint8_t, 4> ipAsBytes() const;
+		std::array<std::uint8_t, 4> netmaskAsBytes() const;
+		std::array<std::uint8_t, 4> gatewayAsBytes() const;
+		inline bool useDhcp() const
+		{
+			return ip == 0;
+		}
 	};
 public:
 	Sta(esp_netif_t **);

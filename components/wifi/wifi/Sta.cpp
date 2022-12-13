@@ -29,10 +29,13 @@ constexpr std::size_t kPasswordMaxLength = 64;
 constexpr std::uint8_t *kIp = nullptr;
 constexpr std::uint8_t *kGateway = nullptr;
 constexpr std::uint8_t *kNetmask = nullptr;
-
 static constexpr auto kModule = Mod::Module::WifiStaConnection;
 
-Sta::Sta(esp_netif_t **aEspNetif) : Mod::ModuleBase{kModule}, espNetif{aEspNetif}, credentials{"", "", false}
+static std::array<std::uint8_t, 4> u32AsBytes(std::uint32_t ip);
+static std::string u32AsIpString(std::uint32_t ip);
+static std::uint32_t ipStringToNetworkIp4(std::string ipString);
+
+Sta::Sta(esp_netif_t **aEspNetif) : Mod::ModuleBase{kModule}, espNetif{aEspNetif}, credentials{"", "", false, 0, 0, 0}
 {
 }
 
@@ -122,8 +125,18 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 			}
 
 			if (resp.isOk()) {
-				const esp_err_t espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp,
-					kGateway, kNetmask);
+				esp_err_t espErr = ESP_OK;
+
+				if (credentials.useDhcp()) {
+					espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp, kGateway,
+						kNetmask);
+				} else {
+					const auto ip = credentials.ipAsBytes();
+					const auto netmask = credentials.netmaskAsBytes();
+					const auto gateway = credentials.gatewayAsBytes();
+					espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), ip.data(),
+						netmask.data(), gateway.data());
+				}
 
 				if (espErr != ESP_OK) {
 					resp = {Mod::Fld::RequestResult::Other, esp_err_to_name(espErr)};
@@ -135,6 +148,21 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 			esp_wifi_disconnect();
 			onResponse(resp);
 		}
+	} else if (writeReq.field == Mod::Fld::Field::Ip) {
+		credentials.ip = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
+		onResponse(resp);
+		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip,
+			u32AsIpString(credentials.ip));
+	} else if (writeReq.field == Mod::Fld::Field::Netmask) {
+		credentials.netmask = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
+		onResponse(resp);
+		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask,
+			u32AsIpString(credentials.netmask));
+	} else if (writeReq.field == Mod::Fld::Field::Gateway) {
+		credentials.gateway = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
+		onResponse(resp);
+		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway,
+			u32AsIpString(credentials.gateway));
 	}
 }
 
@@ -226,6 +254,34 @@ Mod::Par::Result Sta::Credentials::fetch()
 		ESP_LOGW(Wifi::kDebugTag, "Sta::fetch: error=%d (%s)", static_cast<int>(result), Mod::Par::resultAsStr(result));
 	}
 
+	// Fetch IP
+	{
+		std::string strIp;
+
+		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip, strIp)
+				== Mod::Par::Result::Ok) {
+			ip = ipStringToNetworkIp4(strIp);
+		}
+	}
+	// Fetch gateway
+	{
+		std::string strGateway;
+
+		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway, strGateway)
+				== Mod::Par::Result::Ok) {
+			gateway = ipStringToNetworkIp4(strGateway);
+		}
+	}
+	// Fetch netmask
+	{
+		std::string strNetmask;
+
+		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask, strNetmask)
+				== Mod::Par::Result::Ok) {
+			netmask = ipStringToNetworkIp4(strNetmask);
+		}
+	}
+
 	return result;
 }
 
@@ -256,6 +312,47 @@ bool Sta::Credentials::trySetSsid(const std::string &ssid)
 	}
 
 	return ret;
+}
+
+static std::array<std::uint8_t, 4> u32AsBytes(std::uint32_t u32)
+{
+	const std::uint8_t *bytes = reinterpret_cast<const std::uint8_t *>(u32);
+
+	return {{bytes[0], bytes[1], bytes[2], bytes[4]}};
+}
+
+static std::string u32AsIpString(std::uint32_t ipNetwork)
+{
+	return asio::ip::address_v4{ipNetwork}.to_string();
+}
+
+static std::uint32_t ipStringToNetworkIp4(std::string ipString)
+{
+	asio::error_code err;
+	const auto addr = asio::ip::make_address_v4(ipString, err);
+	std::uint32_t res = 0;
+
+	if (!err) {
+		res = addr.to_uint();
+		res = htonl(res);
+	}
+
+	return res;
+}
+
+std::array<uint8_t, 4> Sta::Credentials::ipAsBytes() const
+{
+	return u32AsBytes(ip);
+}
+
+std::array<uint8_t, 4> Sta::Credentials::netmaskAsBytes() const
+{
+	return u32AsBytes(netmask);
+}
+
+std::array<uint8_t, 4> Sta::Credentials::gatewayAsBytes() const
+{
+	return u32AsBytes(gateway);
 }
 
 }  // namespace Wifi
