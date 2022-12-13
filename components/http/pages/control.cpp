@@ -188,8 +188,16 @@ static Error processPhoto(string name)
 static Error processWifi(string aCommand, string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
 {
 	if (aCommand == kDisconnect) {
-		esp_wifi_disconnect();
-		return Ok;
+		Error error = Error::Err;
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(false,
+			[&error](const Mod::Fld::WriteResp &response)
+			{
+				if (response.isOk()) {
+					error = Ok;
+				}
+			});
+
+		return error;
 	} else if (aCommand != kConnect) {
 		return ErrArg;
 	}
