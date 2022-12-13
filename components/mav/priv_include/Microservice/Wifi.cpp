@@ -32,7 +32,6 @@ namespace Mic {
 Microservice::Ret Wifi::process(mavlink_message_t &message, Microservice::OnResponseSignature onResponse)
 {
 	Ret ret = Ret::Ignored;
-	GS_UTILITY_LOGD_CLASS_ASPECT(Mav::kDebugTag, Wifi, "tracing", "got message");
 
 	switch (message.msgid) {
 		case MAVLINK_MSG_ID_WIFI_CONFIG_AP:
