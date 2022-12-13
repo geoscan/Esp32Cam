@@ -34,6 +34,7 @@ namespace Mic {
 class GsNetwork;
 class Camera;
 class Tracking;
+class Wifi;
 }
 
 class Dispatcher : public DelayedSendHandle, public Bdg::Receiver {
@@ -53,7 +54,7 @@ private:
 	} key;
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking> micAggregate;
+	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];

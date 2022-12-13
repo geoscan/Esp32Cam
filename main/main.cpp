@@ -26,17 +26,21 @@
 #include "socket/socket.hpp"
 #include "wq/wq.hpp"
 #include "tracking/tracking.hpp"
+#include "module/module.hpp"
+#include "utility/time.hpp"
 #include <nvs_flash.h>
 
 static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
+	Ut::Tim::taskDelay(std::chrono::milliseconds(300));
 	nvs_flash_init();
 	Wq::start();
 	CameraRecorder::init();
 	camInit();
 	esp_event_loop_create_default();
+	Mod::init();
 	wifiStart();
 	httpStart();
 #if !CONFIG_DRIVER_OV2640_USE_HOOKS

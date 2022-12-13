@@ -28,6 +28,8 @@ enum class Result {
 	NotEnoughMemoryError,
 	/// The config file can be read, but it contains no relevant entries
 	EntryNotFoundError,
+	/// There is no config description that would match the request
+	ConfigDoesNotExist,
 	/// End-of-enum marker
 	N,
 };

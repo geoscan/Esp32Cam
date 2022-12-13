@@ -18,4 +18,6 @@ idf_component_register(
 	REQUIRES
 		socket
 		module
+	PRIV_REQUIRES
+		mbedtls
 )

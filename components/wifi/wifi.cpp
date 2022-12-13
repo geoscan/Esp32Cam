@@ -9,6 +9,7 @@
 #include "wifi/Sta.hpp"
 #include "wifi/Ap.hpp"
 #include "utility/al/Algorithm.hpp"
+#include "utility/time.hpp"
 #include <esp_event.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
@@ -50,9 +51,9 @@ std::string userSsid();
 /// \param len      Return value
 /// \param prefix   OPTIONAL: if NULL, configuration file will be used
 ///
-static void decorateSsid(uint8_t **data, unsigned *len, const char *prefix)
+static void decorateSsid(char const **data, unsigned *len, const char *prefix)
 {
-	static uint8_t ssid[SSID_MAX_LENGTH] = {'\0'};
+	static char ssid[SSID_MAX_LENGTH] = {'\0'};
 	static uint8_t mac[MAC_LENGTH]       = {'\0'};
 	const unsigned prefixlen             = strlen(prefix);
 
@@ -196,19 +197,22 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid, const char *aPassword)
 {
 	esp_netif_create_default_wifi_ap();
-
 	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
-
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
+	// TODO:  Initialize ssid_len, to prevent overflows
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
 	sApWifiConfig.ap.beacon_interval = 100;  // default
 	sApWifiConfig.ap.channel = 1;  // auto
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
-
 	strcpy((char *)&sApWifiConfig.ap.ssid, (char *)aSsid);
-	strcpy((char *)&sApWifiConfig.ap.password, aPassword);
+
+	if (usePassword) {
+		strcpy((char *)&sApWifiConfig.ap.password, aPassword);
+	} else {
+		ESP_LOGI(Wifi::kDebugTag, "Creating open Wi-Fi access point");
+	}
 
 	ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_AP, &sApWifiConfig) );
 }
@@ -241,6 +245,27 @@ std::string userSsid()
 	return ret;
 }
 
+/// \brief Make an attempt to load user SSID from SD card
+/// \returns True, if succeeded
+/// \arg [out] Password
+bool tryGetUserPassword(std::string &password)
+{
+	bool ret = false;
+	auto *parameter = Mod::Par::Parameter::instanceByMf(Mod::Module::WifiAp, Mod::Fld::Field::Password);
+
+	if (parameter != nullptr) {
+		const auto result = parameter->fetch();
+
+		if (result == Mod::Par::Result::Ok) {
+			password = parameter->asStr();
+			ESP_LOGI(Wifi::kDebugTag, "Got user password");
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
 void wifi_init_sta(void)
 {
 	esp_wifi_set_storage(WIFI_STORAGE_RAM);
@@ -249,28 +274,30 @@ void wifi_init_sta(void)
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA) );
 	wifiConfigStaConnection("", "", NULL, NULL, NULL);  // Trigger the initialization process
 	auto ussid = userSsid();
+	const char *ssid = nullptr;
+	std::string password{CONFIG_ESP_WIFI_PASSWORD};
 
 	if (ussid.length() > 0 && ussid.length() <= SSID_MAX_LENGTH) {
-		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ussid.c_str(), CONFIG_ESP_WIFI_PASSWORD);
+		ssid = ussid.c_str();
 	} else {
-		uint8_t  *ssid;
 		unsigned ssid_len;
 		decorateSsid(&ssid, &ssid_len, CONFIG_ESP_WIFI_SSID);
-		wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, (char *)ssid, CONFIG_ESP_WIFI_PASSWORD);
 	}
 
+	tryGetUserPassword(password);
+	wifiConfigApConnection(CONFIG_ESP_MAX_STA_CONN, ssid, password.c_str());
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
 void wifiStart(void)
 {
-
 	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
 	ESP_LOGD(Wifi::kDebugTag, "Debug log test");
 	ESP_LOGV(Wifi::kDebugTag, "Verbose log test");
 	wifi_init_sta();
 	static Wifi::Sta sta{&sStaEspNetif};
 	static Wifi::Ap ap{};
+	sta.tryFetchConnect();
 	(void)sta;
 	(void)ap;
 }

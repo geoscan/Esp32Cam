@@ -13,22 +13,65 @@
 #include "module/Parameter/MemoryProvider/SdMemoryProvider.hpp"
 #include "module/module.hpp"
 #include "utility/al/String.hpp"
+#include "utility/LogSection.hpp"
 #include <array>
 #include <algorithm>
 #include <memory>
 #include "Parameter.hpp"
 #include <mutex>
 
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::Parameter, "tracing", 1);
+
 namespace Mod {
 namespace Par {
 
-static constexpr const std::array<ParameterDescription, 1> kParameterDescriptions = {{
+static constexpr const std::array<ParameterDescription, 5> kParameterDescriptions = {{
+	// AP SSID (this AP)
 	{
 		0,  // id
 		"WifiApSsid",  // name
 		ParameterType::Str,
 		Mod::Module::WifiAp,
 		Mod::Fld::Field::StringIdentifier,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	// AP password (this AP)
+	{
+		1,  // id
+		"WifiApPassword",  // name
+		ParameterType::Str,
+		Mod::Module::WifiAp,
+		Mod::Fld::Field::Password,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	// STA SSID (remote AP)
+	{
+		2,  // id
+		"WifiStaSsid",  // name
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::StringIdentifier,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	// STA password (remote AP)
+	{
+		3,  // id
+		"WifiStaPassword",  // name
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::Password,
+		MemoryProviderType::Sd,
+		true,  // mirrorField
+	},
+	{
+		4,  //id
+		"WifiStaAutoconn",
+		ParameterType::I32,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::Initialized,
 		MemoryProviderType::Sd,
 		true,  // mirrorField
 	}
@@ -42,10 +85,39 @@ static constexpr bool pardescValidateStrlen(std::size_t pos = 0)
 {
 	return pos >= kParameterDescriptions.size() ?
 		true :
-		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && pardescValidateStrlen(pos + 1);
+		Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) <= kParameterStrlen && pardescValidateStrlen(pos + 1)
+			&& Ut::Al::Str::cxStrlen(kParameterDescriptions[pos].name) > 0;
 }
 
+static constexpr bool pardescValidateUniquenessImpl(std::size_t currentId, std::size_t candidateId)
+{
+	return candidateId >= kParameterDescriptions.size() || currentId >= kParameterDescriptions.size() ? true :
+		currentId == candidateId ? pardescValidateUniquenessImpl(currentId, candidateId + 1) :
+		Ut::Al::Str::cxStrcpy(kParameterDescriptions[currentId].name, kParameterDescriptions[candidateId].name) != 0
+			&& (kParameterDescriptions[currentId].field != kParameterDescriptions[candidateId].field
+			|| kParameterDescriptions[currentId].module != kParameterDescriptions[candidateId].module)
+			&& pardescValidateUniquenessImpl(currentId, candidateId + 1);
+}
+
+/// \brief Makes sure that each parameter description is unique
+static constexpr bool pardescValidateUniqueness(std::size_t currentId = 0)
+{
+	return currentId >= kParameterDescriptions.size() ? true :
+		pardescValidateUniquenessImpl(currentId, currentId) && pardescValidateUniqueness(currentId + 1);
+}
+
+static constexpr bool pardescEnsureSequence(std::size_t currentId = 0)
+{
+	return currentId >= kParameterDescriptions.size() ? true :
+		currentId == kParameterDescriptions[currentId].id && pardescEnsureSequence(currentId + 1);
+}
+
+static_assert(pardescValidateStrlen(), "A parameter's name length constraints have been violated");
+static_assert(pardescValidateUniqueness(), "Parameters must be unique");
+static_assert(pardescEnsureSequence(), "There is a mismatch between some parameter's position and its id.");
+
 /// \brief Convert (MODULE, FIELD) pair to a parameter's unique identifier
+/// \arg [out] oId Id of the parameter for which a decsription has been found
 /// \returns True, if found. Sets `oId`
 static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 {
@@ -58,14 +130,14 @@ static bool pardescToId(Module module, Fld::Field field, std::size_t &oId)
 		});
 
 	if (it != std::end(kParameterDescriptions)) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing",
+			"found parameter, module=%d, field=%d, id=%d", static_cast<int>(module), static_cast<int>(field), it->id);
 		res = true;
 		oId = it->id;
 	}
 
 	return res;
 }
-
-static_assert(pardescValidateStrlen(), "A parameter's name length has been exceeded");
 
 /// \brief Static parameter instances storage.
 struct InstanceStorage {
@@ -166,6 +238,7 @@ Result Parameter::fetch()
 	} else {
 		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->load(kParameterDescriptions[id()], variant);
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing", "Loading parameter, id=%d", id());
 	}
 
 	return res;
@@ -184,6 +257,7 @@ Result Parameter::commit()
 		res = Result::MemoryProviderNotFound;
 		ESP_LOGW(Mod::kDebugTag, "Parameter::commit: %s, parameter id %d", Par::resultAsStr(res), id());
 	} else {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Parameter, "tracing", "Saving parameter, id=%d", id());
 		std::lock_guard<std::mutex> lock{sMutex};
 		res = memoryProvider->save(kParameterDescriptions[id()], variant);
 	}

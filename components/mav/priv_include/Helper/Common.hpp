@@ -22,15 +22,16 @@ template <class T> struct CallbackEncode;
 template <> struct CallbackEncode<mavlink_command_long_t> { static constexpr auto call = mavlink_msg_command_long_encode; };
 template <> struct CallbackEncode<mavlink_command_ack_t> {static constexpr auto call = mavlink_msg_command_ack_encode; };
 template <> struct CallbackEncode<mavlink_camera_image_captured_t> {static constexpr auto call = mavlink_msg_camera_image_captured_encode; };
+template <> struct CallbackEncode<mavlink_wifi_config_ap_t> {static constexpr auto call = mavlink_msg_wifi_config_ap_encode; };
 
 template <class T>
 struct Pack {
-	inline void packInto(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId())
+	inline void packInto(mavlink_message_t &aMsgOut, std::uint8_t aCompid = Globals::getCompId()) const
 	{
 		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &aMsgOut, reinterpret_cast<const T *>(this));
 	}
 
-	inline mavlink_message_t pack(std::uint8_t aCompid = Globals::getCompId())
+	inline mavlink_message_t pack(std::uint8_t aCompid = Globals::getCompId()) const
 	{
 		mavlink_message_t msgOut;
 		CallbackEncode<T>::call(Globals::getSysId(), aCompid, &msgOut, reinterpret_cast<const T *>(this));

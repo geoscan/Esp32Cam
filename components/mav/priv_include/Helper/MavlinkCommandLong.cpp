@@ -10,9 +10,9 @@
 namespace Mav {
 namespace Hlpr {
 
-mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_command_int_t &aIn)
+MavlinkCommandLong MavlinkCommandLong::makeFrom(const mavlink_command_int_t &aIn)
 {
-	mavlink_command_long_t res;
+	MavlinkCommandLong res;
 
 	res.target_component = aIn.target_component;
 	res.target_system = aIn.target_system;
@@ -28,9 +28,9 @@ mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_command_int_t 
 	return res;
 }
 
-mavlink_command_long_t MavlinkCommandLong::makeFrom(const mavlink_message_t &aMessage)
+MavlinkCommandLong MavlinkCommandLong::makeFrom(const mavlink_message_t &aMessage)
 {
-	mavlink_command_long_t ret;
+	MavlinkCommandLong ret;
 
 	if (MAVLINK_MSG_ID_COMMAND_LONG == aMessage.msgid) {
 		mavlink_msg_command_long_decode(&aMessage, &ret);

@@ -57,7 +57,9 @@ enum class Field : std::uint8_t {
 	VersionCommitHash,  ///< Git commit hash
 	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
 	Roi,  ///< Region of Interest
-	StringIdentifier  ///< Generic string name
+	StringIdentifier,  ///< Generic string name
+	Password,  ///< Password. Wi-Fi STA, or AP
+	RestoreState,  ///< If set, the module will attempt to restore its state (which resides in some non-volatile storage)
 };
 
 template <class T>
@@ -66,7 +68,7 @@ using StoreType = typename Rr::Trait::StoreType<T>;
 /// \brief Compile-time selector of respective field types
 template <Field, Module=Module::All> struct GetType : StoreType<None> {};  ///< Type selector
 template <> struct GetType<Field::FrameSize, Module::Camera> : StoreType<std::pair<int, int>> {};
-template <Module I> struct GetType<Field::Initialized, I> : StoreType<bool> {};
+template <Module I> struct GetType<Field::Initialized, I> : StoreType<std::int32_t> {};
 template <Module I> struct GetType<Field::VendorName, I> : StoreType<const char *> {};
 template <Module I> struct GetType<Field::ModelName, I> : StoreType<const char *> {};
 template <> struct GetType<Field::CaptureCount, Module::Camera> : StoreType<unsigned> {};
@@ -79,6 +81,8 @@ template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::varia
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
+template <Module I> struct GetType<Field::Password, I> : StoreType<std::string> {};
+template <Module I> struct GetType<Field::RestoreState, I> : StoreType<std::int32_t> {};
 
 struct Variant : public Mod::Variant {
 	using Mod::Variant::Variant;
