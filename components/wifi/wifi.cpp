@@ -171,7 +171,7 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 	EventBits_t eventBits;
 
 	if (useDhcp) {
-		constexpr unsigned kDhcpWaitTimeoutMs = 6000 / portTICK_PERIOD_MS;
+		constexpr unsigned kDhcpWaitTimeoutMs = 3000 / portTICK_PERIOD_MS;
 		eventBits = xEventGroupWaitBits(wifiEventGroup, kBitStaGotIp | kBitDisconnected, pdFALSE, pdFALSE,
 			kDhcpWaitTimeoutMs);
 	} else {
