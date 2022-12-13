@@ -288,17 +288,12 @@ static void printStatus(httpd_req_t *req, Error res)
 			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
 		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(
-			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
+			[root](std::uint32_t aAddr)
 			{
-				aAddr.match(
-					[root, &aAddr](const asio::ip::address_v4 &aAddr) mutable
-					{
-						static constexpr auto kIpLen = 4;
-						const auto bytes = aAddr.to_bytes();
-						const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
-						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
-					}
-				);
+				static constexpr std::size_t kIpLen = 4;
+				const auto bytes = asio::ip::address_v4{aAddr}.to_bytes();
+				const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
+				cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
 			});
 	}
 	// Get camera frame size
