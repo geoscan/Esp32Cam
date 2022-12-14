@@ -58,7 +58,7 @@ static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
 
 enum Error : esp_err_t {
-	Ok = 0,
+	Ok = ESP_OK,
 	Err = 1,
 	ErrArg = 2,
 	ErrCam = 3,
@@ -70,7 +70,8 @@ enum Error : esp_err_t {
 	ErrMax,
 };
 
-static std::array<const char *, static_cast<unsigned>(ErrMax)> sErrorMessages {{
+static_assert(ESP_OK == 0, "");
+static std::array<const char *, static_cast<std::size_t>(ErrMax)> sErrorMessages {{
 	"",
 	"Unknown error",
 	"Wrong input argument(s)",
