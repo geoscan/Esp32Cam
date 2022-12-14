@@ -1,0 +1,32 @@
+menu "[http]"
+
+	choice HTTP_DEBUG_LEVEL
+		prompt "[http] HTTP debug level"
+		default HTTP_DEBUG_LEVEL_INFO
+
+		config HTTP_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config HTTP_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config HTTP_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config HTTP_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config HTTP_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+	endchoice
+
+	config HTTP_DEBUG_LEVEL
+		int
+		default 1 if HTTP_DEBUG_LEVEL_ERROR
+		default 2 if HTTP_DEBUG_LEVEL_WARN
+		default 3 if HTTP_DEBUG_LEVEL_INFO
+		default 4 if HTTP_DEBUG_LEVEL_DEBUG
+		default 5 if HTTP_DEBUG_LEVEL_VERBOSE
+
+endmenu
