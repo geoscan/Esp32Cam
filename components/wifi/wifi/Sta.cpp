@@ -323,9 +323,10 @@ bool Sta::Credentials::trySetSsid(const std::string &ssid)
 
 static std::array<std::uint8_t, 4> u32AsBytes(std::uint32_t u32)
 {
-	const std::uint8_t *bytes = reinterpret_cast<const std::uint8_t *>(u32);
+	u32 = htonl(u32);
+	const std::uint8_t *bytes = reinterpret_cast<const std::uint8_t *>(&u32);
 
-	return {{bytes[0], bytes[1], bytes[2], bytes[4]}};
+	return {{bytes[0], bytes[1], bytes[2], bytes[3]}};
 }
 
 static std::string u32AsIpString(std::uint32_t ipNetwork)
@@ -341,7 +342,6 @@ static std::uint32_t ipStringToNetworkIp4(std::string ipString)
 
 	if (!err) {
 		res = addr.to_uint();
-		res = htonl(res);
 	}
 
 	return res;
