@@ -51,6 +51,7 @@ static constexpr const char *kStop = "stop"; // value
 static constexpr const char *kStart = "start"; // value
 static constexpr const char *kConnect = "connect"; //value
 static constexpr const char *kDisconnect = "disconnect"; //value
+static constexpr const char *kSetSsid = "setssid";
 // JSON response
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
@@ -265,6 +266,32 @@ static Error processWifi(std::string aCommand, std::string aSsid, std::string aP
 			default:
 				return Err;
 		}
+	} else if (aCommand == kSetSsid) {
+		auto result = Ok;
+
+		if (!stringIsError(aSsid)) {
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>(aSsid,
+				[&result](const Mod::Fld::WriteResp &response)
+				{
+					if (!response.isOk()) {
+						result = ErrOther;
+						sErrorMessages[result] = response.resultAsCstr();
+					}
+				});
+		}
+
+		if (result == Ok && !stringIsError(aPassword)) {
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::Password>(aPassword,
+				[&result](const Mod::Fld::WriteResp &response)
+				{
+					if (!response.isOk()) {
+						result = ErrOther;
+						sErrorMessages[result] = response.resultAsCstr();
+					}
+				});
+		}
+
+		return result;
 	} else {
 		return ErrArg;
 	}
