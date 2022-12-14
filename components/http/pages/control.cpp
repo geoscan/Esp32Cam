@@ -27,8 +27,6 @@
 #include <cJSON.h>
 #include <sdkconfig.h>
 
-using namespace std;
-
 // Various keys
 static constexpr const char *kName = "name"; // key
 static constexpr const char *kSsid = "ssid"; // key
@@ -83,7 +81,7 @@ static std::array<std::string, static_cast<std::size_t>(ErrMax)> sErrorMessages 
 }};
 
 static bool shotFile(const char *);
-static Error processPhoto(string name);
+static Error processPhoto(std::string name);
 
 static struct {
 	bool videoRecRunning = false;
@@ -119,7 +117,7 @@ static bool shotFile(const char *aName)
 ///
 /// \return "", if no such key has been found. Value of the key otherwise.
 ///
-static string getArgValueByKey(httpd_req_t *req, const char *key)
+static std::string getArgValueByKey(httpd_req_t *req, const char *key)
 {
 	static constexpr size_t kValueBufSize = 20;
 
@@ -145,7 +143,7 @@ static Error processVideoStream()
 	return Err;
 }
 
-static Error processVideoRecord(string command, string name)
+static Error processVideoRecord(std::string command, std::string name)
 {
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(".avi");
@@ -170,7 +168,7 @@ static Error processVideoRecord(string command, string name)
 	return Ok;
 }
 
-static Error processPhoto(string name)
+static Error processPhoto(std::string name)
 {
 	static constexpr const char *kJpg = ".jpg";
 
@@ -187,7 +185,7 @@ static Error processPhoto(string name)
 	return rec.frame.start(name.c_str()) ? Ok : Err;
 }
 
-static Error processWifi(string aCommand, string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
+static Error processWifi(std::string aCommand, std::string aSsid, std::string aPassword, std::string aIp, std::string aGateway, std::string aNetmask)
 {
 	if (aCommand == kDisconnect) {
 		Error error = Error::Err;
