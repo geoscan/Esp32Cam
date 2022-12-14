@@ -326,12 +326,15 @@ Result Parameter::fetchStringByMf(Module module, Fld::Field field, std::string &
 
 Result Parameter::commitStringByMf(Module module, Fld::Field field, const std::string &aValue)
 {
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Mod::Par::Parameter, "tracing", "commitStringByMf, value=%s",
+		aValue.c_str());
 	assert(descriptionByMf(module, field)->parameterType == ParameterType::Str);
 	auto *parameter = instanceByMf(module, field);
 	Result result = Result::Ok;
 
 	if (parameter != nullptr) {
 		parameter->set({aValue});
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Mod::Par::Parameter, "tracing", "commitStringByMf, committing");
 		result = parameter->commit();
 	} else {
 		result = Result::ConfigDoesNotExist;
