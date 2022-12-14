@@ -149,16 +149,19 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 			onResponse(resp);
 		}
 	} else if (writeReq.field == Mod::Fld::Field::Ip) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saving IP parameters storage");
 		credentials.ip = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
 		onResponse(resp);
 		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip,
 			u32AsIpString(credentials.ip));
 	} else if (writeReq.field == Mod::Fld::Field::Netmask) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saving netmask parameters storage");
 		credentials.netmask = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
 		onResponse(resp);
 		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask,
 			u32AsIpString(credentials.netmask));
 	} else if (writeReq.field == Mod::Fld::Field::Gateway) {
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saving gateway IP parameters storage");
 		credentials.gateway = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
 		onResponse(resp);
 		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway,
@@ -256,6 +259,7 @@ Mod::Par::Result Sta::Credentials::fetch()
 
 	// Fetch IP
 	{
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "fetching IP from parameters storage");
 		std::string strIp;
 
 		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip, strIp)
@@ -265,6 +269,8 @@ Mod::Par::Result Sta::Credentials::fetch()
 	}
 	// Fetch gateway
 	{
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "fetching gateway IP from parameters"
+			"storage");
 		std::string strGateway;
 
 		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway, strGateway)
@@ -274,6 +280,7 @@ Mod::Par::Result Sta::Credentials::fetch()
 	}
 	// Fetch netmask
 	{
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "fetching netmask from parameters storage");
 		std::string strNetmask;
 
 		if (Mod::Par::Parameter::fetchStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask, strNetmask)
