@@ -14,6 +14,7 @@
 
 #include "Types.hpp"
 #include "utility/thr/Semaphore.hpp"
+#include "module/Parameter/Result.hpp"
 #include <Rr/Util/Module.hpp>
 #include <mutex>
 #include <list>
@@ -68,8 +69,13 @@ public:
 					[aCb, field](Fld::WriteResp resp)
 					{
 						if (resp.isOk()) {
-							fieldTryMirrorParameter(Im, If, Fld::Variant::make<Im, If>(field));
+							auto result = fieldTryMirrorParameter(Im, If, Fld::Variant::make<Im, If>(field));
+
+							if (result != Mod::Par::Result::Ok) {
+								resp = {Mod::Fld::RequestResult::Other, Mod::Par::resultAsStr(result)};
+							}
 						}
+
 						aCb(resp);
 					});
 			}
@@ -118,7 +124,7 @@ private:
 	static void notifyFieldAsync(const Fld::ModuleField &moduleField);
 	/// \brief If field setting has been successful, and mirroring is enabled
 	/// for the field, the new value will be stored in a permanent storage
-	static void fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant);
+	static Mod::Par::Result fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant);
 private:
 	struct {
 		Module type;
