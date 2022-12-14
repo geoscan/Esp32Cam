@@ -109,6 +109,8 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 		if (!credentials.trySetSsid(writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection,
 				Mod::Fld::Field::StringIdentifier>())) {
 			resp = {Mod::Fld::RequestResult::Other, "Wrong SSID format"};
+		} else {
+			credentials.resetUseDhcp();
 		}
 
 		onResponse(resp);
@@ -360,6 +362,12 @@ std::array<uint8_t, 4> Sta::Credentials::netmaskAsBytes() const
 std::array<uint8_t, 4> Sta::Credentials::gatewayAsBytes() const
 {
 	return u32AsBytes(gateway);
+}
+
+void Sta::Credentials::resetUseDhcp()
+{
+	ip = 0;
+	Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip, "");
 }
 
 }  // namespace Wifi

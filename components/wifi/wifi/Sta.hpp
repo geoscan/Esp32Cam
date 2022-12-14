@@ -34,6 +34,7 @@ private:
 		std::array<std::uint8_t, 4> ipAsBytes() const;
 		std::array<std::uint8_t, 4> netmaskAsBytes() const;
 		std::array<std::uint8_t, 4> gatewayAsBytes() const;
+		inline void resetUseDhcp();
 		inline bool useDhcp() const
 		{
 			return ip == 0;
