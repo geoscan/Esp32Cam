@@ -9,14 +9,6 @@
 // * Wifi
 //
 
-#include <memory>
-#include <algorithm>
-#include <esp_http_server.h>
-#include <utility>
-#include <string>
-#include <cJSON.h>
-#include <sdkconfig.h>
-#include <Ov2640.hpp>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "camera_recorder/RecFrame.hpp"
 #include "sd_fat.h"
@@ -25,6 +17,15 @@
 #include "module/ModuleBase.hpp"
 #include "esp_wifi.h"
 #include "sub/Cam.hpp"
+#include "Ov2640.hpp"
+#include "http.h"
+#include <memory>
+#include <algorithm>
+#include <esp_http_server.h>
+#include <utility>
+#include <string>
+#include <cJSON.h>
+#include <sdkconfig.h>
 
 using namespace std;
 
@@ -204,43 +205,56 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 
 	const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
 	esp_err_t connResult;
-
-	if (useExplicitAddress) {
-		std::array<asio::error_code, 3> arrErr;
-		asio::ip::address_v4::bytes_type ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_bytes();
-		asio::ip::address_v4::bytes_type gateway = asio::ip::make_address_v4(aGateway, arrErr[1]).to_bytes();
-		asio::ip::address_v4::bytes_type netmask = asio::ip::make_address_v4(aNetmask, arrErr[2]).to_bytes();
-
-		if (std::any_of(arrErr.begin(), arrErr.end(),
-			[](const asio::error_code &errCode) {return static_cast<bool>(errCode);}))
+	bool success = false;
+	// Write relevant STA module fields
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
+		[&success](const Mod::Fld::WriteResp &response)
 		{
-			return ErrIpParse;
-		}
+			success = response.isOk();
+		});
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
+		[&success](const Mod::Fld::WriteResp &response)
+		{
+			success = success && response.isOk();
+		});
 
-		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
+	// Write IP network configurations, if needed
+	if (useExplicitAddress) {
+		ESP_LOGD(kHttpDebugTag, "control: setting IP config-s");
+		std::array<asio::error_code, 3> arrErr;
+		std::uint32_t ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(ip,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+		std::uint32_t netmask = asio::ip::make_address_v4(aNetmask, arrErr[1]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask>(netmask,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+		std::uint32_t gateway = asio::ip::make_address_v4(aGateway, arrErr[2]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway>(gateway,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+				ESP_LOGD(kHttpDebugTag, "control: set gateway ip, success=%d", success);
+			});
+	}
+
+	// Connect
+	ESP_LOGD(kHttpDebugTag, "control: connecting to Wi-Fi AP");
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
+		[&success](const Mod::Fld::WriteResp &response)
+		{
+			success = success && response.isOk();
+		});
+
+	if (success) {
+		connResult = ESP_OK;
 	} else {
-		bool success = false;
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
-			[&success](const Mod::Fld::WriteResp &response)
-			{
-				success = response.isOk();
-			});
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
-			[&success](const Mod::Fld::WriteResp &response)
-			{
-				success = success && response.isOk();
-			});
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
-			[&success](const Mod::Fld::WriteResp &response)
-			{
-				success = success && response.isOk();
-			});
-
-		if (success) {
-			connResult = ESP_OK;
-		} else {
-			connResult = ESP_FAIL;
-		}
+		connResult = ESP_FAIL;
 	}
 
 	switch (connResult) {
