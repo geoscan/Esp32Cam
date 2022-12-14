@@ -79,9 +79,16 @@ static std::array<std::string, static_cast<std::size_t>(ErrMax)> sErrorMessages 
 	{""},
 	{""},
 }};
+static const std::string kStringError{"\0\0", 2};
 
 static bool shotFile(const char *);
 static Error processPhoto(std::string name);
+/// \brief Legacy handling. Checks whether a `std::string` object is a special
+/// string sequence.
+static bool stringIsError(const std::string string)
+{
+	return string.size() == 2 && string[0] == '\0' && string[1] == '\0';
+}
 
 static struct {
 	bool videoRecRunning = false;
@@ -109,14 +116,12 @@ static bool shotFile(const char *aName)
 	return Ok == processPhoto(aName);
 }
 
-///
 /// \brief getArgValueByKey Parses GET request and extracts values corresponding to the key it is provided with
 ///
 /// \param req Request object
 /// \param key Get key to search for
 ///
-/// \return "", if no such key has been found. Value of the key otherwise.
-///
+/// \return `kStringError`, if no such key has been found. Value of the key otherwise.
 static std::string getArgValueByKey(httpd_req_t *req, const char *key)
 {
 	static constexpr size_t kValueBufSize = 20;
@@ -135,7 +140,7 @@ static std::string getArgValueByKey(httpd_req_t *req, const char *key)
 		return valueBuf;
 	}
 
-	return {};
+	return kStringError;
 }
 
 static Error processVideoStream()
