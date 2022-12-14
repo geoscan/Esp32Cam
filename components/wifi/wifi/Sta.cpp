@@ -119,11 +119,15 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Setting \"Initialized\" field");
 
 		if (enable) {
+			credentials.autoconnect = true;
+
 			if (!tryFetchConnect()) {
 				resp = {Mod::Fld::RequestResult::Other, "Unable to fetch conn. credentials, or execute the connection"};
-				onResponse(resp);
 			}
+
+			onResponse(resp);
 		} else {  // Disconnect
+			credentials.autoconnect = false;
 			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "enable=%d, disconnecting", enable);
 			esp_wifi_disconnect();
 			onResponse(resp);
@@ -168,31 +172,34 @@ bool Sta::tryFetchConnect()
 
 	// Determine whether or not a network's DHCP should be used, and execute the appropriate connection protocol
 	if (result) {
-		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "the credentials are valid, connecting");
-		esp_err_t espErr = ESP_OK;
+		if (credentials.autoconnect) {
+			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "the credentials are valid, connecting");
+			esp_err_t espErr = ESP_OK;
 
-		if (credentials.useDhcp()) {
-			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting using DHCP, SSID=%s",
-				credentials.ssid.c_str());
-			espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp, kGateway,
-				kNetmask);
-		} else {
-			const auto ip = credentials.ipAsBytes();
-			const auto netmask = credentials.netmaskAsBytes();
-			const auto gateway = credentials.gatewayAsBytes();
-			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting w/ IP");
-			ESP_LOGI(Wifi::kDebugTag, "Sta: Connecting w/ IP, SSID=%s, ip=%d.%d.%d.%d, gateway=%d.%d.%d.%d,"
-				"netmask=%d.%d.%d.%d", credentials.ssid.c_str(), ip[0], ip[1], ip[2],
-				ip[3], netmask[0], netmask[1], netmask[2], netmask[3], gateway[0], gateway[1], gateway[2], gateway[3]);
-			espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), ip.data(),
-				gateway.data(), netmask.data());
-		}
+			if (credentials.useDhcp()) {
+				ESP_LOGI(Wifi::kDebugTag, "Connecting using DHCP, SSID=%s", credentials.ssid.c_str());
+				espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp, kGateway,
+					kNetmask);
+			} else {
+				const auto ip = credentials.ipAsBytes();
+				const auto netmask = credentials.netmaskAsBytes();
+				const auto gateway = credentials.gatewayAsBytes();
+				GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting w/ IP");
+				ESP_LOGI(Wifi::kDebugTag, "Sta: Connecting w/ IP, SSID=%s, ip=%d.%d.%d.%d, gateway=%d.%d.%d.%d,"
+					"netmask=%d.%d.%d.%d", credentials.ssid.c_str(), ip[0], ip[1], ip[2],
+					ip[3], netmask[0], netmask[1], netmask[2], netmask[3], gateway[0], gateway[1], gateway[2], gateway[3]);
+				espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), ip.data(),
+					gateway.data(), netmask.data());
+			}
 
-		if (espErr == ESP_OK) {
-			ESP_LOGI(Wifi::kDebugTag, "Sta: connection succeeded");
+			if (espErr == ESP_OK) {
+				ESP_LOGI(Wifi::kDebugTag, "Sta: connection succeeded");
+			} else {
+				result = false;
+				ESP_LOGW(Wifi::kDebugTag, "Sta: failed to connect to an AP, error=%d (%s)", espErr, esp_err_to_name(espErr));
+			}
 		} else {
-			result = false;
-			ESP_LOGW(Wifi::kDebugTag, "Sta: failed to connect to an AP, error=%d (%s)", espErr, esp_err_to_name(espErr));
+			ESP_LOGI(Wifi::kDebugTag, "Sta: no autoconnect required, skipping");
 		}
 	}
 
