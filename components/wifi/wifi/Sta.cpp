@@ -114,28 +114,40 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 		onResponse(resp);
 	} else if (writeReq.field == Mod::Fld::Field::Initialized) {  // Activate connection
 		bool enable = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>();
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Setting \"Initialized\" field");
 
 		if (enable) {
+			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "enable=%d, attempting to connect", enable);
 			if (!credentials.isValid()) {
+				GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "invalid credentials, fetching");
 				Mod::Par::Result result = credentials.fetch();
 
 				if (result != Mod::Par::Result::Ok || !credentials.isValid()) {
+					ESP_LOGW(Wifi::kDebugTag, "Unable to fetch connection parameters");
 					resp = {Mod::Fld::RequestResult::Other, Mod::Par::resultAsStr(result)};
 				}
 			}
 
 			if (resp.isOk()) {
+				GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "the credentials are valid, connecting");
 				esp_err_t espErr = ESP_OK;
 
 				if (credentials.useDhcp()) {
+					GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting using DHCP, SSID=%s, "
+						"password=%s", credentials.ssid.c_str(), credentials.password.c_str());
 					espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), kIp, kGateway,
 						kNetmask);
 				} else {
 					const auto ip = credentials.ipAsBytes();
 					const auto netmask = credentials.netmaskAsBytes();
 					const auto gateway = credentials.gatewayAsBytes();
+					GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting w/ IP");
+					GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "Connecting w/ IP, SSID=%s, "
+						"password=%s ip=%d.%d.%d.%d, gateway=%d.%d.%d.%d, netmask=%d.%d.%d.%d", credentials.ssid.c_str(),
+						credentials.password.c_str(), ip[0], ip[1], ip[2], ip[3], netmask[0], netmask[1], netmask[2],
+						netmask[3], gateway[0], gateway[1], gateway[2], gateway[3]);
 					espErr = wifiStaConnect(credentials.ssid.c_str(), credentials.password.c_str(), ip.data(),
-						netmask.data(), gateway.data());
+						gateway.data(), netmask.data());
 				}
 
 				if (espErr != ESP_OK) {
@@ -145,6 +157,7 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 
 			onResponse(resp);
 		} else {  // Disconnect
+			GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Sta, "tracing", "enable=%d, disconnecting", enable);
 			esp_wifi_disconnect();
 			onResponse(resp);
 		}
@@ -161,11 +174,12 @@ void Sta::setFieldValue(Mod::Fld::WriteReq writeReq, Mod::Fld::OnWriteResponseCa
 		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask,
 			u32AsIpString(credentials.netmask));
 	} else if (writeReq.field == Mod::Fld::Field::Gateway) {
-		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saving gateway IP parameters storage");
 		credentials.gateway = writeReq.variant.getUnchecked<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>();
 		onResponse(resp);
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saving gateway IP parameters storage");
 		Mod::Par::Parameter::commitStringByMf(Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway,
 			u32AsIpString(credentials.gateway));
+		GS_UTILITY_LOGD_CLASS_ASPECT(Wifi::kDebugTag, Wifi::Sta, "tracing", "saved gateway IP parameters storage");
 	}
 }
 
