@@ -27,8 +27,6 @@
 #include <cJSON.h>
 #include <sdkconfig.h>
 
-using namespace std;
-
 // Various keys
 static constexpr const char *kName = "name"; // key
 static constexpr const char *kSsid = "ssid"; // key
@@ -53,12 +51,13 @@ static constexpr const char *kStop = "stop"; // value
 static constexpr const char *kStart = "start"; // value
 static constexpr const char *kConnect = "connect"; //value
 static constexpr const char *kDisconnect = "disconnect"; //value
+static constexpr const char *kSetSsid = "setssid";
 // JSON response
 static constexpr const char *kSuccess = "success";
 static constexpr const char *kMessage = "message";
 
 enum Error : esp_err_t {
-	Ok = 0,
+	Ok = ESP_OK,
 	Err = 1,
 	ErrArg = 2,
 	ErrCam = 3,
@@ -70,19 +69,27 @@ enum Error : esp_err_t {
 	ErrMax,
 };
 
-static std::array<const char *, static_cast<unsigned>(ErrMax)> sErrorMessages {{
-	"",
-	"Unknown error",
-	"Wrong input argument(s)",
-	"Camera Error",
-	"Storage or filesystem error",
-	"IP parsing error",
-	"",
-	""
+static_assert(ESP_OK == 0, "");
+static std::array<std::string, static_cast<std::size_t>(ErrMax)> sErrorMessages {{
+	{""},
+	{"Unknown error"},
+	{"Wrong input argument(s)"},
+	{"Camera Error"},
+	{"Storage or filesystem error"},
+	{"IP parsing error"},
+	{""},
+	{""},
 }};
+static const std::string kStringError{"\0\0", 2};
 
 static bool shotFile(const char *);
-static Error processPhoto(string name);
+static Error processPhoto(std::string name);
+/// \brief Legacy handling. Checks whether a `std::string` object is a special
+/// string sequence.
+static bool stringIsError(const std::string string)
+{
+	return string.size() == 2 && string[0] == '\0' && string[1] == '\0';
+}
 
 static struct {
 	bool videoRecRunning = false;
@@ -110,15 +117,13 @@ static bool shotFile(const char *aName)
 	return Ok == processPhoto(aName);
 }
 
-///
 /// \brief getArgValueByKey Parses GET request and extracts values corresponding to the key it is provided with
 ///
 /// \param req Request object
 /// \param key Get key to search for
 ///
-/// \return "", if no such key has been found. Value of the key otherwise.
-///
-static string getArgValueByKey(httpd_req_t *req, const char *key)
+/// \return `kStringError`, if no such key has been found. Value of the key otherwise.
+static std::string getArgValueByKey(httpd_req_t *req, const char *key)
 {
 	static constexpr size_t kValueBufSize = 20;
 
@@ -136,7 +141,7 @@ static string getArgValueByKey(httpd_req_t *req, const char *key)
 		return valueBuf;
 	}
 
-	return {};
+	return kStringError;
 }
 
 static Error processVideoStream()
@@ -144,7 +149,7 @@ static Error processVideoStream()
 	return Err;
 }
 
-static Error processVideoRecord(string command, string name)
+static Error processVideoRecord(std::string command, std::string name)
 {
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(".avi");
@@ -169,7 +174,7 @@ static Error processVideoRecord(string command, string name)
 	return Ok;
 }
 
-static Error processPhoto(string name)
+static Error processPhoto(std::string name)
 {
 	static constexpr const char *kJpg = ".jpg";
 
@@ -186,7 +191,7 @@ static Error processPhoto(string name)
 	return rec.frame.start(name.c_str()) ? Ok : Err;
 }
 
-static Error processWifi(string aCommand, string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
+static Error processWifi(std::string aCommand, std::string aSsid, std::string aPassword, std::string aIp, std::string aGateway, std::string aNetmask)
 {
 	if (aCommand == kDisconnect) {
 		Error error = Error::Err;
@@ -199,70 +204,96 @@ static Error processWifi(string aCommand, string aSsid, string aPassword, string
 			});
 
 		return error;
-	} else if (aCommand != kConnect) {
-		return ErrArg;
-	}
-
-	const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
-	esp_err_t connResult;
-	bool success = false;
-	// Write relevant STA module fields
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
-		[&success](const Mod::Fld::WriteResp &response)
-		{
-			success = response.isOk();
-		});
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
-		[&success](const Mod::Fld::WriteResp &response)
-		{
-			success = success && response.isOk();
-		});
-
-	// Write IP network configurations, if needed
-	if (useExplicitAddress) {
-		ESP_LOGD(kHttpDebugTag, "control: setting IP config-s");
-		std::array<asio::error_code, 3> arrErr;
-		std::uint32_t ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_uint();
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(ip,
+	} else if (aCommand == kConnect) {
+		const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
+		esp_err_t connResult;
+		bool success = false;
+		// Write relevant STA module fields
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = response.isOk();
+			});
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
 			[&success](const Mod::Fld::WriteResp &response)
 			{
 				success = success && response.isOk();
 			});
-		std::uint32_t netmask = asio::ip::make_address_v4(aNetmask, arrErr[1]).to_uint();
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask>(netmask,
+
+		// Write IP network configurations, if needed
+		if (useExplicitAddress) {
+			ESP_LOGD(kHttpDebugTag, "control: setting IP config-s");
+			std::array<asio::error_code, 3> arrErr;
+			std::uint32_t ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_uint();
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(ip,
+				[&success](const Mod::Fld::WriteResp &response)
+				{
+					success = success && response.isOk();
+				});
+			std::uint32_t netmask = asio::ip::make_address_v4(aNetmask, arrErr[1]).to_uint();
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask>(netmask,
+				[&success](const Mod::Fld::WriteResp &response)
+				{
+					success = success && response.isOk();
+				});
+			std::uint32_t gateway = asio::ip::make_address_v4(aGateway, arrErr[2]).to_uint();
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway>(gateway,
+				[&success](const Mod::Fld::WriteResp &response)
+				{
+					success = success && response.isOk();
+					ESP_LOGD(kHttpDebugTag, "control: set gateway ip, success=%d", success);
+				});
+		}
+
+		// Connect
+		ESP_LOGD(kHttpDebugTag, "control: connecting to Wi-Fi AP");
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
 			[&success](const Mod::Fld::WriteResp &response)
 			{
 				success = success && response.isOk();
 			});
-		std::uint32_t gateway = asio::ip::make_address_v4(aGateway, arrErr[2]).to_uint();
-		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway>(gateway,
-			[&success](const Mod::Fld::WriteResp &response)
-			{
-				success = success && response.isOk();
-				ESP_LOGD(kHttpDebugTag, "control: set gateway ip, success=%d", success);
-			});
-	}
 
-	// Connect
-	ESP_LOGD(kHttpDebugTag, "control: connecting to Wi-Fi AP");
-	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
-		[&success](const Mod::Fld::WriteResp &response)
-		{
-			success = success && response.isOk();
-		});
+		if (success) {
+			connResult = ESP_OK;
+		} else {
+			connResult = ESP_FAIL;
+		}
 
-	if (success) {
-		connResult = ESP_OK;
+		switch (connResult) {
+			case ESP_OK:
+				return Ok;
+
+			default:
+				return Err;
+		}
+	} else if (aCommand == kSetSsid) {
+		auto result = Ok;
+
+		if (!stringIsError(aSsid)) {
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::StringIdentifier>(aSsid,
+				[&result](const Mod::Fld::WriteResp &response)
+				{
+					if (!response.isOk()) {
+						result = ErrOther;
+						sErrorMessages[result] = response.resultAsCstr();
+					}
+				});
+		}
+
+		if (result == Ok && !stringIsError(aPassword)) {
+			Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiAp, Mod::Fld::Field::Password>(aPassword,
+				[&result](const Mod::Fld::WriteResp &response)
+				{
+					if (!response.isOk()) {
+						result = ErrOther;
+						sErrorMessages[result] = response.resultAsCstr();
+					}
+				});
+		}
+
+		return result;
 	} else {
-		connResult = ESP_FAIL;
-	}
-
-	switch (connResult) {
-		case ESP_OK:
-			return Ok;
-
-		default:
-			return Err;
+		return ErrArg;
 	}
 }
 
@@ -324,7 +355,7 @@ static void printStatus(httpd_req_t *req, Error res)
 	}
 
 	if (!Ut::Al::in(res, Ok, OkNoRequest)) {
-		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
+		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res].c_str()));
 	}
 
 	char *json = cJSON_Print(root);

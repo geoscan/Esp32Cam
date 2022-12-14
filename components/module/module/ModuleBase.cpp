@@ -40,18 +40,25 @@ void ModuleBase::setFieldValue(Fld::WriteReq aReq, Fld::OnWriteResponseCallback 
 {
 }
 
-void ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant)
+Mod::Par::Result ModuleBase::fieldTryMirrorParameter(Module module, Fld::Field field, const Variant &variant)
 {
 	const Par::ParameterDescription *parameterDescription = Par::Parameter::descriptionByMf(module, field);
+	Mod::Par::Result result = Mod::Par::Result::Ok;
 
 	if (parameterDescription != nullptr && parameterDescription->mirrorField) {
 		Par::Parameter *parameter = Par::Parameter::instanceByMf(module, field);
 
 		if (parameter != nullptr) {
 			parameter->set(variant);
-			parameter->commit();
+			result = parameter->commit();
+		} else {
+			result = Mod::Par::Result::ConfigDoesNotExist;
 		}
+	} else {
+		result = Mod::Par::Result::ConfigDoesNotExist;
 	}
+
+	return result;
 }
 
 }  // namespace Mod
