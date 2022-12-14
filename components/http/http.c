@@ -1,4 +1,18 @@
+//
+// http.c
+//
+// Created on: ?
+//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+//
+
+// Override debug level.
+// https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL)
+#include <esp_log.h>
 #include "pages/pages.h"
+#include <sdkconfig.h>
+
+const char *kHttpDebugTag = "[http]";
 
 static const httpd_uri_t pages[] = {
 	{
@@ -72,6 +86,9 @@ static void connectHandler(void* arg, esp_event_base_t event_base,
 void httpStart(void)
 {
 	static httpd_handle_t server = NULL;
+	esp_log_level_set(kHttpDebugTag, (esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL);
+	ESP_LOGD(kHttpDebugTag, "Debug log test");
+	ESP_LOGV(kHttpDebugTag, "Verbose log test");
 
 	// WARNING: It only works if we have limitation of clients number set to 1. Otherwise, counting mechanism must be implemented
 	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STACONNECTED, &connectHandler, &server));

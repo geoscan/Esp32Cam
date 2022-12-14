@@ -35,6 +35,12 @@ public:
 	/// \brief Gets an instance using (MODULE, FIELD) pair. Returns `nullptr`,
 	/// if the pair is incorrect
 	static Parameter *instanceByMf(Mod::Module module, Mod::Fld::Field);
+	/// \brief Helper. Attempts to fetch a string parameter using (MODULE,
+	/// FIELD) pair
+	static Result fetchStringByMf(Mod::Module module, Mod::Fld::Field field, std::string &oString);
+	/// \brief Helper. Tries to save a string parameter using (MODULE, FIELD)
+	/// pair
+	static Result commitStringByMf(Mod::Module module, Mod::Fld::Field field, const std::string &aValue);
 	/// \brief Get the underlying string. If the parameter is not of
 	/// "std::string" type, an assertion will be raised.
 	const std::string &asStr() const;

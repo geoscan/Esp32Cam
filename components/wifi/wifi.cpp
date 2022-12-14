@@ -79,8 +79,8 @@ static void decorateSsid(char const **data, unsigned *len, const char *prefix)
 /// \param gateway          Gateway of the network, if NULL, a DHCP client will be used
 /// \param netmask          Netmask of the network, if NULL, a DHCP client will be used
 ///
-esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr,
-	uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
+esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetApPassword, const uint8_t ip[4] = nullptr,
+	const uint8_t gateway[4] = nullptr, const uint8_t netmask[4] = nullptr)
 {
 	const bool useDhcp = (ip == NULL || gateway == NULL || netmask == NULL);
 
@@ -144,8 +144,8 @@ static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* event
 /// \brief wifiStaConnect Tries to connect to an Access Point. The parameters
 /// are the same as for \ref wifiConfigStaConnection
 ///
-esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, uint8_t ip[4] = nullptr,
-	uint8_t gateway[4] = nullptr, uint8_t netmask[4] = nullptr)
+esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, const uint8_t ip[4] = nullptr,
+	const uint8_t gateway[4] = nullptr, const uint8_t netmask[4] = nullptr)
 {
 	// Disconnect from an AP
 	{

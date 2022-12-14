@@ -56,6 +56,8 @@ enum class Field : std::uint8_t {
 	VersionSoftwarePatch,  ///< Software version, patch revision, or the number of commits from the latest revision,
 	VersionCommitHash,  ///< Git commit hash
 	Ip,  ///< Depends on context. Module=WifiStaConnection - host ip
+	Gateway,  ///< Gateway of a network.
+	Netmask,  ///< Netmask of a network
 	Roi,  ///< Region of Interest
 	StringIdentifier,  ///< Generic string name
 	Password,  ///< Password. Wi-Fi STA, or AP
@@ -77,7 +79,9 @@ template <Module I> struct GetType<Field::VersionSoftwareMajor, I> : StoreType<u
 template <Module I> struct GetType<Field::VersionSoftwareMinor, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionSoftwarePatch, I> : StoreType<unsigned> {};
 template <Module I> struct GetType<Field::VersionCommitHash, I> : StoreType<unsigned> {};
-template <Module I> struct GetType<Field::Ip, I> : StoreType<mapbox::util::variant<asio::ip::address_v4>> {};
+template <Module I> struct GetType<Field::Ip, I> : StoreType<std::uint32_t> {};
+template <Module I> struct GetType<Field::Netmask, I> : StoreType<std::uint32_t> {};
+template <Module I> struct GetType<Field::Gateway, I> : StoreType<std::uint32_t> {};
 template <> struct GetType<Field::FrameFormat, Module::Camera> : StoreType<const char *> {};  ///< (identifier, human-readable name)
 template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<std::uint16_t, 4>> {};  ///< Rect: (x, y, width, height)
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};

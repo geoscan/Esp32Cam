@@ -25,7 +25,7 @@ GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::Parameter, "tracing", 1);
 namespace Mod {
 namespace Par {
 
-static constexpr const std::array<ParameterDescription, 5> kParameterDescriptions = {{
+static constexpr const std::array<ParameterDescription, 8> kParameterDescriptions = {{
 	// AP SSID (this AP)
 	{
 		0,  // id
@@ -74,6 +74,33 @@ static constexpr const std::array<ParameterDescription, 5> kParameterDescription
 		Mod::Fld::Field::Initialized,
 		MemoryProviderType::Sd,
 		true,  // mirrorField
+	},
+	{
+		5,  //id
+		"WifiStaNetmask",
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::Netmask,
+		MemoryProviderType::Sd,
+		false,  // mirrorField
+	},
+	{
+		6,  //id
+		"WifiStaIp",
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::Ip,
+		MemoryProviderType::Sd,
+		false,  // mirrorField
+	},
+	{
+		7,  //id
+		"WifiStaGateway",
+		ParameterType::Str,
+		Mod::Module::WifiStaConnection,
+		Mod::Fld::Field::Gateway,
+		MemoryProviderType::Sd,
+		false,  // mirrorField
 	}
 }};
 
@@ -276,6 +303,44 @@ Parameter *Parameter::instanceByMf(Module module, Fld::Field field)
 	}
 
 	return instance;
+}
+
+Result Parameter::fetchStringByMf(Module module, Fld::Field field, std::string &oString)
+{
+	assert(descriptionByMf(module, field)->parameterType == ParameterType::Str);
+	auto *parameter = instanceByMf(module, field);
+	Result result = Result::Ok;
+
+	if (parameter != nullptr) {
+		result = parameter->fetch();
+
+		if (result == Result::Ok) {
+			oString = parameter->asStr();
+		}
+	} else {
+		result = Result::ConfigDoesNotExist;
+	}
+
+	return result;
+}
+
+Result Parameter::commitStringByMf(Module module, Fld::Field field, const std::string &aValue)
+{
+	GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Mod::Par::Parameter, "tracing", "commitStringByMf, value=%s",
+		aValue.c_str());
+	assert(descriptionByMf(module, field)->parameterType == ParameterType::Str);
+	auto *parameter = instanceByMf(module, field);
+	Result result = Result::Ok;
+
+	if (parameter != nullptr) {
+		parameter->set({aValue});
+		GS_UTILITY_LOGD_CLASS_ASPECT(Mod::kDebugTag, Mod::Par::Parameter, "tracing", "commitStringByMf, committing");
+		result = parameter->commit();
+	} else {
+		result = Result::ConfigDoesNotExist;
+	}
+
+	return result;
 }
 
 const std::string &Parameter::asStr() const

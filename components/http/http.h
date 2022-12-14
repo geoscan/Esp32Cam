@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void httpStart(void);
+extern const char *kHttpDebugTag;
 
 #ifdef __cplusplus
 }

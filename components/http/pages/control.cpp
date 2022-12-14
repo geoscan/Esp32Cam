@@ -9,14 +9,6 @@
 // * Wifi
 //
 
-#include <memory>
-#include <algorithm>
-#include <esp_http_server.h>
-#include <utility>
-#include <string>
-#include <cJSON.h>
-#include <sdkconfig.h>
-#include <Ov2640.hpp>
 #include "camera_recorder/RecMjpgAvi.hpp"
 #include "camera_recorder/RecFrame.hpp"
 #include "sd_fat.h"
@@ -25,6 +17,15 @@
 #include "module/ModuleBase.hpp"
 #include "esp_wifi.h"
 #include "sub/Cam.hpp"
+#include "Ov2640.hpp"
+#include "http.h"
+#include <memory>
+#include <algorithm>
+#include <esp_http_server.h>
+#include <utility>
+#include <string>
+#include <cJSON.h>
+#include <sdkconfig.h>
 
 using namespace std;
 
@@ -188,30 +189,72 @@ static Error processPhoto(string name)
 static Error processWifi(string aCommand, string aSsid, string aPassword, string aIp, string aGateway, string aNetmask)
 {
 	if (aCommand == kDisconnect) {
-		esp_wifi_disconnect();
-		return Ok;
+		Error error = Error::Err;
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(false,
+			[&error](const Mod::Fld::WriteResp &response)
+			{
+				if (response.isOk()) {
+					error = Ok;
+				}
+			});
+
+		return error;
 	} else if (aCommand != kConnect) {
 		return ErrArg;
 	}
 
 	const bool useExplicitAddress = (aIp.size() && aGateway.size() && aNetmask.size());
 	esp_err_t connResult;
-
-	if (useExplicitAddress) {
-		std::array<asio::error_code, 3> arrErr;
-		asio::ip::address_v4::bytes_type ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_bytes();
-		asio::ip::address_v4::bytes_type gateway = asio::ip::make_address_v4(aGateway, arrErr[1]).to_bytes();
-		asio::ip::address_v4::bytes_type netmask = asio::ip::make_address_v4(aNetmask, arrErr[2]).to_bytes();
-
-		if (std::any_of(arrErr.begin(), arrErr.end(),
-			[](const asio::error_code &errCode) {return static_cast<bool>(errCode);}))
+	bool success = false;
+	// Write relevant STA module fields
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Password>(aPassword,
+		[&success](const Mod::Fld::WriteResp &response)
 		{
-			return ErrIpParse;
-		}
+			success = response.isOk();
+		});
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::StringIdentifier>(aSsid,
+		[&success](const Mod::Fld::WriteResp &response)
+		{
+			success = success && response.isOk();
+		});
 
-		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), ip.data(), gateway.data(), netmask.data());
+	// Write IP network configurations, if needed
+	if (useExplicitAddress) {
+		ESP_LOGD(kHttpDebugTag, "control: setting IP config-s");
+		std::array<asio::error_code, 3> arrErr;
+		std::uint32_t ip = asio::ip::make_address_v4(aIp, arrErr[0]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(ip,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+		std::uint32_t netmask = asio::ip::make_address_v4(aNetmask, arrErr[1]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Netmask>(netmask,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+			});
+		std::uint32_t gateway = asio::ip::make_address_v4(aGateway, arrErr[2]).to_uint();
+		Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Gateway>(gateway,
+			[&success](const Mod::Fld::WriteResp &response)
+			{
+				success = success && response.isOk();
+				ESP_LOGD(kHttpDebugTag, "control: set gateway ip, success=%d", success);
+			});
+	}
+
+	// Connect
+	ESP_LOGD(kHttpDebugTag, "control: connecting to Wi-Fi AP");
+	Mod::ModuleBase::moduleFieldWriteIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Initialized>(true,
+		[&success](const Mod::Fld::WriteResp &response)
+		{
+			success = success && response.isOk();
+		});
+
+	if (success) {
+		connResult = ESP_OK;
 	} else {
-		connResult = wifiStaConnect(aSsid.c_str(), aPassword.c_str(), nullptr, nullptr, nullptr);
+		connResult = ESP_FAIL;
 	}
 
 	switch (connResult) {
@@ -259,17 +302,12 @@ static void printStatus(httpd_req_t *req, Error res)
 			Mod::Fld::Field::Initialized>([&wifiStaConnected](bool a) {wifiStaConnected |= a;});
 		cJSON_AddItemToObject(root, kWifiStaConnected, cJSON_CreateBool(wifiStaConnected));
 		Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiStaConnection, Mod::Fld::Field::Ip>(
-			[root](const mapbox::util::variant<asio::ip::address_v4> &aAddr)
+			[root](std::uint32_t aAddr)
 			{
-				aAddr.match(
-					[root, &aAddr](const asio::ip::address_v4 &aAddr) mutable
-					{
-						static constexpr auto kIpLen = 4;
-						const auto bytes = aAddr.to_bytes();
-						const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
-						cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
-					}
-				);
+				static constexpr std::size_t kIpLen = 4;
+				const auto bytes = asio::ip::address_v4{aAddr}.to_bytes();
+				const int bytesInt[kIpLen] = {bytes[3], bytes[2], bytes[1], bytes[0]};
+				cJSON_AddItemReferenceToObject(root, kWifiStaIp, cJSON_CreateIntArray(bytesInt, kIpLen));
 			});
 	}
 	// Get camera frame size

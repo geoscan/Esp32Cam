@@ -24,6 +24,7 @@ GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, configFileEnsureE
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, configFileRead, 1)
 GS_UTILITY_LOGV_METHOD_SET_ENABLED(Mod::Par::SdMemoryProvider, load, 1)
 GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::SdMemoryProvider, "sdcard", 1)
+GS_UTILITY_LOGD_CLASS_ASPECT_SET_ENABLED(Mod::Par::SdMemoryProvider, "tracing", 1)
 
 namespace Mod {
 namespace Par {
