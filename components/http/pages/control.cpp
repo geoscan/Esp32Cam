@@ -71,15 +71,15 @@ enum Error : esp_err_t {
 };
 
 static_assert(ESP_OK == 0, "");
-static std::array<const char *, static_cast<std::size_t>(ErrMax)> sErrorMessages {{
-	"",
-	"Unknown error",
-	"Wrong input argument(s)",
-	"Camera Error",
-	"Storage or filesystem error",
-	"IP parsing error",
-	"",
-	""
+static std::array<std::string, static_cast<std::size_t>(ErrMax)> sErrorMessages {{
+	{""},
+	{"Unknown error"},
+	{"Wrong input argument(s)"},
+	{"Camera Error"},
+	{"Storage or filesystem error"},
+	{"IP parsing error"},
+	{""},
+	{""},
 }};
 
 static bool shotFile(const char *);
@@ -325,7 +325,7 @@ static void printStatus(httpd_req_t *req, Error res)
 	}
 
 	if (!Ut::Al::in(res, Ok, OkNoRequest)) {
-		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res]));
+		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res].c_str()));
 	}
 
 	char *json = cJSON_Print(root);
