@@ -16,6 +16,7 @@ PRINT_PREFIX := "\\n\\n\\n------------------ "
 
 EXE_PYTHON := python3
 EXE_NJET := $(PATH_NJET)/njet
+SDKCONFIG ?= sdkconfig_pioneer_mini
 
 # The ESP-IDF framework relies on certain paths being
 # present in the environment. This snippet serves as
@@ -118,6 +119,9 @@ configure:
 	@echo $(PRINT_PREFIX) Installing ESP IDF
 	$(SNIPPET_EXPORT_PATHS) && $(PATH_IDF_PATH)/install.sh
 	echo "$(SNIPPET_EXPORT_PATHS) && . $(PATH_IDF_PATH)/export.sh" > $(PATH_ENVIRONMENT)
+	# Copy the relevant sdkconfig
+	rm -f sdkconfig
+	cp sdkconfigs/$(SDKCONFIG) sdkconfig
 
 	@echo $(PRINT_PREFIX) SUCCESS
 	@echo Configuring done
