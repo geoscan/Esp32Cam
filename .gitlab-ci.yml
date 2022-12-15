@@ -17,12 +17,12 @@ stages:
 
 esp32_pioneer_mini:
     extends: .esp32
-    stages: build
+    stage: build
     variables:
         SDKCONFIG: sdkconfig_pioneer_mini
 
 esp32_pioneer_base:
     extends: .esp32
-    stages: build
+    stage: build
     variables:
         SDKCONFIG: sdkconfig_pioneer_base
