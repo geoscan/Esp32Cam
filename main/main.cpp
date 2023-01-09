@@ -34,7 +34,7 @@ static asio::io_context context(3);
 
 extern "C" int app_main(void)
 {
-	Ut::Tim::taskDelay(std::chrono::milliseconds(300));
+	Ut::Tim::taskDelay(std::chrono::milliseconds(1000));  // Time window to connect a hardware debugger, before JTAG pins are reconfigured
 	nvs_flash_init();
 	Wq::start();
 	CameraRecorder::init();
