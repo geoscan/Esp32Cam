@@ -71,7 +71,7 @@ public:
 						if (resp.isOk()) {
 							auto result = fieldTryMirrorParameter(Im, If, Fld::Variant::make<Im, If>(field));
 
-							if (result != Mod::Par::Result::Ok) {
+							if (result != Mod::Par::Result::Ok && result != Mod::Par::Result::ConfigDoesNotExist) {
 								resp = {Mod::Fld::RequestResult::Other, Mod::Par::resultAsStr(result)};
 							}
 						}
