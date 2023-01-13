@@ -20,6 +20,8 @@ public:
 	/// \brief Serves as a stub interpcepting field setting.
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
 	void getFieldValue(Mod::Fld::Req req, Mod::Fld::OnResponseCallback onResponse) override;
+private:
+	std::array<std::uint8_t, 6> mac;
 };
 
 }  // namespace Wifi
