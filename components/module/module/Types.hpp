@@ -62,6 +62,7 @@ enum class Field : std::uint8_t {
 	StringIdentifier,  ///< Generic string name
 	Password,  ///< Password. Wi-Fi STA, or AP
 	RestoreState,  ///< If set, the module will attempt to restore its state (which resides in some non-volatile storage)
+	Mac,  ///< Mac address of Wi-Fi network
 };
 
 template <class T>
@@ -87,6 +88,7 @@ template <> struct GetType<Field::Roi, Module::Tracking> : StoreType<std::array<
 template <Module I> struct GetType<Field::StringIdentifier, I> : StoreType<std::string> {};
 template <Module I> struct GetType<Field::Password, I> : StoreType<std::string> {};
 template <Module I> struct GetType<Field::RestoreState, I> : StoreType<std::int32_t> {};
+template <Module I> struct GetType<Field::Mac, I> : StoreType<std::array<std::uint8_t, 6> *> {};
 
 struct Variant : public Mod::Variant {
 	using Mod::Variant::Variant;

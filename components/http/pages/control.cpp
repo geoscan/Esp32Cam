@@ -354,6 +354,14 @@ static void printStatus(httpd_req_t *req, Error res)
 		cJSON_AddItemToObject(root, kSuccess, cJSON_CreateBool(static_cast<int>(res == Ok)));
 	}
 
+	Mod::ModuleBase::moduleFieldReadIter<Mod::Module::WifiAp, Mod::Fld::Field::Mac>(
+		[root](std::array<std::uint8_t, 6> *mac)
+		{
+			std::array<int, 6> macInt;
+			std::copy(mac->begin(), mac->end(), macInt.begin());
+			cJSON_AddItemReferenceToObject(root, "mac", cJSON_CreateIntArray(macInt.data(), macInt.size()));
+		});
+
 	if (!Ut::Al::in(res, Ok, OkNoRequest)) {
 		cJSON_AddItemReferenceToObject(root, kMessage, cJSON_CreateString(sErrorMessages[res].c_str()));
 	}

@@ -81,6 +81,9 @@ void Ap::getFieldValue(Mod::Fld::Req req, Mod::Fld::OnResponseCallback onRespons
 			const std::string password{reinterpret_cast<const char *>(wifiConfig.ap.password), passwordLen};
 			onResponse({password});
 		}
+	} else if (req.field == Mod::Fld::Field::Mac) {
+		esp_efuse_mac_get_default(mac.data());
+		onResponse({&mac});
 	}
 }
 
