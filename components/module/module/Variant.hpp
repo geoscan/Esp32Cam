@@ -21,7 +21,7 @@ struct None{};
 /// \brief Variant type serving as the storage module fields' values
 using VariantBase = typename mapbox::util::variant< None, unsigned, std::pair<int, int>, bool, const char *,
 	mapbox::util::variant<asio::ip::address_v4>, std::tuple<std::uint8_t, const char *>, std::uint8_t,
-	std::array<std::uint16_t, 4>, std::string, std::int32_t, std::uint32_t>;
+	std::array<std::uint16_t, 4>, std::string, std::int32_t, std::uint32_t, std::array<std::uint8_t, 6> *>;
 
 struct Variant : VariantBase {
 	using VariantBase::VariantBase;
