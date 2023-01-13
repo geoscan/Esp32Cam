@@ -15,13 +15,15 @@ namespace Wifi {
 /// \brief Module object. Encapsulates Wi-Fi Access Point-related field
 /// processing
 class Ap : public Mod::ModuleBase {
+private:
+	static constexpr std::size_t kMacLength = 6;
 public:
 	Ap();
 	/// \brief Serves as a stub interpcepting field setting.
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
 	void getFieldValue(Mod::Fld::Req req, Mod::Fld::OnResponseCallback onResponse) override;
 private:
-	std::array<std::uint8_t, 6> mac;
+	std::array<std::uint8_t, kMacLength> mac;
 };
 
 }  // namespace Wifi
