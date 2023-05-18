@@ -1,0 +1,33 @@
+menu "[buffered_file_transfer]"
+
+	choice BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
+		prompt "[buffered_file_transfer] module debug level"
+		default BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_INFO
+
+		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
+		int
+		default 1 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
+		default 2 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_WARN
+		default 3 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_INFO
+		default 4 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_DEBUG
+		default 5 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_VERBOSE
+
+endmenu
