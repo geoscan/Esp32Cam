@@ -2,8 +2,11 @@ file(GLOB
 	SOURCE_FILES
 		"*.c"
 		"*.cpp"
+		"http/*.c"
+		"http/*.cpp"
 		"pages/*.c"
-		"pages/*.cpp")
+		"pages/*.cpp"
+)
 
 idf_component_register(
 	SRCS         ${SOURCE_FILES}
