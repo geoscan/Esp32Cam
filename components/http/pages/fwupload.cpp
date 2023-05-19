@@ -50,13 +50,6 @@ using InputBytesIterationHandler = void(*)(const InputBytesIterationContext &aIn
 
 static constexpr std::size_t kIntermediateBufferMaxLength = 64;
 
-/// \brief Test implementation, proof-of-concept. Reads the input file
-/// chunk-by-chunk, and produces debug output.
-static esp_err_t testPageHandler(httpd_req_t *aHttpdReq);
-
-/// \brief The actual implementation
-static esp_err_t pageHandler(httpd_req_t *aHttpdReq);
-
 /// \brief Checks relevant attributes of an incoming POST request
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq);
 
@@ -65,41 +58,13 @@ static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq);
 static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	InputBytesIterationHandler aInputBytesIterationHandler);
 
+/// \brief Test implementation, proof-of-concept. Reads the input file
+/// chunk-by-chunk, and produces debug output.
 static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext);
 
 static constexpr const char *debugPreamble()
 {
 	return "fwupload";
-}
-
-static esp_err_t testPageHandler(httpd_req_t *aHttpdReq)
-{
-	ESP_LOGD(httpDebugTag(), "%s - running test page handler", debugPreamble());
-	esp_err_t ret = ESP_OK;
-	ret = httpdReqValidate(aHttpdReq);
-
-	if (ESP_OK != ret) {
-		ESP_LOGE(httpDebugTag(), "%s: failed to validate request", debugPreamble());
-
-		return ret;
-	}
-
-	ret = httpdReqIterateReceiveInputBytes(aHttpdReq, handleInputBytesTest);
-
-	if (ESP_OK != ret) {
-		ESP_LOGE(httpDebugTag(), "%s: reception failed", debugPreamble());
-
-		return ret;
-	}
-
-	return ESP_OK;
-}
-
-static esp_err_t pageHandler(httpd_req_t *aHttpdReq)
-{
-	(void)aHttpdReq;
-
-	return ESP_FAIL;
 }
 
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq)
@@ -195,5 +160,23 @@ static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIt
 
 extern "C" esp_err_t fwUploadPageHandler(httpd_req_t *aHttpdReq)
 {
-	return testPageHandler(aHttpdReq);
+	ESP_LOGD(httpDebugTag(), "%s - running test page handler", debugPreamble());
+	esp_err_t ret = ESP_OK;
+	ret = httpdReqValidate(aHttpdReq);
+
+	if (ESP_OK != ret) {
+		ESP_LOGE(httpDebugTag(), "%s: failed to validate request", debugPreamble());
+
+		return ret;
+	}
+
+	ret = httpdReqIterateReceiveInputBytes(aHttpdReq, handleInputBytesTest);
+
+	if (ESP_OK != ret) {
+		ESP_LOGE(httpDebugTag(), "%s: reception failed", debugPreamble());
+
+		return ret;
+	}
+
+	return ESP_OK;
 }
