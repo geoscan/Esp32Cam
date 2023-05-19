@@ -16,7 +16,7 @@ extern "C" {
 #endif  // __cplusplus
 
 /// \brief Extracts value pairs from URI corresponding to keys
-esp_err_t httpdReqParameterValue(httpd_req_t aHttpdReq, const char *aParameterKey, char *aValueBuffer,
+esp_err_t httpdReqParameterValue(httpd_req_t *aHttpdReq, const char *aParameterKey, char *aValueBuffer,
 	size_t aValueBufferSize);
 
 #ifdef __cplusplus
