@@ -23,6 +23,8 @@ esp_err_t cameraDemoHandler(httpd_req_t *);
 esp_err_t controlHandler(httpd_req_t *);
 esp_err_t indexPageHandler(httpd_req_t *);
 esp_err_t infoPageHandler(httpd_req_t *);
+esp_err_t fwPageHandler(httpd_req_t *);
+esp_err_t fwUploadPageHandler(httpd_req_t *);
 
 #ifdef __cplusplus
 }
