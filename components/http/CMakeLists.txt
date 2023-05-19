@@ -18,4 +18,6 @@ idf_component_register(
 		camera_recorder
 		sd_fat
 		utility
+	EMBED_FILES
+		"resources/upload_script.html"
 )
