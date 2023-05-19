@@ -8,6 +8,11 @@ extern "C" {
 void httpStart(void);
 extern const char *kHttpDebugTag;
 
+inline const char *httpDebugTag()
+{
+	return kHttpDebugTag;
+}
+
 #ifdef __cplusplus
 }
 #endif
