@@ -60,13 +60,11 @@ static esp_err_t pageHandler(httpd_req_t *aHttpdReq);
 /// \brief Checks relevant attributes of an incoming POST request
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq);
 
-// TODO
 /// \brief Receives input bytes. On each incoming chunk, notifies
 /// `aInputBytesIterationHandler`
 static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	InputBytesIterationHandler aInputBytesIterationHandler);
 
-// TODO
 static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext);
 
 static constexpr const char *debugPreamble()
@@ -81,12 +79,16 @@ static esp_err_t testPageHandler(httpd_req_t *aHttpdReq)
 	ret = httpdReqValidate(aHttpdReq);
 
 	if (ESP_OK != ret) {
+		ESP_LOGE(httpDebugTag(), "%s: failed to validate request", debugPreamble());
+
 		return ret;
 	}
 
 	ret = httpdReqIterateReceiveInputBytes(aHttpdReq, handleInputBytesTest);
 
 	if (ESP_OK != ret) {
+		ESP_LOGE(httpDebugTag(), "%s: reception failed", debugPreamble());
+
 		return ret;
 	}
 
@@ -107,10 +109,14 @@ static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq)
 	esp_err_t ret = httpdReqParameterValue(aHttpdReq, "file", intermediateBuffer, kIntermediateBufferMaxLength);
 
 	if (ret != ESP_OK) {
+		ESP_LOGE(httpDebugTag(), "%s: failed to get k/v pair", debugPreamble());
+
 		return ret;
 	}
 
 	if (strcmp(kFileExpectedName, intermediateBuffer) != 0) {
+		ESP_LOGE(httpDebugTag(), "%s: unsupported file name: \"%s\"", debugPreamble(), intermediateBuffer);
+
 		return ESP_FAIL;
 	}
 
@@ -169,6 +175,22 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	httpd_resp_sendstr(aHttpdReq, "File uploaded successfully");
 
 	return ESP_OK;
+}
+
+static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext)
+{
+	(void)aInputBytesIterationContext;
+
+	switch (aInputBytesIterationContext.receptionState) {
+		case InputBytesReceptionState::Receiving:
+			ESP_LOGI(httpDebugTag(), "%s: received %d bytes", debugPreamble(),
+				aInputBytesIterationContext.receivingState.inputSize);
+
+			break;
+
+		default:
+			break;
+	}
 }
 
 extern "C" esp_err_t fwUploadPageHandler(httpd_req_t *aHttpdReq)
