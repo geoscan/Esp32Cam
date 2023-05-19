@@ -8,4 +8,7 @@ idf_component_register(
 	INCLUDE_DIRS .
 	REQUIRES
 		esp_common
+	PRIV_REQUIRES
+		wifi_uart_bridge
+		wq
 )
