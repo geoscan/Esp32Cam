@@ -8,9 +8,9 @@
 #include <esp_http_server.h>
 #include <stddef.h>
 
-void httpdReqParameterValue(httpd_req_t *aHttpdReq, const char *aParameterKey, char *aValueBuffer, size_t aValueBufferSize)
+esp_err_t httpdReqParameterValue(httpd_req_t *aHttpdReq, const char *aParameterKey, char *aValueBuffer, size_t aValueBufferSize)
 {
-	static const kMinBufferSize = 2;
+	static const size_t kMinBufferSize = 2;
 	esp_err_t ret = ESP_OK;
 
 	if (aValueBufferSize < kMinBufferSize) {
