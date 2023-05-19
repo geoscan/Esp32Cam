@@ -5,6 +5,9 @@ multiple boards in parallel, it is reasonable to store whatever files are to be
 transfered to the AP in an intermediate storage, and transfer those in
 background using UART leaving ESP working.
 
+It has some FS-related abstraction layers, because it will probably be needed
+to store files in external RAM or flash.
+
 # Limitations and ontological constraints
 
 - Plain file structure is implied, no directories;
@@ -12,3 +15,4 @@ background using UART leaving ESP working.
   stateful: open, write, close;
 - No session-sharing mechanism: one user, one file, one session;
 - A file is viewed as an array of bytes;
+
