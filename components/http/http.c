@@ -38,6 +38,18 @@ static const httpd_uri_t pages[] = {
 		.method   = HTTP_GET,
 		.handler  = controlHandler,
 		.user_ctx = 0
+	},
+	{
+		.uri      = "/fw",
+		.method   = HTTP_GET,
+		.handler  = fwPageHandler,
+		.user_ctx = 0
+	},
+	{
+		.uri      = "/fw/upload",
+		.method   = HTTP_POST,
+		.handler  = fwUploadPageHandler,
+		.user_ctx = 0
 	}
 };
 
