@@ -1,8 +1,18 @@
 menu "[buffered_file_transfer]"
 
+	config BUFFERED_FILE_TRANSFER_ENABLE
+		bool "Enable buffered file transfer"
+		default n
+		help
+			AP/ESP channel has low throughput. That is because all the files
+			are buffered in RAM, or elsewhere, and then transferred with that
+			low-speed channel. From a user's perspective, it looks like
+			background flashing.
+
 	choice BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
 		prompt "[buffered_file_transfer] module debug level"
 		default BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_INFO
+		depends on BUFFERED_FILE_TRANSFER_ENABLE
 
 		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
 			bool "Error"
@@ -19,10 +29,10 @@ menu "[buffered_file_transfer]"
 		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_VERBOSE
 			bool "Verbose"
 
-
 	endchoice
 
 	config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
+		depends on BUFFERED_FILE_TRANSFER_ENABLE
 		int
 		default 1 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
 		default 2 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_WARN
@@ -30,4 +40,15 @@ menu "[buffered_file_transfer]"
 		default 4 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_DEBUG
 		default 5 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_VERBOSE
 
+	choice BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER
+		prompt "Memory provider"
+		depends on BUFFERED_FILE_TRANSFER_ENABLE
+		default BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
+
+		config BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
+			bool "`malloc()`"
+			help
+				Internal RAM, without binding to any memory block in particular
+
+	endchoice
 endmenu
