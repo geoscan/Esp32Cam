@@ -18,14 +18,15 @@ namespace Bft {
 class BufferedFileTransfer final : public Ut::MakeSingleton<BufferedFileTransfer> {
 public:
 	inline BufferedFileTransfer(FileSystem &aFileSystem) :
-		fileSystem{aFileSystem}
+		fileSystem{&aFileSystem}
 	{
 	}
 
-	inline File tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize)
-	{
-		return fileSystem->tryOpenFileWriteBinary(aFileName, aFileSize);
-	}
+	/// \brief Creates a new file descriptor invoking the file system's API it
+	/// has been provided with
+	/// \param `aFileSize`. Depending on the file system in use, it may or may
+	/// not be used.
+	inline File tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize);
 
 private:
 	FileSystem *fileSystem;
