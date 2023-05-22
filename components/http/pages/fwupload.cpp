@@ -9,6 +9,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL)
 #include <esp_log.h>
 
+#include "buffered_file_transfer/BufferedFileTransfer.hpp"
 #include "http.h"
 #include "http/utility.h"
 #include "pages/pages.h"
@@ -47,6 +48,17 @@ struct InputBytesIterationContext {
 };
 
 struct FileBufferingContext {
+	union {
+		void *stub;
+		Bft::File file;
+	};
+	bool initialized;
+
+	inline FileBufferingContext():
+		stub{nullptr},
+		initialized{false}
+	{
+	}
 };
 
 /// \returns ESP_OK, if successful. Sets `sErrorMessage`, and return error code
@@ -68,9 +80,10 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 static esp_err_t handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext);
 
 /// \brief Implements intermediate file buffering for its further transfer
-static esp_err_t handleInputBytesTestBufferFile(const InputBytesIterationContext &aInputBytesIterationContext);
+static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext &aInputBytesIterationContext);
 
 static const char *sErrorMessage = nullptr;
+FileBufferingContext sFileBufferingContext{};
 
 static constexpr const char *debugPreamble()
 {
@@ -170,14 +183,42 @@ static esp_err_t handleInputBytesTest(const InputBytesIterationContext &aInputBy
 	return ESP_OK;
 }
 
-static esp_err_t handleInputBytesTestBufferFile(const InputBytesIterationContext &aInputBytesIterationContext)
+static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext &aInputBytesIterationContext)
 {
+	if (!Bft::BufferedFileTransfer::checkInstance()) {
+		sErrorMessage = "`BufferedFileTransfer` is not initialized";
+
+		return ESP_FAIL;
+	}
+
 	switch (aInputBytesIterationContext.receptionState) {
 		case InputBytesReceptionState::Receiving:
-			break;
+			if (!sFileBufferingContext.initialized) {
+				sFileBufferingContext.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(/*TODO: file name */"fw", /*TODO: file size*/ 64 * 1024);
+
+				if (!sFileBufferingContext.file.isValid()) {
+					sFileBufferingContext.file.close();
+					sErrorMessage = "Unable to open file";
+
+					return ESP_FAIL;
+				}
+
+				sFileBufferingContext.initialized = true;
+			}
+
+			sFileBufferingContext.file.append(aInputBytesIterationContext.receivingState.input,
+				aInputBytesIterationContext.receivingState.inputSize);
+
+			return ESP_OK;
 
 		case InputBytesReceptionState::Finished:
-			break;
+			sFileBufferingContext.file.close();
+			sFileBufferingContext.initialized = false;
+			sFileBufferingContext.stub = nullptr;
+
+			// TODO: notify subscribers
+
+			return ESP_OK;
 	}
 
 	return ESP_OK;
