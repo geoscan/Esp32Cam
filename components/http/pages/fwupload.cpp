@@ -20,11 +20,18 @@
 
 static constexpr std::size_t kIntermediateBufferMaxLength = 64;
 
+/// \brief \sa `InputBytesIterationContext`
 enum class InputBytesReceptionState {
+	/// In the middle of receiving a file.
 	Receiving,
+
+	/// The receiving is finished, either with success or failure.
 	Finished,
 };
 
+/// \brief Reading an input file is organized in such a way so it invokes a
+/// handler callback at certain points of iteration. This is the context of
+/// iteration that is passed to the handler.
 struct InputBytesIterationContext {
 	union {
 		struct {
@@ -57,6 +64,8 @@ struct InputBytesIterationContext {
 	esp_err_t setFileSizeFromHttpdReq(httpd_req_t *aHttpdReq);
 };
 
+/// \brief The context is kept by iteration handler. \sa
+/// `InputBytesIterationContext`
 struct FileBufferingContext {
 	union {
 		void *stub;
