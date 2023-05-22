@@ -26,7 +26,7 @@ public:
 	/// has been provided with
 	/// \param `aFileSize`. Depending on the file system in use, it may or may
 	/// not be used.
-	inline File tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize);
+	File tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize);
 
 private:
 	FileSystem *fileSystem;
