@@ -39,8 +39,8 @@ struct FileDescriptor {
 /// \warning The file is not RAII. It is up to the user to close it.
 class File final {
 public:
-	inline File(FileSystem &aFileSystem, FileDescriptor aFileDescriptor) :
-		fileSystem{&aFileSystem},
+	inline File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor) :
+		fileSystem{aFileSystem},
 		fileDescriptor{aFileDescriptor}
 	{
 	}
@@ -52,7 +52,7 @@ public:
 
 	inline std::size_t append(const std::uint8_t *aBuffer, std::size_t aBufferSize)
 	{
-		return fileSystem->append(fileDescriptor, aBuffer, aBufferSize);
+		return fileSystem ? fileSystem->append(fileDescriptor, aBuffer, aBufferSize) : 0;
 	}
 
 	inline bool isValid()
