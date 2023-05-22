@@ -46,7 +46,12 @@ struct InputBytesIterationContext {
 	}
 };
 
-using InputBytesIterationHandler = void(*)(const InputBytesIterationContext &aInputBytesIterationContext);
+struct FileBufferingContext {
+};
+
+/// \returns ESP_OK, if successful. Sets `sErrorMessage`, and return error code
+/// otherwise.
+using InputBytesIterationHandler = esp_err_t(*)(const InputBytesIterationContext &aInputBytesIterationContext);
 
 static constexpr std::size_t kIntermediateBufferMaxLength = 64;
 
@@ -60,7 +65,12 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 
 /// \brief Test implementation, proof-of-concept. Reads the input file
 /// chunk-by-chunk, and produces debug output.
-static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext);
+static esp_err_t handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext);
+
+/// \brief Implements intermediate file buffering for its further transfer
+static esp_err_t handleInputBytesTestBufferFile(const InputBytesIterationContext &aInputBytesIterationContext);
+
+static const char *sErrorMessage = nullptr;
 
 static constexpr const char *debugPreamble()
 {
@@ -142,7 +152,7 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	return ESP_OK;
 }
 
-static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext)
+static esp_err_t handleInputBytesTest(const InputBytesIterationContext &aInputBytesIterationContext)
 {
 	(void)aInputBytesIterationContext;
 
@@ -156,6 +166,21 @@ static void handleInputBytesTest(const InputBytesIterationContext &aInputBytesIt
 		default:
 			break;
 	}
+
+	return ESP_OK;
+}
+
+static esp_err_t handleInputBytesTestBufferFile(const InputBytesIterationContext &aInputBytesIterationContext)
+{
+	switch (aInputBytesIterationContext.receptionState) {
+		case InputBytesReceptionState::Receiving:
+			break;
+
+		case InputBytesReceptionState::Finished:
+			break;
+	}
+
+	return ESP_OK;
 }
 
 extern "C" esp_err_t fwUploadPageHandler(httpd_req_t *aHttpdReq)
