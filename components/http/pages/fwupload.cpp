@@ -15,7 +15,10 @@
 #include "pages/pages.h"
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+
+static constexpr std::size_t kIntermediateBufferMaxLength = 64;
 
 enum class InputBytesReceptionState {
 	Receiving,
@@ -34,17 +37,24 @@ struct InputBytesIterationContext {
 	};
 	InputBytesReceptionState receptionState;
 
-	explicit inline InputBytesIterationContext(std::uint8_t *aInput, std::size_t aContext)
+	// TODO: initialize
+	char fileName[kIntermediateBufferMaxLength];
+	std::size_t fileSize;
+
+	inline void setReceivingState(std::uint8_t *aInput, std::size_t aInputSize)
 	{
-		receivingState = {aInput, aContext};
 		receptionState = InputBytesReceptionState::Receiving;
+		receivingState = {aInput, aInputSize};
 	}
 
-	explicit inline InputBytesIterationContext(esp_err_t aEspErr)
+	inline void setFinishedState(esp_err_t aEspError)
 	{
-		finishedState = {aEspErr};
 		receptionState = InputBytesReceptionState::Finished;
+		finishedState = {aEspError};
 	}
+
+	esp_err_t setFileNameFromHttpdReq(httpd_req_t *aHttpdReq);
+	esp_err_t setFileSizeFromHttpdReq(httpd_req_t *aHttpdReq);
 };
 
 struct FileBufferingContext {
@@ -65,10 +75,11 @@ struct FileBufferingContext {
 /// otherwise.
 using InputBytesIterationHandler = esp_err_t(*)(const InputBytesIterationContext &aInputBytesIterationContext);
 
-static constexpr std::size_t kIntermediateBufferMaxLength = 64;
-
 /// \brief Checks relevant attributes of an incoming POST request
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq);
+
+/// \brief Extracts file size from URI arguments
+static esp_err_t httpdReqParseFileSize(httpd_req_t *aHttpdReq, std::size_t &aFileSize);
 
 /// \brief Receives input bytes. On each incoming chunk, notifies
 /// `aInputBytesIterationHandler`
@@ -88,6 +99,18 @@ FileBufferingContext sFileBufferingContext{};
 static constexpr const char *debugPreamble()
 {
 	return "fwupload";
+}
+
+esp_err_t InputBytesIterationContext::setFileNameFromHttpdReq(httpd_req_t *aHttpdReq)
+{
+	return httpdReqParseFileSize(aHttpdReq, fileSize);
+}
+
+esp_err_t InputBytesIterationContext::setFileSizeFromHttpdReq(httpd_req_t *aHttpdReq)
+{
+	memset(fileName, 0, sizeof(fileName));
+
+	return httpdReqParameterValue(aHttpdReq, "file", fileName, sizeof(fileName));
 }
 
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq)
@@ -127,6 +150,21 @@ static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq)
 	return ESP_OK;
 }
 
+static esp_err_t httpdReqParseFileSize(httpd_req_t *aHttpdReq, std::size_t &aFileSize)
+{
+	char intermediateBuffer[kIntermediateBufferMaxLength] = {0};
+	const esp_err_t ret = httpdReqParameterValue(aHttpdReq, "filesize", intermediateBuffer, kIntermediateBufferMaxLength);
+
+	if (ESP_OK != ret) {
+		return ret;
+	}
+
+	intermediateBuffer[kIntermediateBufferMaxLength - 1] = '\0';
+	aFileSize = static_cast<std::size_t>(atoi(intermediateBuffer));
+
+	return ESP_OK;
+}
+
 static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	InputBytesIterationHandler aInputBytesIterationHandler)
 {
@@ -135,6 +173,11 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 	// Retrieve the pointer to scratch buffer for temporary storage
 	char buffer[kIntermediateBufferMaxLength];
 	std::size_t nReceived;
+
+	// Initialize context
+	InputBytesIterationContext inputBytesIterationContext{};
+	inputBytesIterationContext.setFileSizeFromHttpdReq(aHttpdReq);  // No need to check return, the input is already validated
+	inputBytesIterationContext.setFileNameFromHttpdReq(aHttpdReq);
 
 	// Content length of the request gives the size of the file being uploaded
 	std::size_t remaining = aHttpdReq->content_len;
@@ -151,22 +194,25 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 			}
 
 			ESP_LOGE(httpDebugTag(), "File reception failed!");
-			/* Respond with 500 Internal Server Error */
+
+			// Respond with 500 Internal Server Error
 			httpd_resp_send_err(aHttpdReq, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
-			aInputBytesIterationHandler(InputBytesIterationContext{ESP_FAIL});
+			inputBytesIterationContext.setFinishedState(ESP_FAIL);
+			aInputBytesIterationHandler(inputBytesIterationContext);
 
 			return ESP_FAIL;
 		}
 
-		aInputBytesIterationHandler(InputBytesIterationContext{reinterpret_cast<std::uint8_t *>(buffer), nReceived});
+		inputBytesIterationContext.setReceivingState(reinterpret_cast<std::uint8_t *>(buffer), nReceived);
+		aInputBytesIterationHandler(inputBytesIterationContext);
 
-		/* Keep track of remaining size of
-		 * the file left to be uploaded */
+		// Keep track of remaining size ofthe file left to be uploaded
 		remaining -= nReceived;
 	}
 
 	ESP_LOGI(httpDebugTag(), "File reception complete");
-	aInputBytesIterationHandler(InputBytesIterationContext{ESP_OK});
+	inputBytesIterationContext.setFinishedState(ESP_OK);
+	aInputBytesIterationHandler(inputBytesIterationContext);
 
 	// Redirect to root to update the page
 	httpd_resp_set_status(aHttpdReq, "303 See Other");
@@ -189,6 +235,12 @@ static esp_err_t handleInputBytesTest(const InputBytesIterationContext &aInputBy
 		case InputBytesReceptionState::Receiving:
 			ESP_LOGI(httpDebugTag(), "%s: received %d bytes", debugPreamble(),
 				aInputBytesIterationContext.receivingState.inputSize);
+
+			break;
+
+		case InputBytesReceptionState::Finished:
+			ESP_LOGI(httpDebugTag(), "%s: finished state, code=%d", debugPreamble(),
+				aInputBytesIterationContext.finishedState.espErr);
 
 			break;
 
