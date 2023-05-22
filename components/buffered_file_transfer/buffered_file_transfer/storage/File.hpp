@@ -43,10 +43,10 @@ public:
 	{
 	}
 
-	inline ~File()
-	{
-		finalize();
-	}
+	File(const File &) = default;
+	File(File &&) = default;
+	File &operator=(const File &) = default;
+	File &operator=(File &&) = default;
 
 	inline std::size_t append(const std::uint8_t *aBuffer, std::size_t aBufferSize)
 	{
