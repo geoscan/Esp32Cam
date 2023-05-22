@@ -8,7 +8,7 @@
 #ifndef BUFFERED_FILE_TRANSFER_BUFFERED_FILE_TRANSFER_SINGLEBUFFERRAMFILESYSTEM_HPP
 #define BUFFERED_FILE_TRANSFER_BUFFERED_FILE_TRANSFER_SINGLEBUFFERRAMFILESYSTEM_HPP
 
-#include "buffered_file_transfer/FileSystem.hpp"
+#include "buffered_file_transfer/storage/FileSystem.hpp"
 
 namespace Bft {
 

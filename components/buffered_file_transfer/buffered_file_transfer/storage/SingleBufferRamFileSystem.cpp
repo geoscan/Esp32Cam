@@ -5,14 +5,16 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "SingleBufferRamFileSystem.hpp"
+#include "buffered_file_transfer/storage/File.hpp"
 #include <esp_log.h>
 #include <mutex>
 #include <stdio.h>
 
+#include "SingleBufferRamFileSystem.hpp"
+
 namespace Bft {
 
-class SynchronizedFileDescriptor {
+struct SynchronizedFileDescriptor {
 	FileDescriptor fileDescriptor;
 	std::mutex mutex;
 
@@ -67,7 +69,7 @@ class SynchronizedFileDescriptor {
 
 static SynchronizedFileDescriptor sSynchronizedFileDescriptor{};
 
-FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *, std::size_t aFileSizeHint)
+FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *, std::size_t aFileSize)
 {
 	if (sSynchronizedFileDescriptor.tryAllocate(aFileSize)) {
 		return sSynchronizedFileDescriptor.fileDescriptor;
