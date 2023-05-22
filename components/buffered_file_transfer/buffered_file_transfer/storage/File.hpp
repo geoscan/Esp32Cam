@@ -34,7 +34,9 @@ struct FileDescriptor {
 };
 
 /// \brief Generalization over a file-like resource which only provides
-/// relevant API
+/// relevant API.
+///
+/// \warning The file is not RAII. It is up to the user to close it.
 class File final {
 public:
 	inline File(FileSystem &aFileSystem, FileDescriptor aFileDescriptor) :
