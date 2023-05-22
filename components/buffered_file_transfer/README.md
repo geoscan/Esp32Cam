@@ -13,6 +13,5 @@ to store files in external RAM or flash.
 - Plain file structure is implied, no directories;
 - A notion of session is employed, i.e. the process of writing to a file is
   stateful: open, write, close;
-- No session-sharing mechanism: one user, one file, one session;
 - A file is viewed as an array of bytes;
 
