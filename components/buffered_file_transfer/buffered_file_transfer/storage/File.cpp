@@ -14,9 +14,8 @@ namespace Bfl {
 
 }  // namespace Bfl
 
-void Bft::File::finalize()
+void Bft::File::close()
 {
-	// TODO: notification
 	if (fileDescriptor.isValid()) {
 		fileSystem->close(fileDescriptor);
 		fileDescriptor.invalidate();

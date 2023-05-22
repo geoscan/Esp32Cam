@@ -60,7 +60,7 @@ public:
 		return fileDescriptor.isValid();
 	}
 
-	void finalize();
+	void close();
 
 private:
 	FileSystem *fileSystem;
