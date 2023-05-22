@@ -197,12 +197,15 @@ static esp_err_t httpdReqIterateReceiveInputBytes(httpd_req_t *aHttpdReq,
 
 			// Respond with 500 Internal Server Error
 			httpd_resp_send_err(aHttpdReq, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
+
+			// Update the context, and notify iteration handler
 			inputBytesIterationContext.setFinishedState(ESP_FAIL);
 			aInputBytesIterationHandler(inputBytesIterationContext);
 
 			return ESP_FAIL;
 		}
 
+		// Update the context, and notify iteration handler
 		inputBytesIterationContext.setReceivingState(reinterpret_cast<std::uint8_t *>(buffer), nReceived);
 		aInputBytesIterationHandler(inputBytesIterationContext);
 
