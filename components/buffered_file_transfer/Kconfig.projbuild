@@ -12,7 +12,6 @@ menu "[buffered_file_transfer]"
 	choice BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
 		prompt "[buffered_file_transfer] module debug level"
 		default BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_INFO
-		depends on BUFFERED_FILE_TRANSFER_ENABLE
 
 		config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
 			bool "Error"
@@ -32,7 +31,6 @@ menu "[buffered_file_transfer]"
 	endchoice
 
 	config BUFFERED_FILE_TRANSFER_DEBUG_LEVEL
-		depends on BUFFERED_FILE_TRANSFER_ENABLE
 		int
 		default 1 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_ERROR
 		default 2 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_WARN
