@@ -35,7 +35,7 @@ function upload() {
     var filePath = document.getElementById("filepath").value;
     var fileInput = document.getElementById("newfile").files;
     var fileSize = fileInput[0].size;
-    var upload_path = "/fw/upload?file=" + "show" + "?filesize=" + fileSize.toString();
+    var upload_path = "/fw/upload?file=" + "show" + "&filesize=" + fileSize.toString();
 
     if (fileInput.length == 0) {
         alert("No file selected!");
