@@ -93,19 +93,35 @@ static constexpr const char *debugPreamble()
 static esp_err_t httpdReqValidate(httpd_req_t *aHttpdReq)
 {
 	static constexpr const char *kFileExpectedName = "show";
-	char intermediateBuffer[kIntermediateBufferMaxLength] = {0};
-	esp_err_t ret = httpdReqParameterValue(aHttpdReq, "file", intermediateBuffer, kIntermediateBufferMaxLength);
 
-	if (ret != ESP_OK) {
-		ESP_LOGE(httpDebugTag(), "%s: failed to get k/v pair", debugPreamble());
+	// Validate file name
+	{
+		char intermediateBuffer[kIntermediateBufferMaxLength] = {0};
+		esp_err_t ret = httpdReqParameterValue(aHttpdReq, "file", intermediateBuffer, kIntermediateBufferMaxLength);
 
-		return ret;
+		if (ret != ESP_OK) {
+			ESP_LOGE(httpDebugTag(), "%s: failed to get k/v pair", debugPreamble());
+
+			return ret;
+		}
+
+		if (strcmp(kFileExpectedName, intermediateBuffer) != 0) {
+			ESP_LOGE(httpDebugTag(), "%s: unsupported file name: \"%s\"", debugPreamble(), intermediateBuffer);
+
+			return ESP_FAIL;
+		}
 	}
 
-	if (strcmp(kFileExpectedName, intermediateBuffer) != 0) {
-		ESP_LOGE(httpDebugTag(), "%s: unsupported file name: \"%s\"", debugPreamble(), intermediateBuffer);
+	// Validate file size
+	{
+		char intermediateBuffer[kIntermediateBufferMaxLength] = {0};
+		esp_err_t ret = httpdReqParameterValue(aHttpdReq, "filesize", intermediateBuffer, kIntermediateBufferMaxLength);
 
-		return ESP_FAIL;
+		if (ret != ESP_OK) {
+			ESP_LOGE(httpDebugTag(), "%s: missing argument \"filesize\"", debugPreamble());
+
+			return ESP_FAIL;
+		}
 	}
 
 	return ESP_OK;
