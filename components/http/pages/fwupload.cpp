@@ -44,7 +44,6 @@ struct InputBytesIterationContext {
 	};
 	InputBytesReceptionState receptionState;
 
-	// TODO: initialize
 	char fileName[kIntermediateBufferMaxLength];
 	std::size_t fileSize;
 
@@ -274,7 +273,8 @@ static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext 
 	switch (aInputBytesIterationContext.receptionState) {
 		case InputBytesReceptionState::Receiving:
 			if (!sFileBufferingContext.initialized) {
-				sFileBufferingContext.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(/*TODO: file name */"fw", /*TODO: file size*/ 64 * 1024);
+				sFileBufferingContext.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(
+					aInputBytesIterationContext.fileName, aInputBytesIterationContext.fileSize);
 
 				if (!sFileBufferingContext.file.isValid()) {
 					sFileBufferingContext.file.close();
