@@ -16,6 +16,12 @@ namespace Mav {
 namespace Hlpr {
 
 struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<mavlink_file_transfer_protocol_t> {
+	/// \brief C MAVLink implementation does not allow parsing `payload` field
+	/// of `FILE_TRANSFER_PROTOCOL` message. `getPayload` fixes the problem
+	inline Mav::Mic::Ftp::Payload &getPayload()
+	{
+		return *reinterpret_cast<Mav::Mic::Ftp::Payload *>(&payload);
+	}
 };
 
 }  // namespace Hlpr
