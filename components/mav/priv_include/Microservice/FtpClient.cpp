@@ -113,7 +113,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 		case RequestRepeat::StateIdle:
 			requestRepeat.stateCommon = {0, aBftFile};
 			sendSessionOpenRequest();  // TODO: XXX: from WQ?
-			// TODO: launch HrTimer
+			startOnce(kRequestResendTimeout);
 
 			break;
 
@@ -122,9 +122,6 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 
 			break;
 	}
-
-	// TODO: register an attempt
-	// TODO: state
 }
 
 void FtpClient::sendSessionOpenRequest()
