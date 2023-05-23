@@ -8,13 +8,16 @@
 #ifndef MAV_PRIV_INCLUDE_DELAYEDSEND_HPP_
 #define MAV_PRIV_INCLUDE_DELAYEDSEND_HPP_
 
+#include "DelayedMavlinkMessageInitialization.hpp"
 #include "Mavlink.hpp"
 #include "utility/Subscription.hpp"
-#include "mapbox/variant.hpp"
+#include <mapbox/variant.hpp>
 
 namespace Mav {
 
-using DelayedSendAsyncVariant = typename mapbox::util::variant<mavlink_camera_tracking_image_status_t>;
+using DelayedSendAsyncVariant = typename mapbox::util::variant<
+	mavlink_camera_tracking_image_status_t,
+	DelayedMavlinkMessageInitialization *>;
 
 /// \brief Enables memory-efficient asynchronous messaging
 ///
