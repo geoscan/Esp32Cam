@@ -11,11 +11,12 @@
 #include "buffered_file_transfer/storage/File.hpp"
 #include "sub/Subscription.hpp"
 #include <memory>
+#include <vector>
 
 namespace Bft {
 
-using OnFileBufferingFinished = typename Rr::Util::Key<void(std::shared_ptr<::Bft::File>), ::Sub::MutSyncTrait,
-	std::vector, void>;
+using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File>), typename ::Sub::MutSyncTrait,
+	std::list>;
 
 }  // namespace Bft
 
