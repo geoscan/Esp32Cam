@@ -4,22 +4,23 @@
 idf_component_register(
 	SRCS "main.cpp"
 	REQUIRES
-		wifi
-		http
-		wifi_uart_bridge
-		esp_common
-		camera_streamer
-		asio
-		pthread
 		OV2640
-		sd_fat
-		esp_event
-		log_udp
+		asio
+		buffered_file_transfer
+		camera_streamer
 		camera_thread
+		esp_common
+		esp_event
+		http
+		log_udp
 		mav
-		uart
-		socket
-		wq
 		module
+		pthread
+		sd_fat
+		socket
 		tracking
+		uart
+		wifi
+		wifi_uart_bridge
+		wq
 )
