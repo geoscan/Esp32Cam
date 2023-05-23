@@ -10,6 +10,8 @@
 #include <esp_log.h>
 
 #include "buffered_file_transfer/BufferedFileTransfer.hpp"
+#include "buffered_file_transfer/Sub.hpp"
+#include "utility/thr/WorkQueue.hpp"
 #include "http.h"
 #include "http/utility.h"
 #include "pages/pages.h"
@@ -76,6 +78,12 @@ struct FileBufferingContext {
 		stub{nullptr},
 		initialized{false}
 	{
+	}
+
+	inline void reset()
+	{
+		file.close();
+		initialized = false;
 	}
 };
 
@@ -266,6 +274,14 @@ static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext 
 {
 	if (!Bft::BufferedFileTransfer::checkInstance()) {
 		sErrorMessage = "`BufferedFileTransfer` is not initialized";
+		ESP_LOGE(httpDebugTag(), "%s: %s", debugPreamble(), sErrorMessage);
+
+		return ESP_FAIL;
+	}
+
+	if (!Ut::Thr::Wq::MediumPriority::checkInstance()) {
+		sErrorMessage = "`MediumPriority` work queue is not running";
+		ESP_LOGE(httpDebugTag(), "%s: %s", debugPreamble(), sErrorMessage);
 
 		return ESP_FAIL;
 	}
@@ -292,11 +308,21 @@ static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext 
 			return ESP_OK;
 
 		case InputBytesReceptionState::Finished:
-			sFileBufferingContext.file.close();
-			sFileBufferingContext.initialized = false;
-			sFileBufferingContext.stub = nullptr;
-
-			// TODO: notify subscribers
+			if (aInputBytesIterationContext.finishedState.espErr == ESP_OK) {
+				// Notify subscribers through the notification chain
+				Ut::Thr::Wq::MediumPriority::getInstance().push(
+					[&sFileBufferingContext]()  // Task
+					{
+						Bft::OnFileBufferingFinished::notify(std::shared_ptr<Bft::File>(&sFileBufferingContext.file,
+							[&sFileBufferingContext](Bft::File *)  // Deleter
+							{
+								sFileBufferingContext.reset();
+							}));
+					});
+				// Notify the subscribers
+			} else {
+				sFileBufferingContext.reset();
+			}
 
 			return ESP_OK;
 	}
