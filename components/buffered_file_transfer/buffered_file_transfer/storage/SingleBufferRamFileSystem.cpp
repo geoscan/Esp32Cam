@@ -5,6 +5,7 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include "buffered_file_transfer/buffered_file_transfer.hpp"
 #include "buffered_file_transfer/storage/File.hpp"
 #include <esp_log.h>
 #include <mutex>
@@ -13,6 +14,11 @@
 #include "SingleBufferRamFileSystem.hpp"
 
 namespace Bft {
+
+static constexpr const char *debugPreamble()
+{
+	return "SingleBufferRamFileSystem";
+}
 
 struct SynchronizedFileDescriptor {
 	FileDescriptor fileDescriptor;
@@ -69,17 +75,24 @@ struct SynchronizedFileDescriptor {
 
 static SynchronizedFileDescriptor sSynchronizedFileDescriptor{};
 
-FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *, std::size_t aFileSize)
+FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize)
 {
 	if (sSynchronizedFileDescriptor.tryAllocate(aFileSize)) {
+		ESP_LOGI(Bft::debugTag(), "%s: successfully allocated %d bytes for RAM file %s", debugPreamble(), aFileSize,
+			aFileName);
+
 		return sSynchronizedFileDescriptor.fileDescriptor;
 	}
+
+	ESP_LOGE(Bft::debugTag(), "%s: failed to allocate %d bytes for RAM file %s", debugPreamble(), aFileSize,
+		aFileName);
 
 	return {nullptr};
 }
 
 void SingleBufferRamFileSystem::closeFile(FileDescriptor aFileDescriptor)
 {
+	ESP_LOGI(Bft::debugTag(), "%s: closing file", debugPreamble());
 	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
 	sSynchronizedFileDescriptor.resetStateUnsafe();
 }
