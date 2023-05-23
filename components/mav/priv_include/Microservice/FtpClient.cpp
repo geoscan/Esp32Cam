@@ -8,9 +8,10 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
 #include <esp_log.h>
 
-#include "Ftp/Types.hpp"
 #include "FtpClient.hpp"
 #include "Globals.hpp"
+#include "Helper/FileTransferProtocol.hpp"
+#include "Microservice/Ftp/Types.hpp"
 #include "mav/mav.hpp"
 #include <esp_log.h>
 
@@ -111,7 +112,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
-			requestRepeat.stateCommon = {0, aBftFile};
+			requestRepeat.stateCommon = {0, aBftFile, 0};
 			sendSessionOpenRequest();  // TODO: XXX: from WQ?
 			startOnce(kRequestResendTimeout);
 
@@ -159,6 +160,24 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
 	// TODO
+
+	switch (requestRepeat.state) {
+		case RequestRepeat::StateCreatingSession: {
+			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
+			mavlinkFileTransferProtocol.setOpenFileSessionFields(requestRepeat.stateCommon.messageSequenceNumber,
+				Ftp::Op::OpenFileWo);
+			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
+			// TODO. XXX. Anything else?
+
+			break;
+		}
+		case RequestRepeat::StateTransferring:
+			// TODO
+			break;
+
+		default:
+			break;
+	}
 }
 
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)

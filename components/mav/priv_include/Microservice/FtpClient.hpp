@@ -54,6 +54,8 @@ private:
 		struct {
 			std::size_t iAttempt;
 			std::shared_ptr<Bft::File> bftFile;
+			// TODO: increment on state transitions
+			std::uint16_t messageSequenceNumber;
 		} stateCommon;
 
 		std::mutex mutex;
