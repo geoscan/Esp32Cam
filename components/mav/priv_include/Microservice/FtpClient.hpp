@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_MAV_PRIV_INCLUDE_MICROSERVICE_FTPCLIENT_HPP_
 #define COMPONENTS_MAV_PRIV_INCLUDE_MICROSERVICE_FTPCLIENT_HPP_
 
+#include "DelayedMavlinkMessageInitialization.hpp"
 #include "DelayedSend.hpp"
 #include "Microservice.hpp"
 #include "buffered_file_transfer/Sub.hpp"
@@ -20,7 +21,8 @@ namespace Mic {
 
 /// \brief Implements client side of MAVLink File Transfer Protocol for
 /// flashing file into AP's FS.
-class FtpClient final : public Microservice, public DelayedSend, public Ut::Sys::HrTimer {
+class FtpClient final : public Microservice, public DelayedSend, public Ut::Sys::HrTimer,
+	public DelayedMavlinkMessageInitialization {
 private:
 	struct SubscriptionPackage {
 		Bft::OnFileBufferingFinished onFileBufferingFinished;
@@ -85,6 +87,7 @@ private:
 	Ret processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
+	void initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage) override;
 
 private:
 	SubscriptionPackage subscriptionPackage;

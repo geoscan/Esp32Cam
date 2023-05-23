@@ -155,6 +155,12 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	return Ret::Ignored;
 }
 
+void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
+{
+	(void)aMavlinkMessage;
+	// TODO
+}
+
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
 {
 	static constexpr const char *kStateNameMapping[] = {
