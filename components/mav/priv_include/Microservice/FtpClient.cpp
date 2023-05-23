@@ -68,6 +68,9 @@ void FtpClient::onHrTimer()
 			sendFileTransferRequest();
 
 			break;
+
+		case RequestRepeat::StateMax:
+			break;
 	}
 
 	startOnce(kRequestResendTimeout);
@@ -80,7 +83,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
 			requestRepeat.stateCommon = {0, aBftFile};
-			sendSessionOpenRequest();  // XXX: from WQ?
+			sendSessionOpenRequest();  // TODO: XXX: from WQ?
 			// TODO: launch HrTimer
 
 			break;
@@ -93,6 +96,32 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 
 	// TODO: register an attempt
 	// TODO: state
+}
+
+void FtpClient::sendSessionOpenRequest()
+{
+	// TODO
+}
+
+void FtpClient::sendFileTransferRequest()
+{
+	// TODO
+}
+
+inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
+{
+	static constexpr const char *kStateNameMapping[] = {
+		"Idle",
+		"Creating session",
+		"Transferring"
+	};
+
+	return kStateNameMapping[aState];
+}
+
+inline const char *FtpClient::RequestRepeat::currentStateAsString()
+{
+	return stateAsString(state);
 }
 
 }  // namespace Mic

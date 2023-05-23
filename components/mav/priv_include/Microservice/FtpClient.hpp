@@ -30,9 +30,11 @@ private:
 	/// AP
 	struct RequestRepeat {
 		enum State {
-			StateIdle,
+			StateIdle = 0,
 			StateCreatingSession,
 			StateTransferring,
+
+			StateMax,
 		};
 
 		union {
@@ -55,9 +57,10 @@ private:
 		std::mutex mutex;
 		State state;
 
+		static const char *stateAsString(State aState);
 		const char *currentStateAsString();
 		// TODO: file position
-		// TOOD: BFT and HrTimer events come at different times
+		// TOOD: BFT and HrTimer events come at different times (XXX :will the mutex suffice?)
 	};
 
 public:
