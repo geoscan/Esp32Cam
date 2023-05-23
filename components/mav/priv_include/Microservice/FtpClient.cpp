@@ -5,6 +5,9 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "Ftp/Types.hpp"
 #include "FtpClient.hpp"
 #include "Globals.hpp"
@@ -48,7 +51,9 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 
 	if (mavlinkFileTransferProtocol.target_component != Globals::getCompId() ||
 			mavlinkFileTransferProtocol.target_system != Globals::getSysId()) {
-		// TODO: debug output, passed message
+		ESP_LOGD(Mav::kDebugTag, "%s:%s: dropping an FTP message with non-matching target target_system=%d"
+			"target_component=%d", debugPreamble(), __func__, mavlinkFileTransferProtocol.target_system,
+			mavlinkFileTransferProtocol.target_component);
 		return Ret::Ignored;
 	}
 
