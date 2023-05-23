@@ -19,5 +19,6 @@ idf_component_register(
 		socket
 		module
 	PRIV_REQUIRES
+		buffered_file_transfer
 		mbedtls
 )
