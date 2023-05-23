@@ -11,6 +11,7 @@
 #define UTILITY_UTILITY_SUBSCRIBER_HPP_
 
 #include <type_traits>
+#include <utility>
 
 namespace Ut {
 namespace Sub {
