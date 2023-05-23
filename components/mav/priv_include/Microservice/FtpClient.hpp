@@ -62,7 +62,7 @@ private:
 		State state;
 
 		static const char *stateAsString(State aState);
-		const char *currentStateAsString();
+		const char *getCurrentStateAsString();
 		// TODO: file position
 		// TOOD: BFT and HrTimer events come at different times (XXX :will the mutex suffice?)
 	};
