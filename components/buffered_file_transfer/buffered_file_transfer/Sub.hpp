@@ -15,7 +15,9 @@
 
 namespace Bft {
 
-using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File>), typename ::Sub::MutSyncTrait,
+/// `aBftFile` is supposed to store a deleter which performs the cleanup. It
+/// implies that subscribers do not participate in file management.
+using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File> aBftfile), typename ::Sub::MutSyncTrait,
 	std::list>;
 
 }  // namespace Bft
