@@ -11,14 +11,15 @@
 #ifndef MAV_PRIV_INCLUDE_DISPATCHER_HPP
 #define MAV_PRIV_INCLUDE_DISPATCHER_HPP
 
+#include "DelayedSend.hpp"
 #include "Globals.hpp"
-#include "sub/Subscription.hpp"
-#include "sub/Rout.hpp"
-#include "wifi_uart_bridge/Receiver.hpp"
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
 #include "Microservice/ApVer.hpp"
-#include "DelayedSend.hpp"
+#include "Microservice/FtpClient.hpp"
+#include "sub/Rout.hpp"
+#include "sub/Subscription.hpp"
+#include "wifi_uart_bridge/Receiver.hpp"
 #include <list>
 #include <memory>
 
@@ -54,7 +55,7 @@ private:
 	} key;
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking> micAggregate;
+	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::FtpClient> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];
