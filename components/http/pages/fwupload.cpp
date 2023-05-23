@@ -345,7 +345,7 @@ extern "C" esp_err_t fwUploadPageHandler(httpd_req_t *aHttpdReq)
 		return ret;
 	}
 
-	ret = httpdReqIterateReceiveInputBytes(aHttpdReq, handleInputBytesTest);
+	ret = httpdReqIterateReceiveInputBytes(aHttpdReq, handleInputBytesFileBuffering);
 
 	if (ESP_OK != ret) {
 		ESP_LOGE(httpDebugTag(), "%s: reception failed", debugPreamble());
