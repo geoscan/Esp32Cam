@@ -311,10 +311,10 @@ static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext 
 			if (aInputBytesIterationContext.finishedState.espErr == ESP_OK) {
 				// Notify subscribers through the notification chain
 				Ut::Thr::Wq::MediumPriority::getInstance().push(
-					[&sFileBufferingContext]()  // Task
+					[]()  // Task
 					{
 						Bft::OnFileBufferingFinished::notify(std::shared_ptr<Bft::File>(&sFileBufferingContext.file,
-							[&sFileBufferingContext](Bft::File *)  // Deleter
+							[](Bft::File *)  // Deleter
 							{
 								sFileBufferingContext.reset();
 							}));
