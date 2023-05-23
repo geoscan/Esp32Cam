@@ -31,3 +31,4 @@ tools/jlink_openocd_scripts/.jlinkgdbinit
 cache/
 environment.sh
 sdkconfig
+*tags
