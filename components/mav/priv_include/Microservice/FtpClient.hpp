@@ -79,6 +79,12 @@ private:
 
 	void sendSessionOpenRequest();
 	void sendFileTransferRequest();
+	Ret processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
+		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
+		Microservice::OnResponseSignature aOnResponse);
+	Ret processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
+		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
+		Microservice::OnResponseSignature aOnResponse);
 
 private:
 	SubscriptionPackage subscriptionPackage;

@@ -5,7 +5,9 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#include "Ftp/Types.hpp"
 #include "FtpClient.hpp"
+#include "Globals.hpp"
 #include "mav/mav.hpp"
 #include <esp_log.h>
 
@@ -35,11 +37,33 @@ FtpClient::~FtpClient()
 
 Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
-	(void)aMessage;
-	(void)aOnResponse;
-	// TODO
+	// Perform initial filtering-out by message and target system identifiers
 
-	return Ret::Ignored;
+	if (aMessage.msgid != MAVLINK_MSG_ID_FILE_TRANSFER_PROTOCOL) {
+		return Ret::Ignored;
+	}
+
+	mavlink_file_transfer_protocol_t mavlinkFileTransferProtocol{};
+	mavlink_msg_file_transfer_protocol_decode(&aMessage, &mavlinkFileTransferProtocol);
+
+	if (mavlinkFileTransferProtocol.target_component != Globals::getCompId() ||
+			mavlinkFileTransferProtocol.target_system != Globals::getSysId()) {
+		// TODO: debug output, passed message
+		return Ret::Ignored;
+	}
+
+	// Delegate further processing of the message
+
+	switch (requestRepeat.state) {
+		case RequestRepeat::StateCreatingSession:
+			return processMavlinkMessageCreatingSession(aMessage, mavlinkFileTransferProtocol, aOnResponse);
+
+		case RequestRepeat::StateTransferring:
+			return processMavlinkMessageTransferring(aMessage, mavlinkFileTransferProtocol, aOnResponse);
+
+		default:
+			return Ret::Ignored;
+	}
 }
 
 void FtpClient::onHrTimer()
@@ -106,6 +130,27 @@ void FtpClient::sendSessionOpenRequest()
 void FtpClient::sendFileTransferRequest()
 {
 	// TODO
+}
+
+Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
+	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
+{
+	// TODO:
+	(void)aMavlinkFileTransferProtocol;
+	(void)aMavlinkMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
+}
+
+Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage, mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
+{
+	// TODO
+	(void)aMavlinkFileTransferProtocol;
+	(void)aMavlinkMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
 }
 
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
