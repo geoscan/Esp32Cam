@@ -23,6 +23,7 @@ template <> struct CallbackEncode<mavlink_command_long_t> { static constexpr aut
 template <> struct CallbackEncode<mavlink_command_ack_t> {static constexpr auto call = mavlink_msg_command_ack_encode; };
 template <> struct CallbackEncode<mavlink_camera_image_captured_t> {static constexpr auto call = mavlink_msg_camera_image_captured_encode; };
 template <> struct CallbackEncode<mavlink_wifi_config_ap_t> {static constexpr auto call = mavlink_msg_wifi_config_ap_encode; };
+template <> struct CallbackEncode<mavlink_file_transfer_protocol_t> {static constexpr auto call = mavlink_msg_file_transfer_protocol_encode; };
 
 template <class T>
 struct Pack {
