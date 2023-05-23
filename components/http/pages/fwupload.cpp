@@ -313,9 +313,12 @@ static esp_err_t handleInputBytesFileBuffering(const InputBytesIterationContext 
 				Ut::Thr::Wq::MediumPriority::getInstance().push(
 					[]()  // Task
 					{
+						ESP_LOGI(httpDebugTag(), "%s: notifying subscribers upon \"buffering finished\" event",
+							debugPreamble());
 						Bft::OnFileBufferingFinished::notify(std::shared_ptr<Bft::File>(&sFileBufferingContext.file,
 							[](Bft::File *)  // Deleter
 							{
+								ESP_LOGI(httpDebugTag(), "%s: finished notification, closing file", debugPreamble());
 								sFileBufferingContext.reset();
 							}));
 					});
