@@ -47,8 +47,8 @@ void FtpClient::onHrTimer()
 	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
 	if (requestRepeat.stateCommon.iAttempt >= knMaxAttempts) {
-		ESP_LOGW(Mav::kDebugTag, "%s:%s: state \"%s\": exceeded the number of attempts", debugPreamble(), __func__,
-			requestRepeat.currentStateAsString());
+		ESP_LOGE(Mav::kDebugTag, "%s:%s: state \"%s\": exceeded the number of attempts, cancelling transfer",
+			debugPreamble(), __func__, requestRepeat.currentStateAsString());
 
 		// TODO: notify upon failure
 	} else {
