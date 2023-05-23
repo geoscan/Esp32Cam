@@ -11,7 +11,13 @@
 namespace Bft {
 
 void init();
+
 static constexpr const char *kDebugTag = "[buffered_file_transfer]";
+
+static constexpr const char *debugTag()
+{
+	return kDebugTag;
+}
 
 }  // namespace Bft
 
