@@ -5,30 +5,31 @@
 // Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-#include <esp_timer.h>
-#include <pthread.h>
-#include <asio.hpp>
-#include <esp_event.h>
-#include "wifi.h"
-#include "http.h"
-#include "wifi_uart_bridge.hpp"
-#include "camera_streamer.h"
+#include "buffered_file_transfer/buffered_file_transfer.hpp"
 #include "cam/cam.hpp"
-#include "camera_thread/camera_thread.hpp"
 #include "camera_recorder/camera_recorder.hpp"
-#include "sd_fat.h"
+#include "camera_streamer.h"
+#include "camera_thread/camera_thread.hpp"
+#include "http.h"
 #include "log_udp.h"
 #include "mav/mav.hpp"
-#include "uart/uart.hpp"
-#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
-#include "socket/socket.hpp"
-#include "wq/wq.hpp"
-#include "tracking/tracking.hpp"
 #include "module/module.hpp"
+#include "sd_fat.h"
+#include "socket/socket.hpp"
+#include "tracking/tracking.hpp"
+#include "uart/uart.hpp"
 #include "utility/time.hpp"
+#include "wifi.h"
+#include "wifi_uart_bridge.hpp"
+#include "wifi_uart_bridge/wifi_uart_bridge.hpp"
+#include "wq/wq.hpp"
+#include <asio.hpp>
+#include <esp_event.h>
+#include <esp_timer.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 #include <nvs_flash.h>
+#include <pthread.h>
 
 static asio::io_context context(3);
 
@@ -52,5 +53,6 @@ extern "C" int app_main(void)
 	Sock::start();
 	Uart::start();
 	Trk::init();
+	Bft::init();
 	return 0;
 }
