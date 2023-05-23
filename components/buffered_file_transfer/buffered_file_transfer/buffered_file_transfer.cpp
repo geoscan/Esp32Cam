@@ -11,14 +11,29 @@
 #include <esp_log.h>
 
 #include "buffered_file_transfer.hpp"
+#include "buffered_file_transfer/BufferedFileTransfer.hpp"
+#include "buffered_file_transfer/storage/SingleBufferRamFileSystem.hpp"
+#include <sdkconfig.h>
 
 namespace Bft {
 
 void init()
 {
+#ifdef CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 	esp_log_level_set(Bft::kDebugTag, (esp_log_level_t)CONFIG_BUFFERED_FILE_TRANSFER_DEBUG_LEVEL);
 	ESP_LOGD(Bft::kDebugTag, "Debug log test");
 	ESP_LOGV(Bft::kDebugTag, "Verbose log test");
+
+#ifdef CONFIG_BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
+	static SingleBufferRamFileSystem fileSystem{};
+#endif  // CONFIG_BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
+
+	static BufferedFileTransfer bufferedFileTransfer{fileSystem};
+
+	(void)fileSystem;
+	(void)bufferedFileTransfer;
+
+#endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 }
 
 }  // namespace Bft
