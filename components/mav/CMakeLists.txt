@@ -1,9 +1,11 @@
 idf_component_register(
 	PRIV_REQUIRES
+		buffered_file_transfer
+		mavlink
+		mbedtls
+		sd_fat
 		sub
 		utility
-		mavlink
-		sd_fat
 		wifi_uart_bridge
 	SRC_DIRS
 		"."
@@ -18,7 +20,4 @@ idf_component_register(
 	REQUIRES
 		socket
 		module
-	PRIV_REQUIRES
-		buffered_file_transfer
-		mbedtls
 )
