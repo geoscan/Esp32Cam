@@ -29,11 +29,11 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 	///	None = 0.
 	///	\param `aOperation`. Expected values are: `OpenFileRo`, `CreateFile`,
 	///	`OpenFileWo`
-	inline void setOpenFileSessionFields( std::uint16_t aSequenceNumber, Mic::Ftp::Op aOperation,
+	inline void setOpenFileSessionFields(std::uint16_t aSequenceNumber, Mic::Ftp::Op aOperation,
 		std::uint8_t aTargetSystem = Globals::getCompidAutopilot(),
 		std::uint8_t aTargetComponent = Globals::getSysId())
 	{
-		target_system = aTargetComponent;
+		target_system = aTargetSystem;
 		target_component = aTargetComponent;
 		target_network = 0;
 		getPayload().seq_number = aSequenceNumber;
