@@ -43,9 +43,10 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 	}
 
 	/// \pre `aDataSize` must not exceed 239, which is the maximum payload length
-	inline void setWriteFileFields(std::uint16_t aSequenceNumber, Ftp::SessionId aSessionId, std::uint8_t *aData,
-		Ftp::Size aDataSize, std::uint32_t aFileOffset, std::uint8_t aTargetSystem = Globals::getCompidAutopilot(),
-		std::uint8_t aTargetComponent = Globals::getSysId())
+	inline void setWriteFileFields(std::uint16_t aSequenceNumber, Mic::Ftp::SessionId aSessionId,
+		std::uint32_t aFileOffset, std::uint8_t aTargetSystem = Globals::getCompidAutopilot(),
+		std::uint8_t aTargetComponent = Globals::getSysId(), std::uint8_t *aData = nullptr,
+		Mic::Ftp::Size aDataSize = 0)
 	{
 		target_system = aTargetSystem;
 		target_component = aTargetComponent;
@@ -54,7 +55,10 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		getPayload().session = aSessionId;
 		getPayload().size = aDataSize;
 		getPayload().offset = aFileOffset;
-		std::copy_n(aData, aDataSize, getPayload().data);
+
+		if (aData != nullptr && aDataSize > 0) {
+			std::copy_n(aData, aDataSize, getPayload().data);
+		}
 		// TODO: XXX: should it also set `req_opcode` to None?
 	}
 };
