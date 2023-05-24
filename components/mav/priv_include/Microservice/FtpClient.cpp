@@ -192,12 +192,13 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
+	static constexpr const char *kTemporaryFilePath = "/dev/UavMonitor/show.bin";
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateCreatingSession: {
 			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
 			mavlinkFileTransferProtocol.setOpenFileSessionFields(requestRepeat.stateCommon.messageSequenceNumber,
-				Ftp::Op::OpenFileWo);
+				Ftp::Op::OpenFileWo, kTemporaryFilePath, strlen(kTemporaryFilePath));
 			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
 			// TODO. XXX. Anything else?
 
