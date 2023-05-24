@@ -36,7 +36,7 @@ public:
 	/// \brief Invokes underlying file system to close the file using its `fd`
 	virtual void closeFile(FileDescriptor aFileDescriptor) = 0;
 
-	/// \brief Appends bytes at the end of file
+	/// \brief Appends bytes at the current position
 	/// \returns `aBufferSize`, if succeeded. 0 otherwise
 	virtual std::size_t append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 		std::size_t aBufferSize) = 0;
