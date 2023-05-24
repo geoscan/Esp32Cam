@@ -46,7 +46,7 @@ public:
 	virtual std::int32_t seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin = PositionStart) = 0;
 
 	/// \returns the number of read bytes
-	virtual std::size_t read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer, std::size_t &aOutBufferSize) = 0;
+	virtual std::size_t read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer, std::size_t aOutBufferSize) = 0;
 };
 
 }  // namespace Bft
