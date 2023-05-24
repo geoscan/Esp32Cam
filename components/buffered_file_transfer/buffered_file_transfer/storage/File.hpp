@@ -65,7 +65,7 @@ public:
 		return fileSystem ? fileSystem->seek(fileDescriptor, aOffset, aOrigin) : FileSystem::PositionError;
 	}
 
-	inline std::size_t read(std::uint8_t *aOutBuffer, std::size_t &aOutBufferSize)
+	inline std::size_t read(std::uint8_t *aOutBuffer, std::size_t aOutBufferSize)
 	{
 		return fileSystem ? fileSystem->read(fileDescriptor, aOutBuffer, aOutBufferSize) : 0;
 	}
