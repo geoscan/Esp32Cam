@@ -210,7 +210,8 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 				reinterpret_cast<std::uint8_t *>(mavlinkFileTransferProtocol.getPayload().data),
 				Mic::Ftp::Payload::kMaxDataLength);
 			mavlinkFileTransferProtocol.setWriteFileFields(requestRepeat.stateCommon.messageSequenceNumber,
-				requestRepeat.stateTransferring.mavlinkFtpSessionId, requestRepeat.stateTransferring.bftFilePosition);
+				requestRepeat.stateTransferring.mavlinkFtpSessionId,
+				requestRepeat.stateCommon.bftFile->getCurrentPosition());
 
 			break;
 		}
