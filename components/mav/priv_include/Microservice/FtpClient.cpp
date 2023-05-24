@@ -150,7 +150,7 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 					requestRepeat.stateCommon.iAttempt = 0;
 					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Reed from the beginning
 					requestRepeat.state = RequestRepeat::StateTransferring;
-					RequestRepeat.stateTransferring = {
+					requestRepeat.stateTransferring = {
 						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session};
 					++requestRepeat.stateCommon.messageSequenceNumber;
 
