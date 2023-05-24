@@ -39,6 +39,7 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		target_network = 0;
 		getPayload().seq_number = aSequenceNumber;
 		getPayload().opcode = aOperation;
+		// TODO: XXX: should it also set `req_opcode` to None?
 	}
 
 	/// \pre `aDataSize` must not exceed 239, which is the maximum payload length
@@ -54,6 +55,7 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		getPayload().size = aDataSize;
 		getPayload().offset = aFileOffset;
 		std::copy_n(aData, aDataSize, getPayload().data);
+		// TODO: XXX: should it also set `req_opcode` to None?
 	}
 };
 
