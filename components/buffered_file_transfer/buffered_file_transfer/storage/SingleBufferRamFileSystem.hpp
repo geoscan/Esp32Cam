@@ -19,6 +19,8 @@ public:
 	void closeFile(FileDescriptor aFileDescriptor) override;
 	std::size_t append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 		std::size_t aBufferSize) override;
+	std::int32_t seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin) override;
+	std::size_t read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer, std::size_t &aOutBufferSize) override;
 };
 
 }  // namespace Bft

@@ -107,4 +107,24 @@ std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, co
 	return nWritten;
 }
 
+std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin)
+{
+	constexpr int kSuccess = 0;
+
+	if (fseek(static_cast<FILE *>(aFileDescriptor.raw), aOffset, aOrigin) == kSuccess) {
+		return ftell(static_cast<FILE *>(aFileDescriptor.raw));
+	} else {
+		return FileSystem::PositionError;
+	}
+}
+
+std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
+	std::size_t &aOutBufferSize)
+{
+	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
+
+	return fread(static_cast<void *>(aOutBuffer), kObjectSize, aOutBufferSize,
+		static_cast<FILE *>(aFileDescriptor.raw));
+}
+
 }  // namespace Bft
