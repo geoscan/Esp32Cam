@@ -51,6 +51,7 @@ private:
 
 		/// \brief Entities used by more than 1 state
 		struct {
+			// Ensure it is reset
 			std::size_t iAttempt;
 			std::shared_ptr<Bft::File> bftFile;
 			// TODO: increment on state transitions

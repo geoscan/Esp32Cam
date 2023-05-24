@@ -159,7 +159,8 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 					break;
 
 				case Ftp::Op::Nak:  // Failed to open
-					// TODO: handle failure
+					requestRepeat.stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleted will handle the rest
+					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to create session", debugPreamble(), __func__);
 
 					break;
 
