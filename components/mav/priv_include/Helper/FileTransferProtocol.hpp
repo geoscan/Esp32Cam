@@ -31,7 +31,7 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 	///	\param `aOperation`. Expected values are: `OpenFileRo`, `CreateFile`,
 	///	`OpenFileWo`
 	inline void setOpenFileSessionFields(std::uint16_t aSequenceNumber, Mic::Ftp::Op aOperation,
-		std::uint8_t aTargetSystem = Globals::getCompidAutopilot(),
+		const char *aFilePath, std::size_t aFilePathLength, std::uint8_t aTargetSystem = Globals::getCompidAutopilot(),
 		std::uint8_t aTargetComponent = Globals::getSysId())
 	{
 		target_system = aTargetSystem;
@@ -39,6 +39,8 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		target_network = 0;
 		getPayload().seq_number = aSequenceNumber;
 		getPayload().opcode = aOperation;
+		std::copy_n(aFilePath, aFilePathLength, getPayload().data);
+		getPayload().size = aFilePathLength;
 		// TODO: XXX: should it also set `req_opcode` to None?
 	}
 
