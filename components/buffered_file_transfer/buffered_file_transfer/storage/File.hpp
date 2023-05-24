@@ -70,6 +70,11 @@ public:
 		return fileSystem ? fileSystem->read(fileDescriptor, aOutBuffer, aOutBufferSize) : 0;
 	}
 
+	inline std::uint32_t currentPosition()
+	{
+		return fileSystem ? fileSystem->seek(fileDescriptor, 0, FileSystem::PositionCurrent) : 0;
+	}
+
 	void close();
 
 private:
