@@ -185,6 +185,16 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	(void)aOnResponse;
 
 	// TODO: close file at the end of transferring
+	// TODO: instantiate session reset
+	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
+		case Ftp::Op::WriteFile:  // An attempt to write a chunk of a file
+			// TODO
+
+			break;
+
+		default:  // Not important -- we only handle file writing
+			break;
+	}
 
 	return Ret::Ignored;
 }
