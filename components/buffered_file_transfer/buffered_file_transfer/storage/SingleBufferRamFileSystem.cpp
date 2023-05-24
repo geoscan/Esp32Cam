@@ -119,7 +119,7 @@ std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std
 }
 
 std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
-	std::size_t &aOutBufferSize)
+	std::size_t aOutBufferSize)
 {
 	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
 
