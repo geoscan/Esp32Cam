@@ -159,7 +159,6 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
-	// TODO
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateCreatingSession: {
@@ -171,14 +170,23 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 
 			break;
 		}
-		case RequestRepeat::StateTransferring:
-			// TODO
-			break;
+		case RequestRepeat::StateTransferring: {
+			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
+			// TODO: in other handler, ensure that the file has its position set
+			mavlinkFileTransferProtocol.getPayload().size = requestRepeat.stateCommon.bftFile->read(
+				reinterpret_cast<std::uint8_t *>(mavlinkFileTransferProtocol.getPayload().data),
+				Mic::Ftp::Payload::kMaxDataLength);
+			mavlinkFileTransferProtocol.setWriteFileFields(requestRepeat.stateCommon.messageSequenceNumber,
+				requestRepeat.stateTransferring.mavlinkFtpSessionId, requestRepeat.stateTransferring.bftFilePosition);
 
+			break;
+		}
 		default:
 			break;
 	}
 }
+
+// TODO: release file after it's done
 
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
 {

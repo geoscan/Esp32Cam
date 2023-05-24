@@ -45,7 +45,6 @@ private:
 			} stateCreatingSession;
 
 			struct {
-				std::size_t bftFilePosition;
 				std::size_t mavlinkFtpSessionId;
 			} stateTransferring;
 		};
@@ -89,6 +88,8 @@ private:
 	Ret processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
+
+	/// \brief Gets invoked on a re-attempt
 	void initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage) override;
 
 private:
