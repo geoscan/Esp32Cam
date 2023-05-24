@@ -60,6 +60,16 @@ public:
 		return fileDescriptor.isValid();
 	}
 
+	inline std::uint32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
+	{
+		return fileSystem ? fileSystem->seek(fileDescriptor, aOffset, aOrigin) : FileSystem::PositionError;
+	}
+
+	inline std::size_t read(std::uint8_t *aOutBuffer, std::size_t &aOutBufferSize)
+	{
+		return fileSystem ? fileSystem->read(fileDescriptor, aOutBuffer, aOutBufferSize) : 0;
+	}
+
 	void close();
 
 private:
