@@ -54,6 +54,7 @@ private:
 			std::size_t iAttempt;
 			std::shared_ptr<Bft::File> bftFile;
 			// TODO: increment on state transitions
+			// TODO: initialize in constructor,
 			std::uint16_t messageSequenceNumber;
 		} stateCommon;
 

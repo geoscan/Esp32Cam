@@ -135,15 +135,45 @@ void FtpClient::sendFileTransferRequest()
 	// TODO
 }
 
+// TODO: ensure that access to the encapsulated states is synchronized all accross the code
+
 Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
-	// TODO:
-	(void)aMavlinkFileTransferProtocol;
-	(void)aMavlinkMessage;
-	(void)aOnResponse;
+	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
-	return Ret::Ignored;
+	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
+		case Ftp::Op::OpenFileWo:  // TODO: ensure consistency, that this is the exact command we've sent (in the other part of the code)
+			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
+				case Ftp::Op::Ack:  // Successfully opened
+					// Initialize the state
+					requestRepeat.stateCommon.iAttempt = 0;
+					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Reed from the beginning
+					requestRepeat.state = RequestRepeat::StateTransferring;
+					RequestRepeat.stateTransferring = {
+						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session};
+					++requestRepeat.stateCommon.messageSequenceNumber;
+
+					ESP_LOGI(Mav::kDebugTag, "%s: %s successfully opened a file for writing session=%d",
+						debugPreamble(), __func__, requestRepeat.stateTransferring.mavlinkFtpSessionId);
+					break;
+
+				case Ftp::Op::Nak:  // Failed to open
+					// TODO: handle failure
+
+					break;
+
+				default:  // Should not get here, if the message was produced by the autopilot
+					break;
+			}
+
+			break;
+
+		default:
+			break;
+	}
+
+	return Ret::NoResponse;
 }
 
 Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage, mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
@@ -152,6 +182,8 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	(void)aMavlinkFileTransferProtocol;
 	(void)aMavlinkMessage;
 	(void)aOnResponse;
+
+	// TODO: close file at the end of transferring
 
 	return Ret::Ignored;
 }
@@ -185,8 +217,6 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 			break;
 	}
 }
-
-// TODO: release file after it's done
 
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
 {
