@@ -129,14 +129,22 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 	}
 }
 
-void FtpClient::resendSessionOpenRequest()
+inline void FtpClient::resendSessionOpenRequest()
 {
-	// TODO
+	DelayedSendAsyncCtx delayedSendAsyncCtx{
+		Globals::getSysId(),
+		Globals::getCompId(),
+		DelayedSendAsyncVariant{static_cast<DelayedMavlinkMessageInitialization *>(this)}
+	};
+	notify(delayedSendAsyncCtx);
 }
 
-void FtpClient::resendFileTransferRequest()
+inline void FtpClient::resendFileTransferRequest()
 {
-	// TODO
+	// Re-adjust the file's current position pointer
+	requestRepeat.stateCommon.bftFile->seek(requestRepeat.stateTransferring.fileOffset);
+
+	resendSessionOpenRequest();
 }
 
 // TODO: ensure that access to the encapsulated states is synchronized all accross the code
