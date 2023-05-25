@@ -490,6 +490,7 @@ inline void FtpClient::RequestRepeat::handleCreatingSessionTransition(const std:
 {
 	handleTransitionCommon();
 	stateCommon.bftFile = aFile;
+	state = RequestRepeat::StateCreatingSession;
 }
 
 inline void FtpClient::RequestRepeat::handleClosingSessionTransition()
