@@ -36,8 +36,9 @@ public:
 	/// \brief Invokes underlying file system to close the file using its `fd`
 	virtual void closeFile(FileDescriptor aFileDescriptor) = 0;
 
-	/// \brief Appends bytes at the current position
+	/// \brief Appends bytes at the CURRENT position
 	/// \returns `aBufferSize`, if succeeded. 0 otherwise
+	/// \post The current position pointer will be advanced
 	virtual std::size_t append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 		std::size_t aBufferSize) = 0;
 
@@ -47,6 +48,7 @@ public:
 	virtual std::int32_t seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin = PositionStart) = 0;
 
 	/// \returns the number of read bytes
+	/// \post The current position pointer will be advanced
 	virtual std::size_t read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer, std::size_t aOutBufferSize) = 0;
 };
 
