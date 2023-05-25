@@ -91,7 +91,9 @@ private:
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
 
-	/// \brief Gets invoked on a re-attempt
+	// TODO: check for multiple mutex locks
+	/// \brief Gets invoked on a re-attempt. It is also useful for initializing
+	/// a response
 	void initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage) override;
 
 private:
