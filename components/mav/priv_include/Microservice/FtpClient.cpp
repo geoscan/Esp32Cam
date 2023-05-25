@@ -336,10 +336,9 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 
 				case Ftp::Op::Nak:
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
-					// TODO: handle failure
-					// TODO: notify
+					requestRepeat.handleIdleTransition();
 
-					break;
+					return Ret::NoResponse;
 
 				default:
 					logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
