@@ -75,7 +75,10 @@ private:
 		void handleTransferringTransition(std::size_t aMavlinkFtpSessionId);
 
 		/// \pre `state == StateIdle`
-		void handleCreatingSessionTransition();
+		void handleCreatingSessionTransition(const std::shared_ptr<Bft::File> &aFile);
+
+		/// \brief Performs routines that are common for ALL states
+		void handleTransitionCommon();
 
 		void handleSuccessfulAttemptCommon();
 		void handleSuccessfulAttemptTransferring();

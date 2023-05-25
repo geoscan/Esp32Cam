@@ -308,6 +308,17 @@ inline void FtpClient::RequestRepeat::handleTransferringTransition(std::size_t a
 	state = RequestRepeat::StateTransferring;
 }
 
+inline void FtpClient::RequestRepeat::handleCreatingSessionTransition(const std::shared_ptr<Bft::File> &aFile)
+{
+	handleTransitionCommon();
+	stateCommon.bftFile = aFile;
+}
+
+inline void FtpClient::RequestRepeat::handleTransitionCommon()
+{
+	stateCommon.iAttempt = 0;
+}
+
 inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCommon()
 {
 	stateCommon.iAttempt = 0;
