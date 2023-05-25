@@ -349,6 +349,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 {
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::TerminateSession:
+			stopTimer();
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
