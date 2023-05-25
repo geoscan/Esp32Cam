@@ -350,7 +350,8 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 			mavlinkFileTransferProtocol.setWriteFileFields(requestRepeat.stateCommon.messageSequenceNumber,
 				requestRepeat.stateTransferring.mavlinkFtpSessionId,
 				requestRepeat.stateCommon.bftFile->getCurrentPosition());
-			// TODO: copy data
+			mavlinkFileTransferProtocol.getPayload().size = requestRepeat.stateCommon.bftFile->read(
+				mavlinkFileTransferProtocol.getPayload().data, Ftp::Payload::kMaxDataLength);
 
 			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
 
