@@ -33,6 +33,11 @@ public:
 	template <class Rep, class Period>
 	esp_err_t startPeriodic(const std::chrono::duration<Rep, Period> &);
 
+	inline void stopTimer()
+	{
+		esp_timer_stop(handle);
+	}
+
 private:
 	static void onTimerStaticCallback(void *arg);
 
