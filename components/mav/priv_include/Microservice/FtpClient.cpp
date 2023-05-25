@@ -299,6 +299,7 @@ inline void FtpClient::RequestRepeat::handleIdleTransition()
 
 inline void FtpClient::RequestRepeat::handleTransferringTransition(std::size_t aMavlinkFtpSessionId)
 {
+	handleTransitionCommon();
 	constexpr std::int32_t kInitialOffset = 0;
 	stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
 	stateTransferring = {
