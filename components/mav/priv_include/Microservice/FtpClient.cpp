@@ -183,15 +183,23 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	// TODO: instantiate session reset
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::WriteFile:  // An attempt to write a chunk of a file
+			stopTimer();
 			// Read the next chunk
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
-				case Ftp::Op::Ack:
-					// TODO: there are locking-related issues here
+				case Ftp::Op::Ack: {
+					// Update the state
+					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 					requestRepeat.stateCommon.iAttempt = 0;
 					++requestRepeat.stateCommon.messageSequenceNumber;
+
+					// Pack the response
 					initializeMavlinkMessage(aMavlinkMessage);
 
+					// Trigger periodic re-sending of the request
+					startOnce(kRequestResendTimeout);
+
 					return Ret::Response;
+				}
 				case Ftp::Op::Nak:
 					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to write file", debugPreamble(), __func__);
 
