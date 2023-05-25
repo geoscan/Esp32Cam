@@ -55,6 +55,7 @@ FtpClient::FtpClient():
 
 static void logUnhandledOpcode(const char *aContext, const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
 static void logGotFailResponse(const char *aContext, const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
+static void logIncomingMessage(const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
 
 static inline void logUnhandledOpcode(const char *aContext,
 	const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
@@ -68,6 +69,14 @@ static inline void logGotFailResponse(const char *aContext,
 	const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
 {
 	ESP_LOGW(Mav::kDebugTag, "%s:%s: got failure response to command req_opcode=%d opcode=%d error code=%d", debugPreamble(), aContext,
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode),
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().data[0]));
+}
+
+static void logIncomingMessage(const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+{
+	ESP_LOGV(Mav::kDebugTag, "%s: got incoming message req_opcode=%d opcode=%d error code=%d", debugPreamble(),
 		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode),
 		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
 		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().data[0]));
@@ -94,12 +103,14 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 		ESP_LOGD(Mav::kDebugTag, "%s:%s: dropping an FTP message with non-matching target target_system=%d"
 			"target_component=%d", debugPreamble(), __func__, mavlinkFileTransferProtocol.target_system,
 			mavlinkFileTransferProtocol.target_component);
+		logIncomingMessage(mavlinkFileTransferProtocol);
 
 		return Ret::Ignored;
 	}
 
 	// Delegate further processing of the message
 	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
+	logIncomingMessage(mavlinkFileTransferProtocol);
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
