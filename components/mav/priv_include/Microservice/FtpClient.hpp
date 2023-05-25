@@ -82,6 +82,9 @@ private:
 		/// \pre `state == StateIdle`
 		void handleCreatingSessionTransition(const std::shared_ptr<Bft::File> &aFile);
 
+		/// \pre `state == StateTransferring`
+		void handleClosingSessionTransition();
+
 		/// \brief Performs routines that are common for ALL states
 		void handleTransitionCommon();
 
