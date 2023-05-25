@@ -5,6 +5,9 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_BUFFERED_FILE_TRANSFER_DEBUG_LEVEL)
+#include <esp_log.h>
+
 #include "buffered_file_transfer/buffered_file_transfer.hpp"
 #include "buffered_file_transfer/storage/File.hpp"
 #include <esp_log.h>
@@ -121,6 +124,7 @@ std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std
 std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
 	std::size_t aOutBufferSize)
 {
+	ESP_LOGV(Bft::debugTag(), "%s:%s attempting to read %d bytes", debugPreamble(), __func__, aOutBufferSize);
 	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
 
 	return fread(static_cast<void *>(aOutBuffer), kObjectSize, aOutBufferSize,
