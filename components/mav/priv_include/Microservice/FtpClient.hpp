@@ -56,7 +56,7 @@ private:
 			} stateClosingSession;
 		};
 
-		/// \brief Entities used by more than 1 state
+		/// \brief Entities used by more than 1 state (NOT necessarily all)
 		struct {
 			// Ensure it is reset
 			std::size_t iAttempt;

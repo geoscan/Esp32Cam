@@ -90,6 +90,7 @@ void FtpClient::onHrTimer()
 		ESP_LOGE(Mav::kDebugTag, "%s:%s: state \"%s\": exceeded the number of attempts, cancelling transfer",
 			debugPreamble(), __func__, requestRepeat.getCurrentStateAsString());
 		requestRepeat.handleIdleTransition();
+		// TODO: reset sessions, if any were opened
 
 		// TODO: notify upon failure
 
