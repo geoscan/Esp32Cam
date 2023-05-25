@@ -113,7 +113,8 @@ void FtpClient::onHrTimer()
 			break;
 
 		case RequestRepeat::StateClosingSession:
-			// TODO
+			resendSessionCloseRequest();
+
 			break;
 
 		case RequestRepeat::StateMax:
@@ -158,6 +159,11 @@ inline void FtpClient::resendFileTransferRequest()
 	requestRepeat.stateCommon.bftFile->seek(requestRepeat.stateTransferring.fileOffset);
 
 	resendSessionOpenRequest();
+}
+
+void FtpClient::resendSessionCloseRequest()
+{
+	// TODO:
 }
 
 // TODO: ensure that access to the encapsulated states is synchronized all accross the code

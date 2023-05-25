@@ -117,6 +117,8 @@ private:
 	/// \brief Delegate for `onHrTimer()`. Handles re-sending of the message
 	void resendFileTransferRequest();
 
+	void resendSessionCloseRequest();
+
 	/// \brief delegate for `process(...)`
 	Ret processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
