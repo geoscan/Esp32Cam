@@ -445,6 +445,18 @@ inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_pr
 	return true;
 }
 
+inline void FtpClient::logUpdateProgress()
+{
+	switch (requestRepeat.state) {
+		case RequestRepeat::StateTransferring:
+			ESP_LOGI(Mav::kDebugTag, "%s transferred %d/%d bytes", debugPreamble(),
+				requestRepeat.stateTransferring.fileOffset, requestRepeat.stateTransferring.fileSize);
+
+		default:
+			break;
+	};
+}
+
 inline FtpClient::RequestRepeat::RequestRepeat():
 	stateCommon{0, {}, 0},
 	mutex{},
