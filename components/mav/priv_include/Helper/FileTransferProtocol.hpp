@@ -26,6 +26,11 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		return *reinterpret_cast<Mav::Mic::Ftp::Payload *>(&payload);
 	}
 
+	inline const Mav::Mic::Ftp::Payload &getPayload() const
+	{
+		return *reinterpret_cast<const Mav::Mic::Ftp::Payload *>(&payload);
+	}
+
 	/// \brief Fields related to creating a file session.
 	///	None = 0.
 	///	\param `aOperation`. Expected values are: `OpenFileRo`, `CreateFile`,
