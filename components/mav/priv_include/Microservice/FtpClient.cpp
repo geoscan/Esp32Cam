@@ -327,6 +327,14 @@ inline void FtpClient::RequestRepeat::handleCreatingSessionTransition(const std:
 	stateCommon.bftFile = aFile;
 }
 
+inline void FtpClient::RequestRepeat::handleClosingSessionTransition()
+{
+	handleTransitionCommon();
+	stateCommon.bftFile.reset();
+	state = StateClosingSession;
+	stateClosingSession = {stateTransferring.mavlinkFtpSessionId};
+}
+
 inline void FtpClient::RequestRepeat::handleTransitionCommon()
 {
 	stateCommon.iAttempt = 0;

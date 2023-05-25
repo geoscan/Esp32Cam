@@ -50,6 +50,10 @@ private:
 				std::int32_t fileOffset;
 				std::uint32_t fileSize;
 			} stateTransferring;
+
+			struct {
+				std::size_t mavlinkFtpSessionId;
+			} stateClosingSession;
 		};
 
 		/// \brief Entities used by more than 1 state
