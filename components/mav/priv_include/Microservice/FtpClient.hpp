@@ -86,11 +86,12 @@ private:
 	/// automiatically close the file.
 	void onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile);
 
-	/// \brief Delegate for `onHrTimer()`. Handles re-sending of the message
-	void sendSessionOpenRequest();
+	/// \brief Delegate for `onHrTimer()` and `onFileBufferingFinished(...)`.
+	/// Handles re-sending of the message.
+	void resendSessionOpenRequest();
 
 	/// \brief Delegate for `onHrTimer()`. Handles re-sending of the message
-	void sendFileTransferRequest();
+	void resendFileTransferRequest();
 
 	/// \brief delegate for `process(...)`
 	Ret processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
