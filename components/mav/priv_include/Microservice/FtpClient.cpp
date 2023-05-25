@@ -288,21 +288,12 @@ Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
-					// TODO: OPTIONAL handle non-matching session numbers
-					const auto sessionId
-						= static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session;
-
-					if (sessionId != requestRepeat.stateClosingSession.mavlinkFtpSessionId) {
-						ESP_LOGW(Mav::kDebugTag, "%s:%s: Got unexpected session id session=%d", debugPreamble(),
-							__func__, sessionId);
-					} else {
+					if (validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
 						// TODO: notify upon completion
 
 						// transfer to idle state
 						requestRepeat.handleIdleTransition();
 					}
-
-
 
 					return Ret::NoResponse;
 				}
@@ -364,6 +355,19 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 		case RequestRepeat::StateMax:
 			break;
 	}
+}
+
+inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+{
+	const auto sessionId = static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session;
+
+	if (sessionId != requestRepeat.stateClosingSession.mavlinkFtpSessionId) {
+		ESP_LOGW(Mav::kDebugTag, "%s:%s: Got unexpected session id session=%d", debugPreamble(), __func__, sessionId);
+
+		return false;
+	}
+
+	return true;
 }
 
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)

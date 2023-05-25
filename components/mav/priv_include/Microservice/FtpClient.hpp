@@ -142,6 +142,12 @@ private:
 	/// initializing a response
 	void initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage) override;
 
+	/// \brief Checks the incoming message's session id against that stored in
+	/// the relevant state.
+	/// \pre `requestRepeat.state == RequestRepeat::StateClosingSession`, OR
+	/// `requestRepeat.state == RequestRepeat::StateTransferring`
+	bool validateIncomingMessageSessionId(mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
+
 private:
 	SubscriptionPackage subscriptionPackage;
 	RequestRepeat requestRepeat;
