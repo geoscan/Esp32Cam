@@ -34,6 +34,16 @@ FtpClient::FtpClient():
 {
 }
 
+static void logUnhandledOpcode(const char *aContext, mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
+
+static inline void logUnhandledOpcode(const char *aContext,
+	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+{
+	ESP_LOGW(Mav::kDebugTag, "%s:%s: unexpected opcode pair opcode=%d req_opcode=%d", debugPreamble(), aContext,
+		static_cast<int>(static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
+		static_cast<int>(static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode));
+}
+
 FtpClient::~FtpClient()
 {
 	subscriptionPackage.onFileBufferingFinished.setEnabled(false);
@@ -228,12 +238,15 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 					break;
 
 				default:  // Should not get here, if the message was produced by the autopilot
+					logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
+
 					break;
 			}
 
 			break;
 
 		default:
+			logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
 			break;
 	}
 
@@ -279,12 +292,16 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 					break;
 
 				default:
+					logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
+
 					break;
 			}
 
 			break;
 
 		default:  // Not relevant -- so far, we only handle file writing-related responses here
+			logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
+
 			break;
 	}
 
@@ -316,12 +333,16 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 					break;
 
 				default:
-					// TODO: Should not get here. Produce a warning
-					// TODO: produce warning in other handlers too
+					logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
+
 					break;
 			}
 
+			break;
+
 		default:  // Irrelevant
+			logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
+
 			break;
 	}
 
