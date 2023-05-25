@@ -144,6 +144,8 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::OpenFileWo:  // TODO: ensure consistency, that this is the exact command we've sent (in the other part of the code)
+			stopTimer();
+
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack:  // Successfully opened
 					// Initialize the state
@@ -156,10 +158,15 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 
 					ESP_LOGI(Mav::kDebugTag, "%s: %s successfully opened a file for writing session=%d",
 						debugPreamble(), __func__, requestRepeat.stateTransferring.mavlinkFtpSessionId);
+
+					// TODO: send "file write"
+					// TODO: restart timer
 					break;
 
 				case Ftp::Op::Nak:  // Failed to open
+					// TODO: reduce the boilerplate
 					requestRepeat.stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleted will handle the rest
+					requestRepeat.state = RequestRepeat::StateIdle;
 					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to create session", debugPreamble(), __func__);
 
 					break;
@@ -184,6 +191,7 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::WriteFile:  // An attempt to write a chunk of a file
 			stopTimer();
+
 			// Read the next chunk
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
