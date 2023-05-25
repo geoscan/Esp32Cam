@@ -339,7 +339,7 @@ inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
 
 inline void FtpClient::RequestRepeat::handleFailedAttemptCommon()
 {
-	++requestRepeat.stateCommon.iAttempt;
+	++stateCommon.iAttempt;
 }
 
 inline bool FtpClient::RequestRepeat::stateTransferringIsEof()
