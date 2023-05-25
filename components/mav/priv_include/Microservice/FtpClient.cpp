@@ -62,15 +62,24 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 	// Delegate further processing of the message
 
 	switch (requestRepeat.state) {
+		case RequestRepeat::StateIdle:
+			return Ret::Ignored;
+
 		case RequestRepeat::StateCreatingSession:
 			return processMavlinkMessageCreatingSession(aMessage, mavlinkFileTransferProtocol, aOnResponse);
 
 		case RequestRepeat::StateTransferring:
 			return processMavlinkMessageTransferring(aMessage, mavlinkFileTransferProtocol, aOnResponse);
 
-		default:
+		case RequestRepeat::StateClosingSession:
+			// TODO
+			return Ret::Response;
+
+		case RequestRepeat::StateMax:
 			return Ret::Ignored;
 	}
+
+	return Ret::Ignored;
 }
 
 void FtpClient::onHrTimer()
