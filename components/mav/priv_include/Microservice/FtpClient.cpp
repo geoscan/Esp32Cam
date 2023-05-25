@@ -67,8 +67,10 @@ static inline void logUnhandledOpcode(const char *aContext,
 static inline void logGotFailResponse(const char *aContext,
 	const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
 {
-	ESP_LOGW(Mav::kDebugTag, "%s:%s: got failure response to command opcode=%d", debugPreamble(), aContext,
-		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode));
+	ESP_LOGW(Mav::kDebugTag, "%s:%s: got failure response to command req_opcode=%d opcode=%d error code=%d", debugPreamble(), aContext,
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode),
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().data[0]));
 }
 
 FtpClient::~FtpClient()
