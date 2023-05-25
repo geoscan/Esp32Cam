@@ -217,7 +217,7 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 					requestRepeat.handleSuccessfulAttemptTransferring();
 
 					if (requestRepeat.stateTransferringIsEof()) {
-						// TODO: handle EOF (XXX: should it be handled in response, or during sending?)
+						requestRepeat.handleClosingSessionTransition();
 					}
 
 					// Pack the response
