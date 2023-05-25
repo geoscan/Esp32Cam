@@ -72,8 +72,7 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 			return processMavlinkMessageTransferring(aMessage, mavlinkFileTransferProtocol, aOnResponse);
 
 		case RequestRepeat::StateClosingSession:
-			// TODO
-			return Ret::Response;
+			return processMavlinkMessageClosingSession(aMessage, mavlinkFileTransferProtocol, aOnResponse);
 
 		case RequestRepeat::StateMax:
 			return Ret::Ignored;
@@ -283,6 +282,33 @@ Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message
 	(void)aMavlinkFileTransferProtocol;
 	(void)aMavlinkMessage;
 	(void)aOnResponse;
+
+	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
+		case Ftp::Op::TerminateSession:
+
+			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
+				case Ftp::Op::Ack: {
+					// TODO:
+
+					aOnResponse(aMavlinkMessage);
+
+					return Ret::Response;
+				}
+
+				case Ftp::Op::Nak:
+					// TODO: handle failure
+
+					break;
+
+				default:
+					// TODO: Should not get here. Produce a warning
+					// TODO: produce warning in other handlers too
+					break;
+			}
+
+		default:  // Irrelevant
+			break;
+	}
 
 	return Ret::Ignored;
 }
