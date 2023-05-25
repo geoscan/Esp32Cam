@@ -92,10 +92,8 @@ private:
 		void handleSuccessfulAttemptTransferring();
 		void handleSuccessfulAttemptCreatingSession();
 		void handleFailedAttemptCommon();
-
 		bool stateTransferringIsEof();
 
-		// TODO: file position
 		// TOOD: BFT and HrTimer events come at different times (XXX :will the mutex suffice?)
 	};
 
