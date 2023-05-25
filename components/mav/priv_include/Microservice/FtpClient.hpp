@@ -57,6 +57,7 @@ private:
 			// TODO: increment on state transitions
 			// TODO: initialize in constructor,
 			std::uint16_t messageSequenceNumber;
+			// TODO: lock current file position
 		} stateCommon;
 
 		std::mutex mutex;
@@ -76,7 +77,7 @@ public:
 	~FtpClient();
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override;
 
-	/// \brief Re-instantiates a request
+	/// \brief Re-sends a message depending on the current state.
 	void onHrTimer() override;
 
 private:
@@ -85,18 +86,26 @@ private:
 	/// automiatically close the file.
 	void onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile);
 
+	/// \brief Delegate for `onHrTimer()`. Handles re-sending of the message
 	void sendSessionOpenRequest();
+
+	/// \brief Delegate for `onHrTimer()`. Handles re-sending of the message
 	void sendFileTransferRequest();
+
+	/// \brief delegate for `process(...)`
 	Ret processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
+
+	/// \brief delegate for `process(...)`
 	Ret processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
 
 	// TODO: check for multiple mutex locks
-	/// \brief Gets invoked on a re-attempt. It is also useful for initializing
-	/// a response
+	/// \brief Initializes `aMavlinkMessage` depending on the current state.
+	/// Designed to get invoked on a re-attempt, but it is also useful for
+	/// initializing a response
 	void initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage) override;
 
 private:
