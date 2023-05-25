@@ -242,6 +242,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 				case Ftp::Op::Nak:  // Failed to open
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
+					// TODO: nofity upon failure
 
 					break;
 
@@ -296,6 +297,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 				case Ftp::Op::Nak:
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
+					// TODO: nofity upon failure
 
 					break;
 
@@ -337,6 +339,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 				case Ftp::Op::Nak:
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
+					// TODO: nofity upon failure
 
 					return Ret::NoResponse;
 
