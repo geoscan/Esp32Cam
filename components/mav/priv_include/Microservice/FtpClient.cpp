@@ -159,12 +159,22 @@ inline void FtpClient::resendFileTransferRequest()
 	// Re-adjust the file's current position pointer
 	requestRepeat.stateCommon.bftFile->seek(requestRepeat.stateTransferring.fileOffset);
 
-	resendSessionOpenRequest();
+	DelayedSendAsyncCtx delayedSendAsyncCtx{
+		Globals::getSysId(),
+		Globals::getCompId(),
+		DelayedSendAsyncVariant{static_cast<DelayedMavlinkMessageInitialization *>(this)}
+	};
+	notify(delayedSendAsyncCtx);
 }
 
 void FtpClient::resendSessionCloseRequest()
 {
-	// TODO:
+	DelayedSendAsyncCtx delayedSendAsyncCtx{
+		Globals::getSysId(),
+		Globals::getCompId(),
+		DelayedSendAsyncVariant{static_cast<DelayedMavlinkMessageInitialization *>(this)}
+	};
+	notify(delayedSendAsyncCtx);
 }
 
 // TODO: ensure that access to the encapsulated states is synchronized all accross the code
