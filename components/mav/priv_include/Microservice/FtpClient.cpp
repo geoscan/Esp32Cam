@@ -240,8 +240,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 				}
 
 				case Ftp::Op::Nak:  // Failed to open
+					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
-					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to create session", debugPreamble(), __func__);
 
 					break;
 
@@ -294,7 +294,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 					return Ret::Response;
 				}
 				case Ftp::Op::Nak:
-					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to write file", debugPreamble(), __func__);
+					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
 
 					break;
@@ -335,6 +335,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 				}
 
 				case Ftp::Op::Nak:
+					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					// TODO: handle failure
 					// TODO: notify
 
