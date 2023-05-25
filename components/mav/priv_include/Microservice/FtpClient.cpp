@@ -160,13 +160,15 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: { // Successfully opened
 					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
+					constexpr std::int32_t kInitialOffset = 0;
 
 					// Handle state transition
 					requestRepeat.stateCommon.iAttempt = 0;
 					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
 					requestRepeat.state = RequestRepeat::StateTransferring;
 					requestRepeat.stateTransferring = {
-						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session};
+						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session,
+						kInitialOffset, requestRepeat.stateCommon.bftFile->getSize()};
 					++requestRepeat.stateCommon.messageSequenceNumber;
 
 					ESP_LOGI(Mav::kDebugTag, "%s: %s successfully opened a file for writing session=%d",

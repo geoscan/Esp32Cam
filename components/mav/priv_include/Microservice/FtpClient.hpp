@@ -46,6 +46,8 @@ private:
 
 			struct {
 				std::size_t mavlinkFtpSessionId;
+				std::int32_t fileOffset;
+				std::uint32_t fileSize;
 			} stateTransferring;
 		};
 
