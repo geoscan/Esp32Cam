@@ -104,6 +104,7 @@ void FtpClient::onHrTimer()
 			break;
 
 		case RequestRepeat::StateClosingSession:
+			// TODO
 			break;
 
 		case RequestRepeat::StateMax:
@@ -278,6 +279,7 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 		}
 
 		case RequestRepeat::StateClosingSession:
+			// TODO
 			break;
 
 		case RequestRepeat::StateMax:
