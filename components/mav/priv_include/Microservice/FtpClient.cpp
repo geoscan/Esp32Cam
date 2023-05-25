@@ -116,7 +116,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
-			requestRepeat.stateCommon = {0, aBftFile, 0};
+			requestRepeat.handleCreatingSessionTransition(aBftFile);
 			resendSessionOpenRequest();  // TODO: XXX: from WQ?
 			startOnce(kRequestResendTimeout);
 
