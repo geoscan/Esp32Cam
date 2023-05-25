@@ -55,6 +55,7 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 		ESP_LOGD(Mav::kDebugTag, "%s:%s: dropping an FTP message with non-matching target target_system=%d"
 			"target_component=%d", debugPreamble(), __func__, mavlinkFileTransferProtocol.target_system,
 			mavlinkFileTransferProtocol.target_component);
+
 		return Ret::Ignored;
 	}
 
@@ -140,17 +141,17 @@ void FtpClient::sendFileTransferRequest()
 Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
-	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::OpenFileWo:  // TODO: ensure consistency, that this is the exact command we've sent (in the other part of the code)
 			stopTimer();
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
-				case Ftp::Op::Ack:  // Successfully opened
-					// Initialize the state
+				case Ftp::Op::Ack: { // Successfully opened
+					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
+					// Handle state transition
 					requestRepeat.stateCommon.iAttempt = 0;
-					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Reed from the beginning
+					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
 					requestRepeat.state = RequestRepeat::StateTransferring;
 					requestRepeat.stateTransferring = {
 						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session};
@@ -159,9 +160,14 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 					ESP_LOGI(Mav::kDebugTag, "%s: %s successfully opened a file for writing session=%d",
 						debugPreamble(), __func__, requestRepeat.stateTransferring.mavlinkFtpSessionId);
 
-					// TODO: send "file write"
-					// TODO: restart timer
-					break;
+					// Initialize response message
+					initializeMavlinkMessage(aMavlinkMessage);
+
+					// Trigger re-sending the message
+					startOnce(kRequestResendTimeout);
+
+					return Ret::Response;
+				}
 
 				case Ftp::Op::Nak:  // Failed to open
 					requestRepeat.handleIdleTransition();
