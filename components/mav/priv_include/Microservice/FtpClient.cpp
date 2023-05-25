@@ -103,6 +103,9 @@ void FtpClient::onHrTimer()
 
 			break;
 
+		case RequestRepeat::StateClosingSession:
+			break;
+
 		case RequestRepeat::StateMax:
 			break;
 	}
@@ -249,6 +252,9 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 	static constexpr const char *kTemporaryFilePath = "/dev/UavMonitor/show.bin";
 
 	switch (requestRepeat.state) {
+		case RequestRepeat::StateIdle:
+			break;
+
 		case RequestRepeat::StateCreatingSession: {
 			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
 			mavlinkFileTransferProtocol.setOpenFileSessionFields(requestRepeat.stateCommon.messageSequenceNumber,
@@ -270,7 +276,11 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 
 			break;
 		}
-		default:
+
+		case RequestRepeat::StateClosingSession:
+			break;
+
+		case RequestRepeat::StateMax:
 			break;
 	}
 }
