@@ -60,7 +60,6 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		target_network = 0;
 		getPayload().seq_number = aSequenceNumber;
 		getPayload().session = aSessionId;
-		getPayload().size = aDataSize;
 		getPayload().offset = aFileOffset;
 		getPayload().opcode = Mic::Ftp::Op::WriteFile;
 
