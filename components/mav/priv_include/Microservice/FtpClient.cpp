@@ -13,6 +13,7 @@
 #include "Helper/FileTransferProtocol.hpp"
 #include "Microservice/Ftp/Types.hpp"
 #include "mav/mav.hpp"
+#include "utility/thr/WorkQueue.hpp"
 #include <esp_log.h>
 
 namespace Mav {
@@ -21,6 +22,24 @@ namespace Mic {
 static constexpr const char *debugPreamble()
 {
 	return "FtpClient";
+}
+
+template <class Key>
+static inline bool workqueuePushNotify(typename Key::template Arg<0> aPayload)
+{
+	if (!Ut::Thr::Wq::MediumPriority::checkInstance()) {
+		ESP_LOGE(Mav::kDebugTag, "%s: Workqueue is unavailable, cannot notify", debugPreamble());
+
+		return false;
+	}
+
+	Ut::Thr::Wq::MediumPriority::getInstance().push(
+		[aPayload]()
+		{
+			Key::notify(aPayload);
+		});
+
+	return true;
 }
 
 static constexpr std::chrono::milliseconds kRequestResendTimeout{200};
@@ -124,7 +143,8 @@ void FtpClient::onHrTimer()
 				break;
 		}
 
-		// TODO: notify upon failure
+		workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setFailed(
+			"Exceeded max. number of re-send attempts"));
 	} else {
 		requestRepeat.handleFailedAttemptCommon();
 	}
@@ -240,7 +260,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 				case Ftp::Op::Nak:  // Failed to open
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
-					// TODO: nofity upon failure
+					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setFailed(
+						"Could not create session, got FAILED response"));
 
 					break;
 
@@ -287,6 +308,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 
 					// Trigger periodic re-sending of the request
 					startOnce(kRequestResendTimeout);
+					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setInProgress(
+						requestRepeat.stateTransferring.fileOffset, requestRepeat.stateTransferring.fileSize));
 
 					aOnResponse(aMavlinkMessage);
 
@@ -295,7 +318,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 				case Ftp::Op::Nak:
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
-					// TODO: nofity upon failure
+					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setFailed(
+						"Could not transfer a file chunk, got FAILED response"));
 
 					break;
 
@@ -325,7 +349,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
 					if (validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
-						// TODO: notify upon completion
+						workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setDone());
 
 						// transfer to idle state
 						requestRepeat.handleIdleTransition();
@@ -337,7 +361,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 				case Ftp::Op::Nak:
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
 					requestRepeat.handleIdleTransition();
-					// TODO: nofity upon failure
+					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setFailed(
+						"Could not close session, got FAILED response"));
 
 					return Ret::NoResponse;
 
