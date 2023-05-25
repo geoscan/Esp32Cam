@@ -34,14 +34,22 @@ FtpClient::FtpClient():
 {
 }
 
-static void logUnhandledOpcode(const char *aContext, mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
+static void logUnhandledOpcode(const char *aContext, const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
+static void logGotFailResponse(const char *aContext, const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
 
 static inline void logUnhandledOpcode(const char *aContext,
-	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+	const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
 {
 	ESP_LOGW(Mav::kDebugTag, "%s:%s: unexpected opcode pair opcode=%d req_opcode=%d", debugPreamble(), aContext,
-		static_cast<int>(static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
-		static_cast<int>(static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode));
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode),
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode));
+}
+
+static inline void logGotFailResponse(const char *aContext,
+	const mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+{
+	ESP_LOGW(Mav::kDebugTag, "%s:%s: got failure response to command opcode=%d", debugPreamble(), aContext,
+		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode));
 }
 
 FtpClient::~FtpClient()
