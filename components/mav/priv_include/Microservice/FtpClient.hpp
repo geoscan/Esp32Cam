@@ -83,6 +83,7 @@ private:
 		void handleSuccessfulAttemptCommon();
 		void handleSuccessfulAttemptTransferring();
 		void handleSuccessfulAttemptCreatingSession();
+		void handleFailedAttemptCommon();
 
 		bool stateTransferringIsEof();
 

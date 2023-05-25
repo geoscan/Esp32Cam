@@ -86,7 +86,7 @@ void FtpClient::onHrTimer()
 
 		return;
 	} else {
-		++requestRepeat.stateCommon.iAttempt;
+		requestRepeat.handleFailedAttemptCommon();
 	}
 
 	switch (requestRepeat.state) {
@@ -335,6 +335,11 @@ inline void FtpClient::RequestRepeat::handleSuccessfulAttemptTransferring()
 inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
 {
 	handleSuccessfulAttemptCommon();
+}
+
+inline void FtpClient::RequestRepeat::handleFailedAttemptCommon()
+{
+	++requestRepeat.stateCommon.iAttempt;
 }
 
 inline bool FtpClient::RequestRepeat::stateTransferringIsEof()
