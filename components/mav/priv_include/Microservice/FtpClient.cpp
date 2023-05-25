@@ -154,7 +154,7 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 {
 
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
-		case Ftp::Op::OpenFileWo:  // TODO: ensure consistency, that this is the exact command we've sent (in the other part of the code)
+		case Ftp::Op::OpenFileWo:
 			stopTimer();
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
