@@ -240,6 +240,11 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 			// Read the next chunk
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
+
+					if (!validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
+						return Ret::Ignored;
+					}
+
 					// Update the state
 					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 					requestRepeat.handleSuccessfulAttemptTransferring();
