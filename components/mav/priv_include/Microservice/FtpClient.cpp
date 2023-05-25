@@ -267,6 +267,16 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	return Ret::Ignored;
 }
 
+Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
+	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
+{
+	(void)aMavlinkFileTransferProtocol;
+	(void)aMavlinkMessage;
+	(void)aOnResponse;
+
+	return Ret::Ignored;
+}
+
 void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;

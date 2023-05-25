@@ -132,6 +132,10 @@ private:
 		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
 		Microservice::OnResponseSignature aOnResponse);
 
+	Ret processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
+		mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol,
+		Microservice::OnResponseSignature aOnResponse);
+
 	// TODO: check for multiple mutex locks
 	/// \brief Initializes `aMavlinkMessage` depending on the current state.
 	/// Designed to get invoked on a re-attempt, but it is also useful for
