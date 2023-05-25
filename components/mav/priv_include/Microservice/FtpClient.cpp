@@ -195,6 +195,8 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 					// Trigger re-sending the message
 					startOnce(kRequestResendTimeout);
 
+					aOnResponse(aMavlinkMessage);
+
 					return Ret::Response;
 				}
 
@@ -241,6 +243,8 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 
 					// Trigger periodic re-sending of the request
 					startOnce(kRequestResendTimeout);
+
+					aOnResponse(aMavlinkMessage);
 
 					return Ret::Response;
 				}
