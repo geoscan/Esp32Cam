@@ -151,7 +151,7 @@ void FtpClient::onHrTimer()
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
-			break;
+			return;
 
 		case RequestRepeat::StateCreatingSession:
 			resendSessionOpenRequest();
