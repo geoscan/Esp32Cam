@@ -149,6 +149,7 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: { // Successfully opened
 					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
+
 					// Handle state transition
 					requestRepeat.stateCommon.iAttempt = 0;
 					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
