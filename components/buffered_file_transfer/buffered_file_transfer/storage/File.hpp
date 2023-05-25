@@ -50,6 +50,7 @@ public:
 	File &operator=(const File &) = default;
 	File &operator=(File &&) = default;
 
+	/// \brief \sa `FileSystem::append`
 	inline std::size_t append(const std::uint8_t *aBuffer, std::size_t aBufferSize)
 	{
 		return fileSystem ? fileSystem->append(fileDescriptor, aBuffer, aBufferSize) : 0;
@@ -60,11 +61,13 @@ public:
 		return fileDescriptor.isValid();
 	}
 
+	/// \brief \sa `FileSystem::seek`
 	inline std::uint32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
 	{
 		return fileSystem ? fileSystem->seek(fileDescriptor, aOffset, aOrigin) : FileSystem::PositionError;
 	}
 
+	/// \brief \sa `fileSystem::read`
 	inline std::size_t read(std::uint8_t *aOutBuffer, std::size_t aOutBufferSize)
 	{
 		return fileSystem ? fileSystem->read(fileDescriptor, aOutBuffer, aOutBufferSize) : 0;
