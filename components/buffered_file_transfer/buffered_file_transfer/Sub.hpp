@@ -23,7 +23,7 @@ using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File> 
 struct TransferUpdateEvent {
 	enum Status {
 		StatusInProgress,
-		StatusOk,
+		StatusDone,
 		StatusFailed,
 	};
 
@@ -54,6 +54,13 @@ struct TransferUpdateEvent {
 	{
 		status = StatusFailed;
 		failedState.errorMessage = aErrorMessage;
+
+		return *this;
+	}
+
+	inline TransferUpdateEvent &setDone()
+	{
+		status = StatusDone;
 
 		return *this;
 	}
