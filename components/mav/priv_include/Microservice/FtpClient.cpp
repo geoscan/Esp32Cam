@@ -408,15 +408,18 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 		}
 		case RequestRepeat::StateTransferring: {
 			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
+
+			// Initialize message
 			mavlinkFileTransferProtocol.getPayload().size = requestRepeat.stateCommon.bftFile->read(
 				reinterpret_cast<std::uint8_t *>(mavlinkFileTransferProtocol.getPayload().data),
 				Mic::Ftp::Payload::kMaxDataLength);
 			mavlinkFileTransferProtocol.setWriteFileFields(requestRepeat.stateCommon.messageSequenceNumber,
 				requestRepeat.stateTransferring.mavlinkFtpSessionId,
 				requestRepeat.stateCommon.bftFile->getCurrentPosition());
-			mavlinkFileTransferProtocol.getPayload().size = requestRepeat.stateCommon.bftFile->read(
-				mavlinkFileTransferProtocol.getPayload().data, Ftp::Payload::kMaxDataLength);
+			ESP_LOGV(Mav::kDebugTag, "%s:%s packed %d bytes", debugPreamble(), __func__,
+				mavlinkFileTransferProtocol.getPayload().size);
 
+			// Pack message
 			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
 
 			break;
@@ -453,7 +456,7 @@ inline void FtpClient::logTransferProgress()
 {
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateTransferring:
-			ESP_LOGI(Mav::kDebugTag, "%s transferred %d/%d bytes", debugPreamble(),
+			ESP_LOGV(Mav::kDebugTag, "%s transferred %d/%d bytes", debugPreamble(),
 				requestRepeat.stateTransferring.fileOffset, requestRepeat.stateTransferring.fileSize);
 
 		default:
@@ -532,6 +535,7 @@ inline void FtpClient::RequestRepeat::handleSuccessfulAttemptTransferring()
 {
 	handleSuccessfulAttemptCommon();
 	stateTransferring.fileOffset = stateCommon.bftFile->getCurrentPosition();
+	ESP_LOGV(Mav::kDebugTag, "%s:%s Updated fileOffset=%d", debugPreamble(), __func__, stateTransferring.fileOffset);
 }
 
 inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
