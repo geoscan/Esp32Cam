@@ -208,6 +208,7 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 				}
 				case Ftp::Op::Nak:
 					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to write file", debugPreamble(), __func__);
+					requestRepeat.handleIdleTransition();
 
 					break;
 
