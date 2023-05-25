@@ -151,8 +151,11 @@ std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std:
 	ESP_LOGV(Bft::debugTag(), "%s:%s attempting to read %d bytes", debugPreamble(), __func__, aOutBufferSize);
 	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
 
-	return fread(static_cast<void *>(aOutBuffer), kObjectSize, aOutBufferSize,
+	const auto nRead = fread(static_cast<void *>(aOutBuffer), kObjectSize, aOutBufferSize,
 		static_cast<FILE *>(aFileDescriptor.raw));
+	ESP_LOGV(Bft::debugTag(), "%s:%s read %d bytes of %d", debugPreamble(), __func__, nRead, aOutBufferSize);
+
+	return nRead;
 }
 
 }  // namespace Bft
