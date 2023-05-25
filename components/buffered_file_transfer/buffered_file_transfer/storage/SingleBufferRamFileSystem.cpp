@@ -35,7 +35,7 @@ struct SynchronizedFileDescriptor {
 	/// \brief Makes an attempt to allocate a buffer, and map it onto FS
 	bool tryAllocate(std::size_t aFileSize)
 	{
-		static constexpr const char *kWriteBinaryFileMode = "wb";
+		static constexpr const char *kWriteBinaryFileMode = "wb+";
 		std::lock_guard<std::mutex> lock{mutex};
 
 		// Ensure there is no opened file yet
