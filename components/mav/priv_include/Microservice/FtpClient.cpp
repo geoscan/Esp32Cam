@@ -80,8 +80,11 @@ void FtpClient::onHrTimer()
 	if (requestRepeat.stateCommon.iAttempt >= knMaxAttempts) {
 		ESP_LOGE(Mav::kDebugTag, "%s:%s: state \"%s\": exceeded the number of attempts, cancelling transfer",
 			debugPreamble(), __func__, requestRepeat.getCurrentStateAsString());
+		requestRepeat.handleIdleTransition();
 
 		// TODO: notify upon failure
+
+		return;
 	} else {
 		++requestRepeat.stateCommon.iAttempt;
 	}
