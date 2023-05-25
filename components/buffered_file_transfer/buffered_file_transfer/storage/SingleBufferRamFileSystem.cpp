@@ -76,7 +76,20 @@ struct SynchronizedFileDescriptor {
 	}
 };
 
+static inline bool validateFileDescriptor(FileDescriptor aFileDescriptor, const char *aContext);
+
 static SynchronizedFileDescriptor sSynchronizedFileDescriptor{};
+
+static inline bool validateFileDescriptor(FileDescriptor aFileDescriptor, const char *aContext)
+{
+	if (!aFileDescriptor.isValid()) {
+		ESP_LOGE(Bft::debugTag(), "%s:%s invalid file descriptor", debugPreamble(), aContext);
+
+		return false;
+	}
+
+	return true;
+}
 
 FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize)
 {
@@ -95,6 +108,7 @@ FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *aFi
 
 void SingleBufferRamFileSystem::closeFile(FileDescriptor aFileDescriptor)
 {
+	validateFileDescriptor(aFileDescriptor, __func__);
 	ESP_LOGI(Bft::debugTag(), "%s: closing file", debugPreamble());
 	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
 	sSynchronizedFileDescriptor.resetStateUnsafe();
@@ -103,15 +117,18 @@ void SingleBufferRamFileSystem::closeFile(FileDescriptor aFileDescriptor)
 std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 	std::size_t aBufferSize)
 {
+	validateFileDescriptor(aFileDescriptor, __func__);
 	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
 	const std::size_t nWritten = fwrite(static_cast<const void *>(aBuffer), aBufferSize, sizeof(std::uint8_t),
 		static_cast<FILE *>(sSynchronizedFileDescriptor.fileDescriptor.raw));
+	ESP_LOGV(Bft::debugTag(), "%s:%s written %d bytes", debugPreamble(), __func__, nWritten);
 
 	return nWritten;
 }
 
 std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin)
 {
+	validateFileDescriptor(aFileDescriptor, __func__);
 	constexpr int kSuccess = 0;
 
 	if (fseek(static_cast<FILE *>(aFileDescriptor.raw), aOffset, aOrigin) == kSuccess) {
@@ -124,6 +141,7 @@ std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std
 std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
 	std::size_t aOutBufferSize)
 {
+	validateFileDescriptor(aFileDescriptor, __func__);
 	ESP_LOGV(Bft::debugTag(), "%s:%s attempting to read %d bytes", debugPreamble(), __func__, aOutBufferSize);
 	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
 
