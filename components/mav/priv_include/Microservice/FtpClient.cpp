@@ -386,7 +386,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
-	static constexpr const char *kTemporaryFilePath = "/dev/UavMonitor/show.bin";
+	// TODO: change me
+	static constexpr const char *kTemporaryFilePath = "/dev/LuaScript/main.lua";
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
