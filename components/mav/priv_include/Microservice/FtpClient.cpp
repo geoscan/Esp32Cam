@@ -88,8 +88,22 @@ void FtpClient::onHrTimer()
 	if (requestRepeat.stateCommon.iAttempt >= knMaxAttempts) {
 		ESP_LOGE(Mav::kDebugTag, "%s:%s: state \"%s\": exceeded the number of attempts, cancelling transfer",
 			debugPreamble(), __func__, requestRepeat.getCurrentStateAsString());
-		requestRepeat.handleIdleTransition();
-		// TODO: reset sessions, if any were opened
+
+		switch (requestRepeat.state) {
+			case RequestRepeat::StateIdle:
+			case RequestRepeat::StateCreatingSession:
+			case RequestRepeat::StateClosingSession:
+				requestRepeat.handleIdleTransition();
+
+				break;
+
+			case RequestRepeat::StateTransferring:
+			case RequestRepeat::StateMax:
+				// Make an attempt to close the session gracefully
+				requestRepeat.handleClosingSessionTransition();
+
+				break;
+		}
 
 		// TODO: notify upon failure
 
