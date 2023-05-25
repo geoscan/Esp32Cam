@@ -356,9 +356,14 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 			break;
 		}
 
-		case RequestRepeat::StateClosingSession:
-			// TODO
+		case RequestRepeat::StateClosingSession: {
+			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
+			mavlinkFileTransferProtocol.setTerminateSessionFields(requestRepeat.stateCommon.messageSequenceNumber,
+				requestRepeat.stateClosingSession.mavlinkFtpSessionId);
+			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
+
 			break;
+		}
 
 		case RequestRepeat::StateMax:
 			break;
