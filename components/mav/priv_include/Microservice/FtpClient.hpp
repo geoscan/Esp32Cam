@@ -35,6 +35,7 @@ private:
 			StateIdle = 0,
 			StateCreatingSession,
 			StateTransferring,
+			StateClosingSession,
 
 			StateMax,
 		};
