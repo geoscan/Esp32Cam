@@ -351,7 +351,8 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 				requestRepeat.stateTransferring.mavlinkFtpSessionId,
 				requestRepeat.stateCommon.bftFile->getCurrentPosition());
 			// TODO: copy data
-			// TODO: pack into `aMavlinkMessage`
+
+			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
 
 			break;
 		}
