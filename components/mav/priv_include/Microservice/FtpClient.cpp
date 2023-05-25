@@ -60,6 +60,7 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 	}
 
 	// Delegate further processing of the message
+	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
@@ -190,8 +191,6 @@ inline void FtpClient::resendSessionCloseRequest()
 	notify(delayedSendAsyncCtx);
 }
 
-// TODO: ensure that access to the encapsulated states is synchronized all accross the code
-
 inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
@@ -202,7 +201,6 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: { // Successfully opened
-					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
 					// Handle state transition
 					requestRepeat.handleSuccessfulAttemptCreatingSession();
@@ -260,7 +258,6 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 					}
 
 					// Update the state
-					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 					requestRepeat.handleSuccessfulAttemptTransferring();
 
 					if (requestRepeat.stateTransferringIsEof()) {
@@ -299,10 +296,6 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
-	(void)aMavlinkFileTransferProtocol;
-	(void)aMavlinkMessage;
-	(void)aOnResponse;
-
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::TerminateSession:
 
