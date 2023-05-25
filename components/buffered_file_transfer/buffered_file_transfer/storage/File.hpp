@@ -78,6 +78,9 @@ public:
 		return fileSystem ? fileSystem->seek(fileDescriptor, 0, FileSystem::PositionCurrent) : 0;
 	}
 
+	/// \brief returns total file size
+	std::uint32_t getSize();
+
 	void close();
 
 private:
