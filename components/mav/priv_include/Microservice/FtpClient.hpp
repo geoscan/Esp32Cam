@@ -143,7 +143,7 @@ private:
 	/// `requestRepeat.state == RequestRepeat::StateTransferring`
 	bool validateIncomingMessageSessionId(mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol);
 
-	void logUpdateProgress();
+	void logTransferProgress();
 
 private:
 	SubscriptionPackage subscriptionPackage;

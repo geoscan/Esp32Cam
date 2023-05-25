@@ -292,6 +292,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 			// Read the next chunk
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
+					logTransferProgress();
 
 					if (!validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
 						return Ret::Ignored;
@@ -301,6 +302,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 					requestRepeat.handleSuccessfulAttemptTransferring();
 
 					if (requestRepeat.stateTransferringIsEof()) {
+						ESP_LOGI(Mav::kDebugTag, "%s:%s successfully uploaded the file, closing session",
+							debugPreamble(), __func__);
 						requestRepeat.handleClosingSessionTransition();
 					}
 
@@ -445,7 +448,7 @@ inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_pr
 	return true;
 }
 
-inline void FtpClient::logUpdateProgress()
+inline void FtpClient::logTransferProgress()
 {
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateTransferring:
