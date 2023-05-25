@@ -61,13 +61,13 @@ private:
 			// Ensure it is reset
 			std::size_t iAttempt;
 			std::shared_ptr<Bft::File> bftFile;
-			// TODO: initialize in constructor,
 			std::uint16_t messageSequenceNumber;
 		} stateCommon;
 
 		std::mutex mutex;
 		State state;
 
+		RequestRepeat();
 		static const char *stateAsString(State aState);
 		const char *getCurrentStateAsString();
 

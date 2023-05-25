@@ -385,6 +385,13 @@ inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_pr
 	return true;
 }
 
+inline FtpClient::RequestRepeat::RequestRepeat():
+	stateCommon{0, {}, 0},
+	mutex{},
+	state{StateIdle}
+{
+}
+
 inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
 {
 	static constexpr const char *kStateNameMapping[] = {
