@@ -208,6 +208,8 @@ inline void FtpClient::resendSessionOpenRequest()
 inline void FtpClient::resendFileTransferRequest()
 {
 	// Re-adjust the file's current position pointer
+	ESP_LOGV(Mav::kDebugTag, "%s:%s resetting file position =%d", debugPreamble(), __func__,
+		requestRepeat.stateTransferring.fileOffset);
 	requestRepeat.stateCommon.bftFile->seek(requestRepeat.stateTransferring.fileOffset);
 
 	DelayedSendAsyncCtx delayedSendAsyncCtx{
