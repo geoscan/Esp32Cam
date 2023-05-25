@@ -181,6 +181,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
+			ESP_LOGI(Mav::kDebugTag, "%s:%s: Preparing transfer", debugPreamble(), __func__);
 			requestRepeat.handleCreatingSessionTransition(aBftFile);
 			resendSessionOpenRequest();
 			startOnce(kRequestResendTimeout);
