@@ -125,8 +125,6 @@ void FtpClient::onHrTimer()
 		}
 
 		// TODO: notify upon failure
-
-		return;
 	} else {
 		requestRepeat.handleFailedAttemptCommon();
 	}
