@@ -160,16 +160,11 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: { // Successfully opened
 					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
-					constexpr std::int32_t kInitialOffset = 0;
 
 					// Handle state transition
-					requestRepeat.stateCommon.iAttempt = 0;
-					requestRepeat.stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
-					requestRepeat.state = RequestRepeat::StateTransferring;
-					requestRepeat.stateTransferring = {
-						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session,
-						kInitialOffset, requestRepeat.stateCommon.bftFile->getSize()};
-					++requestRepeat.stateCommon.messageSequenceNumber;
+					requestRepeat.handleSuccessfulAttemptCreatingSession();
+					requestRepeat.handleTransferringTransition(
+						static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session);
 
 					ESP_LOGI(Mav::kDebugTag, "%s: %s successfully opened a file for writing session=%d",
 						debugPreamble(), __func__, requestRepeat.stateTransferring.mavlinkFtpSessionId);
@@ -215,8 +210,11 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 				case Ftp::Op::Ack: {
 					// Update the state
 					std::lock_guard<std::mutex> lock{requestRepeat.mutex};
-					requestRepeat.stateCommon.iAttempt = 0;
-					++requestRepeat.stateCommon.messageSequenceNumber;
+					requestRepeat.handleSuccessfulAttemptTransferring();
+
+					if (requestRepeat.stateTransferringIsEof()) {
+						// TODO: handle EOF (XXX: should it be handled in response, or during sending?)
+					}
 
 					// Pack the response
 					initializeMavlinkMessage(aMavlinkMessage);
@@ -297,6 +295,39 @@ inline void FtpClient::RequestRepeat::handleIdleTransition()
 {
 	stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleter will handle the rest
 	state = RequestRepeat::StateIdle;
+}
+
+inline void FtpClient::RequestRepeat::handleTransferringTransition(std::size_t aMavlinkFtpSessionId)
+{
+	constexpr std::int32_t kInitialOffset = 0;
+	stateCommon.bftFile->seek(0, Bft::FileSystem::PositionStart);  // Read from the beginning
+	stateTransferring = {
+		aMavlinkFtpSessionId,
+		kInitialOffset, stateCommon.bftFile->getSize()
+	};
+	state = RequestRepeat::StateTransferring;
+}
+
+inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCommon()
+{
+	stateCommon.iAttempt = 0;
+	++stateCommon.messageSequenceNumber;
+}
+
+inline void FtpClient::RequestRepeat::handleSuccessfulAttemptTransferring()
+{
+	handleSuccessfulAttemptCommon();
+	stateTransferring.fileOffset = stateCommon.bftFile->getCurrentPosition();
+}
+
+inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
+{
+	handleSuccessfulAttemptCommon();
+}
+
+inline bool FtpClient::RequestRepeat::stateTransferringIsEof()
+{
+	return stateTransferring.fileOffset == stateTransferring.fileSize;
 }
 
 }  // namespace Mic

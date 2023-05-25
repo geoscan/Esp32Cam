@@ -70,6 +70,19 @@ private:
 
 		/// \brief Releases the resources, sets the new state
 		void handleIdleTransition();
+
+		/// \pre `state == StateCreatingSession`
+		void handleTransferringTransition(std::size_t aMavlinkFtpSessionId);
+
+		/// \pre `state == StateIdle`
+		void handleCreatingSessionTransition();
+
+		void handleSuccessfulAttemptCommon();
+		void handleSuccessfulAttemptTransferring();
+		void handleSuccessfulAttemptCreatingSession();
+
+		bool stateTransferringIsEof();
+
 		// TODO: file position
 		// TOOD: BFT and HrTimer events come at different times (XXX :will the mutex suffice?)
 	};
