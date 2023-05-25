@@ -64,6 +64,9 @@ private:
 
 		static const char *stateAsString(State aState);
 		const char *getCurrentStateAsString();
+
+		/// \brief Releases the resources, sets the new state
+		void handleIdleTransition();
 		// TODO: file position
 		// TOOD: BFT and HrTimer events come at different times (XXX :will the mutex suffice?)
 	};

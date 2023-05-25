@@ -164,9 +164,7 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 					break;
 
 				case Ftp::Op::Nak:  // Failed to open
-					// TODO: reduce the boilerplate
-					requestRepeat.stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleted will handle the rest
-					requestRepeat.state = RequestRepeat::StateIdle;
+					requestRepeat.handleIdleTransition();
 					ESP_LOGE(Mav::kDebugTag, "%s:%s failed to create session", debugPreamble(), __func__);
 
 					break;
@@ -272,6 +270,12 @@ inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRep
 inline const char *FtpClient::RequestRepeat::getCurrentStateAsString()
 {
 	return stateAsString(state);
+}
+
+inline void FtpClient::RequestRepeat::handleIdleTransition()
+{
+	stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleter will handle the rest
+	state = RequestRepeat::StateIdle;
 }
 
 }  // namespace Mic
