@@ -62,6 +62,7 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		getPayload().session = aSessionId;
 		getPayload().size = aDataSize;
 		getPayload().offset = aFileOffset;
+		getPayload().opcode = Mic::Ftp::Op::WriteFile;
 
 		if (aData != nullptr && aDataSize > 0) {
 			std::copy_n(aData, aDataSize, getPayload().data);
