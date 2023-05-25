@@ -63,6 +63,17 @@ struct FileTransferProtocol : mavlink_file_transfer_protocol_t, Cmn::Impl::Pack<
 		}
 		// TODO: XXX: should it also set `req_opcode` to None?
 	}
+
+	inline void setTerminateSessionFields(std::uint16_t aSequenceNumber, Mic::Ftp::SessionId aSessionId,
+		std::uint8_t aTargetSystem = Globals::getCompidAutopilot(), std::uint8_t aTargetComponent = Globals::getSysId())
+	{
+		target_system = aTargetSystem;
+		target_component = aTargetComponent;
+		target_network = 0;
+		getPayload().seq_number = aSequenceNumber;
+		getPayload().session = aSequenceNumber;
+		getPayload().opcode = Mic::Ftp::Op::TerminateSession;
+	}
 };
 
 }  // namespace Hlpr
