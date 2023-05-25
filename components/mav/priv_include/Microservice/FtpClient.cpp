@@ -166,7 +166,7 @@ inline void FtpClient::resendFileTransferRequest()
 	notify(delayedSendAsyncCtx);
 }
 
-void FtpClient::resendSessionCloseRequest()
+inline void FtpClient::resendSessionCloseRequest()
 {
 	DelayedSendAsyncCtx delayedSendAsyncCtx{
 		Globals::getSysId(),
@@ -178,7 +178,7 @@ void FtpClient::resendSessionCloseRequest()
 
 // TODO: ensure that access to the encapsulated states is synchronized all accross the code
 
-Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
+inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 
@@ -228,7 +228,8 @@ Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_messag
 	return Ret::NoResponse;
 }
 
-Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage, mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
+inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
+	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 	// TODO: close file at the end of transferring
 	// TODO: instantiate session reset
@@ -276,7 +277,7 @@ Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t
 	return Ret::Ignored;
 }
 
-Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
+inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 	(void)aMavlinkFileTransferProtocol;
