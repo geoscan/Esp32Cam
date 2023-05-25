@@ -243,7 +243,6 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
-	// TODO: close file at the end of transferring
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
 		case Ftp::Op::WriteFile:  // An attempt to write a chunk of a file
 			stopTimer();
@@ -343,13 +342,11 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 			mavlinkFileTransferProtocol.setOpenFileSessionFields(requestRepeat.stateCommon.messageSequenceNumber,
 				Ftp::Op::OpenFileWo, kTemporaryFilePath, strlen(kTemporaryFilePath));
 			mavlinkFileTransferProtocol.packInto(aMavlinkMessage);
-			// TODO. XXX. Anything else?
 
 			break;
 		}
 		case RequestRepeat::StateTransferring: {
 			Mav::Hlpr::FileTransferProtocol mavlinkFileTransferProtocol{};
-			// TODO: in other handler, ensure that the file has its position set
 			mavlinkFileTransferProtocol.getPayload().size = requestRepeat.stateCommon.bftFile->read(
 				reinterpret_cast<std::uint8_t *>(mavlinkFileTransferProtocol.getPayload().data),
 				Mic::Ftp::Payload::kMaxDataLength);
