@@ -121,7 +121,7 @@ std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, co
 	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
 	const std::size_t nWritten = fwrite(static_cast<const void *>(aBuffer), 1, aBufferSize,
 		static_cast<FILE *>(sSynchronizedFileDescriptor.fileDescriptor.raw));
-	ESP_LOGV(Bft::debugTag(), "%s:%s written %d bytes", debugPreamble(), __func__, nWritten);
+	ESP_LOGV(Bft::debugTag(), "%s:%s written %d bytes of %d", debugPreamble(), __func__, nWritten, aBufferSize);
 
 	return nWritten;
 }
@@ -132,8 +132,14 @@ std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std
 	constexpr int kSuccess = 0;
 
 	if (fseek(static_cast<FILE *>(aFileDescriptor.raw), aOffset, aOrigin) == kSuccess) {
-		return ftell(static_cast<FILE *>(aFileDescriptor.raw));
+		const auto newPosition = ftell(static_cast<FILE *>(aFileDescriptor.raw));
+		ESP_LOGV(Bft::debugTag(), "%s:%s shifted cursor at %d", debugPreamble(), __func__,
+			static_cast<int>(newPosition));
+
+		return newPosition;
 	} else {
+		ESP_LOGE(Bft::debugTag(), "%s:%s failed to shift cursor", debugPreamble(), __func__);
+
 		return FileSystem::PositionError;
 	}
 }
