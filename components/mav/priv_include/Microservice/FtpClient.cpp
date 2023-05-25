@@ -288,15 +288,28 @@ Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message
 
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
-					// TODO:
+					// TODO: OPTIONAL handle non-matching session numbers
+					const auto sessionId
+						= static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session;
 
-					aOnResponse(aMavlinkMessage);
+					if (sessionId != requestRepeat.stateClosingSession.mavlinkFtpSessionId) {
+						ESP_LOGW(Mav::kDebugTag, "%s:%s: Got unexpected session id session=%d", debugPreamble(),
+							__func__, sessionId);
+					} else {
+						// TODO: notify upon completion
 
-					return Ret::Response;
+						// transfer to idle state
+						requestRepeat.handleIdleTransition();
+					}
+
+
+
+					return Ret::NoResponse;
 				}
 
 				case Ftp::Op::Nak:
 					// TODO: handle failure
+					// TODO: notify
 
 					break;
 
