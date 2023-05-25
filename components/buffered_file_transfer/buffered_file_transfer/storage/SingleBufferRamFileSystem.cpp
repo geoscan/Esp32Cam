@@ -119,7 +119,7 @@ std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, co
 {
 	validateFileDescriptor(aFileDescriptor, __func__);
 	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
-	const std::size_t nWritten = fwrite(static_cast<const void *>(aBuffer), aBufferSize, sizeof(std::uint8_t),
+	const std::size_t nWritten = fwrite(static_cast<const void *>(aBuffer), 1, aBufferSize,
 		static_cast<FILE *>(sSynchronizedFileDescriptor.fileDescriptor.raw));
 	ESP_LOGV(Bft::debugTag(), "%s:%s written %d bytes", debugPreamble(), __func__, nWritten);
 
