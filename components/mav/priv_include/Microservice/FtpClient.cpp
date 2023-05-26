@@ -442,7 +442,7 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 				Mic::Ftp::Payload::kMaxDataLength);
 			mavlinkFileTransferProtocol.setWriteFileFields(requestRepeat.stateCommon.messageSequenceNumber,
 				requestRepeat.stateTransferring.mavlinkFtpSessionId,
-				requestRepeat.stateCommon.bftFile->getCurrentPosition());
+				requestRepeat.stateTransferring.fileOffset);
 			ESP_LOGV(Mav::kDebugTag, "%s:%s packed %d bytes", debugPreamble(), __func__,
 				mavlinkFileTransferProtocol.getPayload().size);
 
