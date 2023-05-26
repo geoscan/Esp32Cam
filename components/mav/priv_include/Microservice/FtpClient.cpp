@@ -379,13 +379,19 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 			switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().opcode) {
 				case Ftp::Op::Ack: {
 					if (validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
-						workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setDone());
 						ESP_LOGI(Mav::kDebugTag, "%s:%s successfully closed session, transferring to \"Idle\" state",
 							debugPreamble(), __func__);
-
-						// transfer to idle state
-						requestRepeat.handleIdleTransition();
+					} else {
+						// There is a bug in the current implementation of MAVLink FTP on the side of the AP, so it confuses session ids
+						ESP_LOGI(Mav::kDebugTag, "%s:%s got unexpected session id, accepting anyway", debugPreamble(),
+							__func__);
 					}
+
+					// Notify upon completion
+					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setDone());
+
+					// transfer to idle state
+					requestRepeat.handleIdleTransition();
 
 					return Ret::NoResponse;
 				}
