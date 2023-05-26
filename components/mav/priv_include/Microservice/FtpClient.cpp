@@ -335,12 +335,22 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 					return Ret::Response;
 				}
 				case Ftp::Op::Nak:
+					// Notify upon failure
 					logGotFailResponse(__func__, aMavlinkFileTransferProtocol);
-					requestRepeat.handleIdleTransition();
 					workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setFailed(
 						"Could not transfer a file chunk, got FAILED response"));
 
-					break;
+					// Instantiate session closing protocol
+					requestRepeat.handleClosingSessionTransition();
+					initializeMavlinkMessage(aMavlinkMessage);
+					aOnResponse(aMavlinkMessage);
+
+					// Start periodic resending
+					startOnce(kRequestResendTimeout);
+
+					// TODO: distinguish between "failure" and "success" session closing
+
+					return Ret::Response;
 
 				default:
 					logUnhandledOpcode(__func__, aMavlinkFileTransferProtocol);
@@ -370,6 +380,8 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 				case Ftp::Op::Ack: {
 					if (validateIncomingMessageSessionId(aMavlinkFileTransferProtocol)) {
 						workqueuePushNotify<Bft::OnTransferUpdate>(Bft::TransferUpdateEvent().setDone());
+						ESP_LOGI(Mav::kDebugTag, "%s:%s successfully closed session, transferring to \"Idle\" state",
+							debugPreamble(), __func__);
 
 						// transfer to idle state
 						requestRepeat.handleIdleTransition();
