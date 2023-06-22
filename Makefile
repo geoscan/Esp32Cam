@@ -114,7 +114,7 @@ distclean:
 # Configure the project
 configure:
 	@echo $(PRINT_PREFIX) Initializing submodules
-	git submodule update --init --recursive
+	-git submodule update --init --recursive
 
 	@echo $(PRINT_PREFIX) Installing ESP IDF
 	$(SNIPPET_EXPORT_PATHS) && $(PATH_IDF_PATH)/install.sh

@@ -38,16 +38,16 @@ extern "C" int app_main(void)
 	Ut::Tim::taskDelay(std::chrono::milliseconds(1000));  // Time window to connect a hardware debugger, before JTAG pins are reconfigured
 	nvs_flash_init();
 	Wq::start();
-	CameraRecorder::init();
-	camInit();
+//	CameraRecorder::init();
+//	camInit();
 	esp_event_loop_create_default();
 	Mod::init();
 	wifiStart();
 	httpStart();
 #if !CONFIG_DRIVER_OV2640_USE_HOOKS
-	cameraThreadInit();
+//	cameraThreadInit();
 #endif
-	cameraStreamerStart(context);
+//	cameraStreamerStart(context);
 	Mav::init();
 	Bdg::init();
 	Sock::start();

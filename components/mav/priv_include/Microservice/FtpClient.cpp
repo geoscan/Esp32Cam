@@ -42,8 +42,8 @@ static inline bool workqueuePushNotify(typename Key::template Arg<0> aPayload)
 	return true;
 }
 
-static constexpr std::chrono::milliseconds kRequestResendTimeout{200};
-static constexpr std::size_t knMaxAttempts = 4;
+static constexpr std::chrono::milliseconds kRequestResendTimeout{300};
+static constexpr std::size_t knMaxAttempts = 10;
 
 FtpClient::FtpClient():
 	Ut::Sys::HrTimer{ESP_TIMER_TASK, "MavFtpClient"},
@@ -425,7 +425,7 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
 	// TODO: change me
-	static constexpr const char *kTemporaryFilePath = "/dev/LuaScript/main.lua";
+	static constexpr const char *kTemporaryFilePath = "/dev/LuaScript/0";
 
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateIdle:
