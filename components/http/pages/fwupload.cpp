@@ -20,7 +20,7 @@
 #include <cstdlib>
 #include <cstring>
 
-static constexpr std::size_t kIntermediateBufferMaxLength = 64;
+static constexpr std::size_t kIntermediateBufferMaxLength = 512;
 
 /// \brief \sa `InputBytesIterationContext`
 enum class InputBytesReceptionState {
