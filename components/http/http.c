@@ -9,10 +9,14 @@
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL)
 #include <esp_log.h>
+
+#include "client/file.h"
 #include "pages/pages.h"
 #include <sdkconfig.h>
 
 const char *kHttpDebugTag = "[http]";
+
+static const char *kDebugContext = "http/http";
 
 static const httpd_uri_t pages[] = {
 	{
@@ -87,6 +91,19 @@ static void connectHandler(void* arg, esp_event_base_t event_base,
 	if (*server == NULL) {
 		*server = startWebserver();
 	}
+}
+
+esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
+{
+	ESP_LOGV(kHttpDebugTag, "%s:%s got chunk size=%d", kDebugContext, __func__, (int)aChunkSize);
+
+	return ESP_OK;
+}
+
+void testFileHttpClient()
+{
+	static const char *kFileUrl = "192.168.50.63:8080/genshin_300_0.bin";
+	httpDownloadFileOverHttpGet(kFileUrl, onFileChunkTest);
 }
 
 void httpStart(void)
