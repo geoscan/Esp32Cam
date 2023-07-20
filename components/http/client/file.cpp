@@ -48,6 +48,7 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 			break;
 
 		case HTTP_EVENT_ON_HEADER:
+			// TODO: check header content
 
 			// Produce verbose output, if enabled
 #if CONFIG_HTTP_DEBUG_LEVEL == 5
