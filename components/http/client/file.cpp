@@ -38,11 +38,13 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 {
 	switch (aEspHttpClientEvent->event_id) {
 		case HTTP_EVENT_ON_FINISH:
+			// TODO: handle return value
 			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr, 0);  // The last chunk
 
 			break;
 
 		case HTTP_EVENT_ON_DATA:
+			// TODO: handle return value
 			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
 				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len);
 
@@ -61,6 +63,7 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 			ESP_LOGV(kHttpDebugTag, "%s:%s: Got header: \"%s\"=\"%s\"", kDebugContext, __func__,
 				aEspHttpClientEvent->header_key, aEspHttpClientEvent->header_value);
 #endif
+
 
 			break;
 
