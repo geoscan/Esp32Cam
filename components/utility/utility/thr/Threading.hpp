@@ -118,6 +118,11 @@ public:
 	void start();
 	void suspend();
 	void resume();
+
+	static inline void deleteThisTask()
+	{
+		vTaskDelete(NULL);
+	}
 private:
 	TaskInfo taskInfo;
 
