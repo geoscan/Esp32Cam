@@ -58,7 +58,7 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 
 			// Produce verbose output, if enabled
 #if CONFIG_HTTP_DEBUG_LEVEL == 5
-			ESP_LOGV(kHttpDebugTag, "%s:%s: Got header: \"%s\"=\"%s\"", kDebugContext, __func__, buffer,
+			ESP_LOGV(kHttpDebugTag, "%s:%s: Got header: \"%s\"=\"%s\"", kDebugContext, __func__,
 				aEspHttpClientEvent->header_key, aEspHttpClientEvent->header_value);
 #endif
 
