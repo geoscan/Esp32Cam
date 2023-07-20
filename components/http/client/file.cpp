@@ -42,6 +42,12 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 
 			break;
 
+		case HTTP_EVENT_ON_DATA:
+			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
+				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len);
+
+			break;
+
 		case HTTP_EVENT_ON_CONNECTED:
 			ESP_LOGI(kHttpDebugTag, "%s:%s: Successfully connected", kDebugContext, __func__);
 
@@ -55,12 +61,6 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 			ESP_LOGV(kHttpDebugTag, "%s:%s: Got header: \"%s\"=\"%s\"", kDebugContext, __func__, buffer,
 				aEspHttpClientEvent->header_key, aEspHttpClientEvent->header_value);
 #endif
-
-			break;
-
-		case HTTP_EVENT_ON_DATA:
-			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
-				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len);
 
 			break;
 
