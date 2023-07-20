@@ -5,13 +5,13 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 // TODO: Naming
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL)
 #include <esp_log.h>
 
+#include "http.h"
 #include <esp_http_client.h>
 #include <esp_log.h>
 #include <algorithm>
@@ -19,6 +19,7 @@
 #include "file.h"
 
 static constexpr const char kHttpBufferSize = 128;
+static constexpr const char *kDebugContext = "http/file";
 
 static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t *);
 
@@ -41,9 +42,9 @@ extern "C" esp_err_t httpDownloadFileOverHttpGet(const char *aFileUrl, OnFileChu
 	const esp_err_t espErr = esp_http_client_perform(espHttpClientHandle);
 
 	if (espErr == ESP_OK) {
-		// TODO: handle
+		ESP_LOGV(kHttpDebugTag, "%s:%s: successfully handled HTTP GET request", kDebugContext, __func__);
 	} else {
-		// TODO: handle
+		ESP_LOGE(kHttpDebugTag, "%s:%s: failed to handle HTTP GET request", kDebugContext, __func__);
 	}
 
 	// Teardown routines
