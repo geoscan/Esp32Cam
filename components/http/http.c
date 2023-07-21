@@ -93,17 +93,17 @@ static void connectHandler(void* arg, esp_event_base_t event_base,
 	}
 }
 
-esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
+static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
 {
 	ESP_LOGV(kHttpDebugTag, "%s:%s got chunk size=%d", kDebugContext, __func__, (int)aChunkSize);
 
 	return ESP_OK;
 }
 
-void testFileHttpClient()
+void httpTest()
 {
-	static const char *kFileUrl = "192.168.50.63:8080/genshin_300_0.bin";
-	httpDownloadFileOverHttpGet(kFileUrl, onFileChunkTest);
+	static const char *kFileUrl = "http://192.168.50.63:8080/genshin_300_0.bin";
+	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest);
 }
 
 void httpStart(void)

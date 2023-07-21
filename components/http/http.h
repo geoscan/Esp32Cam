@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void httpStart(void);
+void httpTest(void);
 extern const char *kHttpDebugTag;
 
 inline const char *httpDebugTag()
