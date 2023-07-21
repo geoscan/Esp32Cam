@@ -23,7 +23,10 @@ typedef esp_err_t (*OnFileChunkCallable)(const char *aChunk, size_t aChunkSize);
 /// Downloads a binary file over HTTP.
 ///
 /// \param aOnFileChunkCallable - callback. Gets invoked on each chunk
-esp_err_t httpDownloadFileOverHttpGet(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable);
+esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable);
+
+esp_err_t httpDownloadFileOverHttpGet(const char *aHost, int aPort, const char *aPath,
+	OnFileChunkCallable aOnFileChunkCallable);
 
 #ifdef __cplusplus
 }

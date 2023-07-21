@@ -84,12 +84,43 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 	return ESP_FAIL;
 }
 
-extern "C" esp_err_t httpDownloadFileOverHttpGet(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable)
+extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable)
 {
 	// Init client
 	esp_http_client_config_t espHttpClientConfig{};
 	DownloadFileOverHttpContext downloadFileOverHttpContext {aOnFileChunkCallable};
 	espHttpClientConfig.url = aFileUrl;
+	espHttpClientConfig.event_handler = httpDownloadFileOverHttpGetEventHandler;
+	espHttpClientConfig.user_data = static_cast<void *>(&downloadFileOverHttpContext);
+	esp_http_client_handle_t espHttpClientHandle = esp_http_client_init(&espHttpClientConfig);
+
+	// Download file
+	const esp_err_t espErr = esp_http_client_perform(espHttpClientHandle);
+
+	if (espErr == ESP_OK) {
+		ESP_LOGV(kHttpDebugTag, "%s:%s: successfully handled HTTP GET request", kDebugContext, __func__);
+	} else {
+		ESP_LOGE(kHttpDebugTag, "%s:%s: failed to handle HTTP GET request", kDebugContext, __func__);
+	}
+
+	// Teardown routines
+	esp_http_client_cleanup(espHttpClientHandle);
+
+	return espErr;
+}
+
+extern "C"  esp_err_t httpDownloadFileOverHttpGet(const char *aHost, int aPort, const char *aPath,
+	OnFileChunkCallable aOnFileChunkCallable)
+{
+	// Init client
+	esp_http_client_config_t espHttpClientConfig{};
+	DownloadFileOverHttpContext downloadFileOverHttpContext{aOnFileChunkCallable};
+	espHttpClientConfig.host = aHost;
+	espHttpClientConfig.port = aPort;
+	espHttpClientConfig.path = aPath;
+	espHttpClientConfig.disable_auto_redirect = true;
+	espHttpClientConfig.query = "";
+	espHttpClientConfig.transport_type = HTTP_TRANSPORT_OVER_TCP;
 	espHttpClientConfig.event_handler = httpDownloadFileOverHttpGetEventHandler;
 	espHttpClientConfig.user_data = static_cast<void *>(&downloadFileOverHttpContext);
 	esp_http_client_handle_t espHttpClientHandle = esp_http_client_init(&espHttpClientConfig);
