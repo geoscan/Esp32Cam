@@ -40,8 +40,7 @@ using ModuleRegistry = Rr::Util::ModuleRegistry<ModuleBase, ModuleBaseImpl::Sync
 /// \brief A detachable entity that stores its state in the form of fields of various types.
 ///
 /// A module may unify an entire set of CPP modules, even if those are scattered across the project.
-///
-class ModuleBase :
+class [[deprecated]] ModuleBase :
 	public ModuleBaseImpl::ModuleRegistry,
 	public Rr::Util::MakeModule<typename ModuleBaseImpl::ModuleRegistry>
 {
