@@ -19,24 +19,35 @@ const char *kHttpDebugTag = "[http]";
 static const char *kDebugContext = "http/http";
 
 static const httpd_uri_t pages[] = {
+
+#ifdef CONFIG_HTTP_PAGE_CAMERA_DEMO_ENABLE
 	{
 		.uri      = "/camera/demo",
 		.method   = HTTP_GET,
 		.handler  = cameraDemoHandler,
 		.user_ctx = 0
 	},
+#endif
+
+#ifdef CONFIG_HTTP_PAGE_INFO_ENABLE
 	{
 		.uri = "/info",
 		.method = HTTP_GET,
 		.handler = infoPageHandler,
 		.user_ctx = 0,
 	},
+#endif
+
+#ifdef CONFIG_HTTP_PAGE_CONTROL_ENABLE
 	{
 		.uri      = "/control",
 		.method   = HTTP_GET,
 		.handler  = controlHandler,
 		.user_ctx = 0
 	},
+#endif
+
+#ifdef HTTP_PAGE_FILE_UPLOAD_ENABLE
 	{
 		.uri      = "/fw",
 		.method   = HTTP_GET,
@@ -49,6 +60,7 @@ static const httpd_uri_t pages[] = {
 		.handler  = fwUploadPageHandler,
 		.user_ctx = 0
 	}
+#endif
 };
 
 static const size_t kNpages = sizeof(pages) / sizeof(httpd_uri_t);
