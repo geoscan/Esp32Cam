@@ -18,11 +18,13 @@ const char *kDebugTag = "[camera_recorder]";
 
 void init()
 {
+#ifdef CONFIG_CAMERA_RECORDER_ENABLE
 	static Storage storage{};
 	(void)storage;
 	esp_log_level_set(CameraRecorder::kDebugTag, (esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL);
 	ESP_LOGD(CameraRecorder::kDebugTag, "Debug log test");
 	ESP_LOGV(CameraRecorder::kDebugTag, "Verbose log test");
+#endif
 }
 
 }  // namespace CameraRecorder
