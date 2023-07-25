@@ -32,12 +32,6 @@ static const httpd_uri_t pages[] = {
 		.user_ctx = 0,
 	},
 	{
-		.uri      = "/hello",
-		.method   = HTTP_GET,
-		.handler  = indexPageHandler,
-		.user_ctx = (void*)"Hello World!"
-	},
-	{
 		.uri      = "/control",
 		.method   = HTTP_GET,
 		.handler  = controlHandler,
