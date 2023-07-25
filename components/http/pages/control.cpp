@@ -96,10 +96,6 @@ static struct {
 } status;
 
 static struct {
-	CameraRecorder::RecFrame frame;
-} rec;
-
-static struct {
 	Sub::Cam::ShotFile shotFile;
 } key {{shotFile}};
 
@@ -155,7 +151,7 @@ static Error processVideoRecord(std::string command, std::string name)
 	if (!CameraRecorder::RecMjpgAvi::checkInstance()) {
 		ESP_LOGE(kHttpDebugTag, "control: `CameraRecorder` is not initialized");
 
-		return ErrOther;
+		return Err;
 	}
 
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
@@ -183,6 +179,12 @@ static Error processVideoRecord(std::string command, std::string name)
 
 static Error processPhoto(std::string name)
 {
+	if (!CameraRecorder::RecFrame::checkInstance()) {
+		ESP_LOGD(kHttpDebugTag, "control: cannot processPhoto, `RecFrame` is not initialized");
+
+		return Err;
+	}
+
 	static constexpr const char *kJpg = ".jpg";
 
 	sdFatInit();
@@ -195,7 +197,7 @@ static Error processPhoto(std::string name)
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(kJpg);
 
-	return rec.frame.start(name.c_str()) ? Ok : Err;
+	return CameraRecorder::RecFrame::getInstance().start(name.c_str()) ? Ok : Err;
 }
 
 static Error processWifi(std::string aCommand, std::string aSsid, std::string aPassword, std::string aIp, std::string aGateway, std::string aNetmask)
