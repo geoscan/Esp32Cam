@@ -96,8 +96,7 @@ static struct {
 } status;
 
 static struct {
-	CameraRecorder::RecMjpgAvi mjpgAvi;
-	CameraRecorder::RecFrame   frame;
+	CameraRecorder::RecFrame frame;
 } rec;
 
 static struct {
@@ -106,8 +105,10 @@ static struct {
 
 static void wifiDisconnectHandler(Sub::Key::WifiDisconnected::Type)
 {
-	rec.mjpgAvi.stop();
-	status.videoRecRunning = false;
+	if (CameraRecorder::RecMjpgAvi::checkInstance()) {
+		CameraRecorder::RecMjpgAvi::getInstance().stop();
+		status.videoRecRunning = false;
+	}
 }
 
 static Sub::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
@@ -151,6 +152,12 @@ static Error processVideoStream()
 
 static Error processVideoRecord(std::string command, std::string name)
 {
+	if (!CameraRecorder::RecMjpgAvi::checkInstance()) {
+		ESP_LOGE(kHttpDebugTag, "control: `CameraRecorder` is not initialized");
+
+		return ErrOther;
+	}
+
 	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
 	name.append(".avi");
 	sdFatInit();
@@ -160,13 +167,13 @@ static Error processVideoRecord(std::string command, std::string name)
 	ESP_LOGI("[http]", "command: %s, name: %s", command.c_str(), name.c_str());
 
 	if (command == "start" && !status.videoRecRunning) {
-		if (rec.mjpgAvi.start(name.c_str())) {
+		if (CameraRecorder::RecMjpgAvi::getInstance().start(name.c_str())) {
 			status.videoRecRunning = true;
 			return Ok;
 		}
 		return Err;
 	} else if (command == "stop" && status.videoRecRunning) {
-		rec.mjpgAvi.stop();
+		CameraRecorder::RecMjpgAvi::getInstance().stop();
 		status.videoRecRunning = false;
 	} else {
 		return Err;
