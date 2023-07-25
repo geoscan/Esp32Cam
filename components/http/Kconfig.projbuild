@@ -21,6 +21,22 @@ menu "[http]"
 
 	endchoice
 
+	config HTTP_PAGE_CAMERA_DEMO_ENABLE
+		bool "Enable camera demo page"
+		default y
+
+	config HTTP_PAGE_INFO_ENABLE
+		bool "Enable info page"
+		default y
+
+	config HTTP_PAGE_CONTROL_ENABLE
+		bool "Enable control page"
+		default y
+
+	config HTTP_PAGE_FILE_UPLOAD_ENABLE
+		bool "Enable file upload page"
+		default n
+
 	config HTTP_DEBUG_LEVEL
 		int
 		default 1 if HTTP_DEBUG_LEVEL_ERROR
