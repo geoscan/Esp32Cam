@@ -21,6 +21,7 @@ using namespace CameraStreamer;
 
 void cameraStreamerStart(asio::io_context &context)
 {
+#ifdef CONFIG_CAMSTREAM_ENABLE
 	static asio::ip::tcp::socket tcpSocket(context);
 	static asio::ip::tcp::acceptor acceptor(context, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), CONFIG_CAMSTREAM_SOURCE_TCP_PORT));
 	static asio::ip::udp::socket udpSocket(context, asio::ip::udp::endpoint(asio::ip::udp::v4(), CONFIG_CAMSTREAM_SOURCE_UDP_PORT));
@@ -30,4 +31,5 @@ void cameraStreamerStart(asio::io_context &context)
 
 	Ut::Thr::setThreadCoreAffinity(0);
 	static std::thread threadCameraStreamTcpControl(&CameraStreamTcpControl::operator(), &cameraStreamTcpControl);
+#endif
 }
