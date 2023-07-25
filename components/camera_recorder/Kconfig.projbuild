@@ -1,5 +1,9 @@
 menu "[camera_recorder]"
 
+	config CAMERA_RECORDER_ENABLE
+		bool "Enable camera recording"
+		default y
+
 	choice CAMERA_RECORDER_DEBUG_LEVEL
 		prompt "[camera_recorder] module debug level"
 		default CAMERA_RECORDER_DEBUG_LEVEL_INFO
@@ -18,7 +22,6 @@ menu "[camera_recorder]"
 
 		config CAMERA_RECORDER_DEBUG_LEVEL_VERBOSE
 			bool "Verbose"
-
 
 	endchoice
 
