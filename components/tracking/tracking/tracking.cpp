@@ -36,6 +36,7 @@ static void apiInit()
 
 void init()
 {
+#ifdef CONFIG_TRACKING_INIT
 	apiInit();
 	logInit();
 #if CONFIG_TRACKING_RUN_PROFILE
@@ -43,18 +44,23 @@ void init()
 #else
 	trackingInit();
 #endif
+#endif
 }
 
 static void trackingInit()
 {
+#ifdef CONFIG_TRACKING_INIT
 	static Trk::Tracking tracking;
 	(void)tracking;
+#endif
 }
 
 void profileInit()
 {
+#ifdef CONFIG_TRACKING_INIT
 	static Profile profile;
 	(void)profile;
+#endif
 }
 
 }  // namespace Trk
