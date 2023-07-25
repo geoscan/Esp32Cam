@@ -1,5 +1,9 @@
 menu "[tracking]"
 
+	config TRACKING_ENABLE
+		bool "Enable tracking"
+		default n
+
 	choice TRACKING_DEBUG_LEVEL
 		prompt "[tracking] module debug level"
 		default TRACKING_DEBUG_LEVEL_INFO
@@ -59,7 +63,7 @@ menu "[tracking]"
 
 			config TRACKING_RUN_PROFILE_TYPE_CAMERA
 				bool "Short sequence: Camera driver (Measure camera performance)"
-			
+
 		endchoice
 
 	endif
