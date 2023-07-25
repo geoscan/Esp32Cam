@@ -1,5 +1,9 @@
 menu "[camera_streamer]"
 
+	config CAMSTREAM_ENABLE
+		bool "Enable camera_streamer"
+		default y
+
 	config CAMSTREAM_SOURCE_UDP_PORT
 		int "Default port device uses for sending frames"
 		default 8888
