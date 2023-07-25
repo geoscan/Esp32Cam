@@ -26,6 +26,7 @@ static void cameraThreadTask(void *)
 
 void cameraThreadInit()
 {
+#if !CONFIG_DRIVER_OV2640_USE_HOOKS
 	ESP_LOGI(kDebugTag, "Initializing");
 	static TaskHandle_t taskHandle;
 	constexpr std::size_t kStackSize = 1024 * 3;
@@ -33,4 +34,5 @@ void cameraThreadInit()
 	constexpr UBaseType_t kPriority = Ut::Thr::FreertosTask::PriorityLowest + 1;
 	xTaskCreatePinnedToCore(cameraThreadTask, "camera_thread", kStackSize, kArg, kPriority, &taskHandle,
 		CONFIG_CAMERA_THREAD_PIN_TO_CORE);
+#endif
 }
