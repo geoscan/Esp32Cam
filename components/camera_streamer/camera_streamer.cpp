@@ -8,13 +8,14 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include <memory>
-#include <thread>
-
 #include "utility/thr/Threading.hpp"
 #include "camera_streamer.h"
 #include "CameraStreamTcpControl.hpp"
 #include "FrameSender.hpp"
+
+#include <memory>
+#include <sdkconfig.h>
+#include <thread>
 
 using namespace CameraStreamer;
 
