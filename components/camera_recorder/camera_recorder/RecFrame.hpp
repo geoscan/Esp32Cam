@@ -11,10 +11,11 @@
 #include <chrono>
 #include "Record.hpp"
 #include "utility/thr/Semaphore.hpp"
+#include "utility/MakeSingleton.hpp"
 
 namespace CameraRecorder {
 
-class RecFrame : public Record {
+class RecFrame : public Record, public Ut::MakeSingleton<RecFrame> {
 private:
 	FILE *file;
 	struct {
