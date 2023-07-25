@@ -196,7 +196,15 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 ///
 static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid, const char *aPassword)
 {
-	esp_netif_create_default_wifi_ap();
+	static auto *espNetifAp = esp_netif_create_default_wifi_ap();
+	esp_netif_dhcps_stop(espNetifAp);
+	static const esp_netif_ip_info_t espNetifIpInfo{
+		{0x010aa8c0},
+		{0x00ffffff},
+		{0x010aa8c0},
+	};
+	esp_netif_set_ip_info(espNetifAp, &espNetifIpInfo);
+	esp_netif_dhcps_start(espNetifAp);
 	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
 	// TODO:  Initialize ssid_len, to prevent overflows
