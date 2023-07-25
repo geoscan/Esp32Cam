@@ -9,9 +9,10 @@
 #define CAMERA_RECORDER_CAMERA_RECORDER_RECMJPGAVI_H
 
 #include "Record.hpp"
-#include "utility/thr/Semaphore.hpp"
-#include "sub/Cam.hpp"
 #include "module/ModuleBase.hpp"
+#include "sub/Cam.hpp"
+#include "utility/MakeSingleton.hpp"
+#include "utility/thr/Semaphore.hpp"
 #include <type_traits>
 #include <chrono>
 #include <cmath>
@@ -22,7 +23,7 @@ extern "C" {
 
 namespace CameraRecorder {
 
-class RecMjpgAvi : public Record, public Mod::ModuleBase {
+class RecMjpgAvi : public Record, public Mod::ModuleBase, public Ut::MakeSingleton<RecMjpgAvi> {
 private:
 	static constexpr std::size_t kFrameRegCount = 200;
 	struct {
