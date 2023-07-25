@@ -102,7 +102,7 @@ static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
 
 void httpTest()
 {
-	static const char *kFileUrl = "http://192.168.50.63:8080/genshin_300_0.bin";
+	static const char *kFileUrl = "http://192.168.4.1:9000/testbins/interactiv/test_0.bin";
 	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest);
 }
 
