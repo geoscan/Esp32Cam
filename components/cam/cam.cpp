@@ -20,8 +20,10 @@ static void init()
 
 void camInit()
 {
+#ifdef CONFIG_CAM_ENABLE
 #ifdef CONFIG_CAM_MODEL_OV2640
 	init<Ov2640>();
 #else
 #endif // CONFIG_CAM_MODEL_OV2640
+#endif  // CONFIG_CAM_ENABLE
 }
