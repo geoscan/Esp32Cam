@@ -10,17 +10,19 @@
 #include "wifi/Ap.hpp"
 #include "utility/al/Algorithm.hpp"
 #include "utility/time.hpp"
+#include <asio.hpp>
 #include <esp_event.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
 #include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
 #include <freertos/event_groups.h>
-#include <nvs_flash.h>
-#include <string.h>
-#include <stdlib.h>
+#include <freertos/task.h>
 #include <lwip/err.h>
 #include <lwip/sys.h>
+#include <nvs_flash.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 // https://en.wikipedia.org/wiki/Service_set_(802.11_network)
 #define SSID_MAX_LENGTH    32
@@ -188,6 +190,43 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 	return err;
 }
 
+static esp_err_t espNetifSetIpInfoFromStringIp(esp_netif_t &aEspNetif, const char *aIp, const char *aNetmask)
+{
+	int ip = 0;
+	int netmask = 0;
+	int gateway = 0;
+	asio::error_code asioErrorCode{};
+
+	// Try parse IP
+	ip = asio::ip::address_v4::from_string(aIp, asioErrorCode).to_uint();
+
+	if (asioErrorCode) {
+		ESP_LOGE(Wifi::kDebugTag, "%s: unable to parse IP %s", __func__, aIp);
+
+		return ESP_FAIL;
+	} else {
+		gateway = ip;  // AP is the gateway
+	}
+
+	// Try parse netmask
+	netmask = asio::ip::address_v4::from_string(aNetmask, asioErrorCode).to_uint();
+
+	if (asioErrorCode) {
+		ESP_LOGE(Wifi::kDebugTag, "%s: unable to parse netmask %s", __func__, aNetmask);
+
+		return ESP_FAIL;
+	}
+
+	// Apply IP settings
+	const esp_netif_ip_info_t espNetifIpInfo{
+		{htonl(ip)},
+		{htonl(netmask)},
+		{htonl(gateway)},
+	};
+
+	return esp_netif_set_ip_info(&aEspNetif, &espNetifIpInfo);
+}
+
 ///
 /// \brief wifiConfigApConnection Sets and applies AP-related configs
 /// \param aMaxClients
@@ -197,14 +236,21 @@ esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword,
 static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid, const char *aPassword)
 {
 	static auto *espNetifAp = esp_netif_create_default_wifi_ap();
+
+	// Apply custom IP settings
 	esp_netif_dhcps_stop(espNetifAp);
-	static const esp_netif_ip_info_t espNetifIpInfo{
-		{0x010aa8c0},
-		{0x00ffffff},
-		{0x010aa8c0},
-	};
-	esp_netif_set_ip_info(espNetifAp, &espNetifIpInfo);
+
+	if (espNetifSetIpInfoFromStringIp(*espNetifAp, CONFIG_WIFI_ACCESS_POINT_IP,
+			CONFIG_WIFI_ACCESS_POINT_IP_NETMASK) != ESP_OK) {
+		ESP_LOGW(Wifi::kDebugTag, "%s: failed to apply specified ip/netmask %s/%s", __func__,
+			CONFIG_WIFI_ACCESS_POINT_IP, CONFIG_WIFI_ACCESS_POINT_IP_NETMASK);
+		assert(false);
+	}
+
+	// Restart DHCP
 	esp_netif_dhcps_start(espNetifAp);
+
+	// Configure access point
 	const bool usePassword = !(aPassword == NULL || strlen(aPassword) == 0);
 	memset(&sApWifiConfig, 0, sizeof(sApWifiConfig));
 	// TODO:  Initialize ssid_len, to prevent overflows
