@@ -32,7 +32,7 @@ menu "[wifi]"
             WiFi channel (network channel) for the example to use.
 
     config ESP_MAX_STA_CONN
-        int "Maximal STA connections"
+        int "Maximum STA connections (clients to the AP)"
         default 1
         help
             Max number of the STA connects to AP.
