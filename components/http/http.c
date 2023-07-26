@@ -91,6 +91,7 @@ static void disconnectHandler(void* arg, esp_event_base_t event_base, int32_t ev
 {
 	httpd_handle_t* server = (httpd_handle_t*) arg;
 	if (*server) {
+		ESP_LOGI(kHttpDebugTag, "%s: stopping webserver", __func__);
 		stopWebserver(*server);
 		*server = NULL;
 	}
