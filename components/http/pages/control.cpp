@@ -99,16 +99,6 @@ static struct {
 	Sub::Cam::ShotFile shotFile;
 } key {{shotFile}};
 
-static void wifiDisconnectHandler(Sub::Key::WifiDisconnected::Type)
-{
-	if (CameraRecorder::RecMjpgAvi::checkInstance()) {
-		CameraRecorder::RecMjpgAvi::getInstance().stop();
-		status.videoRecRunning = false;
-	}
-}
-
-static Sub::Key::WifiDisconnected keyWifiDisconnected{wifiDisconnectHandler};
-
 static bool shotFile(const char *aName)
 {
 	return Ok == processPhoto(aName);
