@@ -14,10 +14,9 @@ namespace CameraRecorder {
 
 static constexpr const char *kLogPreamble = "CameraRecorder::StopRecordingWifiDisconnectHandler";
 
-StopRecordingWifiDisconnectHandler::StopRecordingWifiDisconnectHandler() :
-	subscription{
-		{&StopRecordingWifiDisconnectHandler::onWifiDisconnected, this}
-	}
+StopRecordingWifiDisconnectHandler::StopRecordingWifiDisconnectHandler(Record *aRecord):
+	subscription{*this},
+	record{aRecord}
 {
 }
 
@@ -42,6 +41,16 @@ void StopRecordingWifiDisconnectHandler::onWifiDisconnected(asio::ip::address)
 {
 	stopTimer();
 	startOnce(kReestablishWifiConnectionTimeout);
+}
+
+StopRecordingWifiDisconnectHandler::Subscription::Subscription(StopRecordingWifiDisconnectHandler &aOwner):
+	onWifiDisconnected{&StopRecordingWifiDisconnectHandler::onWifiDisconnected, &aOwner}
+{
+}
+
+StopRecordingWifiDisconnectHandler::Subscription::~Subscription()
+{
+	onWifiDisconnected.setEnabled(false);
 }
 
 }  // CameraRecorder

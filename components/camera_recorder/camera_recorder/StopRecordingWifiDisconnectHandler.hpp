@@ -26,11 +26,12 @@ private:
 		Wifi::Sub::Disconnected onWifiDisconnected;
 
 		Subscription(StopRecordingWifiDisconnectHandler &aOwner);
+		~Subscription();
 	};
 
 public:
 	StopRecordingWifiDisconnectHandler(Record *aRecord);
-	~StopRecordingWifiDisconnectHandler();
+	~StopRecordingWifiDisconnectHandler() = default;
 
 	/// Handle timeout: stop the recording
 	void onHrTimer() override;
