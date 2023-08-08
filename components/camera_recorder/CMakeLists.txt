@@ -1,4 +1,4 @@
-file(GLOB SOURCES *.c *.cpp)
+file(GLOB SOURCES *.c *.cpp camera_recorder/*.cpp)
 
 idf_component_register(
 	SRCS
