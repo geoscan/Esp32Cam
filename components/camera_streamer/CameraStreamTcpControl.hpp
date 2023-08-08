@@ -13,6 +13,7 @@
 
 #include <esp_event.h>
 #include <map>
+#include "wifi/Sub.hpp"
 #include "sub/Subscription.hpp"
 
 namespace CameraStreamer {
@@ -27,17 +28,15 @@ private:
 
 	void handleApClientDisconnected(asio::ip::address);  // Handle end of client's Wi-Fi connection
 
-	static void handleApClientDisconnected(void *arg, esp_event_base_t, int32_t, void *data);  // Handle end of client's Wi-Fi connection
-
 	struct {
 		asio::ip::tcp::socket   &socket;
 		asio::ip::tcp::acceptor &acceptor;
 	} tcp;
 
 	struct {
-		Sub::Key::TcpConnected     tcpConnected;
-		Sub::Key::TcpDisconnected  tcpDisconnected;
-		Sub::Key::WifiDisconnected wifiDisconnected;
+		Sub::Key::TcpConnected tcpConnected;
+		Sub::Key::TcpDisconnected tcpDisconnected;
+		Wifi::Sub::Disconnected wifiDisconnected;
 	} key;
 
 };

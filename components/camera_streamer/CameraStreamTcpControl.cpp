@@ -23,16 +23,10 @@ CameraStreamTcpControl::CameraStreamTcpControl(asio::ip::tcp::acceptor &tcpAccep
 	tcp{tcpSocket, tcpAcceptor},
 	key{{}, {}, {&CameraStreamTcpControl::handleApClientDisconnected, this}}
 {
-	if (++instances == 1) {
-		esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, CameraStreamTcpControl::handleApClientDisconnected, nullptr);
-	}
 }
 
 CameraStreamTcpControl::~CameraStreamTcpControl()
 {
-	if (instances-- == 1) {  // last man standing
-		esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_AP_STADISCONNECTED, CameraStreamTcpControl::handleApClientDisconnected);
-	}
 }
 
 void CameraStreamTcpControl::operator()()
@@ -77,13 +71,4 @@ void CameraStreamTcpControl::operator()()
 void CameraStreamTcpControl::handleApClientDisconnected(asio::ip::address)
 {
 	tcp.socket.close();
-}
-
-void CameraStreamTcpControl::handleApClientDisconnected(void */*nullptr*/, esp_event_base_t, int32_t, void *data)
-{
-	ip4_addr_t ipAddress;
-	dhcp_search_ip_on_mac(reinterpret_cast<system_event_ap_stadisconnected_t *>(data)->mac, &ipAddress);
-
-	Sub::Key::WifiDisconnected key;
-	key.notify(asio::ip::address_v4(ntohl(ipAddress.addr)));
 }
