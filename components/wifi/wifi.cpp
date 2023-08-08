@@ -29,6 +29,10 @@
 #define SSID_MAX_LENGTH    32
 #define MAC_LENGTH         6
 
+#if CONFIG_ESP_MAX_STA_CONN > ESP_WIFI_MAX_CONN_NUM
+# error "The maximum number of Wi-Fi connections to AP has been exceeded"
+#endif
+
 #define min(a,b) (a<b?a:b)
 
 #define CUSTOM_ESP_ERR_RETURN(x)  \
@@ -147,7 +151,7 @@ static void staHandler(void* arg, esp_event_base_t, int32_t eventId, void* event
 /// \brief wifiStaConnect Tries to connect to an Access Point. The parameters
 /// are the same as for \ref wifiConfigStaConnection
 ///
-esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, const uint8_t ip[4] = nullptr,
+extern "C" esp_err_t wifiStaConnect(const char *targetApSsid, const char *targetApPassword, const uint8_t ip[4] = nullptr,
 	const uint8_t gateway[4] = nullptr, const uint8_t netmask[4] = nullptr)
 {
 	// Disconnect from an AP
@@ -344,7 +348,7 @@ void wifi_init_sta(void)
 	ESP_ERROR_CHECK(esp_wifi_start() );
 }
 
-void wifiStart(void)
+extern "C" void wifiStart(void)
 {
 	static Wifi::DisconnectHandler disconnectHandler{};
 	esp_log_level_set(Wifi::kDebugTag, static_cast<esp_log_level_t>(LOG_LOCAL_LEVEL));
@@ -356,4 +360,20 @@ void wifiStart(void)
 	sta.tryFetchConnect();
 	(void)sta;
 	(void)ap;
+}
+
+extern "C" esp_err_t wifiApCountConnectedStations(unsigned long *aStations)
+{
+	wifi_sta_list_t wifiStaList{};
+
+	const esp_err_t result = esp_wifi_ap_get_sta_list(&wifiStaList);
+
+	if (result != ESP_OK) {
+		ESP_LOGE(Wifi::kDebugTag, "%s: unable to get Wi-Fi connected stations list error=%d", __func__,
+			static_cast<int>(result));
+	} else {
+		*aStations = wifiStaList.num;
+	}
+
+	return result;
 }
