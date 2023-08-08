@@ -36,7 +36,7 @@ void DisconnectHandler::onDisconnected(void *aData)
 {
 	// Check the availability of the context
 	if (aData == nullptr) {
-		ESP_LOGE(Wifi::kDebugTag, "%s:%s event has been triggered, but no context provided (nullptr). Skipping",
+		ESP_LOGE(Wifi::kDebugTag, "%s::%s event has been triggered, but no context provided (nullptr). Skipping",
 			kLogPreamble, __func__);
 
 		return;
@@ -47,7 +47,7 @@ void DisconnectHandler::onDisconnected(void *aData)
 
 	if (!dhcp_search_ip_on_mac(reinterpret_cast<system_event_ap_stadisconnected_t *>(aData)->mac, &ipAddress)) {
 		ESP_LOGE(Wifi::kDebugTag,
-			"%s:%s: Unable to restore corresponding IP from MAC %02X%02X%02X%02X%02X%02X. Skipping",
+			"%s::%s: Unable to restore corresponding IP from MAC %02X%02X%02X%02X%02X%02X. Skipping",
 			kLogPreamble, __func__,
 			reinterpret_cast<system_event_ap_stadisconnected_t *>(aData)->mac[0],
 			reinterpret_cast<system_event_ap_stadisconnected_t *>(aData)->mac[1],
@@ -60,7 +60,7 @@ void DisconnectHandler::onDisconnected(void *aData)
 	}
 
 	const auto asioIp = asio::ip::address_v4(ntohl(ipAddress.addr));
-	ESP_LOGI(Wifi::kDebugTag, "%s:%s: Disconnected IP=%d.%d.%d.%d MAC=%02X%02X%02X%02X%02X%02X", kLogPreamble, __func__,
+	ESP_LOGI(Wifi::kDebugTag, "%s::%s: IP=%d.%d.%d.%d MAC=%02X%02X%02X%02X%02X%02X", kLogPreamble, __func__,
 			reinterpret_cast<std::uint8_t *>(&ipAddress.addr)[0],
 			reinterpret_cast<std::uint8_t *>(&ipAddress.addr)[1],
 			reinterpret_cast<std::uint8_t *>(&ipAddress.addr)[2],
