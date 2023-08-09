@@ -106,8 +106,9 @@ static void connectHandler(void* arg, esp_event_base_t event_base,
 	}
 }
 
-static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
+static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize, void *aData)
 {
+	(void)aData;
 	ESP_LOGV(kHttpDebugTag, "%s:%s got chunk size=%d", kDebugContext, __func__, (int)aChunkSize);
 
 	return ESP_OK;
@@ -116,7 +117,7 @@ static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
 void httpTest()
 {
 	static const char *kFileUrl = "http://192.168.4.1:9000/testbins/interactiv/test_0.bin";
-	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest, nullptr);
+	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest, 0);
 }
 
 void httpStart(void)
