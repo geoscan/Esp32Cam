@@ -2,8 +2,8 @@ file(GLOB
 	SOURCE_FILES
 		"*.c"
 		"*.cpp"
-		"client/*.c"
-		"client/*.cpp"
+		"http/client/*.c"
+		"http/client/*.cpp"
 		"http/*.c"
 		"http/*.cpp"
 		"pages/*.c"
