@@ -26,23 +26,36 @@ private:
 	/// \brief Encapsulates the context passed along with
 	/// `onHttpFileDownloadChunk`. See `http/client` API for more info.
 	struct HttpDownloadContext {
+		BufferedFileTransfer &owner;
+
+		/// Boilerplate-reducing helper
+		static inline HttpDownloadContext &castFromVoid(void *aHttpDownloadContext)
+		{
+			return *static_cast<HttpDownloadContext *>(aHttpDownloadContext);
+		}
 	};
 
 	enum class Stage {
 		/// Waiting for a request
 		Idle,
 
-		/// In the process of fetching the binary file over HTTP
-		ReceivingHttp,
-
-		/// The file has been received successfully
-		NotifyingSubscribers,
+		/// Got file size. Expecting chunks
+		Receiving,
 	};
 
 	/// Encapsulates the buffered file transfer process at the Mav's side
 	struct State {
 		Bft::File bftFile;
 		Stage stage;
+
+		/// If in `Idle` state, will try to allocate resources
+		esp_err_t transferIntoReceiving(std::size_t aFileSize); // TODO implement
+
+		/// Deallocates all the resources, and falls back to the initial state.
+		/// It is guaranteed to be able to do so from whatever state.
+		void transferIntoIdle();  // TODO implement
+
+		esp_err_t handleFileChunk(const char *aBuffer, std::size_t aBufferSize);
 	};
 
 public:

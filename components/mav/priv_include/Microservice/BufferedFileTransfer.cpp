@@ -99,7 +99,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 
 	// TODO: allocate the buffer after receiving content length header
 
-	HttpDownloadContext httpDownloadContext{};
+	HttpDownloadContext httpDownloadContext{*this};
 	const auto httpDownloadEspErr = httpDownloadFileOverHttpGetByUrl(url, onHttpFileDownloadChunk,
 		static_cast<void *>(&httpDownloadContext));
 
@@ -123,6 +123,40 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	aOnResponse(aMavlinkMessage);
 
 	return Ret::Response;
+}
+
+esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData)
+{
+	esp_err_t espErr = ESP_OK;
+
+	if (aChunk == nullptr) {  // Check if this call is the announcement of the expected binary length (see `http` API). Knowing the expected length is crucial for allocating enough space
+		if (aChunkSize > 0) {
+			espErr = HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoReceiving(aChunkSize);
+
+			if (espErr != ESP_OK) {  // Cannot transfer into `Receiving` state. Most likely, unable to allocate memory
+				ESP_LOGE(Mav::kDebugTag,
+					"%s::%s: failed to transfer into receiving state, error=%d, stopping the process",
+					kLogPreamble, __func__, static_cast<int>(espErr));
+				HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+			}
+		} else {  // Wrong arguments: file size=0
+			ESP_LOGE(Mav::kDebugTag, "%s::%s: invalid announced file size=0", kLogPreamble, __func__);
+			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+			espErr = ESP_FAIL;
+		}
+	} else if (aChunkSize == 0 ) {  // Check if the transmission has been completed
+		HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+		espErr = ESP_OK;
+	} else {  // Regular transmission
+		espErr = HttpDownloadContext::castFromVoid(aData).owner.state.handleFileChunk(aChunk, aChunkSize);
+
+		if (espErr != ESP_OK) {
+			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+			ESP_LOGE(Mav::kDebugTag, "%s::%s Unable to handle file chunk. Stopping", kLogPreamble, __func__);
+		}
+	}
+
+	return espErr;
 }
 
 static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
