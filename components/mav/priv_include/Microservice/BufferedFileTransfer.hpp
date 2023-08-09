@@ -13,6 +13,7 @@
 #include "Microservice.hpp"
 #include "buffered_file_transfer/BufferedFileTransfer.hpp"
 #include <esp_err.h>
+#include <array>
 #include <cstdint>
 
 namespace Mav {
@@ -36,26 +37,42 @@ private:
 	};
 
 	enum class Stage {
-		/// Waiting for a request
-		Idle,
+		/// Waiting for a MAVLink request
+		MavlinkInitial = 0,
+
+		/// Expecting HTTP file size
+		HttpInitial,
 
 		/// Got file size. Expecting chunks
-		Receiving,
+		HttpReceiving,
 	};
 
 	/// Encapsulates the buffered file transfer process at the Mav's side
 	struct State {
-		Bft::File bftFile;
 		Stage stage;
 
+		/// \pre Relies on the assumption that members stored here have
+		/// non-RAII construction / destruction semantics
+		union {
+			struct HttpInitial {
+				std::array<char, 32> fileName;
+			} httpInitial;
+
+			struct {
+				Bft::File file;
+			} httpReceiving;
+		} stageState;
+
 		/// If in `Idle` state, will try to allocate resources
-		esp_err_t transferIntoReceiving(std::size_t aFileSize); // TODO implement
+		esp_err_t transferIntoHttpReceiving(std::size_t aFileSize);
+
+		esp_err_t transferIntoHttpInitial(const char *aFileName);  // TODO: not invoked
 
 		/// Deallocates all the resources, and falls back to the initial state.
 		/// It is guaranteed to be able to do so from whatever state.
-		void transferIntoIdle();  // TODO implement
+		void transferIntoMavlinkInitial();  // TODO implement
 
-		esp_err_t handleFileChunk(const char *aBuffer, std::size_t aBufferSize);
+		esp_err_t onFileChunk(const char *aBuffer, std::size_t aBufferSize);
 	};
 
 public:

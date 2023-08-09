@@ -131,27 +131,27 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 
 	if (aChunk == nullptr) {  // Check if this call is the announcement of the expected binary length (see `http` API). Knowing the expected length is crucial for allocating enough space
 		if (aChunkSize > 0) {
-			espErr = HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoReceiving(aChunkSize);
+			espErr = HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoHttpReceiving(aChunkSize);
 
 			if (espErr != ESP_OK) {  // Cannot transfer into `Receiving` state. Most likely, unable to allocate memory
 				ESP_LOGE(Mav::kDebugTag,
 					"%s::%s: failed to transfer into receiving state, error=%d, stopping the process",
 					kLogPreamble, __func__, static_cast<int>(espErr));
-				HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+				HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 			}
 		} else {  // Wrong arguments: file size=0
 			ESP_LOGE(Mav::kDebugTag, "%s::%s: invalid announced file size=0", kLogPreamble, __func__);
-			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 			espErr = ESP_FAIL;
 		}
 	} else if (aChunkSize == 0 ) {  // Check if the transmission has been completed
-		HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+		HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 		espErr = ESP_OK;
 	} else {  // Regular transmission
-		espErr = HttpDownloadContext::castFromVoid(aData).owner.state.handleFileChunk(aChunk, aChunkSize);
+		espErr = HttpDownloadContext::castFromVoid(aData).owner.state.onFileChunk(aChunk, aChunkSize);
 
 		if (espErr != ESP_OK) {
-			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoIdle();
+			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 			ESP_LOGE(Mav::kDebugTag, "%s::%s Unable to handle file chunk. Stopping", kLogPreamble, __func__);
 		}
 	}
@@ -178,6 +178,113 @@ static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
 static inline int mavlinkMessageFetchFileGetFileId(const mavlink_message_t &aMavlinkMessage)
 {
 	return static_cast<int>(mavlink_msg_command_long_get_param1(&aMavlinkMessage));
+}
+
+esp_err_t BufferedFileTransfer::State::transferIntoHttpReceiving(std::size_t aFileSize)
+{
+	esp_err_t result = ESP_OK;
+
+	// Check whether the operation is appropriate from the current stage
+	switch (stage) {
+		case Stage::HttpInitial: {
+			stageState.httpReceiving.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(
+				stageState.httpInitial.fileName.data(), aFileSize);
+
+			if (stageState.httpReceiving.file.isValid()) {
+				ESP_LOGE(Mav::kDebugTag, "%s::%s: failed to open file, name=\"%s\", size=%d", kLogPreamble, __func__,
+					stageState.httpInitial.fileName.data(), aFileSize);
+				result = ESP_FAIL;
+			}
+
+			break;
+		}
+
+		default:
+			ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot transfer into state", kLogPreamble, __func__);
+			result = ESP_ERR_INVALID_STATE;
+
+			break;
+	}
+
+	stage = Stage::HttpReceiving;
+
+	return result;
+}
+
+esp_err_t BufferedFileTransfer::State::transferIntoHttpInitial(const char *aFileName)
+{
+	esp_err_t result = ESP_OK;
+
+	switch (stage) {
+		case Stage::MavlinkInitial: {
+			const std::size_t aFileNameLength = strlen(aFileName);
+
+			if (aFileNameLength >= stageState.httpInitial.fileName.size()) {
+				result = ESP_ERR_NO_MEM;
+			}
+
+			break;
+		}
+
+		default:
+			result = ESP_ERR_INVALID_STATE;
+			ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot transfer into state", kLogPreamble, __func__);
+
+			break;
+	}
+
+	stage = Stage::HttpInitial;
+
+	return result;
+}
+
+void BufferedFileTransfer::State::transferIntoMavlinkInitial()
+{
+	switch (stage) {
+		case Stage::HttpReceiving: {
+			stageState.httpReceiving.file.close();
+
+			break;
+		}
+
+		default:
+			break;
+	}
+
+	stage = Stage::MavlinkInitial;
+}
+
+esp_err_t BufferedFileTransfer::State::onFileChunk(const char *aBuffer, std::size_t aBufferSize)
+{
+	esp_err_t result = ESP_OK;
+
+	switch (stage) {
+		case Stage::HttpReceiving: {
+			if (stageState.httpReceiving.file.isValid()) {
+				const auto nWritten = stageState.httpReceiving.file.append(
+					reinterpret_cast<const std::uint8_t *>(aBuffer), aBufferSize);
+
+				if (nWritten != aBufferSize) {
+					ESP_LOGE(Mav::kDebugTag,
+						"%s::%s: failed to write file chunk, chunk size=%d, actual written chunk length=%d",
+						kLogPreamble, __func__, aBufferSize, nWritten);
+				}
+			} else {
+				ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot write into file, the file is invalid", kLogPreamble, __func__);
+			}
+
+			break;
+		}
+
+		default:
+			result = ESP_ERR_INVALID_STATE;
+			ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot handle file chunk on this stage=Stage::HttpReceiving",
+				kLogPreamble, __func__);
+
+			break;
+	}
+
+	return result;
 }
 
 }  // Mic
