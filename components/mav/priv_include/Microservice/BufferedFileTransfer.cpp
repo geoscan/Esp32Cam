@@ -97,8 +97,6 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 		return Ret::Response;
 	}
 
-	// TODO: allocate the buffer after receiving content length header
-
 	HttpDownloadContext httpDownloadContext{*this};
 	const auto httpDownloadEspErr = httpDownloadFileOverHttpGetByUrl(url, onHttpFileDownloadChunk,
 		static_cast<void *>(&httpDownloadContext));

@@ -70,7 +70,7 @@ private:
 
 		/// Deallocates all the resources, and falls back to the initial state.
 		/// It is guaranteed to be able to do so from whatever state.
-		void transferIntoMavlinkInitial();  // TODO implement
+		void transferIntoMavlinkInitial();
 
 		esp_err_t onFileChunk(const char *aBuffer, std::size_t aBufferSize);
 	};
@@ -95,7 +95,6 @@ private:
 
 
 	/// \brief Callback, a part of `http` client API. \sa "http/client/file.h"
-	/// TODO implement
 	static esp_err_t onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData);
 
 private:
