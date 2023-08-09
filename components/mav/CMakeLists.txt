@@ -18,6 +18,7 @@ idf_component_register(
 	INCLUDE_DIRS
 		"include"
 	REQUIRES
-		socket
+		http
 		module
+		socket
 )
