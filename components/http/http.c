@@ -116,7 +116,7 @@ static esp_err_t onFileChunkTest(const char *aChunk, size_t aChunkSize)
 void httpTest()
 {
 	static const char *kFileUrl = "http://192.168.4.1:9000/testbins/interactiv/test_0.bin";
-	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest);
+	httpDownloadFileOverHttpGetByUrl(kFileUrl, onFileChunkTest, nullptr);
 }
 
 void httpStart(void)
