@@ -37,5 +37,6 @@ void Bft::File::close()
 	if (fileDescriptor.isValid() && fileSystem) {
 		fileSystem->closeFile(fileDescriptor);
 		fileDescriptor.invalidate();
+		fileSystem = nullptr;
 	}
 }
