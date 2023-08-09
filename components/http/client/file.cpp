@@ -25,6 +25,7 @@ static constexpr const char *kDebugContext = "http/file";
 struct DownloadFileOverHttpContext {
 	/// The caller should provide the callback
 	OnFileChunkCallable callable;
+	void *userData;
 
 	static inline DownloadFileOverHttpContext &fromEspHttpClientEvent(esp_http_client_event_t *aEspHttpClientEvent)
 	{
@@ -39,14 +40,16 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 	switch (aEspHttpClientEvent->event_id) {
 		case HTTP_EVENT_ON_FINISH:
 			// TODO: handle return value
-			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr, 0);  // The last chunk
+			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr, 0,
+				DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).userData);  // The last chunk
 
 			break;
 
 		case HTTP_EVENT_ON_DATA:
 			// TODO: handle return value
 			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
-				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len);
+				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len,
+				DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).userData);
 
 			break;
 
@@ -84,11 +87,12 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 	return ESP_FAIL;
 }
 
-extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable)
+extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable,
+	void *aUserData)
 {
 	// Init client
 	esp_http_client_config_t espHttpClientConfig{};
-	DownloadFileOverHttpContext downloadFileOverHttpContext {aOnFileChunkCallable};
+	DownloadFileOverHttpContext downloadFileOverHttpContext {aOnFileChunkCallable, aUserData};
 	espHttpClientConfig.url = aFileUrl;
 	espHttpClientConfig.event_handler = httpDownloadFileOverHttpGetEventHandler;
 	espHttpClientConfig.user_data = static_cast<void *>(&downloadFileOverHttpContext);

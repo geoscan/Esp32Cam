@@ -18,12 +18,14 @@ extern "C" {
 /// \brief Gets invoked each time a chunk of a file is received.
 /// \param `aChunkSize` - size of the received chunk, 0 denotes the end of
 /// transfer
-typedef esp_err_t (*OnFileChunkCallable)(const char *aChunk, size_t aChunkSize);
+/// \param aUserData - optional argument, \sa `httpDownloadFileOverHttpGetByUrl`
+typedef esp_err_t (*OnFileChunkCallable)(const char *aChunk, size_t aChunkSize, void *aUserData);
 
 /// Downloads a binary file over HTTP.
 ///
 /// \param aOnFileChunkCallable - callback. Gets invoked on each chunk
-esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable);
+/// \param aUserData - will be passed to `aOnFileChunkCallable`
+esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable, void *aUserData);
 
 esp_err_t httpDownloadFileOverHttpGet(const char *aHost, int aPort, const char *aPath,
 	OnFileChunkCallable aOnFileChunkCallable);
