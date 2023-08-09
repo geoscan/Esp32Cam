@@ -28,7 +28,7 @@ typedef esp_err_t (*OnFileChunkCallable)(const char *aChunk, size_t aChunkSize, 
 esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable, void *aUserData);
 
 esp_err_t httpDownloadFileOverHttpGet(const char *aHost, int aPort, const char *aPath,
-	OnFileChunkCallable aOnFileChunkCallable);
+	OnFileChunkCallable aOnFileChunkCallable, void *aUserData);
 
 #ifdef __cplusplus
 }

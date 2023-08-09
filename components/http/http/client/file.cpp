@@ -25,7 +25,7 @@ static constexpr const char *kDebugContext = "http/file";
 struct DownloadFileOverHttpContext {
 	/// The caller should provide the callback
 	OnFileChunkCallable callable;
-	void *userData;
+	void *userData;  // not to be confused w/ `esp_http_client_event_t::user_data`
 
 	static inline DownloadFileOverHttpContext &fromEspHttpClientEvent(esp_http_client_event_t *aEspHttpClientEvent)
 	{
@@ -114,11 +114,11 @@ extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFi
 }
 
 extern "C"  esp_err_t httpDownloadFileOverHttpGet(const char *aHost, int aPort, const char *aPath,
-	OnFileChunkCallable aOnFileChunkCallable)
+	OnFileChunkCallable aOnFileChunkCallable, void *aUserData)
 {
 	// Init client
 	esp_http_client_config_t espHttpClientConfig{};
-	DownloadFileOverHttpContext downloadFileOverHttpContext{aOnFileChunkCallable};
+	DownloadFileOverHttpContext downloadFileOverHttpContext{aOnFileChunkCallable, aUserData};
 	espHttpClientConfig.host = aHost;
 	espHttpClientConfig.port = aPort;
 	espHttpClientConfig.path = aPath;
