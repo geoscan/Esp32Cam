@@ -47,7 +47,8 @@ private:
 		HttpReceiving,
 	};
 
-	/// Encapsulates the buffered file transfer process at the Mav's side
+	/// Encapsulates the buffered file transfer process at the Mav's side,
+	/// and also manages transitions in the context of BFT
 	struct State {
 		Stage stage;
 
@@ -87,12 +88,12 @@ private:
 	/// - `command` = MAV_CMD_USER_2
 	/// - `confirmation` = <NUMBER OF THE ATTEMPT>
 	/// - `param1` = <ID OF THE FILE TO FETCH>
+	/// - `param2` = <AP FILE, 0.0 for Lua Show>
 	Ret onCommandLongFetchFile(mavlink_message_t &aMavlinkMessage, OnResponseSignature aOnResponse);
 
 	/// Creates shared pointer over `BufferedFileTransfer::file` with a
 	/// deallocator that automatically closes file.
 	std::unique_ptr<Bft::File> makeCustomDeallocationSharedFilePointer();
-
 
 	/// \brief Callback, a part of `http` client API. \sa "http/client/file.h"
 	static esp_err_t onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData);

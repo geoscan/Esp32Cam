@@ -11,9 +11,11 @@
 #include "buffered_file_transfer/Sub.hpp"
 #include "http/client/file.h"
 #include "mav/mav.hpp"
+#include <esp_log.h>
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <esp_log.h>
 
 #include "BufferedFileTransfer.hpp"
 
@@ -22,9 +24,17 @@ namespace Mic {
 
 static constexpr const char *kHttpPreamble = "192.168.4.1:9000";  // TODO: make it configurable from Kconfig
 static constexpr unsigned kMaxUrlLength = 128;
+static constexpr unsigned kFileNameMaxLength = 32;
 static constexpr const char *kLogPreamble = "Mav::Mic::BufferedFileTransfer";
 static constexpr MAV_CMD kMavlinkCommandFetchFile = MAV_CMD_USER_2;
 
+struct AutopilotFile {
+	enum {
+		LuaShow = 0,
+	};
+
+	static const char *tryGetNameById(int aAutopilotFileId);
+};
 
 /// Encodes a URL. The code implies knowledge of the base station's REST API
 /// \pre `aMavlinkMessage` is a MAVLINK_COMMAND_LONG type, with `command`
@@ -35,6 +45,13 @@ static bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize, const ma
 /// \pre `aMavlinkMessage` is a MAVLINK_COMMAND_LONG type, with `command`
 /// field=MAV_CMD_USER_2, and `sysid`, `compid` set accordingly (see `Globals`)
 static int mavlinkMessageFetchFileGetFileId(const mavlink_message_t &aMavlinkMessage);
+
+/// \brief Parses a MAVLink message, and prints the file name requested by it
+/// into the provided buffer
+///
+/// \return false, if the buffer is too small
+/// \pre aMavlinkMessage is of type MAV_COMMAND_LONG
+static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, const mavlink_message_t &aMavlinkMessage);
 
 Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlinkMessage,
 	OnResponseSignature aOnResponse)
@@ -98,6 +115,22 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	}
 
 	HttpDownloadContext httpDownloadContext{*this};
+
+	// Handle state machine transfer
+	char fileName[kFileNameMaxLength];  // TODO kFileN...
+	if (!tryEncodeAutopilotFileName(fileName, kFileNameMaxLength, aMavlinkMessage)) {
+		ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot encode file name, sending fail response", kLogPreamble, __func__);
+		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
+			MAV_RESULT_FAILED);
+		commandAckFail.packInto(aMavlinkMessage);
+		aOnResponse(aMavlinkMessage);
+
+		return Ret::Response;
+	}
+
+	state.transferIntoHttpInitial(fileName);
+
+	// Run file reception
 	const auto httpDownloadEspErr = httpDownloadFileOverHttpGetByUrl(url, onHttpFileDownloadChunk,
 		static_cast<void *>(&httpDownloadContext));
 
@@ -113,6 +146,9 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 
 	// Trigger event notification
 	Bft::OnFileBufferingFinished::notify(makeCustomDeallocationSharedFilePointer());
+
+	// Restore the initial state
+	state.transferIntoMavlinkInitial();
 
 	// Send a response
 	auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
@@ -175,7 +211,7 @@ static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
 
 static inline int mavlinkMessageFetchFileGetFileId(const mavlink_message_t &aMavlinkMessage)
 {
-	return static_cast<int>(mavlink_msg_command_long_get_param1(&aMavlinkMessage));
+	return static_cast<int>(lroundf(mavlink_msg_command_long_get_param1(&aMavlinkMessage)));
 }
 
 esp_err_t BufferedFileTransfer::State::transferIntoHttpReceiving(std::size_t aFileSize)
@@ -283,6 +319,40 @@ esp_err_t BufferedFileTransfer::State::onFileChunk(const char *aBuffer, std::siz
 	}
 
 	return result;
+}
+
+static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, const mavlink_message_t &aMavlinkMessage)
+{
+	// Infer the name from the provided type
+	const auto autopilotFileId = static_cast<int>(lround(mavlink_msg_command_long_get_param2(&aMavlinkMessage)));
+	const char *autopilotFileName = AutopilotFile::tryGetNameById(autopilotFileId);
+
+	if (autopilotFileName == nullptr) {
+		ESP_LOGE(Mav::kDebugTag, "%s::%s: unable to infer autopilot file name from the provided file id=%d",
+			kLogPreamble, __func__, autopilotFileId);
+
+		return false;
+	}
+
+	// Try to fill the name into the resulting buffer
+	const auto autopilotFileNameLength = strlen(autopilotFileName);
+
+	if (autopilotFileNameLength >= aBufferSize) {
+		ESP_LOGE(Mav::kDebugTag, "%s::%s: autopilot file name=\"%s\" won't fit into the buffer of size=%d",
+			kLogPreamble, __func__, autopilotFileName, aBufferSize);
+
+		return false;
+	}
+
+	std::fill_n(aBuffer, aBufferSize, '\0');
+	strcpy(aBuffer, autopilotFileName);
+
+	return true;
+}
+
+const char *AutopilotFile::tryGetNameById(int aAutopilotFile)
+{
+	return nullptr;
 }
 
 }  // Mic
