@@ -17,7 +17,8 @@ namespace Bft {
 
 /// \brief Event key to notify subscribers upon buffering completion
 /// \details `aBftFile` is supposed to store a deleter which performs the
-/// cleanup. It implies that subscribers do not participate in file management.
+/// cleanup. Subscribers do not participate in file management. This allows for
+/// dereliction of ownership on behalf of the notifier.
 using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File> aBftfile), typename ::Sub::MutSyncTrait,
 	std::list>;
 
