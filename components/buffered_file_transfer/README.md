@@ -8,6 +8,17 @@ background using UART leaving ESP working.
 It has some FS-related abstraction layers, because it will probably be needed
 to store files in external RAM or flash.
 
+# Stages
+
+BFT component can be conceptualized in the following way. The entire process
+consists of two stages:
+
+1. Buffering
+2. Transfer
+
+Each of those stages notify respective components over the appropriate event
+key (see "buffered_file_transfer/Sub.hpp" for the list of topics).
+
 # Limitations and ontological constraints
 
 - Plain file structure is implied, no directories;
