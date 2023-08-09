@@ -48,6 +48,11 @@ public:
 	{
 	}
 
+	inline File():
+		File(nullptr, FileDescriptor{nullptr})
+	{
+	}
+
 	File(const File &) = default;
 	File(File &&) = default;
 	File &operator=(const File &) = default;
@@ -61,7 +66,7 @@ public:
 
 	inline bool isValid()
 	{
-		return fileDescriptor.isValid();
+		return fileDescriptor.isValid() && fileSystem != nullptr;
 	}
 
 	/// \brief \sa `FileSystem::seek`
