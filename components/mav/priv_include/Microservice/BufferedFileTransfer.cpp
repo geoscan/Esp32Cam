@@ -109,6 +109,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 
 	// Access BFT, open a file, handle allocation errors, if there's any
 	if (!Bft::BufferedFileTransfer::checkInstance()) {
+		// TODO: refactor into a separate boilerplate handler
 		ESP_LOGE(Mav::kDebugTag,
 			"%s::%s: a `BufferedFileTransfer` instance is not registered, cannot resume, sending fail response",
 			kLogPreamble, __func__);
@@ -125,6 +126,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	// Handle state machine transfer
 	char fileName[kFileNameMaxLength];  // TODO kFileN...
 	if (!tryEncodeAutopilotFileName(fileName, kFileNameMaxLength, aMavlinkMessage)) {
+		// TODO: refactor into a separate boilerplate handler
 		ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot encode file name, sending fail response", kLogPreamble, __func__);
 		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
 			MAV_RESULT_FAILED);
@@ -141,6 +143,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 		static_cast<void *>(&httpDownloadContext));
 
 	if (httpDownloadEspErr != ESP_OK) {
+		// TODO: refactor into a separate boilerplate handler
 		ESP_LOGE(Mav::kDebugTag, "%s::%s: failed to receive file", kLogPreamble, __func__);
 		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
 			MAV_RESULT_FAILED);
@@ -197,6 +200,16 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 	}
 
 	return espErr;
+}
+
+inline bool BufferedFileTransfer::mavlinkMessageIsRepeatingMavCommandLong(const mavlink_message_t &aMavlinkMessage)
+{
+	// TODO XXX state / stage synchronization through mutex?
+	return aMavlinkMessage.msgid == MAVLINK_MSG_ID_COMMAND_LONG
+		&& mavlink_msg_command_long_get_target_component(&aMavlinkMessage) == Globals::getCompId()
+		&& mavlink_msg_command_long_get_target_system(&aMavlinkMessage) == Globals::getSysId()
+		&& mavlink_msg_command_long_get_command(&aMavlinkMessage) == kMavlinkCommandFetchFile
+		&& state.stage != Stage::HttpInitial;  // The process is ongoing
 }
 
 static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
