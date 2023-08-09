@@ -10,7 +10,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_HTTP_DEBUG_LEVEL)
 #include <esp_log.h>
 
-#include "client/file.h"
+#include "http/client/file.h"
 #include "pages/pages.h"
 #include <sdkconfig.h>
 
