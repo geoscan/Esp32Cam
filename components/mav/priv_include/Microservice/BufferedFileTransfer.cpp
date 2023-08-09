@@ -184,8 +184,7 @@ esp_err_t BufferedFileTransfer::State::transferIntoHttpReceiving(std::size_t aFi
 {
 	esp_err_t result = ESP_OK;
 
-	// Check whether the operation is appropriate from the current stage
-	switch (stage) {
+	switch (stage) {  // Make sure the state is appropriate
 		case Stage::HttpInitial: {
 			stageState.httpReceiving.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(
 				stageState.httpInitial.fileName.data(), aFileSize);
@@ -215,7 +214,7 @@ esp_err_t BufferedFileTransfer::State::transferIntoHttpInitial(const char *aFile
 {
 	esp_err_t result = ESP_OK;
 
-	switch (stage) {
+	switch (stage) {  // Make sure the state is appropriate
 		case Stage::MavlinkInitial: {
 			const std::size_t aFileNameLength = strlen(aFileName);
 
@@ -258,9 +257,10 @@ esp_err_t BufferedFileTransfer::State::onFileChunk(const char *aBuffer, std::siz
 {
 	esp_err_t result = ESP_OK;
 
-	switch (stage) {
+	switch (stage) {  // Make sure the state is appropriate
 		case Stage::HttpReceiving: {
 			if (stageState.httpReceiving.file.isValid()) {
+				// Try to write the chunk
 				const auto nWritten = stageState.httpReceiving.file.append(
 					reinterpret_cast<const std::uint8_t *>(aBuffer), aBufferSize);
 
