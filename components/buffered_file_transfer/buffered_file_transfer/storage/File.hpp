@@ -57,6 +57,7 @@ public:
 	File(File &&) = default;
 	File &operator=(const File &) = default;
 	File &operator=(File &&) = default;
+	~File() = default;
 
 	/// \brief \sa `FileSystem::append`
 	inline std::size_t append(const std::uint8_t *aBuffer, std::size_t aBufferSize)
