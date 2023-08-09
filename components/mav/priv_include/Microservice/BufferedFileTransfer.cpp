@@ -28,11 +28,17 @@ static constexpr unsigned kFileNameMaxLength = 32;
 static constexpr const char *kLogPreamble = "Mav::Mic::BufferedFileTransfer";
 static constexpr MAV_CMD kMavlinkCommandFetchFile = MAV_CMD_USER_2;
 
+/// Encapsulates the knowledge about the AP's internal files
 struct AutopilotFile {
 	enum {
+		/// Script for a light show drone
 		LuaShow = 0,
+
+		/// Meta
+		N,
 	};
 
+	/// Converts AP file id into MAVLink API-compatible file name
 	static const char *tryGetNameById(int aAutopilotFileId);
 };
 
@@ -350,9 +356,18 @@ static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, c
 	return true;
 }
 
-const char *AutopilotFile::tryGetNameById(int aAutopilotFile)
+inline const char *AutopilotFile::tryGetNameById(int aAutopilotFileId)
 {
-	return nullptr;
+	static constexpr std::array<const char *, AutopilotFile::N> kFileNames = {{
+		"/dev/UavMonitor/show.bin",  // TODO: check that through running Pioneer SDK
+	}};
+
+	if (aAutopilotFileId >= kFileNames.size()) {
+		ESP_LOGW(Mav::kDebugTag, "%s::%s: invalid file id=%d", kLogPreamble, __func__, aAutopilotFileId);
+		return nullptr;
+	} else {
+		return kFileNames[aAutopilotFileId];
+	}
 }
 
 }  // Mic

@@ -19,9 +19,14 @@
 namespace Mav {
 namespace Mic {
 
-/// Waits for a command to fetch a file by URL. When it is issued:
+/// \brief Waits for a command to fetch a file by URL. When it is issued:
 /// 1. Fetches a file by URL over HTTP
 /// 2. Pushes it back to the AP using FTP client protocol
+///
+/// \details This is a part of the buffered file transfer process. This
+/// particular module serves the purpose of initial file fetching from a remote
+/// file repository (namely: base station). \sa
+/// `buffered_file_transfer/README.md`
 class BufferedFileTransfer : public Mav::Microservice {
 private:
 	/// \brief Encapsulates the context passed along with
