@@ -15,10 +15,13 @@
 namespace Bft {
 
 /// \brief Common polymorphic file descriptor, pointer or identifier of a
-/// stored state
+/// stored state.
 struct FileDescriptor {
 	union {
+		/// nullptr means the descriptor is invalid
 		void *raw;
+
+		/// 0 means the descriptor is invalid
 		int identifier;
 	};
 
