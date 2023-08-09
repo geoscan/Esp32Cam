@@ -24,12 +24,20 @@ At/after each of those stages, a participant to the process will notify
 respective components over the appropriate event key (see
 "buffered_file_transfer/Sub.hpp" for the list of topics).
 
-# Memory
+# Buffer memory (RAM)
 
-# Limitations and ontological constraints
+An encapsulating overhead over a RAM chunk is used, which is comprised of 2
+entities:
+
+- File;
+    - Stores the current state of writing into the memory;
+- File system;
+    - Handles allocation affairs.
+
+## Limitations and ontological constraints
 
 - Plain file structure is implied, no directories;
-- A notion of session is employed, i.e. the process of writing to a file is
-  stateful: open, write, close;
+- The process of writing to a file is a multistaged stateful process: open,
+  write, close, seek;
 - A file is viewed as an array of bytes;
 
