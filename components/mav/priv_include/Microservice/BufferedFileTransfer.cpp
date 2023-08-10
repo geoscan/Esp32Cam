@@ -88,7 +88,6 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 					default:
 						ESP_LOGD(Mav::kDebugTag, "%s::%s unsupported MAV_COMMAND_LONG.command=%d", kLogPreamble,
 							__func__, mavlink_msg_command_long_get_command(&aMavlinkMessage));
-
 						break;
 				}
 			}
@@ -212,7 +211,7 @@ inline bool BufferedFileTransfer::mavlinkMessageIsRepeatingMavCommandLong(const 
 		&& mavlink_msg_command_long_get_target_component(&aMavlinkMessage) == Globals::getCompId()
 		&& mavlink_msg_command_long_get_target_system(&aMavlinkMessage) == Globals::getSysId()
 		&& mavlink_msg_command_long_get_command(&aMavlinkMessage) == kMavlinkCommandFetchFile
-		&& state.stage != Stage::HttpInitial;  // The process is ongoing
+		&& state.stage != Stage::MavlinkInitial;  // The process is ongoing
 }
 
 static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
