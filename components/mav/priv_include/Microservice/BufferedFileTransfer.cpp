@@ -185,14 +185,11 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 					kLogPreamble, __func__, static_cast<int>(espErr));
 				HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 			}
-		} else {  // Wrong arguments: file size=0
-			ESP_LOGE(Mav::kDebugTag, "%s::%s: invalid announced file size=0", kLogPreamble, __func__);
+		} else {  // Finalizing
+			ESP_LOGI(Mav::kDebugTag, "%s::%s: finalizing write", kLogPreamble, __func__);
 			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
-			espErr = ESP_FAIL;
+			espErr = ESP_OK;
 		}
-	} else if (aChunkSize == 0) {  // Check if the transmission has been completed
-		HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
-		espErr = ESP_OK;
 	} else {  // Regular transmission
 		espErr = HttpDownloadContext::castFromVoid(aData).owner.state.onFileChunk(aChunk, aChunkSize);
 
