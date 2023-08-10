@@ -22,7 +22,7 @@
 namespace Mav {
 namespace Mic {
 
-static constexpr const char *kHttpPreamble = "http://192.168.4.1:9000";  // TODO: make it configurable from Kconfig
+static constexpr const char *kHttpPreamble = "http://192.168.4.2:8000";  // TODO: make it configurable from Kconfig
 static constexpr unsigned kMaxUrlLength = 128;
 static constexpr unsigned kFileNameMaxLength = 32;
 static constexpr const char *kLogPreamble = "Mav::Mic::BufferedFileTransfer";
@@ -232,7 +232,7 @@ esp_err_t BufferedFileTransfer::State::transferIntoHttpReceiving(std::size_t aFi
 			stageState.httpReceiving.file = Bft::BufferedFileTransfer::getInstance().tryOpenFileWriteBinary(
 				stageState.httpInitial.fileName.data(), aFileSize);
 
-			if (stageState.httpReceiving.file.isValid()) {
+			if (!stageState.httpReceiving.file.isValid()) {
 				ESP_LOGE(Mav::kDebugTag, "%s::%s: failed to open file, name=\"%s\", size=%d", kLogPreamble, __func__,
 					stageState.httpInitial.fileName.data(), aFileSize);
 				result = ESP_FAIL;
@@ -263,6 +263,9 @@ esp_err_t BufferedFileTransfer::State::transferIntoHttpInitial(const char *aFile
 
 			if (aFileNameLength >= stageState.httpInitial.fileName.size()) {
 				result = ESP_ERR_NO_MEM;
+			} else {
+				stageState.httpInitial.fileName.fill('\0');
+				strcpy(stageState.httpInitial.fileName.data(), aFileName);
 			}
 
 			break;
