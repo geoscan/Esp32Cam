@@ -22,7 +22,7 @@
 namespace Mav {
 namespace Mic {
 
-static constexpr const char *kHttpPreamble = "192.168.4.1:9000";  // TODO: make it configurable from Kconfig
+static constexpr const char *kHttpPreamble = "http://192.168.4.1:9000";  // TODO: make it configurable from Kconfig
 static constexpr unsigned kMaxUrlLength = 128;
 static constexpr unsigned kFileNameMaxLength = 32;
 static constexpr const char *kLogPreamble = "Mav::Mic::BufferedFileTransfer";
