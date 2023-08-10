@@ -314,6 +314,8 @@ esp_err_t BufferedFileTransfer::State::onFileChunk(const char *aBuffer, std::siz
 					ESP_LOGE(Mav::kDebugTag,
 						"%s::%s: failed to write file chunk, chunk size=%d, actual written chunk length=%d",
 						kLogPreamble, __func__, aBufferSize, nWritten);
+
+					result = ESP_FAIL;
 				}
 			} else {
 				ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot write into file, the file is invalid", kLogPreamble, __func__);
