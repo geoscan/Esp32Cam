@@ -1,16 +1,10 @@
 file(GLOB SOURCE_FILES
-		"*.c"
-		"*.cpp"
-		"priv_include/*.cpp"
-		"wifi_uart_bridge/*.cpp")
+	"wifi_uart_bridge/*.cpp")
 
 idf_component_register(
 	SRCS ${SOURCE_FILES}
 	INCLUDE_DIRS
 		.
-		include
-	PRIV_INCLUDE_DIRS
-		priv_include
 	REQUIRES
 		freertos
 		uart

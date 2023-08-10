@@ -8,28 +8,12 @@
 #include <driver/gpio.h>
 
 #include "wifi_uart_bridge.hpp"
-#include "utility/thr/Threading.hpp"
-#include "Bridge.hpp"
-#include "UartEndpoint.hpp"
-#include "UdpEndpoint.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "wifi_uart_bridge/RoutingRules.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
 #include "MavlinkRouting.hpp"
 #include "socket/Api.hpp"
-#include "Routing.hpp"
 #include <vector>
-
-void wifiUartBridgeStart(asio::io_context &context)
-{
-
-	static UartEndpoint uart(UART_NUM_0, GPIO_NUM_3, GPIO_NUM_1, CONFIG_WIFI_UART_BRIDGE_BAUDRATE,
-		UART_PARITY_DISABLE, UART_STOP_BITS_1);
-	static UdpEndpoint  udp(context);
-	static Bridge       bridge(uart, udp);
-
-	Ut::Thr::threadRun(bridge);
-}
 
 namespace Bdg {
 
@@ -38,10 +22,8 @@ void init()
 	esp_log_level_set(Bdg::kDebugTag, LOG_LOCAL_LEVEL);
 	ESP_LOGD(Bdg::kDebugTag, "Debug log test");
 	ESP_LOGV(Bdg::kDebugTag, "Verbose log test");
-	static Routing routing;
 	static Bdg::RoutingRules routingRules{};
 	static Bdg::MavlinkRouting mavlinkRouting{};
-	(void)routing;
 	(void)routingRules;
 	(void)mavlinkRouting;
 }
