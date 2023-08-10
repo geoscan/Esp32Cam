@@ -70,7 +70,7 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 	auto result = Ret::Ignored;
 
 	if (mavlinkMessageIsRepeatingMavCommandLong(aMavlinkMessage)) {
-		// TODO: send IN_PROGRESS response
+		ESP_LOGW(Mav::kDebugTag, "%s::%s Got repeating request, ignoring", kLogPreamble, __func__);
 
 		return Ret::NoResponse;
 	}
@@ -86,6 +86,9 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 						break;
 
 					default:
+						ESP_LOGD(Mav::kDebugTag, "%s::%s unsupported MAV_COMMAND_LONG.command=%d", kLogPreamble,
+							__func__, mavlink_msg_command_long_get_command(&aMavlinkMessage));
+
 						break;
 				}
 			}
