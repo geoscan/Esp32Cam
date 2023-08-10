@@ -114,12 +114,8 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 
 	// Encode URL to fetch the file
 	if (!tryEncodeRequestUrl(url, kMaxUrlLength, aMavlinkMessage)) {
-		ESP_LOGE(Mav::kDebugTag, "%s:%s: failed to encode URL, not enough buffer space, sending fail response",
-			kLogPreamble, __func__);
-		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-			MAV_RESULT_FAILED);
-		commandAckFail.packInto(aMavlinkMessage);
-		aOnResponse(aMavlinkMessage);
+		handlePackResponse(aMavlinkMessage, aOnResponse, MAV_RESULT_FAILED, esp_log_level_t::ESP_LOG_ERROR, __func__,
+			"failed to encode URL, not enough buffer space, sending fail response");
 
 		return Ret::Response;
 	}
@@ -127,13 +123,8 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	// Access BFT, open a file, handle allocation errors, if there's any
 	if (!Bft::BufferedFileTransfer::checkInstance()) {
 		// TODO: refactor into a separate boilerplate handler
-		ESP_LOGE(Mav::kDebugTag,
-			"%s::%s: a `BufferedFileTransfer` instance is not registered, cannot resume, sending fail response",
-			kLogPreamble, __func__);
-		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-			MAV_RESULT_FAILED);
-		commandAckFail.packInto(aMavlinkMessage);
-		aOnResponse(aMavlinkMessage);
+		handlePackResponse(aMavlinkMessage, aOnResponse, MAV_RESULT_FAILED, esp_log_level_t::ESP_LOG_ERROR, __func__,
+			"`BufferedFileTransfer` instance is not registered, cannot resume, sending fail response");
 
 		return Ret::Response;
 	}
@@ -143,12 +134,8 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	// Handle state machine transfer
 	char fileName[kFileNameMaxLength];  // TODO kFileN...
 	if (!tryEncodeAutopilotFileName(fileName, kFileNameMaxLength, aMavlinkMessage)) {
-		// TODO: refactor into a separate boilerplate handler
-		ESP_LOGE(Mav::kDebugTag, "%s::%s: cannot encode file name, sending fail response", kLogPreamble, __func__);
-		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-			MAV_RESULT_FAILED);
-		commandAckFail.packInto(aMavlinkMessage);
-		aOnResponse(aMavlinkMessage);
+		handlePackResponse(aMavlinkMessage, aOnResponse, MAV_RESULT_FAILED, esp_log_level_t::ESP_LOG_ERROR, __func__,
+			"cannot encode file name, sending fail response");
 
 		return Ret::Response;
 	}
@@ -160,12 +147,8 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 		static_cast<void *>(&httpDownloadContext));
 
 	if (httpDownloadEspErr != ESP_OK) {
-		// TODO: refactor into a separate boilerplate handler
-		ESP_LOGE(Mav::kDebugTag, "%s::%s: failed to receive file", kLogPreamble, __func__);
-		auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-			MAV_RESULT_FAILED);
-		commandAckFail.packInto(aMavlinkMessage);
-		aOnResponse(aMavlinkMessage);
+		handlePackResponse(aMavlinkMessage, aOnResponse, MAV_RESULT_FAILED, esp_log_level_t::ESP_LOG_ERROR, __func__,
+			"failed to receive file");
 
 		return Ret::Response;
 	}
@@ -177,10 +160,8 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	state.transferIntoMavlinkInitial();
 
 	// Send a response
-	auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-		MAV_RESULT_ACCEPTED);
-	commandAckFail.packInto(aMavlinkMessage);
-	aOnResponse(aMavlinkMessage);
+	handlePackResponse(aMavlinkMessage, aOnResponse, MAV_RESULT_ACCEPTED, esp_log_level_t::ESP_LOG_ERROR, __func__,
+		"Initiating buffered file transfer");
 
 	return Ret::Response;
 }
