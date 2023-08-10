@@ -84,6 +84,8 @@ private:
 
 public:
 	Ret process(mavlink_message_t &aMavlinkMessage, OnResponseSignature aOnResponse);
+	BufferedFileTransfer() = default;
+	~BufferedFileTransfer() override = default;
 
 private:
 	/// Process custom MAVLINK_COMMAND_LONG message
