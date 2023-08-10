@@ -149,7 +149,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	// Trigger event notification
 	Bft::OnFileBufferingFinished::notify(makeCustomDeallocationSharedFilePointer());
 
-	// Restore the initial state
+	// Restore the initial state, make it ready to accept new requests
 	state.transferIntoMavlinkInitial();
 
 	// Send a response
