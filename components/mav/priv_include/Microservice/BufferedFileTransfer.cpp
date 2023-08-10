@@ -137,6 +137,7 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	state.transferIntoHttpInitial(fileName);
 
 	// Run file reception
+	ESP_LOGI(Mav::kDebugTag, "%s::%s: Requesting file by URL=\"%s\"", kLogPreamble, __func__, url);
 	const auto httpDownloadEspErr = httpDownloadFileOverHttpGetByUrl(url, onHttpFileDownloadChunk,
 		static_cast<void *>(&httpDownloadContext));
 
