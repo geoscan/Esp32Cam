@@ -41,14 +41,14 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 	switch (aEspHttpClientEvent->event_id) {
 		case HTTP_EVENT_ON_FINISH:
 			// TODO: handle return value
-			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr, 0,
+			return DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr, 0,
 				DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).userData);  // The last chunk
 
 			break;
 
 		case HTTP_EVENT_ON_DATA:
 			// TODO: handle return value
-			DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
+			return DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(
 				static_cast<const char *>(aEspHttpClientEvent->data), aEspHttpClientEvent->data_len,
 				DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).userData);
 
@@ -62,7 +62,8 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 		case HTTP_EVENT_ON_HEADER:
 			if (strcmp(aEspHttpClientEvent->header_key, "Content-Length") == 0) {  // Announce content length to the callback
 				const int contentLength = atoi(aEspHttpClientEvent->header_value);
-				DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr,
+
+				return DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).callable(nullptr,
 					contentLength, DownloadFileOverHttpContext::fromEspHttpClientEvent(aEspHttpClientEvent).userData);
 			}
 
@@ -83,13 +84,13 @@ static esp_err_t httpDownloadFileOverHttpGetEventHandler(esp_http_client_event_t
 		case HTTP_EVENT_ERROR:
 			ESP_LOGE(kDebugContext, "%s:%s got error", kDebugContext, __func__);
 
-			break;
+			return ESP_FAIL;
 
 		default:
-			break;
+			return ESP_FAIL;
 	}
 
-	return ESP_FAIL;
+	return ESP_OK;
 }
 
 extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFileChunkCallable aOnFileChunkCallable,
