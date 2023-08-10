@@ -176,6 +176,7 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 
 	if (aChunk == nullptr) {  // Check if this call is the announcement of the expected binary length (see `http` API). Knowing the expected length is crucial for allocating enough space
 		if (aChunkSize > 0) {
+			ESP_LOGD(Mav::kDebugTag, "%s::%s allocating %d bytes for file", kLogPreamble, __func__, aChunkSize);
 			espErr = HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoHttpReceiving(aChunkSize);
 
 			if (espErr != ESP_OK) {  // Cannot transfer into `Receiving` state. Most likely, unable to allocate memory
