@@ -61,15 +61,8 @@ static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, c
 
 /// \brief Boilerplate reducer. Produces log output, packs response, invokes
 /// the callback it's been provided with.
-static inline void handlePackResponse(mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature &aOnResponse,
-	MAV_RESULT aMavResult, esp_log_level_t aEspLogLevel, const char *aContext, const char *aMessage)
-{
-	ESP_LOG_LEVEL(aEspLogLevel, Mav::kDebugTag, "%s::%s: %s", kLogPreamble, aContext, aMessage);
-	auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
-		MAV_RESULT_FAILED);
-	commandAckFail.packInto(aMavlinkMessage);
-	aOnResponse(aMavlinkMessage);
-}
+static void handlePackResponse(mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature &aOnResponse,
+	MAV_RESULT aMavResult, esp_log_level_t aEspLogLevel, const char *aContext, const char *aMessage);
 
 Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlinkMessage,
 	OnResponseSignature aOnResponse)
@@ -365,6 +358,16 @@ static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, c
 	strcpy(aBuffer, autopilotFileName);
 
 	return true;
+}
+
+static inline void handlePackResponse(mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature &aOnResponse,
+	MAV_RESULT aMavResult, esp_log_level_t aEspLogLevel, const char *aContext, const char *aMessage)
+{
+	ESP_LOG_LEVEL(aEspLogLevel, Mav::kDebugTag, "%s::%s: %s", kLogPreamble, aContext, aMessage);
+	auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
+		MAV_RESULT_FAILED);
+	commandAckFail.packInto(aMavlinkMessage);
+	aOnResponse(aMavlinkMessage);
 }
 
 inline const char *AutopilotFile::tryGetNameById(int aAutopilotFileId)
