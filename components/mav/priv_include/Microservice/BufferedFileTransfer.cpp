@@ -69,12 +69,6 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 {
 	auto result = Ret::Ignored;
 
-	if (mavlinkMessageIsRepeatingMavCommandLong(aMavlinkMessage)) {
-		ESP_LOGW(Mav::kDebugTag, "%s::%s Got repeating request, ignoring", kLogPreamble, __func__);
-
-		return Ret::NoResponse;
-	}
-
 	switch (aMavlinkMessage.msgid) {
 		case MAVLINK_MSG_ID_COMMAND_LONG: {
 			if (mavlink_msg_command_long_get_target_component(&aMavlinkMessage) == Globals::getCompId()
@@ -82,6 +76,11 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 				switch (mavlink_msg_command_long_get_command(&aMavlinkMessage)) {
 					case kMavlinkCommandFetchFile:
 						result = onCommandLongFetchFile(aMavlinkMessage, aOnResponse);
+
+						// Check repeating request
+						if (state.stage != Stage::MavlinkInitial) {
+							ESP_LOGW(Mav::kDebugTag, "%s::%s Got repeating request, ignoring", kLogPreamble, __func__);
+						}
 
 						break;
 
@@ -204,18 +203,7 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 	return espErr;
 }
 
-inline bool BufferedFileTransfer::mavlinkMessageIsRepeatingMavCommandLong(const mavlink_message_t &aMavlinkMessage)
-{
-	// TODO XXX state / stage synchronization through mutex?
-	return aMavlinkMessage.msgid == MAVLINK_MSG_ID_COMMAND_LONG
-		&& mavlink_msg_command_long_get_target_component(&aMavlinkMessage) == Globals::getCompId()
-		&& mavlink_msg_command_long_get_target_system(&aMavlinkMessage) == Globals::getSysId()
-		&& mavlink_msg_command_long_get_command(&aMavlinkMessage) == kMavlinkCommandFetchFile
-		&& state.stage != Stage::MavlinkInitial;  // The process is ongoing
-}
-
-static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize,
-		const mavlink_message_t &aMavlinkMessage)
+static inline bool tryEncodeRequestUrl(char *aBuffer, std::size_t aBufferSize, const mavlink_message_t &aMavlinkMessage)
 {
 	const auto droneId = mavlinkMessageFetchFileGetFileId(aMavlinkMessage);
 	const int result = snprintf(aBuffer, aBufferSize, "%s/%d.bin", kHttpPreamble, static_cast<int>(droneId));

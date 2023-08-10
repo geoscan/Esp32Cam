@@ -115,11 +115,6 @@ private:
 	/// \brief Callback, a part of `http` client API. \sa "http/client/file.h"
 	static esp_err_t onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData);
 
-	/// \brief Makes a complete check over the provided MAVLink message.
-	/// \returns true, if the message contains reissuing of the fetch command,
-	/// and the fetching is already ongoing.
-	bool mavlinkMessageIsRepeatingMavCommandLong(const mavlink_message_t &aMavlinkMessage);
-
 private:
 	State state;
 };
