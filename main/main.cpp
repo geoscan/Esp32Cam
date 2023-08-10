@@ -20,7 +20,6 @@
 #include "uart/uart.hpp"
 #include "utility/time.hpp"
 #include "wifi.h"
-#include "wifi_uart_bridge.hpp"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "wq/wq.hpp"
 #include <asio.hpp>
