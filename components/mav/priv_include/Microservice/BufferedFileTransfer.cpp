@@ -189,7 +189,7 @@ esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std:
 			HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 			espErr = ESP_FAIL;
 		}
-	} else if (aChunkSize == 0 ) {  // Check if the transmission has been completed
+	} else if (aChunkSize == 0) {  // Check if the transmission has been completed
 		HttpDownloadContext::castFromVoid(aData).owner.state.transferIntoMavlinkInitial();
 		espErr = ESP_OK;
 	} else {  // Regular transmission
