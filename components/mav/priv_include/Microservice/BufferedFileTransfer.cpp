@@ -59,6 +59,18 @@ static int mavlinkMessageFetchFileGetFileId(const mavlink_message_t &aMavlinkMes
 /// \pre aMavlinkMessage is of type MAV_COMMAND_LONG
 static bool tryEncodeAutopilotFileName(char *aBuffer, std::size_t aBufferSize, const mavlink_message_t &aMavlinkMessage);
 
+/// \brief Boilerplate reducer. Produces log output, packs response, invokes
+/// the callback it's been provided with.
+static inline void handlePackResponse(mavlink_message_t &aMavlinkMessage, Microservice::OnResponseSignature &aOnResponse,
+	MAV_RESULT aMavResult, esp_log_level_t aEspLogLevel, const char *aContext, const char *aMessage)
+{
+	ESP_LOG_LEVEL(aEspLogLevel, Mav::kDebugTag, "%s::%s: %s", kLogPreamble, aContext, aMessage);
+	auto commandAckFail = Mav::Hlpr::MavlinkCommandAck::makeFrom(aMavlinkMessage, kMavlinkCommandFetchFile,
+		MAV_RESULT_FAILED);
+	commandAckFail.packInto(aMavlinkMessage);
+	aOnResponse(aMavlinkMessage);
+}
+
 Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlinkMessage,
 	OnResponseSignature aOnResponse)
 {
