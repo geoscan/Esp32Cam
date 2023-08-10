@@ -159,6 +159,15 @@ inline Microservice::Ret BufferedFileTransfer::onCommandLongFetchFile(mavlink_me
 	return Ret::Response;
 }
 
+std::shared_ptr<::Bft::File> BufferedFileTransfer::makeCustomDeallocationSharedFilePointer()
+{
+	return std::shared_ptr<::Bft::File>{&state.stageState.httpReceiving.file,
+		[](::Bft::File *aBftFile)  // Deleter
+		{
+			aBftFile->close();
+		}};
+}
+
 esp_err_t BufferedFileTransfer::onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData)
 {
 	esp_err_t espErr = ESP_OK;

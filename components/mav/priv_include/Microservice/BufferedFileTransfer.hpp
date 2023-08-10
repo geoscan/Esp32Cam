@@ -99,7 +99,7 @@ private:
 
 	/// Creates shared pointer over `BufferedFileTransfer::file` with a
 	/// deallocator that automatically closes file.
-	std::unique_ptr<Bft::File> makeCustomDeallocationSharedFilePointer();
+	std::shared_ptr<::Bft::File> makeCustomDeallocationSharedFilePointer();
 
 	/// \brief Callback, a part of `http` client API. \sa "http/client/file.h"
 	static esp_err_t onHttpFileDownloadChunk(const char *aChunk, std::size_t aChunkSize, void *aData);
