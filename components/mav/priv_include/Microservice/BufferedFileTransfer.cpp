@@ -63,7 +63,12 @@ Mav::Microservice::Ret BufferedFileTransfer::process(mavlink_message_t &aMavlink
 	OnResponseSignature aOnResponse)
 {
 	auto result = Ret::Ignored;
-	// TODO: filter repeating requests
+
+	if (mavlinkMessageIsRepeatingMavCommandLong(aMavlinkMessage)) {
+		// TODO: send IN_PROGRESS response
+
+		return Ret::NoResponse;
+	}
 
 	switch (aMavlinkMessage.msgid) {
 		case MAVLINK_MSG_ID_COMMAND_LONG: {
