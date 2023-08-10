@@ -61,6 +61,9 @@ private:
 		/// \pre Relies on the assumption that members stored here have
 		/// non-RAII construction / destruction semantics
 		union {
+			struct MavlinkInitial {
+			} mavlinkInitial;
+
 			struct HttpInitial {
 				std::array<char, 32> fileName;
 			} httpInitial;
@@ -69,6 +72,12 @@ private:
 				Bft::File file;
 			} httpReceiving;
 		} stageState;
+
+		inline State():
+			stage{Stage::MavlinkInitial},
+			stageState{}
+		{
+		}
 
 		/// If in `Idle` state, will try to allocate resources
 		esp_err_t transferIntoHttpReceiving(std::size_t aFileSize);
