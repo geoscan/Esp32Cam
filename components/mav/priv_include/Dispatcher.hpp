@@ -16,6 +16,7 @@
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
 #include "Microservice/ApVer.hpp"
+#include "Microservice/BufferedFileTransfer.hpp"
 #include "Microservice/FtpClient.hpp"
 #include "sub/Rout.hpp"
 #include "sub/Subscription.hpp"
@@ -55,7 +56,8 @@ private:
 	} key;
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::FtpClient> micAggregate;
+	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::FtpClient,
+		Mic::BufferedFileTransfer> micAggregate;
 
 	struct {
 		std::uint8_t buffer[sizeof(mavlink_message_t)];
