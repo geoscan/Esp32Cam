@@ -175,18 +175,6 @@ static Error processPhoto(std::string name)
 		return Err;
 	}
 
-	static constexpr const char *kJpg = ".jpg";
-
-	sdFatInit();
-
-	if (name.length() == 0) {
-		return ErrArg;
-	}
-
-	// <name> -> <mount_point>/<name>.jpg
-	name.insert(0, CONFIG_SD_FAT_MOUNT_POINT"/");
-	name.append(kJpg);
-
 	return CameraRecorder::RecFrame::getInstance().start(name.c_str()) ? Ok : Err;
 }
 
