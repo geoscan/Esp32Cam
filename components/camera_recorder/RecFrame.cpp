@@ -40,11 +40,7 @@ bool RecFrame::start(const char *aFilename)
 		return false;
 	}
 
-	if (!sdFatInit()) {
-		ESP_LOGE(kTag, "Failed to initialize file system, aborting");
-
-		return false;
-	}
+	sdFatInit();
 
 	// Compose path to the file compatible with the file system API
 	static constexpr unsigned kMaxFilePathLength = 64;
