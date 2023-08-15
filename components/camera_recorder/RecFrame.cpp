@@ -72,11 +72,11 @@ bool RecFrame::start(const char *aFilename)
 	// Open the file to save the frame into
 	{
 		std::lock_guard<std::mutex> lock(sync.mut);
-		file = fopen(aFilename, "wb");
-		ESP_LOGD(kDebugTag, "start. opening file \"%s\"", aFilename);
+		file = fopen(filePath, "wb");
+		ESP_LOGD(kDebugTag, "start. opening file \"%s\"", filePath);
 
 		if (!file) {
-			ESP_LOGW(kDebugTag, "start. Photo -- unable to open the file %s. Capture is aborted", aFilename);
+			ESP_LOGW(kDebugTag, "start. Photo -- unable to open the file %s. Capture is aborted", filePath);
 
 			return false;
 		}
@@ -114,7 +114,7 @@ bool RecFrame::start(const char *aFilename)
 
 	if (file) {  // There was no frame stream in place, try "manually"
 		auto frame = Cam::Camera::getInstance().getFrame();
-		ESP_LOGD(kDebugTag, "start. Writing to file \"%s\"", aFilename);
+		ESP_LOGD(kDebugTag, "start. Writing to file \"%s\"", filePath);
 		if (frame && frame->valid() && fwrite(frame->data(), 1, frame->size(), file) == frame->size()) {
 			ret = true;
 		}
@@ -123,9 +123,9 @@ bool RecFrame::start(const char *aFilename)
 	}
 
 	if (ret) {
-		ESP_LOGI(kTag, "Photo -- successfully wrote frame file %s", aFilename);
+		ESP_LOGI(kTag, "Photo -- successfully wrote frame file %s", filePath);
 	} else {
-		ESP_LOGW(kTag, "Photo -- writing to file \"%s\" failed", aFilename);
+		ESP_LOGW(kTag, "Photo -- writing to file \"%s\" failed", filePath);
 	}
 
 	// Restore previous frame size
