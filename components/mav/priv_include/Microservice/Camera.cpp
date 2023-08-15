@@ -5,33 +5,36 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include <sdkconfig.h>
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
 #include <esp_log.h>
 
-#include "Microservice/Camera.hpp"
-#include "Helper/MavlinkCommandLong.hpp"
-#include "Helper/MavlinkCommandAck.hpp"
-#include "Helper/Common.hpp"
-#include "Helper/CameraImageCaptured.hpp"
-#include "sub/Rout.hpp"
-#include "sub/Cam.hpp"
-#include "mav/mav.hpp"
 #include "Globals.hpp"
+#include "Helper/CameraImageCaptured.hpp"
+#include "Helper/Common.hpp"
+#include "Helper/MavlinkCommandAck.hpp"
+#include "Helper/MavlinkCommandLong.hpp"
+#include "Microservice/Camera.hpp"
+#include "camera_recorder/RecFrame.hpp"
+#include "mav/mav.hpp"
 #include "module/ModuleBase.hpp"
-#include "utility/time.hpp"
-#include "utility/LogSection.hpp"
 #include "sd_fat.h"
-#include <cstring>
+#include "sub/Cam.hpp"
+#include "sub/Rout.hpp"
+#include "utility/LogSection.hpp"
+#include "utility/time.hpp"
 #include <algorithm>
 #include <chrono>
+#include <cstring>
+#include <sdkconfig.h>
 
 #define DEBUG_PRETEND_CAMERA_INITIALIZED 0
 
 namespace Mav {
 namespace Mic {
+
+static constexpr const char *kLogPreamble = "Camera";
 
 void Camera::onHrTimer()
 {
@@ -447,8 +450,17 @@ Camera::ImageCapture Camera::processMakeShot(const mavlink_command_long_t &aMavl
 					snprintf(filename, kNameMaxLen, "%d", aCount);
 				});
 
-			for (auto &camCb : Sub::Cam::ShotFile::getIterators()) {
-				imageCapture.result = camCb(filename) ? MAV_RESULT_ACCEPTED : MAV_RESULT_DENIED;
+			if (CameraRecorder::RecFrame::checkInstance()) {
+				if (CameraRecorder::RecFrame::getInstance().start(filename)) {
+					imageCapture.result = MAV_RESULT_ACCEPTED;
+				} else {
+					imageCapture.result = MAV_RESULT_FAILED;
+					ESP_LOGE(Mav::kDebugTag, "%s::%s failed to make a capture", kLogPreamble, __func__);
+				}
+			} else {
+				ESP_LOGE(Mav::kDebugTag, "%s::%s frame capturer instance is not initialized, cannot proceed",
+					kLogPreamble, __func__);
+				imageCapture.result = MAV_RESULT_DENIED;
 			}
 
 			ESP_LOGI(Mav::kDebugTag, "Camera::processMakeShot, request to make a shot, frame name \"%s\" "
