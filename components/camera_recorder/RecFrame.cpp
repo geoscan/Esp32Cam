@@ -31,6 +31,12 @@ void RecFrame::onNewFrame(Key::Type frame)
 
 bool RecFrame::start(const char *aFilename)
 {
+	if (aFilename == nullptr) {
+		ESP_LOGE(kTag, "failed to start recording, as no file name has been provided");
+
+		return false;
+	}
+
 	// Save frame in a higher resolution.
 	// Save the currently used camera resolution
 	constexpr int kUninitialized = 0;
