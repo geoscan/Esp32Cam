@@ -95,10 +95,6 @@ static struct {
 	bool videoRecRunning = false;
 } status;
 
-static struct {
-	Sub::Cam::ShotFile shotFile;
-} key {{shotFile}};
-
 static bool shotFile(const char *aName)
 {
 	return Ok == processPhoto(aName);
