@@ -9,9 +9,12 @@
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_CAMERA_RECORDER_DEBUG_LEVEL)
+
 #include "camera_recorder/RecFrame.hpp"
-#include "module/ModuleBase.hpp"
 #include "camera_recorder/camera_recorder.hpp"
+#include "module/ModuleBase.hpp"
+#include "sd_fat.h"
+#include <cstring>
 
 static constexpr const char *kTag = "[camera_recorder: frame]";
 
@@ -33,6 +36,25 @@ bool RecFrame::start(const char *aFilename)
 {
 	if (aFilename == nullptr) {
 		ESP_LOGE(kTag, "failed to start recording, as no file name has been provided");
+
+		return false;
+	}
+
+	if (!sdFatInit()) {
+		ESP_LOGE(kTag, "Failed to initialize file system, aborting");
+
+		return false;
+	}
+
+	// Compose path to the file compatible with the file system API
+	static constexpr unsigned kMaxFilePathLength = 64;
+	char filePath[kMaxFilePathLength];
+	const auto fileNameEncodingResult = snprintf(filePath, kMaxFilePathLength, "%s/%s.jpg",
+		CONFIG_SD_FAT_MOUNT_POINT, aFilename);
+
+	if (fileNameEncodingResult >= kMaxFilePathLength // not enough space for null character
+			|| fileNameEncodingResult < 0) {
+		ESP_LOGE(kTag, "Failed to compose the file path, aborting");
 
 		return false;
 	}
