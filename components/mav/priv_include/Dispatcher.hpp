@@ -47,13 +47,9 @@ public:
 protected:
 	Mav::Microservice::Ret process(Ut::Cont::ConstBuffer aMessage, int &anProcessed);
 private:
-	Sub::Rout::OnMavlinkReceived::Ret onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0>);
 	Sub::Rout::Payload respAsPayload();
 	void onReceive(Bdg::OnReceiveCtx) override;
 private:
-	struct {
-		Sub::Rout::OnMavlinkReceived onMavlinkReceived;
-	} key;
 
 	Unmarshalling unmarshalling;
 	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::FtpClient,

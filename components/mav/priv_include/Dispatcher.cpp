@@ -29,7 +29,6 @@ GS_UTILITY_LOGV_CLASS_ASPECT_SET_ENABLED(Mav::Dispatcher, "async", 1);
 
 Mav::Dispatcher::Dispatcher() :
 	Bdg::Receiver{Bdg::NamedEndpoint::Mavlink, "Mavlink dispatcher"},
-	key{{&Dispatcher::onMavlinkReceived, this}},
 	micAggregate{*this}
 {
 }
@@ -99,38 +98,6 @@ Mav::Microservice::Ret Mav::Dispatcher::process(Ut::Cont::ConstBuffer aBuffer, i
 	}
 
 	return ret;
-}
-
-Sub::Rout::OnMavlinkReceived::Ret Mav::Dispatcher::onMavlinkReceived(Sub::Rout::OnMavlinkReceived::Arg<0> aMessage)
-{
-	// TODO: consider sysid, compid checking, preamble parsing, or maybe other means of optimizing the forwarding to reduce time expenses.
-	Sub::Rout::Response response{Sub::Rout::Response::Type::Ignored};
-
-	switch (process(Ut::Cont::toBuffer<const void>(aMessage), response.nProcessed)) {
-		case Microservice::Ret::Ignored:  // forward the message to UDP interface
-			response.setType(Sub::Rout::Response::Type::Ignored);
-
-			break;
-
-		case Microservice::Ret::NoResponse:
-			response.setType(Sub::Rout::Response::Type::Consumed);
-
-			break;
-
-		case Microservice::Ret::Response:  // send response back
-			ESP_LOGD(Mav::kDebugTag, "Dispatcher::onMavlinkReceived: sending response, size %d", resp.size);
-			response.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
-			response.payload = respAsPayload();
-
-			break;
-
-		default:  // Message has been processed by some Microservice instance, no actions required
-			break;
-	};
-
-	ESP_LOGV(Mav::kDebugTag, "Dispatcher::process(): processed %d bytes", response.nProcessed);
-
-	return response;
 }
 
 Sub::Rout::Payload Mav::Dispatcher::respAsPayload()
