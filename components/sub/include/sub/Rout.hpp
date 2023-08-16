@@ -123,7 +123,6 @@ struct ReceivedVariant {
 	SenderInfoVariant variant;
 };
 
-using OnReceived = Sub::IndKey<Response(const ReceivedVariant &), Topic::Generic>;  ///< Event signifying that something has been received
 using OnTcpEvent = Sub::NoLockKey<void(const TcpConnectionVariant &), Topic::Generic>;  ///< Used by Routing. TODO: if number of users is extended, replace w/ Sub::IndKey!
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
 
