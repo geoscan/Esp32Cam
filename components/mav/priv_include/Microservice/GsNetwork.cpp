@@ -34,7 +34,6 @@ GsNetwork::GsNetwork() :
 	key{
 		{&GsNetwork::packForward<asio::ip::tcp>, this},
 		{&GsNetwork::packForward<asio::ip::udp>, this},
-		{&GsNetwork::packTcpEvent, this},
 		{&GsNetwork::onTcpEvent, this}
 	}
 {
@@ -120,27 +119,6 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnRespo
 	aOnResponse(aMavlinkMessage);
 
 	return ret;
-}
-
-typename Sub::Rout::MavlinkPackTcpEvent::Ret GsNetwork::packTcpEvent(
-	typename Sub::Rout::MavlinkPackTcpEvent::Arg<0> arg)
-{
-	mavlink_mav_gs_network_t mavlinkMavGsNetwork;
-
-	auto visitor = mapbox::util::make_visitor(
-		[&](const Sub::Rout::TcpConnected &a) {
-			initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
-			mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTED;
-		},
-		[&](const Sub::Rout::TcpDisconnected &a) {
-			initMavlinkMavGsNetwork(mavlinkMavGsNetwork, a.remoteEndpoint, a.localPort, asio::const_buffer(nullptr, 0));
-			mavlinkMavGsNetwork.command = MAV_GS_NETWORK_COMMAND_PROCESS_CONNECTION_ABORTED;
-		}
-	);
-	mapbox::util::apply_visitor(visitor, arg);
-	mavlinkMavGsNetwork.ack = MAV_GS_NETWORK_ACK_NONE_HOLD_RESPONSE;
-
-	return respPackLock(mavlinkMavGsNetwork);  // Pack the message into `resp` structure, set `resp.mutex	` so it will be safely stored there until the response is processed and passed down the communication chain
 }
 
 ///

@@ -40,7 +40,6 @@ private:
 	typename Sub::Rout::MavlinkPackForward<Tproto>::Ret packForward(
 		typename Sub::Rout::MavlinkPackForward<Tproto>::template Arg<0>);
 
-	typename Sub::Rout::MavlinkPackTcpEvent::Ret packTcpEvent(typename Sub::Rout::MavlinkPackTcpEvent::Arg<0>);
 	Sub::Rout::Response respPackLock(const mavlink_mav_gs_network_t &);
 	static std::size_t mavGsNetworkGetMaxMessageLength(std::size_t aHintPayloadLength);
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
@@ -60,7 +59,6 @@ private:
 	struct Key {
 		typename Sub::Rout::MavlinkPackForward<asio::ip::tcp> packForwardTcp;
 		typename Sub::Rout::MavlinkPackForward<asio::ip::udp> packForwardUdp;
-		Sub::Rout::MavlinkPackTcpEvent packTcpEvent;
 		Sub::Rout::OnTcpEvent tcpEvent;
 	} key;
 
