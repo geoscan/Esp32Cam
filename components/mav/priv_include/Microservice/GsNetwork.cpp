@@ -120,24 +120,6 @@ Microservice::Ret GsNetwork::process(mavlink_message_t &aMavlinkMessage, OnRespo
 }
 
 ///
-/// \brief Pack a mesasge into `Rout::Response` and ensure its thread safety w/ `resp.mutex`
-///
-Sub::Rout::Response GsNetwork::respPackLock(const mavlink_mav_gs_network_t &mavlinkMavGsNetwork)
-{
-	mavlink_message_t mavlinkMessage;
-	mavlink_msg_mav_gs_network_encode(Globals::getSysId(), Globals::getCompId(), &mavlinkMessage, &mavlinkMavGsNetwork);
-	Sub::Rout::Response ret{Sub::Rout::Response::Type::Response};
-
-	// Pack the message into a buffer
-	ret.payloadLock = Sub::Rout::PayloadLock{new Sub::Rout::PayloadLock::element_type{resp.mutex}};
-	auto nPacked = Marshalling::push(mavlinkMessage, {resp.buffer, sizeof(resp.buffer)});
-	ret.payload = {resp.buffer, nPacked};
-	ret.nProcessed = -1;  // No fragmented processing is used
-
-	return ret;
-}
-
-///
 /// \brief GsNetwork::mavGsNetworkGetMaxMessageLength Calculates max. possible length of `mavlink_mav_gs_network_t`
 /// after serialization.
 ///

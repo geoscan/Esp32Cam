@@ -36,7 +36,6 @@ private:
 	static std::size_t initMavlinkMavGsNetwork(mavlink_mav_gs_network_t &mavGsNetwork,
 		const asio::ip::basic_endpoint<Tproto> &aRemoteEndpoint, std::uint16_t aLocalPort, Tbuf &&aBuffer);
 
-	Sub::Rout::Response respPackLock(const mavlink_mav_gs_network_t &);
 	static std::size_t mavGsNetworkGetMaxMessageLength(std::size_t aHintPayloadLength);
 	asio::ip::address getAddress(mavlink_mav_gs_network_t &);
 	asio::const_buffer getBuffer(mavlink_mav_gs_network_t &);
