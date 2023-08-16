@@ -21,9 +21,6 @@ using DefaultSyncTrait = MutSyncTrait;
 template <class Targ, class Ttopic>
 using Key = typename Rr::Util::LegacyKey<void(Targ), DefaultSyncTrait, std::list, Ttopic>;
 
-template <class Ttopic>
-using KeyVoid = typename Rr::Util::LegacyKey<void(), DefaultSyncTrait, std::list, Ttopic>;
-
 template <class Ttopic, class TsyncTrait, class ...Targs>
 using KeyBase = typename Rr::Util::LegacyKey<void(Targs...), DefaultSyncTrait, std::list, Ttopic>;
 
