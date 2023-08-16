@@ -129,8 +129,6 @@ using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Comma
 template <class Tproto>
 using MavlinkPackForward = typename Sub::NoLockKey<Response(const Socket<Tproto> &), Topic::MavlinkPackForward>;
 
-using MavlinkPackTcpEvent = typename Sub::NoLockKey<Response(const TcpConnectionVariant &), Topic::Mavlink>;
-
 }  // namespace Rout
 }  // namespace Sub
 
