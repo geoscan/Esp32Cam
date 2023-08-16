@@ -48,7 +48,7 @@ bool RecFrame::start(const char *aFilename)
 	const auto fileNameEncodingResult = snprintf(filePath, kMaxFilePathLength, "%s/%s.jpg",
 		CONFIG_SD_FAT_MOUNT_POINT, aFilename);
 
-	if (fileNameEncodingResult >= kMaxFilePathLength // not enough space for null character
+	if (fileNameEncodingResult >= kMaxFilePathLength // not enough space
 			|| fileNameEncodingResult < 0) {
 		ESP_LOGE(kTag, "Failed to compose the file path, aborting");
 
