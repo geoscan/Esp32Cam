@@ -17,12 +17,15 @@ aforementioned goal will become closer through series of incremental steps;
 
 ## Overengineering
 
-- Make `module` API and field paradigm separate
+- [ ] Make `module` API and field paradigm separate
 	- `module` API implements the paradigm of virtual twins of physical or logical "devices" configurable through **fields**
 	- It greatly increases the amount of code that has to be written, and obfuscates the code, while providing no substantial practical benefits;
 	- Better be replaced with a more straightforward approach;
 		- Invoke modules directly (`Camera`, `Wi-Fi`, ...);
 			- not necessarily in a single component;
 		- Implement fields later, if needed
-- [ ] RR library abuse
+- RR library abuse
 	- It found its uses in this code beyond event distribution;
+	- [ ] Refactor legacy topics
+	- [ ] Add a layer of abstraction over RR
+	- [ ] XXX? Move subscription topics from RR closer to the actual modules that produce the events
