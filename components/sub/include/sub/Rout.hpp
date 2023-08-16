@@ -112,7 +112,6 @@ struct Response {
 namespace Topic {
 struct Generic;
 struct Mavlink;
-struct MavlinkPackForward;
 }  // namespace Topic
 
 using TcpConnectionVariant = typename mapbox::util::variant<TcpConnected, TcpDisconnected>;  ///< Tcp connection events
@@ -125,9 +124,6 @@ struct ReceivedVariant {
 
 using OnTcpEvent = Sub::NoLockKey<void(const TcpConnectionVariant &), Topic::Generic>;  ///< Used by Routing. TODO: if number of users is extended, replace w/ Sub::IndKey!
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
-
-template <class Tproto>
-using MavlinkPackForward = typename Sub::NoLockKey<Response(const Socket<Tproto> &), Topic::MavlinkPackForward>;
 
 }  // namespace Rout
 }  // namespace Sub
