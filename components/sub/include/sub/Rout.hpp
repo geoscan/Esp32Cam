@@ -45,49 +45,6 @@ struct TcpDisconnected {
 	std::uint16_t localPort;
 };
 
-///
-/// \brief Provides message passing between interfaces and receive-event handlers.
-///
-/// Please note `payloadLock` and `payloadHold` fields.
-/// They enable 2 ways of providing thread safety of `payload` field
-/// 1. Allocate a chunk of memory and bind it to self-destructing RAII `std::unique_ptr<bytes[]>` (`payloadHold` field)
-/// 2. Use a buffer pre-allocated by the response producer, but lock it w/ `std::unique_ptr<mutex>` (`payloadLock` field)
-///
-struct Response {
-	Payload payload;  ///< Response field
-	PayloadHold payloadHold;  ///< Storage for payload. Solves the transferred buffer's lifetime problem in cases when a receiver does not possess the buffer.
-	int nProcessed;  ///< Number of bytes that has been processed by a receiver. For iterative use (e.g. sending long MAVLink message chunk-by-chunk). Contextual, may be unused (= -1 in that case)
-	PayloadLock payloadLock;  ///< Payload may refer to a buffer owned by a receiver. This field allows to protect the buffer until `payload` is processed by an invoker.
-
-	enum class Type {
-		Ignored,  ///< The message has not been recognized by a receiver
-		Consumed,  ///< The message was addressed to a receiver. No response is sent
-		Response,  ///< The message was addressed to a receiver. There is a response message ready to be sent
-	};
-
-	Type getType();
-	void setType(Type);
-	Response(const Response &) = default;
-	Response(Response &&) = default;
-	Response &operator=(const Response &) = default;
-	Response &operator=(Response &&) = default;
-	Response(Type);
-	Response();
-	void reset();
-
-	template <class Tpayload, class TpayloadHold, class TpayloadLock>
-	Response(Tpayload &&aTpayload,
-		TpayloadHold &&aTpayloadHold = {},
-		int anProcessed = -1,
-		TpayloadLock &&aTpayloadLock = {}) :
-		payload{std::forward<Tpayload>(aTpayload)},
-		payloadHold{std::forward<TpayloadHold>(aTpayloadHold)},
-		nProcessed{anProcessed},
-		payloadLock{std::forward<TpayloadLock>(aTpayloadLock)}
-	{
-	}
-};
-
 namespace Topic {
 struct Generic;
 struct Mavlink;
