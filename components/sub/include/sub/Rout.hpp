@@ -25,37 +25,16 @@ using PayloadLock = std::unique_ptr<std::lock_guard<std::mutex>>;
 using Payload = asio::const_buffer;
 
 ///
-/// \brief Identifies TCP or UDP request handlers
-///
-template <class Tproto>
-struct Socket {
-	static_assert(std::is_same<Tproto, asio::ip::tcp>::value
-		|| std::is_same<Tproto, asio::ip::udp>::value, "");
-
-	const asio::ip::basic_endpoint<Tproto> &remoteEndpoint;
-	std::uint16_t localPort;
-	Payload payload;
-};
-
-///
-/// \brief Identifies UART request handlers
-///
-struct Uart {
-	Payload payload;
-	int uartNum;
-};
-
-/// \brief Mavlink output message. Most likely, it contains a telemetry message
-struct Mavlink {
-	Payload payload;
-};
-
-///
 /// \brief Used by Sock::Api
 ///
 struct TcpConnected {
 	const asio::ip::tcp::endpoint remoteEndpoint;
 	std::uint16_t localPort;
+};
+
+struct Uart {
+	Payload payload;
+	int uartNum;
 };
 
 ///
@@ -115,12 +94,6 @@ struct Mavlink;
 }  // namespace Topic
 
 using TcpConnectionVariant = typename mapbox::util::variant<TcpConnected, TcpDisconnected>;  ///< Tcp connection events
-
-struct ReceivedVariant {
-	using SenderInfoVariant = typename mapbox::util::variant<Socket<asio::ip::udp>, Socket<asio::ip::tcp>, Uart, Mavlink>;  ///< Stores info on whoever produced the request
-
-	SenderInfoVariant variant;
-};
 
 using OnTcpEvent = Sub::NoLockKey<void(const TcpConnectionVariant &), Topic::Generic>;  ///< Used by Routing. TODO: if number of users is extended, replace w/ Sub::IndKey!
 using UartSend = Sub::NoLockKey<void(const Uart &), Topic::Generic>;  ///< Command to send a packet over UART. TODO: consider the same approach for Sock::Api, when RR library gets mature enough so it enables one to register interfaces inst. of function callbacks
