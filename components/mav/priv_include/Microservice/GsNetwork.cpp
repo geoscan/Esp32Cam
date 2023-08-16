@@ -32,8 +32,6 @@ using namespace asio::ip;
 GsNetwork::GsNetwork() :
 	Bdg::Receiver{Bdg::NamedEndpoint::MavlinkIpPack, "MavlinkGsNetwork"},
 	key{
-		{&GsNetwork::packForward<asio::ip::tcp>, this},
-		{&GsNetwork::packForward<asio::ip::udp>, this},
 		{&GsNetwork::onTcpEvent, this}
 	}
 {
