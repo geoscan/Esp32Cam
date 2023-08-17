@@ -44,8 +44,8 @@ private:
 private:
 	void updateFps();
 	void calculateFps();
-	void onNewFrame(Key::Type) override;
-	void logWriting(Key::Type);
+	void onNewFrame(Sub::Key::NewFrameEvent) override;
+	void logWriting(Sub::Key::NewFrameEvent);
 	bool startWrap(const char *filename);
 public:
 	RecMjpgAvi();
