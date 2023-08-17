@@ -1,6 +1,6 @@
 # Refactoring guidelines / milestones
 
-## System layer
+## System layer, general concerns
 
 Severe mistakes were made from the architectural point of view. The code is
 detached from neither ESP-IDF framework, nor the hardware. Moreover, it
@@ -29,3 +29,27 @@ aforementioned goal will become closer through series of incremental steps;
 	- [ ] Refactor legacy topics
 	- [ ] Add a layer of abstraction over RR
 	- [ ] XXX? Move subscription topics from RR closer to the actual modules that produce the events
+
+## Other
+
+- `wifi_uart_bridge`
+	- serves as an inter-protocol router;
+	- enables one to add runtime reduction rules to foward, for example, packages from UART to TCP;
+	- things to fix
+		- [ ] clunky API: less callbacks,
+		- [ ] complicated message delivery
+			- now
+				- get a request from an endpoint
+				- apply a reduction rule
+				- notify subscribers through callbacks
+			- what would be great
+				- get a request from an endpoing
+				- apply a reduction rule
+				- push the buffer into a working queue for notification
+				- suspend the notifier's thread
+					- unless called from the context of the working queue's thread
+				- deliver the message through notification queue
+				- check if there are any responses
+				- if there're no any, resume the notifier's thread
+				- in a nutshell
+					- just plain simple working queue
