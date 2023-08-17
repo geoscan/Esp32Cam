@@ -18,7 +18,7 @@ FrameSender::FrameSender(asio::ip::udp::socket &aSocket) :
 {
 }
 
-void FrameSender::processFrame(const std::shared_ptr<Cam::Frame> &img)
+void FrameSender::processFrame(Sub::Key::NewFrameEvent img)
 {
 	asio::error_code err;
 	for (auto &client : clients) {
