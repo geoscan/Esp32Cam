@@ -34,8 +34,6 @@ private:
 	} tcp;
 
 	struct {
-		Sub::Key::TcpConnected tcpConnected;
-		Sub::Key::TcpDisconnected tcpDisconnected;
 		Wifi::Sub::Disconnected wifiDisconnected;
 	} key;
 

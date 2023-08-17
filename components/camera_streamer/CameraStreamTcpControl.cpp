@@ -21,7 +21,7 @@ size_t CameraStreamTcpControl::instances = 0;
 
 CameraStreamTcpControl::CameraStreamTcpControl(asio::ip::tcp::acceptor &tcpAcceptor, asio::ip::tcp::socket &tcpSocket) :
 	tcp{tcpSocket, tcpAcceptor},
-	key{{}, {}, {&CameraStreamTcpControl::handleApClientDisconnected, this}}
+	key{{&CameraStreamTcpControl::handleApClientDisconnected, this}}
 {
 }
 
@@ -37,7 +37,7 @@ void CameraStreamTcpControl::operator()()
 
 		tcp.acceptor.accept(tcp.socket, clientEndpoint, err);
 		if (!err) {
-			key.tcpConnected.notify(clientEndpoint.address(), clientEndpoint.port());
+			Sub::Key::TcpConnected::notify(clientEndpoint.address(), clientEndpoint.port());
 
 			{
 				auto str = clientEndpoint.address().to_string();
@@ -54,7 +54,7 @@ void CameraStreamTcpControl::operator()()
 			}
 			tcp.socket.close();
 
-			key.tcpDisconnected.notify(clientEndpoint.address());
+			Sub::Key::TcpDisconnected::notify(clientEndpoint.address());
 
 			{
 				auto str = clientEndpoint.address().to_string();
