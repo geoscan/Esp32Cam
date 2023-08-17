@@ -80,7 +80,6 @@ void RecMjpgAvi::calculateFps()
 
 void RecMjpgAvi::onNewFrame(Sub::Key::NewFrameEvent aFrame)
 {
-
 	if (aFrame.get() != nullptr && aFrame->data() != nullptr && aFrame->size()) {
 		stat.width = aFrame->width();
 		stat.height = aFrame->height();
