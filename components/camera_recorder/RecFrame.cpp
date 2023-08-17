@@ -20,7 +20,7 @@ static constexpr const char *kTag = "[camera_recorder: frame]";
 
 using namespace CameraRecorder;
 
-void RecFrame::onNewFrame(Key::Type frame)
+void RecFrame::onNewFrame(Sub::Key::NewFrameEvent frame)
 {
 	std::lock_guard<std::mutex> lock(sync.mut);
 
@@ -104,9 +104,9 @@ bool RecFrame::start(const char *aFilename)
 	}
 	// First try to acquire an image from the frame stream
 	ESP_LOGD(kDebugTag, "start. Enabling frame subcription, acquiring a frame");
-	key.enableSubscribe(true);
+	key.setEnabled(true);
 	sync.sem.try_acquire_for(kFrameTimeout);
-	key.enableSubscribe(false);
+	key.setEnabled(false);
 	sync.sem.try_acquire();  // Reset
 	// Write the acquired frame into file
 	std::lock_guard<std::mutex> lock(sync.mut);
