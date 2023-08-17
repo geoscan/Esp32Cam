@@ -30,7 +30,6 @@ public:
 	CameraStream(Fps fps = kNoFpsLimit);
 
 private:
-	Sub::Key::NewFrame key;
 	Fps fps;
 };
 
