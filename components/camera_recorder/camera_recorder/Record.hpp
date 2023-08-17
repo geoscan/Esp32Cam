@@ -17,7 +17,7 @@ class Record {
 protected:
 	using Key = Sub::Key::NewFrame;  // Smart pointer to smth. having "data()" and "size()" methods, with automatic deallocation
 	Key key;
-	virtual void onNewFrame(Key::Type) = 0;
+	virtual void onNewFrame(Sub::Key::NewFrameEvent) = 0;
 public:
 	Record();
 	virtual bool start(const char *filename) = 0;
