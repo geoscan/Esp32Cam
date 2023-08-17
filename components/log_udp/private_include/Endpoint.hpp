@@ -20,7 +20,7 @@ public:
 	void operator()();
 	void send(const char *);
 private:
-	void onWifiDisconnected(Sub::Key::WifiDisconnected::Type);
+	void onWifiDisconnected(asio::ip::address);
 
 	std::mutex mut;
 	Sub::Key::WifiDisconnected keyWifiDisconnected;
