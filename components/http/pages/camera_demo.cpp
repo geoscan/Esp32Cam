@@ -19,7 +19,7 @@ static struct CameraSubscriber {
 
 	/// If a subscription is active, gets triggered on a new frame posted into
 	/// the queue.
-	void onFrame(const std::shared_ptr<Cam::Frame> &frame)
+	void onFrame(Sub::Key::NewFrameEvent frame)
 	{
 		std::lock_guard<std::mutex> lock{onFrameHook.mutex};
 
@@ -37,8 +37,9 @@ static struct CameraSubscriber {
 		return res;
 	}
 
-	CameraSubscriber() : keyNewFrame{&CameraSubscriber::onFrame, this, false}
+	CameraSubscriber() : keyNewFrame{&CameraSubscriber::onFrame, this}
 	{
+		keyNewFrame.setEnabled(false);
 	}
 
 	template <class C>
@@ -48,14 +49,14 @@ static struct CameraSubscriber {
 			std::lock_guard<std::mutex> lock{onFrameHook.mutex};
 			onFrameHook.callback = std::move(cbOnFrame);
 		}
-		keyNewFrame.enableSubscribe(true);
+		keyNewFrame.setEnabled(true);
 		const std::chrono::milliseconds timeEnd = std::chrono::milliseconds{Ut::bootTimeUs() / 1000 + kFrameTimeout};
 
 		// Frame delay
 		while (!isReceived() && std::chrono::milliseconds(Ut::bootTimeUs() / 1000) < timeEnd) {
 			vTaskDelay(1);
 		}
-		keyNewFrame.enableSubscribe(false);
+		keyNewFrame.setEnabled(false);
 	}
 
 	static constexpr std::size_t kFrameTimeout = 500;
