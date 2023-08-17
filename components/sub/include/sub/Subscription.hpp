@@ -69,7 +69,7 @@ using NewFrameEvent = const typename std::shared_ptr<Cam::Frame> &;
 using TcpConnected     = IndKey<void(asio::ip::address, Port), Topic::TcpConnected>;
 using NewFrame         = IndKey<void(NewFrameEvent), Topic::NewFrame>;  // TODO: considering frame rate, using `shared_ptr` is not a very smart move: mind the allocations it entails
 using TcpDisconnected  = IndKey<void(asio::ip::address), Topic::TcpDisconnected>;
-using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
+using WifiDisconnected = IndKey<void(asio::ip::address), Topic::WifiDisconnected>;
 
 }  // namespace Key
 }  // namespace Sub
