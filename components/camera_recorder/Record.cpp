@@ -9,11 +9,13 @@
 
 using namespace CameraRecorder;
 
-Record::Record() : key(&Record::onNewFrame, this, false)
+Record::Record():
+	key{&Record::onNewFrame, this}
 {
+	key.setEnabled(false);
 }
 
 Record::~Record()
 {
-	key.enableSubscribe(false);
+	key.setEnabled(false);
 }
