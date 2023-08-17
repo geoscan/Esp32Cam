@@ -14,7 +14,7 @@ using namespace CameraRecorder;
 
 static constexpr const char *kTag = "[camera_recorder: mjpeg/avi]";
 
-void RecMjpgAvi::logWriting(Key::Type frame)
+void RecMjpgAvi::logWriting(Sub::Key::NewFrameEvent frame)
 {
 	static constexpr std::size_t kPeriod = 50;
 	static std::size_t iter = 0;
@@ -78,7 +78,7 @@ void RecMjpgAvi::calculateFps()
 	}
 }
 
-void RecMjpgAvi::onNewFrame(Key::Type aFrame)
+void RecMjpgAvi::onNewFrame(Sub::Key::NewFrameEvent aFrame)
 {
 
 	if (aFrame.get() != nullptr && aFrame->data() != nullptr && aFrame->size()) {
@@ -112,7 +112,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 		stat.started = std::chrono::microseconds(Ut::bootTimeUs());
 	    stat.frames  = 0;
 	    stat.fps     = NAN;
-		Record::key.enableSubscribe(true);
+		Record::key.setEnabled(true);
 		return true;
 	} else {
 		ESP_LOGE(kTag, "Record - failed. Unable to open output file %s", aFilename);
@@ -122,7 +122,7 @@ bool RecMjpgAvi::start(const char *aFilename)
 
 void RecMjpgAvi::stop()
 {
-	Record::key.enableSubscribe(false);
+	Record::key.setEnabled(false);
 
 	calculateFps();
 	if (stat.fd) {
