@@ -57,7 +57,7 @@ struct FpsCounter {
 
 static FpsCounter sFpsCounter;
 
-void Profile::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
+void Profile::onFrame(Sub::Key::NewFrameEvent aFrame)
 {
 	assert(nullptr != aFrame.get());
 	// TODO: push into work queue, probably will cause stack overflow

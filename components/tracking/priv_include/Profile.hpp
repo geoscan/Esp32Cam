@@ -40,7 +40,7 @@ private:
 	};
 public:
 	Profile();
-	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
+	void onFrame(Sub::Key::NewFrameEvent);  ///< Subscription handler
 private:
 	void outputProfile();
 private:
