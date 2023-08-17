@@ -64,9 +64,9 @@ using NoLockKey = Rr::Util::Key<Tsignature, NoSyncTrait, std::list, Ttopic>;
 namespace Key {
 
 // Obsolete Rr::Subscription::Key
-using TcpConnected     = Rr::Subscription::KeyBase<Topic::TcpConnected, Rr::Subscription::DefaultSyncTrait, asio::ip::address, Port>;
+using TcpConnected     = IndKey<void(asio::ip::address, Port), Topic::TcpConnected>;
 using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Cam::Frame> &, Topic::NewFrame>;
-using TcpDisconnected  = Rr::Subscription::Key<asio::ip::address, Topic::TcpDisconnected>;
+using TcpDisconnected  = IndKey<void(asio::ip::address), Topic::TcpDisconnected>;
 using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
 
 }  // namespace Key
