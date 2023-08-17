@@ -23,7 +23,7 @@ private:
 		std::mutex mut;
 	} sync;
 protected:
-	void onNewFrame(Key::Type) override;
+	void onNewFrame(Sub::Key::NewFrameEvent) override;
 	static constexpr std::chrono::seconds kFrameTimeout{1};
 public:
 	using CameraRecorder::Record::Record;
