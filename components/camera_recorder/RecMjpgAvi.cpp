@@ -81,12 +81,13 @@ void RecMjpgAvi::calculateFps()
 void RecMjpgAvi::onNewFrame(Sub::Key::NewFrameEvent aFrame)
 {
 	if (aFrame.get() != nullptr && aFrame->data() != nullptr && aFrame->size()) {
+		static constexpr int kNoAviError = 0;
 		stat.width = aFrame->width();
 		stat.height = aFrame->height();
-		if (AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size()) != 0) {
+		int errorCode = AVI_write_frame(stat.fd, reinterpret_cast<char *>(const_cast<void *>(aFrame->data())), aFrame->size());
 
-			ESP_LOGW(kTag, "Recording -- failed to write a frame");
-
+		if (errorCode != kNoAviError) {
+			ESP_LOGW(kTag, "Recording -- failed to write a frame, error=%d(%s)", errorCode, AVI_strerror());
 		} else {
 			updateFps();
 			logWriting(aFrame);
