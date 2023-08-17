@@ -63,7 +63,7 @@ using NoLockKey = Rr::Util::Key<Tsignature, NoSyncTrait, std::list, Ttopic>;
 
 namespace Key {
 
-using NewFrameEvent = typename std::shared_ptr<Cam::Frame>;
+using NewFrameEvent = const typename std::shared_ptr<Cam::Frame> &;
 
 // Obsolete Rr::Subscription::Key
 using TcpConnected     = IndKey<void(asio::ip::address, Port), Topic::TcpConnected>;
