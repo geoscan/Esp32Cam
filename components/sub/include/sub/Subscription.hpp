@@ -63,9 +63,11 @@ using NoLockKey = Rr::Util::Key<Tsignature, NoSyncTrait, std::list, Ttopic>;
 
 namespace Key {
 
+using NewFrameEvent = typename std::shared_ptr<Cam::Frame>;
+
 // Obsolete Rr::Subscription::Key
 using TcpConnected     = IndKey<void(asio::ip::address, Port), Topic::TcpConnected>;
-using NewFrame         = Rr::Subscription::Key<const std::shared_ptr<Cam::Frame> &, Topic::NewFrame>;
+using NewFrame         = IndKey<void(NewFrameEvent), Topic::NewFrame>;  // TODO: considering frame rate, using `shared_ptr` is not a very smart move: mind the allocations it entails
 using TcpDisconnected  = IndKey<void(asio::ip::address), Topic::TcpDisconnected>;
 using WifiDisconnected = Rr::Subscription::Key<asio::ip::address, Topic::WifiDisconnected>;
 
