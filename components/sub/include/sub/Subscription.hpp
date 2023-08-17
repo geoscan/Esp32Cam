@@ -1,31 +1,12 @@
 #ifndef UTILITY_UTILITY_SUBSCRIPTION_HPP
 #define UTILITY_UTILITY_SUBSCRIPTION_HPP
 
-#include <Rr/Util/Key.hpp>
-#include "utility/cont/Buffer.hpp"
 #include "cam/Camera.hpp"
 #include "sub/Types.hpp"
+#include "utility/cont/Buffer.hpp"
+#include <Rr/Util/Key.hpp>
 #include <asio.hpp>
 #include <list>
-
-namespace Rr {
-namespace Subscription {
-
-struct MutSyncTrait {
-	static constexpr auto kPolicy = Rr::Sync::Policy::Type::Mutex;
-	using Mutex = std::mutex;
-};
-
-using DefaultSyncTrait = MutSyncTrait;
-
-template <class Targ, class Ttopic>
-using Key = typename Rr::Util::LegacyKey<void(Targ), DefaultSyncTrait, std::list, Ttopic>;
-
-template <class Ttopic, class TsyncTrait, class ...Targs>
-using KeyBase = typename Rr::Util::LegacyKey<void(Targs...), DefaultSyncTrait, std::list, Ttopic>;
-
-}  // namespace Subscription
-}  // namespace Rr
 
 namespace Sub {
 
