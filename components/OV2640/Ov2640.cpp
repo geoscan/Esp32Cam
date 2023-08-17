@@ -345,7 +345,8 @@ void Ov2640::setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCal
 ///
 void Ov2640::hookOnFrame(camera_fb_t *aFrame)
 {
-	Sub::Key::NewFrame::notify(Sub::Key::NewFrameEvent{new Ov2640::Frame{aFrame}});
+	auto frame = Sub::Key::NewFrameEvent{new Ov2640::Frame{aFrame}};
+	Sub::Key::NewFrame::notify(frame);
 }
 
 // ------------ Ov2640::Frame ------------ //
