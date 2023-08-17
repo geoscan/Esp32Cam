@@ -1253,7 +1253,7 @@ char *(avi_errors[]) =
 		/* 14 */ "avilib - Unkown Error"};
 static int num_avi_errors = sizeof(avi_errors) / sizeof(char *);
 
-static char error_string[4096];
+static char error_string[128];
 
 void AVI_print_error(char *str)
 {
