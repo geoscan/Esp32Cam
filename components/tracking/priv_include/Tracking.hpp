@@ -105,7 +105,7 @@ private:
 	};
 public:
 	Tracking();
-	void onFrame(const std::shared_ptr<Cam::Frame> &);  ///< Subscription handler
+	void onFrame(Sub::Key::NewFrameEvent);  ///< Subscription handler
 protected:
 	void setFieldValue(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb) override;
 private:
@@ -114,11 +114,11 @@ private:
 		return state > State::CamConfFailed;
 	}
 	/// \brief Delegate function. \sa `Tracking::onFrame`
-	void onFrameCamConfStart(const std::shared_ptr<Cam::Frame> &aFrame);
+	void onFrameCamConfStart(Sub::Key::NewFrameEvent aFrame);
 	/// \brief Delegate function. \sa `Tracking::onFrame`
-	void onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame);
+	void onFrameTrackerInit(Sub::Key::NewFrameEvent aFrame);
 	/// \brief Delegate function. \sa `Tracking::onFrame`
-	void onFrameTrackerRunning(const std::shared_ptr<Cam::Frame> &aFrame);
+	void onFrameTrackerRunning(Sub::Key::NewFrameEvent aFrame);
 	/// \brief Delegate function. \sa `Tracking::setFieldValue`
 	void setFieldValueInitialized(Mod::Fld::WriteReq aReq, Mod::Fld::OnWriteResponseCallback aCb);
 	/// \brief Delegate function. \sa `Tracking::setFieldValue`

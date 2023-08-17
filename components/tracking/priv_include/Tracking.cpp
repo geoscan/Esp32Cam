@@ -40,7 +40,7 @@ Tracking::Tracking() :
 }
 
 /// \brief When in tracking mode, processes the new frame searching for the new ROI center.
-void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
+void Tracking::onFrame(Sub::Key::NewFrameEvent aFrame)
 {
 	assert(nullptr != aFrame.get());
 	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "frame", "onFrame");
@@ -76,7 +76,7 @@ void Tracking::onFrame(const std::shared_ptr<Cam::Frame> &aFrame)
 	}
 }
 
-void Tracking::onFrameCamConfStart(const std::shared_ptr<Cam::Frame> &)
+void Tracking::onFrameCamConfStart(Sub::Key::NewFrameEvent)
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state CamConfStart");
 	cameraState.snapshotInit();
@@ -104,7 +104,7 @@ void Tracking::onFrameCamConfStart(const std::shared_ptr<Cam::Frame> &)
 	}
 }
 
-void Tracking::onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame)
+void Tracking::onFrameTrackerInit(Sub::Key::NewFrameEvent aFrame)
 {
 	GS_UTILITY_LOGD_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerInit");
 
@@ -145,7 +145,7 @@ void Tracking::onFrameTrackerInit(const std::shared_ptr<Cam::Frame> &aFrame)
 	}
 }
 
-void Tracking::onFrameTrackerRunning(const std::shared_ptr<Cam::Frame> &aFrame)
+void Tracking::onFrameTrackerRunning(Sub::Key::NewFrameEvent aFrame)
 {
 	GS_UTILITY_LOGV_CLASS_ASPECT(Trk::kDebugTag, Tracking, "state machine", "state TrackerRunning");
 
