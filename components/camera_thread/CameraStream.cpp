@@ -44,7 +44,7 @@ void CameraStream::operator()()
 				lastSend = Ut::bootTimeUs() / 1000;
 			}
 
-			key.notify(img);
+			Sub::Key::NewFrame::notify(img);
 			img.reset();
 			img = Cam::Camera::getInstance().getFrame();
 
