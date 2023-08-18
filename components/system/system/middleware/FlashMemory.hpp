@@ -8,6 +8,7 @@
 #ifndef COMPONENTS_SYSTEM_SYSTEM_MIDDLEWARE_FLASHMEMORY_HPP
 #define COMPONENTS_SYSTEM_SYSTEM_MIDDLEWARE_FLASHMEMORY_HPP
 
+#include "system/Error.hpp"
 #include <cstdint>
 
 namespace Sys {
@@ -50,17 +51,17 @@ public:
 	/// \param aData
 	/// \param aDataLength Must be multiple of
 	/// `FlashMemoryGeometry::writeBlockSize`
-	virtual void writeBlocks(std::uint32_t aWriteBlockOffset, const std::uint8_t *aData, std::size_t aDataLength);
+	virtual Error writeBlocks(std::uint32_t aWriteBlockOffset, const std::uint8_t *aData, std::size_t aDataLength) = 0;
 
 	/// \brief readBlock
 	/// \param aReadBlockOffset The offset for an atomically read block
 	/// \param anReadBlocks The number of block to read
 	/// \param aBuffer
 	/// \param aBufferSize Must be a multiple of `FlashMemoryGeometry::writeBlockSize`
-	virtual void readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
-		std::size_t aBufferSize);
+	virtual Error readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
+		std::size_t aBufferSize) = 0;
 
-	virtual void eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks);
+	virtual Error eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks) = 0;
 
 	inline const FlashMemoryGeometry getFlashMemoryGeometry() const
 	{
