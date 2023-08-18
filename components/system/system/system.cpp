@@ -16,9 +16,9 @@ namespace Sys {
 
 void init()
 {
-	esp_log_level_set(Sys::kDebugTag, (esp_log_level_t)CONFIG_SYSTEM_DEBUG_LEVEL);
-	ESP_LOGD(Sys::kDebugTag, "Debug log test");
-	ESP_LOGV(Sys::kDebugTag, "Verbose log test");
+	esp_log_level_set(Sys::debugTag(), (esp_log_level_t)CONFIG_SYSTEM_DEBUG_LEVEL);
+	ESP_LOGD(Sys::debugTag(), "Debug log test");
+	ESP_LOGV(Sys::debugTag(), "Verbose log test");
 }
 
 }  // namespace Sys
