@@ -1,0 +1,33 @@
+menu "[system]"
+
+	choice SYSTEM_DEBUG_LEVEL
+		prompt "[system] module debug level"
+		default SYSTEM_DEBUG_LEVEL_INFO
+
+		config SYSTEM_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config SYSTEM_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config SYSTEM_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config SYSTEM_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config SYSTEM_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config SYSTEM_DEBUG_LEVEL
+		int
+		default 1 if SYSTEM_DEBUG_LEVEL_ERROR
+		default 2 if SYSTEM_DEBUG_LEVEL_WARN
+		default 3 if SYSTEM_DEBUG_LEVEL_INFO
+		default 4 if SYSTEM_DEBUG_LEVEL_DEBUG
+		default 5 if SYSTEM_DEBUG_LEVEL_VERBOSE
+
+endmenu
