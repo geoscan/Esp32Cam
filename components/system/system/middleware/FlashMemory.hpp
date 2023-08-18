@@ -56,7 +56,7 @@ public:
 	/// \param aReadBlockOffset The offset for an atomically read block
 	/// \param anReadBlocks The number of block to read
 	/// \param aBuffer
-	/// \param aBufferSize Must be multiple of `FlashMemoryGeometry::writeBlockSize`
+	/// \param aBufferSize Must be a multiple of `FlashMemoryGeometry::writeBlockSize`
 	virtual void readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
 		std::size_t aBufferSize);
 
