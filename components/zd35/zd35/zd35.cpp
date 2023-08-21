@@ -21,6 +21,7 @@ extern "C" const spi_flash_chip_t esp_flash_chip_zetta;
 // Override drivers, see `spi_flash_chip_drivers.c`
 extern "C" const spi_flash_chip_t *default_registered_chips[] = {
 	&esp_flash_chip_zetta,
+	nullptr,
 };
 #endif
 
