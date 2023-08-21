@@ -14,7 +14,6 @@
 
 #include <stdlib.h>
 #include "spi_flash_chip_generic.h"
-#include "spi_flash_defs.h"
 #include "esp_log.h"
 #include "hal/spi_flash_hal.h"
 
