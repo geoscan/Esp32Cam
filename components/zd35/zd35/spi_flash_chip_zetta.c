@@ -22,7 +22,7 @@
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flash_id)
 {
 	/* Check manufacturer and product IDs match our desired masks */
-	const uint8_t MFG_ID = 0xC2;
+	const uint8_t MFG_ID = 0x2C;
 	if (flash_id >> 16 != MFG_ID) {
 		return ESP_ERR_NOT_FOUND;
 	}
