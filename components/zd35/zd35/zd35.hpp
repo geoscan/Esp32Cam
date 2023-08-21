@@ -28,7 +28,7 @@ void init();
 // True due to how ESP-IDF's SPI flash driver is implemented. For more info on
 // that, see `<espidf>/components/spi_flash (v4.1 through v5.2, maybe other
 // ones too)`
-void testAsMx35();
+void probeAsMx35();
 
 static inline const char *debugTag()
 {

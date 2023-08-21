@@ -18,7 +18,7 @@
 
 namespace Zd35 {
 
-void testAsMx35()
+void probeAsMx35()
 {
 	// Initialize spi
 	static const spi_bus_config_t spi1Config {
