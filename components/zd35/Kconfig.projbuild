@@ -1,7 +1,7 @@
 config ZD35_CAN_ENABLE
 	bool
+	default y if SPI_FLASH_OVERRIDE_CHIP_DRIVER_LIST
 	default n
-	default y if CONFIG_SPI_FLASH_OVERRIDE_CHIP_DRIVER_LIST
 
 menu "[zd35]"
 
@@ -39,11 +39,11 @@ menu "[zd35]"
 
 	config ZD35_DEBUG_LEVEL
 		int
-		default 3
 		default 1 if ZD35_DEBUG_LEVEL_ERROR
 		default 2 if ZD35_DEBUG_LEVEL_WARN
 		default 3 if ZD35_DEBUG_LEVEL_INFO
 		default 4 if ZD35_DEBUG_LEVEL_DEBUG
 		default 5 if ZD35_DEBUG_LEVEL_VERBOSE
+		default 3
 
 endmenu
