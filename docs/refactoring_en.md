@@ -12,8 +12,10 @@ in its turn, must depend on the actual implementation.
 Here is the list of doable things that might be taken care of, so the
 aforementioned goal will become closer through series of incremental steps;
 
-- [ ] `utility`: Extract out system-related stuff into a different component
+- [ ] `utility`: Extract out system-related stuff into `system`
 	- System-level, and middleware components (such as UartDevice) must reside in a separate component.
+- [ ] Logging
+    - replace `ESP_LOGx`-based logging with `system` logging wrapper
 
 ## Overengineering
 
