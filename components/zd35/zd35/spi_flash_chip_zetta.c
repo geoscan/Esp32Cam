@@ -18,9 +18,9 @@
 #include "esp_log.h"
 #include "hal/spi_flash_hal.h"
 
-/* Driver for MXIC flash chip */
+/* Driver for zetta flash chip */
 
-esp_err_t spi_flash_chip_mxic_probe(esp_flash_t *chip, uint32_t flash_id)
+esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flash_id)
 {
 	/* Check manufacturer and product IDs match our desired masks */
 	const uint8_t MFG_ID = 0xC2;
@@ -28,7 +28,7 @@ esp_err_t spi_flash_chip_mxic_probe(esp_flash_t *chip, uint32_t flash_id)
 		return ESP_ERR_NOT_FOUND;
 	}
 	if (chip->read_mode >= SPI_FLASH_OPI_FLAG) {
-		// The code here serve for ordinary mxic chip. If opi mode has been selected, go `spi_flash_chip_mxic_opi.c`
+		// The code here serve for ordinary zetta chip. If opi mode has been selected, go `spi_flash_chip_zetta_opi.c`
 		return ESP_ERR_NOT_FOUND;
 	}
 
@@ -39,13 +39,13 @@ esp_err_t spi_flash_chip_issi_set_io_mode(esp_flash_t *chip);
 esp_err_t spi_flash_chip_issi_get_io_mode(esp_flash_t *chip, esp_flash_io_mode_t* out_io_mode);
 
 // Use the same implementation as ISSI chips
-#define spi_flash_chip_mxic_set_io_mode spi_flash_chip_issi_set_io_mode
-#define spi_flash_chip_mxic_get_io_mode spi_flash_chip_issi_get_io_mode
-#define spi_flash_chip_mxic_read_reg spi_flash_chip_generic_read_reg
+#define spi_flash_chip_zetta_set_io_mode spi_flash_chip_issi_set_io_mode
+#define spi_flash_chip_zetta_get_io_mode spi_flash_chip_issi_get_io_mode
+#define spi_flash_chip_zetta_read_reg spi_flash_chip_generic_read_reg
 
 static const char chip_name[] = "zetta";
 
-spi_flash_caps_t spi_flash_chip_mxic_get_caps(esp_flash_t *chip)
+spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 {
 	spi_flash_caps_t caps_flags = 0;
 	// 32-bit-address flash is not supported
@@ -54,12 +54,12 @@ spi_flash_caps_t spi_flash_chip_mxic_get_caps(esp_flash_t *chip)
 	return caps_flags;
 }
 
-// The mxic chip can use the functions for generic chips except from set read mode and probe,
+// The zetta chip can use the functions for generic chips except from set read mode and probe,
 // So we only replace these two functions.
-const spi_flash_chip_t esp_flash_chip_mxic = {
+const spi_flash_chip_t esp_flash_chip_zetta = {
 	.name = chip_name,
 	.timeout = &spi_flash_chip_generic_timeout,
-	.probe = spi_flash_chip_mxic_probe,
+	.probe = spi_flash_chip_zetta_probe,
 	.reset = spi_flash_chip_generic_reset,
 	.detect_size = spi_flash_chip_generic_detect_size,
 	.erase_chip = spi_flash_chip_generic_erase_chip,
@@ -83,13 +83,13 @@ const spi_flash_chip_t esp_flash_chip_mxic = {
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
 	.wait_idle = spi_flash_chip_generic_wait_idle,
-	.set_io_mode = spi_flash_chip_mxic_set_io_mode,
-	.get_io_mode = spi_flash_chip_mxic_get_io_mode,
+	.set_io_mode = spi_flash_chip_zetta_set_io_mode,
+	.get_io_mode = spi_flash_chip_zetta_get_io_mode,
 
-	.read_reg = spi_flash_chip_mxic_read_reg,
+	.read_reg = spi_flash_chip_zetta_read_reg,
 	.yield = spi_flash_chip_generic_yield,
 	.sus_setup = spi_flash_chip_generic_suspend_cmd_conf,
 	.read_unique_id = spi_flash_chip_generic_read_unique_id_none,
-	.get_chip_caps = spi_flash_chip_mxic_get_caps,
+	.get_chip_caps = spi_flash_chip_zetta_get_caps,
 	.config_host_io_mode = spi_flash_chip_generic_config_host_io_mode,
 };
