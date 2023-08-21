@@ -1,0 +1,33 @@
+menu "[zd35]"
+
+	choice ZD35_DEBUG_LEVEL
+		prompt "[zd35] module debug level"
+		default ZD35_DEBUG_LEVEL_INFO
+
+		config ZD35_DEBUG_LEVEL_ERROR
+			bool "Error"
+
+		config ZD35_DEBUG_LEVEL_WARN
+			bool "Warning"
+
+		config ZD35_DEBUG_LEVEL_INFO
+			bool "Info"
+
+		config ZD35_DEBUG_LEVEL_DEBUG
+			bool "Debug"
+
+		config ZD35_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
+
+
+	endchoice
+
+	config ZD35_DEBUG_LEVEL
+		int
+		default 1 if ZD35_DEBUG_LEVEL_ERROR
+		default 2 if ZD35_DEBUG_LEVEL_WARN
+		default 3 if ZD35_DEBUG_LEVEL_INFO
+		default 4 if ZD35_DEBUG_LEVEL_DEBUG
+		default 5 if ZD35_DEBUG_LEVEL_VERBOSE
+
+endmenu
