@@ -16,6 +16,14 @@
 
 #include "zd35.hpp"
 
+#ifdef CONFIG_ZD35_ENABLED
+extern "C" const spi_flash_chip_t esp_flash_chip_zetta;
+// Override drivers, see `spi_flash_chip_drivers.c`
+extern "C" const spi_flash_chip_t *default_registered_chips[] = {
+	&esp_flash_chip_zetta,
+};
+#endif
+
 namespace Zd35 {
 
 void probeAsMx35()
@@ -55,9 +63,12 @@ void probeAsMx35()
 
 void init()
 {
+#ifdef CONFIG_ZD35_ENABLED
+
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	ESP_LOGD(Zd35::debugTag(), "Debug log test");
 	ESP_LOGV(Zd35::debugTag(), "Verbose log test");
+#endif
 }
 
 }  // namespace Zd35
