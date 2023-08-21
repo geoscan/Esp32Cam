@@ -7,5 +7,7 @@ idf_component_register(
 	SRCS ${SOURCE_FILES}
 	INCLUDE_DIRS .
 	REQUIRES
+		driver
 		esp_common
+		spi_flash
 )
