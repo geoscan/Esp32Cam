@@ -5,37 +5,33 @@ config ZD35_CAN_ENABLE
 
 menu "[zd35]"
 
-	comment "[zd35] Cannot enable ZD35 flash memory support. Any changes made here will be ignored"
+	comment "[zd35] Cannot provide ZD35 flash memory support."
 		depends on !ZD35_CAN_ENABLE
 
 	config ZD35_ENABLED
 		bool "Enable ZD35 driver"
 		depends on ZD35_CAN_ENABLE
-		
-	if ZD35_ENABLED
 
-		choice ZD35_DEBUG_LEVEL
-			prompt "[zd35] module debug level"
-			default ZD35_DEBUG_LEVEL_INFO
+	choice ZD35_DEBUG_LEVEL
+		prompt "[zd35] module debug level"
+		default ZD35_DEBUG_LEVEL_INFO
 
-			config ZD35_DEBUG_LEVEL_ERROR
-				bool "Error"
+		config ZD35_DEBUG_LEVEL_ERROR
+			bool "Error"
 
-			config ZD35_DEBUG_LEVEL_WARN
-				bool "Warning"
+		config ZD35_DEBUG_LEVEL_WARN
+			bool "Warning"
 
-			config ZD35_DEBUG_LEVEL_INFO
-				bool "Info"
+		config ZD35_DEBUG_LEVEL_INFO
+			bool "Info"
 
-			config ZD35_DEBUG_LEVEL_DEBUG
-				bool "Debug"
+		config ZD35_DEBUG_LEVEL_DEBUG
+			bool "Debug"
 
-			config ZD35_DEBUG_LEVEL_VERBOSE
-				bool "Verbose"
+		config ZD35_DEBUG_LEVEL_VERBOSE
+			bool "Verbose"
 
-		endchoice
-
-	endif
+	endchoice
 
 	config ZD35_DEBUG_LEVEL
 		int
