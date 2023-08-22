@@ -23,4 +23,5 @@ idf_component_register(
 		wifi
 		wifi_uart_bridge
 		wq
+		zd35
 )
