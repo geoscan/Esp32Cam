@@ -34,9 +34,9 @@ struct FlashMemoryGeometry {
 		return eraseBlockSize / writeBlockSize * nEraseBlocks;
 	}
 
-	inline bool checkRwLengthIsMultiple(std::uint32_t aRwLength) const
+	inline bool checkWriteLengthIsMultiple(std::uint32_t aWriteLength) const
 	{
-		return aRwLength > 0 && aRwLength % writeBlockSize == 0;
+		return aWriteLength > 0 && aWriteLength % writeBlockSize == 0;
 	}
 
 	inline bool checkEraseLengthIsMultiple(std::uint32_t aEraseLength) const
