@@ -15,6 +15,7 @@
 namespace Zd35 {
 
 static constexpr const char *kUninitializedEspFlashErrorMessage = "Uninitialized `esp_flash_t` instance";
+static constexpr const char *kUnalignedDataErrorMessage = "Buffer length is not a multiple of the chip's page size";
 static constexpr const char *kLogPreamble = "Zd35::FlashMemory";
 static constexpr Sys::ErrorCode kZd35FlashMemoryCodeBase = Sys::ErrorCode::FlashMemory;
 
@@ -54,7 +55,16 @@ Sys::Error FlashMemory::writeBlocks(uint32_t aWriteBlockOffset, const uint8_t *a
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	// TODO
+	if (!getFlashMemoryGeometry().checkRwLengthIsMultiple(aDataLength)) {
+		return {kUnalignedDataErrorMessage};
+	}
+
+	const auto writeResult = esp_flash_write(espFlash, static_cast<const void *>(aData),
+		getFlashMemoryGeometry().convertRwBlockOffsetIntoAddress(aWriteBlockOffset), aDataLength);
+
+	if (writeResult != ESP_OK) {
+		return {Sys::ErrorCode::Fail, esp_err_to_name(writeResult) /* Implemented as static table under the hood, no need to control lifetime */};
+	}
 
 	return {};
 }
