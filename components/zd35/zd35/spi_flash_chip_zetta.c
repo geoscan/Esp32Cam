@@ -12,22 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "zd35/zd35_defs.hpp"
+#include <esp_log.h>
+#include <hal/spi_flash_hal.h>
+#include <spi_flash_chip_generic.h>
 #include <stdlib.h>
-#include "spi_flash_chip_generic.h"
-#include "esp_log.h"
-#include "hal/spi_flash_hal.h"
 
 /* Driver for zetta flash chip */
 
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
-	/* Check manufacturer and product IDs match our desired masks */
-	static const unsigned long kMfgId = 0x2C24;  // 1 GB versions would have 0x2C code
-	// TODO: extend for 1 Gb versions
-
-	if ((flashId & 0xFFFF) != kMfgId) {
+	if ((flashId & 0xFFFF) != Zd35x2ChipId) {
 		return ESP_ERR_NOT_FOUND;
 	}
+	// TODO: extend for 1 Gb versions
 
 	return ESP_OK;
 }
