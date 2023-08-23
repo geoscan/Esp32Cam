@@ -11,9 +11,12 @@
 namespace Sys {
 
 enum class ErrorCode : unsigned {
+	// Generic error codes
 	None = 0,
 	Fail = 1,
-	Flash = 100,
+
+	// Flash memory error codes
+	FlashMemory = 100,
 };
 
 struct Error {
