@@ -22,9 +22,10 @@
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
 	/* Check manufacturer and product IDs match our desired masks */
-	static const uint8_t kMfgId = 0x2C;
+	static const unsigned long kMfgId = 0x2C24;  // 1 GB versions would have 0x2C code
+	// TODO: extend for 1 Gb versions
 
-	if (((flashId >> 8) & 0xFF) != kMfgId) {
+	if ((flashId & 0xFFFF) != kMfgId) {
 		return ESP_ERR_NOT_FOUND;
 	}
 
@@ -40,6 +41,8 @@ esp_err_t spi_flash_chip_issi_get_io_mode(esp_flash_t *chip, esp_flash_io_mode_t
 #define spi_flash_chip_zetta_read_reg spi_flash_chip_generic_read_reg
 
 static const char chip_name[] = "zetta";
+
+// 2 GB version only
 static const int kPageSize = 2176;
 static const int kBlockSize = 64 * kPageSize;
 
