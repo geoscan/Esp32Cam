@@ -40,6 +40,8 @@ esp_err_t spi_flash_chip_issi_get_io_mode(esp_flash_t *chip, esp_flash_io_mode_t
 #define spi_flash_chip_zetta_read_reg spi_flash_chip_generic_read_reg
 
 static const char chip_name[] = "zetta";
+static const int kPageSize = 2176;
+static const int kBlockSize = 64 * kPageSize;
 
 spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 {
@@ -61,8 +63,8 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.erase_chip = spi_flash_chip_generic_erase_chip,
 	.erase_sector = spi_flash_chip_generic_erase_sector,
 	.erase_block = spi_flash_chip_generic_erase_block,
-	.sector_size = 4 * 1024,
-	.block_erase_size = 64 * 1024,
+	.sector_size = kBlockSize,
+	.block_erase_size = kBlockSize,
 
 	.get_chip_write_protect = spi_flash_chip_generic_get_write_protect,
 	.set_chip_write_protect = spi_flash_chip_generic_set_write_protect,
@@ -75,7 +77,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.read = spi_flash_chip_generic_read,
 	.write = spi_flash_chip_generic_write,
 	.program_page = spi_flash_chip_generic_page_program,
-	.page_size = 256,
+	.page_size = kPageSize,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
 	.wait_idle = spi_flash_chip_generic_wait_idle,
