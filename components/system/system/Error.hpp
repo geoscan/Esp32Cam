@@ -23,7 +23,7 @@ struct Error {
 	ErrorCode errorCode;
 	const char *description;
 
-	constexpr Error(ErrorCode aErrorCode = ErrorCode::None, const char *aDescription = nullptr):
+	constexpr Error(ErrorCode aErrorCode = ErrorCode::None, const char *aDescription = ""):
 		errorCode{aErrorCode},
 		description{aDescription}
 	{
