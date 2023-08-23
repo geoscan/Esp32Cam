@@ -19,10 +19,10 @@ namespace Sys {
 /// block, page, word, byte, bit. It's up to the implementor to provide
 /// necessary conversions.
 struct FlashMemoryGeometry {
-	/// The atomic readable / writable chunk of data
+	/// The atomic readable / writable chunk of data, in bytes
 	std::uint32_t writeBlockSize;
 
-	/// The size of an atomic eraseable chunk. Multiple of `writeBlockSize`
+	/// The size of an atomic eraseable chunk, in bytes. Multiple of `writeBlockSize`
 	std::uint32_t eraseBlockSize;
 
 	/// Number of erase blocks
@@ -42,6 +42,16 @@ struct FlashMemoryGeometry {
 	inline bool checkEraseLengthIsMultiple(std::uint32_t aEraseLength) const
 	{
 		return aEraseLength > 0 && aEraseLength % eraseBlockSize == 0;
+	}
+
+	inline std::uint32_t convertWriteBlockOffsetIntoAddress(std::uint32_t aWriteBlockOffset) const
+	{
+		return aWriteBlockOffset * writeBlockSize;
+	}
+
+	inline std::uint32_t convertEraseBlockOffsetIntoAddress(std::uint32_t aEraseBlockOffset) const
+	{
+		return aEraseBlockOffset * eraseBlockSize;
 	}
 };
 
