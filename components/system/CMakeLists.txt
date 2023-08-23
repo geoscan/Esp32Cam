@@ -5,7 +5,9 @@ file(GLOB SOURCE_FILES
 
 idf_component_register(
 	SRCS ${SOURCE_FILES}
-	INCLUDE_DIRS .
+	INCLUDE_DIRS
+		"."
+		"port/espidf"
 	REQUIRES
 		esp_common
 )
