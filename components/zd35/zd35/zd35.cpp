@@ -35,6 +35,9 @@ namespace Zd35 {
 
 static constexpr const char *kLogPreamble = "zd35";
 
+static void testInitSpiProbe();
+static void initImpl();
+
 static void testInitSpiProbe()
 {
 	periph_module_enable(PERIPH_HSPI_MODULE);
@@ -95,12 +98,17 @@ static void testInitSpiProbe()
 		rxBuffer[1], static_cast<int>(transmissionResult));
 }
 
-void probeAsMx35()
+static inline void initImpl()
 {
-	periph_module_enable(PERIPH_HSPI_MODULE);
-	default_registered_chips[0] = &esp_flash_chip_zetta;
 	constexpr auto kHost = SPI2_HOST;
-	// Initialize spi
+
+	// The memory is on SPI2 bus (a.k.a. HSPI)
+	periph_module_enable(PERIPH_HSPI_MODULE);
+
+	// Bypass the cache error
+	default_registered_chips[0] = &esp_flash_chip_zetta;
+
+	// Initialize SPI
 	static const spi_bus_config_t spiConfig {
 		.mosi_io_num = GPIO_NUM_13,  // MOSI
 		.miso_io_num = GPIO_NUM_12,  // MISO,
@@ -136,8 +144,8 @@ void probeAsMx35()
 
 void init()
 {
+	initImpl();
 #ifdef CONFIG_ZD35_ENABLED
-
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	ESP_LOGD(Zd35::debugTag(), "Debug log test");
 	ESP_LOGV(Zd35::debugTag(), "Verbose log test");
