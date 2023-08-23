@@ -11,7 +11,8 @@
 namespace Sys {
 
 enum class LogLevel {
-	Error = 1,
+	None = 0,  // Completely disabled
+	Error,
 	Warning,
 	Info,
 	Debug,
