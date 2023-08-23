@@ -57,7 +57,7 @@ static void testInitSpiProbe()
 	spi_bus_initialize(kHost, &spiConfig, SPI_DMA_CH1);
 
 	static const spi_device_interface_config_t spiDeviceInterfaceConfig {
-		.command_bits = 7,
+		.command_bits = 8,
 		.address_bits = 0,
 		.dummy_bits = 8,  // expect data after 8 SPI CLK cycles  XXX: are dummy bits included in the address bits?
 		.mode = 0,  // CPOL=0 CPHA=0
