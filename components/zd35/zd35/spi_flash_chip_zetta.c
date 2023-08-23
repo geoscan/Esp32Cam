@@ -19,15 +19,12 @@
 
 /* Driver for zetta flash chip */
 
-esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flash_id)
+esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
 	/* Check manufacturer and product IDs match our desired masks */
-	const uint8_t MFG_ID = 0x2C;
-	if (flash_id >> 16 != MFG_ID) {
-		return ESP_ERR_NOT_FOUND;
-	}
-	if (chip->read_mode >= SPI_FLASH_OPI_FLAG) {
-		// The code here serve for ordinary zetta chip. If opi mode has been selected, go `spi_flash_chip_zetta_opi.c`
+	static const uint8_t kMfgId = 0x2C;
+
+	if ((flashId & 0xF00) != kMfgId) {
 		return ESP_ERR_NOT_FOUND;
 	}
 
