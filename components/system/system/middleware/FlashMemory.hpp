@@ -33,6 +33,16 @@ struct FlashMemoryGeometry {
 	{
 		return eraseBlockSize / writeBlockSize * nEraseBlocks;
 	}
+
+	inline bool checkRwLengthIsMultiple(std::uint32_t aRwLength) const
+	{
+		return aRwLength > 0 && aRwLength % writeBlockSize == 0;
+	}
+
+	inline bool checkEraseLengthIsMultiple(std::uint32_t aEraseLength) const
+	{
+		return aEraseLength > 0 && aEraseLength % eraseBlockSize == 0;
+	}
 };
 
 /// Represents a flash memory device as a set of of sequential read (write) /
