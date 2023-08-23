@@ -18,14 +18,15 @@
 #include <freertos/task.h>
 #include <hal/gpio_types.h>
 #include <hal/spi_flash_types.h>
+#include <spi_flash_chip_generic.h>
+#include "spi_flash_chip_zetta.h"
 
 #include "zd35.hpp"
 
 #ifdef CONFIG_ZD35_ENABLED
-extern "C" const spi_flash_chip_t esp_flash_chip_zetta;
-// Override drivers, see `spi_flash_chip_drivers.c`
 extern "C" const spi_flash_chip_t *default_registered_chips[] = {
-	&esp_flash_chip_zetta,
+	&esp_flash_chip_generic,
+	&esp_flash_chip_generic,
 	nullptr,
 };
 #endif
@@ -96,32 +97,36 @@ static void testInitSpiProbe()
 
 void probeAsMx35()
 {
+	periph_module_enable(PERIPH_HSPI_MODULE);
+	default_registered_chips[0] = &esp_flash_chip_zetta;
+	constexpr auto kHost = SPI2_HOST;
 	// Initialize spi
-	static const spi_bus_config_t spi1Config {
-		13,  // MOSI
-		12,  // MISO,
-		14,  // CLK,
-		-1,  // DATA 2 (not used)
-		-1,  // DATA 3 (not used)
-		-1,  // DATA 4 (not used)
-		-1,  // DATA 5 (not used)
-		-1,  // DATA 6 (not used)
-		-1,  // DATA 7 (not used)
-		0,  // Use default max transfer size
-		0,  // Spi flags -- XXX need none?
-		0,  // Interrupt flags  --- XXX need none?
+	static const spi_bus_config_t spiConfig {
+		.mosi_io_num = GPIO_NUM_13,  // MOSI
+		.miso_io_num = GPIO_NUM_12,  // MISO,
+		.sclk_io_num = GPIO_NUM_14,  // CLK,
+		.data2_io_num = -1,  // DATA 3 (not used)
+		.data3_io_num = -1,  // DATA 4 (not used)
+		.data4_io_num = -1,  // DATA 5 (not used)
+		.data5_io_num = -1,  // DATA 6 (not used)
+		.data6_io_num = -1,  // DATA 7 (not used)
+		.data7_io_num = -1,  // DATA 7 (not used)
+		.max_transfer_sz = 0,  // Use default max transfer size
+		.flags = SPICOMMON_BUSFLAG_MASTER,  // Spi flags -- XXX need none?
+		.intr_flags = ESP_INTR_FLAG_LEVEL3,  // Interrupt flags  --- XXX need none?
+
 	};
-	spi_bus_initialize(SPI1_HOST, &spi1Config, SPI_DMA_DISABLED);
+	spi_bus_initialize(kHost, &spiConfig, SPI_DMA_CH1);
 
 	// Initialize SPI flash
 	esp_flash_t *espFlash;
 	static const esp_flash_spi_device_config_t espFlashSpiDeviceConfig {
-		SPI1_HOST,
-		15,  // CS
-		SPI_FLASH_FASTRD,  // SPI mode
-		ESP_FLASH_40MHZ,
-		0,  // input delay, 0 = don't know
-		0,  // CS line id -- XXX what is "line"?
+		.host_id = kHost,
+		.cs_io_num = GPIO_NUM_15,  // CS
+		.io_mode = SPI_FLASH_FASTRD,  // SPI mode
+		.speed = ESP_FLASH_40MHZ,
+		.input_delay_ns = 0,  // input delay, 0 = don't know
+		.cs_id = 0,  // CS line id -- XXX what is "line"?
 	};
 	spi_bus_add_flash_device(&espFlash, &espFlashSpiDeviceConfig);
 
