@@ -13,7 +13,6 @@
 #include "Receiver.hpp"
 #include "utility/cont/ListArray.hpp"
 #include "wifi_uart_bridge/RoutingRules.hpp"
-#include "utility/comm/RaiiCounter.hpp"
 #include "utility/thr/WorkQueue.hpp"
 #include "utility/comm/InstanceRegistry.hpp"
 #include "utility/LogSection.hpp"
