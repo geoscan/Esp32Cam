@@ -21,7 +21,7 @@ public:
 		std::size_t aDataLength) override;
 	virtual Sys::Error readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
 		std::size_t aBufferSize) override;
-	virtual Sys::Error eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks) = 0;
+	virtual Sys::Error eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks) override;
 
 	~FlashMemory() override = default;
 
