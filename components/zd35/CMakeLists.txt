@@ -11,4 +11,5 @@ idf_component_register(
 		esp_common
 		spi_flash
 		system
+		utility
 )
