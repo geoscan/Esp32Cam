@@ -10,6 +10,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL)
 
 #include "spi_flash_chip_zetta.h"
+#include "system/os/Logger.hpp"
 #include <driver/periph_ctrl.h>
 #include <driver/spi_common.h>
 #include <driver/spi_master.h>
@@ -93,9 +94,9 @@ static void testInitSpiProbe()
 		.tx_buffer = 0,
 		.rx_buffer = static_cast<void *>(&rxBuffer[0]),
 	};
-	ESP_LOGD(debugTag(), "%s:%s starting transmission", kLogPreamble, __func__);
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s starting transmission", kLogPreamble, __func__);
 	const auto transmissionResult = spi_device_transmit(spiDeviceHandle, &spiTransaction);
-	ESP_LOGI(debugTag(), "%s:%s got transaction result=[0x%02x,0x%02x] result=%d", kLogPreamble, __func__, rxBuffer[0],
+	Sys::Logger::write(Sys::LogLevel::Info, "%s:%s got transaction result=[0x%02x,0x%02x] result=%d", kLogPreamble, __func__, rxBuffer[0],
 		rxBuffer[1], static_cast<int>(transmissionResult));
 }
 
@@ -148,8 +149,8 @@ void init()
 	initImpl();
 #ifdef CONFIG_ZD35_ENABLED
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
-	ESP_LOGD(Zd35::debugTag(), "Debug log test");
-	ESP_LOGV(Zd35::debugTag(), "Verbose log test");
+	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "Debug log test");
+	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "Verbose log test");
 #endif
 }
 
