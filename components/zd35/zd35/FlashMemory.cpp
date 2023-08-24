@@ -57,7 +57,7 @@ Sys::Error FlashMemory::writeBlock(std::uint32_t aWriteBlockId, std::uint32_t aW
 	}
 
 	if (aData == nullptr) {
-		return {Sys::ErrorCode::Nullptr};
+		return {Sys::ErrorCode::Fail};
 	}
 
 	const auto writeResult = esp_flash_write(espFlash, static_cast<const void *>(aData),
