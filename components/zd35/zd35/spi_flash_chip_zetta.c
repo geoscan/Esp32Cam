@@ -46,11 +46,7 @@ static const int kBlockSize = 64 * kPageSize;
 
 spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 {
-	spi_flash_caps_t caps_flags = 0;
-	// 32-bit-address flash is not supported
-	// flash-suspend is not supported
-	// reading unique id is not supported.
-	return caps_flags;
+	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT | SPI_FLASH_CHIP_CAP_UNIQUE_ID;
 }
 
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
