@@ -17,6 +17,8 @@ enum class LogLevel {
 	Info,
 	Debug,
 	Verbose,
+
+	N,
 };
 
 }  // Sys
