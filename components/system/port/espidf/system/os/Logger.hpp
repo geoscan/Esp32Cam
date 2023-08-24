@@ -20,7 +20,7 @@ public:
 	static inline void write(LogLevel aLogLevel, const char *aTag, const char *aFormat, Ts ...aArgs)
 	{
 		logMutex.lock();
-		esp_log_write(logLevelIntoEspLogLevel(aLogLevel), aTag, "%s (%d) %s ", logLevelToString(aLogLevel),
+		esp_log_write(logLevelIntoEspLogLevel(aLogLevel), aTag, "%s (%d) %s: ", logLevelToString(aLogLevel),
 			esp_log_timestamp(), aTag);
 		esp_log_write(logLevelIntoEspLogLevel(aLogLevel), aTag, aFormat, aArgs...);
 		esp_log_write(logLevelIntoEspLogLevel(aLogLevel), aTag, "\n");
