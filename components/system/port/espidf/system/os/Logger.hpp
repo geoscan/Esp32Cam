@@ -9,12 +9,13 @@
 #define COMPONENTS_SYSTEM_PORT_ESPIDF_SYSTEM_OS_LOGGER_HPP_
 
 #include "system/os/LogLevel.hpp"
+#include "system/os/LoggerBase.hpp"
 #include <esp_log.h>
 #include <mutex>
 
 namespace Sys {
 
-class Logger {
+class Logger : public LoggerBase {
 public:
 	template <class ...Ts>
 	static inline void write(LogLevel aLogLevel, const char *aTag, const char *aFormat, Ts ...aArgs)
