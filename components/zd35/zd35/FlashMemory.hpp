@@ -17,12 +17,11 @@ namespace Zd35 {
 class FlashMemory : public Sys::FlashMemory {
 public:
 	FlashMemory(esp_flash_t *aEspFlash);
-	virtual Sys::Error writeBlocks(std::uint32_t aWriteBlockOffset, const std::uint8_t *aData,
-		std::size_t aDataLength) override;
-	virtual Sys::Error readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
+	virtual Sys::Error writeBlock(std::uint32_t aWriteBlockId, std::uint32_t aWriteBlockOffset,
+		const std::uint8_t *aData, std::size_t aDataLength) override;
+	virtual Sys::Error readBlock(std::uint32_t aWriteBlockId, std::uint32_t aWriteBlockOffset, std::uint8_t *aBuffer,
 		std::size_t aBufferSize) override;
-	virtual Sys::Error eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks) override;
-
+	virtual Sys::Error eraseBlock(std::uint32_t aEraseBlockId) override;
 	~FlashMemory() override = default;
 
 private:

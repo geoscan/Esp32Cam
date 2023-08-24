@@ -46,7 +46,8 @@ FlashMemory::FlashMemory(esp_flash_t *aEspFlash):
 {
 }
 
-Sys::Error FlashMemory::writeBlocks(uint32_t aWriteBlockOffset, const uint8_t *aData, std::size_t aDataLength)
+Sys::Error FlashMemory::writeBlock(std::uint32_t aWriteBlockId, std::uint32_t aWriteBlockOffset,
+		const std::uint8_t *aData, std::size_t aDataLength)
 {
 	if (espFlash == nullptr) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s::%s: %s", kLogPreamble, __func__,
@@ -55,12 +56,8 @@ Sys::Error FlashMemory::writeBlocks(uint32_t aWriteBlockOffset, const uint8_t *a
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	if (!getFlashMemoryGeometry().checkWriteLengthIsMultiple(aDataLength)) {
-		return {kUnalignedDataErrorMessage};
-	}
-
 	const auto writeResult = esp_flash_write(espFlash, static_cast<const void *>(aData),
-		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aWriteBlockOffset), aDataLength);
+		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aWriteBlockId) + aWriteBlockOffset, aDataLength);
 
 	if (writeResult != ESP_OK) {
 		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(writeResult) /* Implemented as static table under the hood, no need to control lifetime */};
@@ -69,7 +66,7 @@ Sys::Error FlashMemory::writeBlocks(uint32_t aWriteBlockOffset, const uint8_t *a
 	return {};
 }
 
-Sys::Error FlashMemory::readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
+Sys::Error FlashMemory::readBlock(std::uint32_t aReadBlockId, std::uint32_t aReadBlockOffset, std::uint8_t *aBuffer,
 	std::size_t aBufferSize)
 {
 	if (espFlash == nullptr) {
@@ -79,12 +76,8 @@ Sys::Error FlashMemory::readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	if (!getFlashMemoryGeometry().checkWriteLengthIsMultiple(aBufferSize)) {  // Read and write lengths are the same for flash memory chips, hence the use of "write length"
-		return {kUnalignedDataErrorMessage};
-	}
-
 	const auto readResult = esp_flash_read(espFlash, aBuffer,
-		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aReadBlockOffset), aBufferSize);
+		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aReadBlockId) + aReadBlockOffset, aBufferSize);
 
 	if (readResult != ESP_OK) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -97,7 +90,7 @@ Sys::Error FlashMemory::readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t
 	return {};
 }
 
-Sys::Error FlashMemory::eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks)
+Sys::Error FlashMemory::eraseBlock(std::uint32_t aEraseBlockId)
 {
 	if (espFlash == nullptr) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s::%s: %s", kLogPreamble, __func__,
@@ -106,21 +99,14 @@ Sys::Error FlashMemory::eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	if (aEraseBlockOffset + anBlocks >= getFlashMemoryGeometry().nEraseBlocks) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
-			"%s::%s: the span=[%d,%d) of erased blocks exceeds the number=%d of erase blocks on the flash memory chip",
-			kLogPreamble, __func__, aEraseBlockOffset, aEraseBlockOffset + anBlocks,
-			getFlashMemoryGeometry().nEraseBlocks);
-	}
-
 	const auto eraseResult = esp_flash_erase_region(espFlash,
-		getFlashMemoryGeometry().convertEraseBlockOffsetIntoAddress(aEraseBlockOffset),
-		anBlocks * getFlashMemoryGeometry().eraseBlockSize);
+		getFlashMemoryGeometry().convertEraseBlockOffsetIntoAddress(aEraseBlockId),
+		getFlashMemoryGeometry().eraseBlockSize);
 
 	if (eraseResult != ESP_OK) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
-			"%s:%s: failed to erase %d blocks starting from %d error (%d) (%s)", kLogPreamble, __func__,
-			aEraseBlockOffset, anBlocks, eraseResult, esp_err_to_name(eraseResult));
+			"%s:%s: failed to erase block starting from %d error (%d) (%s)", kLogPreamble, __func__,
+			aEraseBlockId, eraseResult, esp_err_to_name(eraseResult));
 
 		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(eraseResult)};
 	}
