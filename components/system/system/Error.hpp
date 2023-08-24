@@ -14,6 +14,7 @@ enum class ErrorCode : unsigned {
 	// Generic error codes
 	None = 0,
 	Fail = 1,
+	Nullptr = 2,  // Unexpected nullptr, be that arguments, or return value
 
 	// Flash memory error codes
 	FlashMemory = 100,
