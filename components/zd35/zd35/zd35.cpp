@@ -203,6 +203,7 @@ static inline void initImpl()
 		}
 	}
 
+	// Create instance, and register `Sys::FlashMemory` API as a singleton
 	sFlashMemoryInstance = std::unique_ptr<Zd35::FlashMemory>(new Zd35::FlashMemory{espFlash});
 
 	if (sFlashMemoryInstance.get() == nullptr) {
