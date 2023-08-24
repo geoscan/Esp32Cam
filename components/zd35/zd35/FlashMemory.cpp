@@ -26,6 +26,8 @@ static Sys::FlashMemoryGeometry makeFlashMemoryGeometryFromEspFlash(esp_flash_t 
 static inline Sys::FlashMemoryGeometry makeFlashMemoryGeometryFromEspFlash(esp_flash_t *aEspFlash)
 {
 	if (aEspFlash == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s: nullptr argument", __func__);
+
 		return {};
 	}
 
@@ -36,6 +38,9 @@ static inline Sys::FlashMemoryGeometry makeFlashMemoryGeometryFromEspFlash(esp_f
 			.nEraseBlocks = Zd35x2BlocksNumber,
 		};
 	}
+
+	Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s: unsupported chip id (0x%04x)", __func__,
+		aEspFlash->chip_id);
 
 	return {};
 }
