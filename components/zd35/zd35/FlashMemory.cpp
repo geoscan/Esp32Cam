@@ -56,10 +56,17 @@ Sys::Error FlashMemory::writeBlock(std::uint32_t aWriteBlockId, std::uint32_t aW
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
+	if (aData == nullptr) {
+		return {Sys::ErrorCode::Nullptr};
+	}
+
 	const auto writeResult = esp_flash_write(espFlash, static_cast<const void *>(aData),
 		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aWriteBlockId) + aWriteBlockOffset, aDataLength);
 
 	if (writeResult != ESP_OK) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s::%s: could not write onto chip, error code=%d message=\"%s\"", kLogPreamble, __func__, writeResult,
+			esp_err_to_name(writeResult));
 		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(writeResult) /* Implemented as static table under the hood, no need to control lifetime */};
 	}
 
