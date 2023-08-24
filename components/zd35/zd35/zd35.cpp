@@ -25,6 +25,7 @@
 #include <hal/gpio_types.h>
 #include <hal/spi_flash_types.h>
 #include <spi_flash_chip_generic.h>
+#include <cstring>
 #include <memory>
 
 #include "zd35.hpp"
@@ -45,6 +46,11 @@ static std::unique_ptr<Sys::FlashMemory> sFlashMemoryInstance;
 /// \brief Test function: initializes the correct SPI bus, and makes an attempt
 /// to fetch ZD35 chip ID.
 static void testInitSpiProbe();
+
+/// \brief Makes a sequential read/write attempt.
+/// \pre An instance of `Sys::FlashMemory` must be registered, i.e.
+/// `initImpl()` must be called beforehand.
+static void testReadWrite();
 static void initImpl();
 
 /// \brief Checks whether the correct verison of `esp_flash_t` has been
@@ -122,6 +128,51 @@ static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
 	}
 
 	return true;
+}
+
+static inline void testReadWrite()
+{
+	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s: memory test failed, `Sys::FlashMemory` instance has not been initialized", kLogPreamble, __func__);
+
+		return;
+	}
+
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s trying write/read cycle on a memory chip",
+		kLogPreamble, __func__);
+
+	// Initialize buffer
+	char buffer[Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize] = {0};
+	strcpy(buffer, "Hello");
+
+	// Flush the buffer into flash
+	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(0, 0,
+		reinterpret_cast<std::uint8_t *>(buffer), sizeof(buffer));
+
+	if (writeResult.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into the chip",
+			kLogPreamble, __func__);
+		return;
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		buffer[i] = 0;
+	}
+
+	// Read the buffer
+	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(0, 0,
+		reinterpret_cast<std::uint8_t *>(buffer), sizeof(buffer));
+
+	if (readResult.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from the chip",
+			kLogPreamble, __func__);
+	}
+
+	// Ensure null-termination, and read the buffer
+	buffer[sizeof(buffer) - 1] = 0;
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
+		buffer);
 }
 
 static inline void initImpl()
@@ -220,12 +271,13 @@ static inline void initImpl()
 
 void init()
 {
-	initImpl();
 #ifdef CONFIG_ZD35_ENABLED
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "Debug log test");
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "Verbose log test");
 #endif
+	initImpl();
+	testReadWrite();
 }
 
 }  // namespace Zd35
