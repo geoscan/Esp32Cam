@@ -11,6 +11,9 @@
 
 #include "spi_flash_chip_zetta.h"
 #include "system/os/Logger.hpp"
+#include "utility/MakeSingleton.hpp"
+#include "zd35/FlashMemory.hpp"
+#include "zd35/zd35_defs.hpp"
 #include <driver/periph_ctrl.h>
 #include <driver/spi_common.h>
 #include <driver/spi_master.h>
@@ -22,6 +25,7 @@
 #include <hal/gpio_types.h>
 #include <hal/spi_flash_types.h>
 #include <spi_flash_chip_generic.h>
+#include <memory>
 
 #include "zd35.hpp"
 
@@ -36,9 +40,16 @@ extern "C" const spi_flash_chip_t *default_registered_chips[] = {
 namespace Zd35 {
 
 static constexpr const char *kLogPreamble = "zd35";
+static std::unique_ptr<Sys::FlashMemory> sFlashMemoryInstance;
 
+/// \brief Test function: initializes the correct SPI bus, and makes an attempt
+/// to fetch ZD35 chip ID.
 static void testInitSpiProbe();
 static void initImpl();
+
+/// \brief Checks whether the correct verison of `esp_flash_t` has been
+/// initialized
+static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash);
 
 static void testInitSpiProbe()
 {
@@ -100,6 +111,19 @@ static void testInitSpiProbe()
 		rxBuffer[1], static_cast<int>(transmissionResult));
 }
 
+static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
+{
+	if (espFlash.chip_id != Zd35x2ChipId) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s: chip ids do not match, actual=0x%04X expected=0x%04X", kLogPreamble, __func__, espFlash.chip_id,
+			Zd35x2ChipId);
+
+		return false;
+	}
+
+	return true;
+}
+
 static inline void initImpl()
 {
 	constexpr auto kHost = SPI2_HOST;
@@ -126,10 +150,19 @@ static inline void initImpl()
 		.intr_flags = ESP_INTR_FLAG_LEVEL3,  // Interrupt flags  --- XXX need none?
 
 	};
-	spi_bus_initialize(kHost, &spiConfig, SPI_DMA_CH1);
+
+	{
+		const auto result = spi_bus_initialize(kHost, &spiConfig, SPI_DMA_CH1);
+
+		if (result != ESP_OK) {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to initialize SPI bus code=%d (%s)",
+				kLogPreamble, __func__, result, esp_err_to_name(result));
+
+			return;
+		}
+	}
 
 	// Initialize SPI flash
-	esp_flash_t *espFlash;
 	static const esp_flash_spi_device_config_t espFlashSpiDeviceConfig {
 		.host_id = kHost,
 		.cs_io_num = GPIO_NUM_15,  // CS
@@ -138,10 +171,50 @@ static inline void initImpl()
 		.input_delay_ns = 0,  // input delay, 0 = don't know
 		.cs_id = 0,  // CS line id -- XXX what is "line"?
 	};
-	spi_bus_add_flash_device(&espFlash, &espFlashSpiDeviceConfig);
+	esp_flash_t *espFlash = nullptr;
+
+	{
+		const auto result = spi_bus_add_flash_device(&espFlash, &espFlashSpiDeviceConfig);
+
+		if (result != ESP_OK || espFlash == nullptr) {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+				"%s:%s failed to attach flash device to SPI bus driver code=%d (%s)", kLogPreamble, __func__, result,
+				esp_err_to_name(result));
+
+			return;
+		}
+	}
+
+	// Check whether the correct chip is on the bus
+	if (espFlashCheckInitialized(*espFlash)) {
+		return;
+	}
 
 	// try to init SPI flash -- ESP IDF will try among known vendor numbers to try to find out which one it deals with
-	esp_flash_init(espFlash);
+	{
+		const auto result = esp_flash_init(espFlash);
+
+		if (result != ESP_OK) {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+				"%s:%s failed to initialize SPI flash device code=%d (%s)", kLogPreamble, __func__, result,
+				esp_err_to_name(result));
+
+			return;
+		}
+	}
+
+	sFlashMemoryInstance = std::unique_ptr<Zd35::FlashMemory>(new Zd35::FlashMemory{espFlash});
+
+	if (sFlashMemoryInstance.get() == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s memory error: failed to create `Zd35::FlashMemory` instance", kLogPreamble, __func__);
+
+		return;
+	}
+
+	Ut::MakeSingleton<Sys::FlashMemory>::setInstance(*sFlashMemoryInstance.get());
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s successfully initialized ZD35 SPI flash memory",
+		kLogPreamble, __func__);
 }
 
 void init()
