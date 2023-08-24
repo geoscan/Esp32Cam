@@ -66,22 +66,27 @@ public:
 	}
 
 	/// \brief writeBlock
-	/// \param aBlockOffset Offset for a writable block. Byte offset, if
-	/// bytewise write operations are available for a device
-	/// \param aData
-	/// \param aDataLength Must be multiple of
-	/// `FlashMemoryGeometry::writeBlockSize`
-	virtual Error writeBlocks(std::uint32_t aWriteBlockOffset, const std::uint8_t *aData, std::size_t aDataLength) = 0;
+	/// \param aWriteBlockId Id of a writable block
+	/// \param aWriteBlockOffset Offset within the block, must not exceed
+	/// `getFlashMemoryGeometry().writeBlockSize`.
+	///
+	/// - The implementor MUST ensure that after write operation, the block
+	/// stores the provided data in the specified range;
+	/// - The implementor MUST preserve the remaning data in the memory chip's
+	/// write block, **if** the device provides block caching;
+	/// - The implementor MUST NOT perform dynamic memory allocation;
+	/// - The implementor SHOULD NOT use additional buffers;
+	virtual Error writeBlock(std::uint32_t aWriteBlockId, std::uint32_t aWriteBlockOffset, const std::uint8_t *aData,
+		std::size_t aDataLength) = 0;
 
 	/// \brief readBlock
-	/// \param aReadBlockOffset The offset for an atomically read block
-	/// \param anReadBlocks The number of block to read
-	/// \param aBuffer
-	/// \param aBufferSize Must be a multiple of `FlashMemoryGeometry::writeBlockSize`
-	virtual Error readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t anReadBlocks, std::uint8_t *aBuffer,
+	/// \param aReadBlockId Id of a readable (writable) block
+	/// \param aReadBlockOffset The offset within the specified block
+	virtual Error readBlock(std::uint32_t aReadBlockId, std::uint32_t aReadBlockOffset, std::uint8_t *aBuffer,
 		std::size_t aBufferSize) = 0;
 
-	virtual Error eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32_t anBlocks) = 0;
+	/// \details "Erase block" is not to be confused with "write block"
+	virtual Error eraseBlock(std::uint32_t aEraseBlockId) = 0;
 
 	inline const FlashMemoryGeometry getFlashMemoryGeometry() const
 	{
