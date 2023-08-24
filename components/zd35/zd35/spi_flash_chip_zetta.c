@@ -22,11 +22,13 @@
 
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
-	if ((flashId & 0xFFFF) != Zd35x2ChipId) {
+	if ((flashId & 0xFFFF) == Zd35x2ChipId) {
+		chip->chip_id = flashId;
+		chip->size = Zd35x2CapacityBytes;
+	} else {
 		return ESP_ERR_NOT_FOUND;
 	}
 
-	chip->chip_id = flashId;
 	// TODO: extend for 1 Gb versions
 
 	return ESP_OK;
