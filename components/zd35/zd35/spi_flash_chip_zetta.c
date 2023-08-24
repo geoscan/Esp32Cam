@@ -44,7 +44,7 @@ static const char chip_name[] = "zetta";
 
 spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 {
-	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT | SPI_FLASH_CHIP_CAP_UNIQUE_ID;
+	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT;
 }
 
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
