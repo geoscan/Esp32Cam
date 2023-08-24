@@ -63,7 +63,7 @@ Sys::Error FlashMemory::writeBlocks(uint32_t aWriteBlockOffset, const uint8_t *a
 		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aWriteBlockOffset), aDataLength);
 
 	if (writeResult != ESP_OK) {
-		return {Sys::ErrorCode::Fail, esp_err_to_name(writeResult) /* Implemented as static table under the hood, no need to control lifetime */};
+		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(writeResult) /* Implemented as static table under the hood, no need to control lifetime */};
 	}
 
 	return {};
@@ -79,7 +79,20 @@ Sys::Error FlashMemory::readBlocks(std::uint32_t aReadBlockOffset, std::uint32_t
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	// TODO
+	if (!getFlashMemoryGeometry().checkWriteLengthIsMultiple(aBufferSize)) {  // Read and write lengths are the same for flash memory chips, hence the use of "write length"
+		return {kUnalignedDataErrorMessage};
+	}
+
+	const auto readResult = esp_flash_read(espFlash, aBuffer,
+		getFlashMemoryGeometry().convertWriteBlockOffsetIntoAddress(aReadBlockOffset), aBufferSize);
+
+	if (readResult != ESP_OK) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s::%s: could not read from memory error code=%d message=\"%s\"", kLogPreamble, __func__, readResult,
+			esp_err_to_name(readResult));
+
+		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(readResult)};
+	}
 
 	return {};
 }
@@ -93,7 +106,24 @@ Sys::Error FlashMemory::eraseBlocks(std::uint32_t aEraseBlockOffset, std::uint32
 		return {kUninitializedEspFlashErrorMessage};
 	}
 
-	// TODO
+	if (aEraseBlockOffset + anBlocks >= getFlashMemoryGeometry().nEraseBlocks) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s::%s: the span=[%d,%d) of erased blocks exceeds the number=%d of erase blocks on the flash memory chip",
+			kLogPreamble, __func__, aEraseBlockOffset, aEraseBlockOffset + anBlocks,
+			getFlashMemoryGeometry().nEraseBlocks);
+	}
+
+	const auto eraseResult = esp_flash_erase_region(espFlash,
+		getFlashMemoryGeometry().convertEraseBlockOffsetIntoAddress(aEraseBlockOffset),
+		anBlocks * getFlashMemoryGeometry().eraseBlockSize);
+
+	if (eraseResult != ESP_OK) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s: failed to erase %d blocks starting from %d error (%d) (%s)", kLogPreamble, __func__,
+			aEraseBlockOffset, anBlocks, eraseResult, esp_err_to_name(eraseResult));
+
+		return {Sys::ErrorCode::FlashMemory, esp_err_to_name(eraseResult)};
+	}
 
 	return {};
 }
