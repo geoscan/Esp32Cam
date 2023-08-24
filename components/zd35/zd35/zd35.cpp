@@ -236,11 +236,6 @@ static inline void initImpl()
 		}
 	}
 
-	// Check whether the correct chip is on the bus
-	if (espFlashCheckInitialized(*espFlash)) {
-		return;
-	}
-
 	// try to init SPI flash -- ESP IDF will try among known vendor numbers to try to find out which one it deals with
 	{
 		const auto result = esp_flash_init(espFlash);
@@ -253,6 +248,12 @@ static inline void initImpl()
 			return;
 		}
 	}
+
+	// Check whether the correct chip is on the bus
+	if (!espFlashCheckInitialized(*espFlash)) {
+		return;
+	}
+
 
 	// Create instance, and register `Sys::FlashMemory` API as a singleton
 	sFlashMemoryInstance = std::unique_ptr<Zd35::FlashMemory>(new Zd35::FlashMemory{espFlash});
