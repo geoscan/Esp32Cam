@@ -8,6 +8,8 @@
 // Override debug level.
 // https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/log.html#_CPPv417esp_log_level_setPKc15esp_log_level_t
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL)
+
+#include "spi_flash_chip_zetta.h"
 #include <driver/periph_ctrl.h>
 #include <driver/spi_common.h>
 #include <driver/spi_master.h>
@@ -19,7 +21,6 @@
 #include <hal/gpio_types.h>
 #include <hal/spi_flash_types.h>
 #include <spi_flash_chip_generic.h>
-#include "spi_flash_chip_zetta.h"
 
 #include "zd35.hpp"
 
