@@ -34,6 +34,43 @@ esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 	return ESP_OK;
 }
 
+esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
+{
+
+	uint8_t misoBuffer[1] = {0};
+	esp_err_t err = ESP_OK;
+	const uint8_t mosiBuffer[] = {Zd35AddressBlockLock};
+
+	// Configure the transaction to be made
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 1,  // 1 command byte
+		.miso_len = 1,  // 1 output byte
+		.address_bitlen = 8,
+		.address = Zd35AddressBlockLock,
+		.mosi_data = mosiBuffer,
+		.miso_data = misoBuffer,
+		.flags = 0,  // XXX
+		.command = Zd35CommandGetFeatures,
+		.dummy_bitlen = 0,
+		.io_mode = 0,  // XXX
+	};
+
+	if (chip == NULL || write_protect == NULL) {
+		return ESP_ERR_INVALID_ARG;
+	}
+
+	// Make a transfer
+	err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	*write_protect = ((misoBuffer[0] & Zd35RegisterBlockLockBrwdMask) == 0);
+
+	return err;
+}
+
 esp_err_t spi_flash_chip_issi_set_io_mode(esp_flash_t *chip);
 esp_err_t spi_flash_chip_issi_get_io_mode(esp_flash_t *chip, esp_flash_io_mode_t* out_io_mode);
 
@@ -63,7 +100,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.sector_size = Zd35x2BlockSize,
 	.block_erase_size = Zd35x2BlockSize,
 
-	.get_chip_write_protect = spi_flash_chip_generic_get_write_protect,
+	.get_chip_write_protect = spi_flash_chip_zetta_get_write_protect,
 	.set_chip_write_protect = spi_flash_chip_generic_set_write_protect,
 
 	.num_protectable_regions = 0,
