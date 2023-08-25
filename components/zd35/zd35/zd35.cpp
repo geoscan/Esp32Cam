@@ -218,7 +218,7 @@ static inline void initImpl()
 		.host_id = kHost,
 		.cs_io_num = GPIO_NUM_15,  // CS
 		.io_mode = SPI_FLASH_FASTRD,  // SPI mode
-		.speed = ESP_FLASH_40MHZ,
+		.speed = ESP_FLASH_5MHZ,
 		.input_delay_ns = 0,  // input delay, 0 = don't know
 		.cs_id = 0,  // CS line id -- XXX what is "line"?
 	};
