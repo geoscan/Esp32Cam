@@ -30,10 +30,17 @@ static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
 /// \pre `out_buffer` size is 1 byte
 static esp_err_t esp_flash_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer);
 
+static inline uint8_t get_zd35_full_lock_mask();
+
+static inline uint8_t get_zd35_full_lock_mask()
+{
+	return Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockBp0 | Zd35registerBlockLockBp1
+		| Zd35registerBlockLockBp2 | Zd35registerBlockLockBp3 | Zd35registerBlockLockTb;
+}
+
 static inline bool block_lock_register_is_write_protected(uint8_t block_lock_register)
 {
-	int result = (block_lock_register & (Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockBp0
-		| Zd35registerBlockLockBp1 | Zd35registerBlockLockBp2 | Zd35registerBlockLockBp3 | Zd35registerBlockLockTb));
+	int result = (block_lock_register & get_zd35_full_lock_mask());
 
 	return (result != Zd35registerBlockLockTb);
 }
@@ -98,6 +105,49 @@ esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_
 
 esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
 {
+	uint8_t register_value = 0;
+	esp_err_t err = ESP_OK;
+
+	// Read the current register value
+	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Prepare the register value
+	if (write_protect) {
+		// Enable write protection for all panes
+		register_value |= get_zd35_full_lock_mask();  // The mask coincides w/ required bit values
+	} else {
+		// Disable write protection for all panes
+		register_value &= ~get_zd35_full_lock_mask();  // reset irrelevant registers
+		register_value |= (Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockTb);
+	}
+
+	// Write the register value
+	{
+		const uint8_t mosi_data[2] = {Zd35CommandSetFeatures, register_value};
+		spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+			.mosi_len = 1,  // 1 command byte
+			.miso_len = 0,  // 0 output bytes
+			.address_bitlen = 8,
+			.address = Zd35AddressBlockLock,
+			.mosi_data = mosi_data,
+			.miso_data = NULL,
+			.flags = 0,  // XXX
+			.command = Zd35CommandSetFeatures,
+			.dummy_bitlen = 0,
+			.io_mode = 0,  // XXX}
+		};
+		err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+		if (err != ESP_OK) {
+			return err;
+		}
+	}
+
+	return err;
 }
 
 esp_err_t spi_flash_chip_issi_set_io_mode(esp_flash_t *chip);
@@ -130,7 +180,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.block_erase_size = Zd35x2BlockSize,
 
 	.get_chip_write_protect = spi_flash_chip_zetta_get_write_protect,
-	.set_chip_write_protect = spi_flash_chip_generic_set_write_protect,
+	.set_chip_write_protect = spi_flash_chip_zetta_set_write_protect,
 
 	.num_protectable_regions = 0,
 	.protectable_regions = NULL,
