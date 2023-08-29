@@ -33,7 +33,12 @@ enum Zd35Address {
 // Bits
 
 enum Zd35Register {
-	Zd35RegisterBlockLockBrwdMask = 7  // 8-bit BRWD register
+	Zd35RegisterBlockLockBrwdMask = 1 << 7  // 8-bit BRWD register
+	Zd35registerBlockLockBp3 = 1 << 6,
+	Zd35registerBlockLockBp2 = 1 << 5,
+	Zd35registerBlockLockBp1 = 1 << 4,
+	Zd35registerBlockLockBp0 = 1 << 3,
+	Zd35registerBlockLockTb = 1 << 2,
 };
 
 #endif // COMPONENTS_ZD35_ZD35_DEFS_HPP
