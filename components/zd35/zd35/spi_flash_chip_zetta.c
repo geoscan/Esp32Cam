@@ -12,13 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+
+/* Driver for zetta flash chip */
+
 #include "zd35/zd35_defs.hpp"
 #include <esp_log.h>
 #include <hal/spi_flash_hal.h>
 #include <spi_flash_chip_generic.h>
 #include <stdlib.h>
 
-/* Driver for zetta flash chip */
+/// Returns true if BRWD register is 0, and all blocks on all panes are
+/// write-unprotected (TB bit = 1, BPx bits = 0)
+static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
+
+static inline bool block_lock_register_is_write_protected(uint8_t block_lock_register)
+{
+	int result = (block_lock_register & (Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockBp0
+		| Zd35registerBlockLockBp1 | Zd35registerBlockLockBp2 | Zd35registerBlockLockBp3 | Zd35registerBlockLockTb));
+
+	return (result != Zd35registerBlockLockTb);
+}
 
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
@@ -36,7 +49,6 @@ esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 
 esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
 {
-
 	uint8_t misoBuffer[1] = {0};
 	esp_err_t err = ESP_OK;
 	const uint8_t mosiBuffer[] = {Zd35AddressBlockLock};
@@ -66,9 +78,13 @@ esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_
 		return err;
 	}
 
-	*write_protect = ((misoBuffer[0] & Zd35RegisterBlockLockBrwdMask) == 0);
+	*write_protect = block_lock_register_is_write_protected(misoBuffer[0]);
 
 	return err;
+}
+
+esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
+{
 }
 
 esp_err_t spi_flash_chip_issi_set_io_mode(esp_flash_t *chip);
