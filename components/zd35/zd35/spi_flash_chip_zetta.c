@@ -25,12 +25,39 @@
 /// write-unprotected (TB bit = 1, BPx bits = 0)
 static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
 
+/// Performs `GET_FEATURES` operation upon the `chip`: reads the value of a
+/// specified register at `register_address`.
+/// \pre `out_buffer` size is 1 byte
+static esp_err_t esp_flash_get_register_value(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer);
+
 static inline bool block_lock_register_is_write_protected(uint8_t block_lock_register)
 {
 	int result = (block_lock_register & (Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockBp0
 		| Zd35registerBlockLockBp1 | Zd35registerBlockLockBp2 | Zd35registerBlockLockBp3 | Zd35registerBlockLockTb));
 
 	return (result != Zd35registerBlockLockTb);
+}
+
+static inline esp_err_t esp_flash_get_register_value(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer)
+{
+	// Configure the transaction to be made
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 1,  // 1 command byte
+		.miso_len = 1,  // 1 output byte
+		.address_bitlen = 8,
+		.address = Zd35AddressBlockLock,
+		.mosi_data = &register_address,
+		.miso_data = out_buffer,
+		.flags = 0,  // XXX
+		.command = Zd35CommandGetFeatures,
+		.dummy_bitlen = 0,
+		.io_mode = 0,  // XXX
+	};
+
+	// Perform the transfer
+	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	return err;
 }
 
 esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
@@ -49,36 +76,22 @@ esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 
 esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
 {
-	uint8_t misoBuffer[1] = {0};
+	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
-	const uint8_t mosiBuffer[] = {Zd35AddressBlockLock};
-
-	// Configure the transaction to be made
-	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
-		.mosi_len = 1,  // 1 command byte
-		.miso_len = 1,  // 1 output byte
-		.address_bitlen = 8,
-		.address = Zd35AddressBlockLock,
-		.mosi_data = mosiBuffer,
-		.miso_data = misoBuffer,
-		.flags = 0,  // XXX
-		.command = Zd35CommandGetFeatures,
-		.dummy_bitlen = 0,
-		.io_mode = 0,  // XXX
-	};
 
 	if (chip == NULL || write_protect == NULL) {
 		return ESP_ERR_INVALID_ARG;
 	}
 
 	// Make a transfer
-	err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+	err = esp_flash_get_register_value(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
 		return err;
 	}
 
-	*write_protect = block_lock_register_is_write_protected(misoBuffer[0]);
+	// Parse the response
+	*write_protect = block_lock_register_is_write_protected(register_value);
 
 	return err;
 }
