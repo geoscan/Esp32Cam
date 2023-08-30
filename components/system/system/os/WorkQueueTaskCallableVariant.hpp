@@ -55,7 +55,7 @@ public:
 		void *aUserData = nullptr):
 		memberWorkQueueTaskCallable{aMemberWorkQueueTaskCallable},
 		userData{aUserData},
-		virtualCallable{&WorkQueueTaskCallableVariant::callStaticWorkQueueTaskCallable}
+		virtualCallable{&WorkQueueTaskCallableVariant::callMemberWorkQueueTaskCallable}
 	{
 	}
 
