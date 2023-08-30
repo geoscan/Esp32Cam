@@ -10,6 +10,11 @@
 
 namespace Wq {
 
+static inline constexpr char *debugTag()
+{
+	return "[wq]";
+}
+
 void start();
 
 }  // namespace Wq
