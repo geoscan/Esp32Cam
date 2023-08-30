@@ -22,6 +22,7 @@ enum {
 
 enum Zd35Command {
 	Zd35CommandGetFeatures = 0x0F,
+	Zd35CommandSetFeatures = 0x1F,
 };
 
 // Registers
