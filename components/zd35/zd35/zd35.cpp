@@ -11,6 +11,7 @@
 
 #include "spi_flash_chip_zetta.h"
 #include "system/os/Logger.hpp"
+#include "system/os/WorkQueue.hpp"
 #include "utility/MakeSingleton.hpp"
 #include "zd35/FlashMemory.hpp"
 #include "zd35/zd35_defs.hpp"
@@ -50,7 +51,7 @@ static void testInitSpiProbe();
 /// \brief Makes a sequential read/write attempt.
 /// \pre An instance of `Sys::FlashMemory` must be registered, i.e.
 /// `initImpl()` must be called beforehand.
-static void testReadWrite();
+static bool testReadWrite(void *);
 static void initImpl();
 
 /// \brief Checks whether the correct verison of `esp_flash_t` has been
@@ -130,13 +131,13 @@ static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
 	return true;
 }
 
-static inline void testReadWrite()
+static bool testReadWrite(void *)
 {
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s: memory test failed, `Sys::FlashMemory` instance has not been initialized", kLogPreamble, __func__);
 
-		return;
+		return false;
 	}
 
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s trying write/read cycle on a memory chip",
@@ -153,7 +154,7 @@ static inline void testReadWrite()
 	if (writeResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into the chip",
 			kLogPreamble, __func__);
-		return;
+		return false;
 	}
 
 	for (int i = 0; i < 6; ++i) {
@@ -172,7 +173,9 @@ static inline void testReadWrite()
 	// Ensure null-termination, and read the buffer
 	buffer[sizeof(buffer) - 1] = 0;
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
-		buffer);
+		&buffer[0]);
+
+	return false;
 }
 
 static inline void initImpl()
@@ -278,7 +281,16 @@ void init()
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "Verbose log test");
 #endif
 	initImpl();
-	testReadWrite();
+
+#if 1
+	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s testing code requires a work queue instance to be registered", kLogPreamble, __func__);
+		assert(false);
+	}
+
+	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testReadWrite);
+#endif
 }
 
 }  // namespace Zd35
