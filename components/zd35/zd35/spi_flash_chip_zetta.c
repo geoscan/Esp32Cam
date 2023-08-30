@@ -34,7 +34,7 @@ static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
 /// Performs `GET_FEATURES` operation upon the `chip`: reads the value of a
 /// specified register at `register_address`.
 /// \pre `out_buffer` size is 1 byte
-static esp_err_t esp_flash_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer);
+static esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer);
 
 static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect);
 static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect);
@@ -56,7 +56,7 @@ static inline bool block_lock_register_is_write_protected(uint8_t block_lock_reg
 	return (result != Zd35registerBlockLockTb);
 }
 
-static inline esp_err_t esp_flash_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer)
+static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer)
 {
 	// Configure the transaction to be made
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
@@ -103,7 +103,7 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 	}
 
 	// Make a transfer
-	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
 		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
@@ -127,7 +127,7 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 	esp_err_t err = ESP_OK;
 
 	// Read the current register value
-	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
 		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
@@ -174,7 +174,7 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 	}
 
 #if 1  // Additional check for debugging purposes
-	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
 		ESP_LOGI(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
