@@ -39,7 +39,7 @@ static esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *chip, ui
 static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect);
 static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect);
 static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId);
-static esp_err_t spi_flash_chip_zetta_read_bytes(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length);
+static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length);
 static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip);
 static inline uint8_t get_zd35_full_lock_mask();
 
@@ -149,11 +149,10 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 
 	// Write the register value
 	{
-
 		ESP_LOGV(DEBUG_TAG, "%s:%s: Writing register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
-		const uint8_t mosi_data[2] = {Zd35CommandSetFeatures, register_value};
+		const uint8_t mosi_data[] = {register_value};
 		spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
-			.mosi_len = 1,  // 1 command byte
+			.mosi_len = sizeof(mosi_data),  // 1 command byte
 			.miso_len = 0,  // 0 output bytes
 			.address_bitlen = 8,
 			.address = Zd35AddressBlockLock,
