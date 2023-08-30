@@ -140,8 +140,9 @@ static bool testReadWrite(void *)
 		return false;
 	}
 
-	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s trying write/read cycle on a memory chip",
-		kLogPreamble, __func__);
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(),
+		"%s:%s trying write/read cycle on a memory chip writeBlockSize=%d", kLogPreamble, __func__,
+		Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize);
 
 	// Initialize buffer
 	char buffer[Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize] = {0};
