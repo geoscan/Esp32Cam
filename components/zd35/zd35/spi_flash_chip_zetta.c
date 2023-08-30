@@ -41,7 +41,30 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId);
 static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length);
 static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip);
-static inline uint8_t get_zd35_full_lock_mask();
+static uint8_t get_zd35_full_lock_mask();
+static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
+	uint8_t register_value);
+
+static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
+	uint8_t register_value)
+{
+	const uint8_t mosi_buffer[] = {register_address, register_value};
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 2,  // register address + value thereof
+		.miso_len = 0,
+		.address_bitlen = 8,
+		.address = Zd35AddressBlockLock,
+		.mosi_data = mosi_buffer,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandSetFeatures,
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	return err;
+}
 
 static inline uint8_t get_zd35_full_lock_mask()
 {
@@ -150,20 +173,7 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 	// Write the register value
 	{
 		ESP_LOGV(DEBUG_TAG, "%s:%s: Writing register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
-		const uint8_t mosi_data[] = {register_value};
-		spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
-			.mosi_len = sizeof(mosi_data),  // 1 command byte
-			.miso_len = 0,  // 0 output bytes
-			.address_bitlen = 8,
-			.address = Zd35AddressBlockLock,
-			.mosi_data = mosi_data,
-			.miso_data = NULL,
-			.flags = 0,  // XXX
-			.command = Zd35CommandSetFeatures,
-			.dummy_bitlen = 0,
-			.io_mode = 0,  // XXX}
-		};
-		err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+		err = spi_flash_chip_zetta_perform_set_features(chip, Zd35AddressBlockLock, register_value);
 
 		if (err != ESP_OK) {
 			ESP_LOGE(DEBUG_TAG, "%s:%s failed to set/reset write protection", LOG_PREAMBLE, __func__);
