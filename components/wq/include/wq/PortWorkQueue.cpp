@@ -24,10 +24,11 @@ void PortWorkQueue::pushTask(const Sys::WorkQueueTaskCallableVariant &aWorkQueue
 		assert(false);
 	}
 
+	auto task = aWorkQueueTaskCallableVariant;
 	Ut::Thr::Wq::MediumPriority::getInstance().pushContinuous(
-		[aWorkQueueTaskCallableVariant]()
+		[task]() mutable
 		{
-			return aWorkQueueTaskCallableVariant.invokeTask();
+			return task.invokeTask();
 		});
 }
 
