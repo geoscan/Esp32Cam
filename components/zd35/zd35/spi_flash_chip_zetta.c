@@ -36,6 +36,11 @@ static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
 /// \pre `out_buffer` size is 1 byte
 static esp_err_t esp_flash_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer);
 
+static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect);
+static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect);
+static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId);
+static esp_err_t spi_flash_chip_zetta_read_bytes(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length);
+static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip);
 static inline uint8_t get_zd35_full_lock_mask();
 
 static inline uint8_t get_zd35_full_lock_mask()
@@ -73,7 +78,7 @@ static inline esp_err_t esp_flash_perform_get_features(esp_flash_t *chip, uint8_
 	return err;
 }
 
-esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
+static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
 	if ((flashId & 0xFFFF) == Zd35x2ChipId) {
 		chip->chip_id = flashId;
@@ -87,7 +92,7 @@ esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 	return ESP_OK;
 }
 
-esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
+static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
 {
 	static const char *register_name = "Block lock";
 	uint8_t register_value = 0;
@@ -115,7 +120,7 @@ esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_
 	return err;
 }
 
-esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
+static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
 {
 	static const char *register_name = "Block lock";
 	uint8_t register_value = 0;
@@ -193,7 +198,7 @@ esp_err_t spi_flash_chip_issi_get_io_mode(esp_flash_t *chip, esp_flash_io_mode_t
 
 static const char chip_name[] = "zetta";
 
-spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
+static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 {
 	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT;
 }
