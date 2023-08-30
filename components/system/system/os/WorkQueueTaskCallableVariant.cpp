@@ -1,11 +1,11 @@
 //
-// WorkQueue.cpp
+// WorkQueueTaskCallableVariant.cpp
 //
 // Created on: Aug 30, 2023
 //     Author: Dmitry Murashov (d <DOT> murashov <AT> geoscan <DOT> aero)
 //
 
-#include "WorkQueue.hpp"
+#include "WorkQueueTaskCallableVariant.hpp"
 
 namespace Sys {
 
@@ -18,5 +18,6 @@ bool WorkQueueTaskCallableVariant::callMemberWorkQueueTaskCallable()
 {
 	return memberWorkQueueTaskCallable->onCalledFromWorkQueue(userData);
 }
+
 
 }  // Sys
