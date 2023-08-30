@@ -14,12 +14,18 @@
 
 
 /* Driver for zetta flash chip */
+#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL)
+#include <sdkconfig.h>
+#include <esp_log.h>
 
 #include "zd35/zd35_defs.hpp"
 #include <esp_log.h>
 #include <hal/spi_flash_hal.h>
 #include <spi_flash_chip_generic.h>
 #include <stdlib.h>
+
+static const char *DEBUG_TAG = "[zd35]";
+static const char *LOG_PREAMBLE = "spi_flash_chip_zetta";
 
 /// Returns true if BRWD register is 0, and all blocks on all panes are
 /// write-unprotected (TB bit = 1, BPx bits = 0)
@@ -83,6 +89,7 @@ esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 
 esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
 {
+	static const char *register_name = "Block lock";
 	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
 
@@ -94,17 +101,23 @@ esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_
 	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
+
 		return err;
 	}
 
+	ESP_LOGV(DEBUG_TAG, "%s:%s: %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
+
 	// Parse the response
 	*write_protect = block_lock_register_is_write_protected(register_value);
+	ESP_LOGV(DEBUG_TAG, "%s:%s: write_protect=%d", LOG_PREAMBLE, __func__, *write_protect);
 
 	return err;
 }
 
 esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
 {
+	static const char *register_name = "Block lock";
 	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
 
@@ -112,8 +125,12 @@ esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_p
 	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
+
 		return err;
 	}
+
+	ESP_LOGV(DEBUG_TAG, "%s:%s: register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
 
 	// Prepare the register value
 	if (write_protect) {
@@ -127,6 +144,8 @@ esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_p
 
 	// Write the register value
 	{
+
+		ESP_LOGV(DEBUG_TAG, "%s:%s: Writing register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
 		const uint8_t mosi_data[2] = {Zd35CommandSetFeatures, register_value};
 		spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 			.mosi_len = 1,  // 1 command byte
@@ -143,9 +162,23 @@ esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_p
 		err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
 
 		if (err != ESP_OK) {
+			ESP_LOGE(DEBUG_TAG, "%s:%s failed to set/reset write protection", LOG_PREAMBLE, __func__);
+
 			return err;
 		}
 	}
+
+#if 1  // Additional check for debugging purposes
+	err = esp_flash_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+
+	if (err != ESP_OK) {
+		ESP_LOGI(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
+
+		return err;
+	}
+
+	ESP_LOGV(DEBUG_TAG, "%s:%s: register after writing %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
+#endif
 
 	return err;
 }
@@ -190,7 +223,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.read = spi_flash_chip_generic_read,
 	.write = spi_flash_chip_generic_write,
 	.program_page = spi_flash_chip_generic_page_program,
-	.page_size = Zd35x2PageSize,
+	.page_size = 512,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
 	.wait_idle = spi_flash_chip_generic_wait_idle,
