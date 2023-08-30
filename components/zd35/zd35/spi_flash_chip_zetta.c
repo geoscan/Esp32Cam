@@ -223,7 +223,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.read = spi_flash_chip_generic_read,
 	.write = spi_flash_chip_generic_write,
 	.program_page = spi_flash_chip_generic_page_program,
-	.page_size = 512,
+	.page_size = Zd35x2PageSize,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
 	.wait_idle = spi_flash_chip_generic_wait_idle,
