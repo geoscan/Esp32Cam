@@ -1,7 +1,10 @@
 file(GLOB SOURCE_FILES
+		"port/espidf/system/os/*.cpp"
 		"system/*.c"
 		"system/*.cpp"
-		"port/espidf/system/os/*.cpp"
+		"system/hardware/*.cpp"
+		"system/middleware/*.cpp"
+		"system/os/*.cpp"
 		)
 
 idf_component_register(
