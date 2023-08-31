@@ -74,7 +74,7 @@ static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, ui
 	return err;
 }
 
-static inline esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
+static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_spi_page_address)
 {
 	// TODO: bounary check
