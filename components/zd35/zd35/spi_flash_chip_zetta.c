@@ -185,20 +185,21 @@ static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip
 static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer, uint32_t cache_offset,
 	uint32_t length)
 {
-	if (cache_offset >= Zd35x2CacheSize || length > Zd35x2CacheSize || cache_offset + length > Zd35x2CacheSize) {
+	if (cache_offset >= Zd35x2CacheSizeBytes || length > Zd35x2CacheSizeBytes
+			|| cache_offset + length > Zd35x2CacheSizeBytes) {
 		return ESP_ERR_INVALID_ARG;
 	}
 
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
 		.miso_len = length,
-		.address_bitlen = 24,
+		.address_bitlen = 15,  // 3 dummy bits + 1 plane select bit + 11 address bits  XXX: isn't it meant to be handled by `dummy_bits'?
 		.address = cache_offset,
 		.mosi_data = NULL,
 		.miso_data = NULL,
 		.flags = 0,
-		.command = Zd35CommandReadFromCache,  // TODO
-		.dummy_bitlen = 0,
+		.command = Zd35CommandReadFromCache,
+		.dummy_bitlen = 8,
 		.io_mode = 0,
 	};
 	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
