@@ -103,7 +103,7 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 
 // TODO: fdecl
 // TODO: description
-static inline spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
+static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
 {
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
