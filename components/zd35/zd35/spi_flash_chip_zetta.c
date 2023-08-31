@@ -120,7 +120,7 @@ static esp_err_t spi_flash_chip_zetta_address_to_cache_offset(esp_flash_t *chip,
 			*out_cache_offset = absolute_address % Zd35x2PageSize;
 			*out_cache_offset |= plane_select_mask;
 
-			return ESP_OK;  // TODO
+			return ESP_OK;
 		}
 
 		default:
