@@ -153,7 +153,7 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 
 // TODO: fdecl
 // TODO: description
-static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
+static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
 {
 	static const size_t N_ATTEMPTS = 10;
 
