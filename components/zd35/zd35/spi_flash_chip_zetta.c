@@ -222,7 +222,7 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 		.miso_data = NULL,
 		.flags = 0,
 		.command = Zd35CommandReadFromCache,
-		.dummy_bitlen = 8,
+		.dummy_bitlen = 8,  // 1 dummy byte
 		.io_mode = 0,
 	};
 	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
