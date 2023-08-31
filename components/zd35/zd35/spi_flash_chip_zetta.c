@@ -45,6 +45,14 @@ static uint8_t get_zd35_full_lock_mask();
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value);
 
+/// \brief Will produce a SPI-compatible address accouting for pane selection
+/// bit for 2 GB versions.
+///
+/// \note The driver may not support some versions of Zetta SPI Flash memory
+/// yet, which the user will be notified of through return value.
+static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
+	uint32_t *out_spi_page_address);
+
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value)
 {
@@ -64,6 +72,25 @@ static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, ui
 	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
 
 	return err;
+}
+
+static inline esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
+	uint32_t *out_spi_page_address)
+{
+	// TODO: bounary check
+	*out_spi_page_address = absolute_address / chip->chip_drv->page_size;
+
+	return ESP_OK;
+}
+
+static inline esp_err_t spi_flash_chip_zetta_address_to_cache_offset(esp_flash_t *chip, uint32_t absolute_address,
+	uint32_t *out_cache_offset)
+{
+	// TODO: bounary check
+
+	*out_cache_offset = absolute_address % chip->chip_drv->page_size;
+
+	return ESP_OK;
 }
 
 static inline uint8_t get_zd35_full_lock_mask()
