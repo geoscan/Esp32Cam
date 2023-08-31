@@ -77,20 +77,43 @@ static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, ui
 static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_spi_page_address)
 {
-	// TODO: bounary check
-	*out_spi_page_address = absolute_address / chip->chip_drv->page_size;
+	switch (chip->chip_id) {
+		case Zd35x2ChipId: {
+			if (absolute_address > Zd35x2CapacityBytes) {
+				return ESP_ERR_INVALID_ARG;
+			}
 
-	return ESP_OK;
+			*out_spi_page_address = absolute_address / chip->chip_drv->page_size;
+
+			return ESP_OK;
+		}
+
+		default:
+			return ESP_ERR_NOT_SUPPORTED;
+	}
 }
 
-static inline esp_err_t spi_flash_chip_zetta_address_to_cache_offset(esp_flash_t *chip, uint32_t absolute_address,
+/// Converts the absolute address into 12-bit address compatible with "READ
+/// FROM CACHE" operation.
+static esp_err_t spi_flash_chip_zetta_address_to_cache_offset(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_cache_offset)
 {
-	// TODO: bounary check
+	switch (chip->chip_id)  {
+		case Zd35x2ChipId: {
+			static const int PLANE_SELECT_BYTE_OFFSET = 12;
+			uint32_t plane_select_mask = 0;
 
-	*out_cache_offset = absolute_address % chip->chip_drv->page_size;
+			// Form SPI-compatible address
+			plane_select_mask = (absolute_address / Zd35x2PlaneSizeBytes) << PLANE_SELECT_BYTE_OFFSET;  // See the datasheet, "READ FROM CACHE x1"
+			*out_cache_offset = absolute_address % Zd35x2PageSize;
+			*out_cache_offset |= plane_select_mask;
 
-	return ESP_OK;
+			return ESP_OK;  // TODO
+		}
+
+		default:
+			return ESP_ERR_NOT_SUPPORTED;
+	}
 }
 
 static inline uint8_t get_zd35_full_lock_mask()
