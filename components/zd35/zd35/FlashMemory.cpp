@@ -34,8 +34,8 @@ static inline Sys::FlashMemoryGeometry makeFlashMemoryGeometryFromEspFlash(esp_f
 	if (aEspFlash->chip_id == Zd35x2ChipId) {
 		return Sys::FlashMemoryGeometry{
 			.writeBlockSize = Zd35x2PageSize,
-			.eraseBlockSize = Zd35x2BlockSize,
-			.nEraseBlocks = Zd35x2BlocksNumber,
+			.eraseBlockSize = Zd35x2BlockSizeBytes,
+			.nEraseBlocks = Zd35x2CapacityBlocks,
 		};
 	}
 
