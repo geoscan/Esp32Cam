@@ -370,6 +370,7 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 		return err;
 	}
 
+	ESP_LOGV(DEBUG_TAG, "%s:%s trying to cache page by id=%d", LOG_PREAMBLE, __func__, page_address);
 	err = spi_flash_chip_zetta_perform_page_read(chip, page_address);
 
 	if (err != ESP_OK) {
@@ -383,6 +384,8 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 		return err;
 	}
 
+	ESP_LOGV(DEBUG_TAG, "%s:%s reading the cached page at offset=%d, length=%d", LOG_PREAMBLE, __func__, cache_offset,
+		length);
 	err = spi_flash_chip_zetta_perform_read_from_cache(chip, buffer, cache_offset, length);
 
 	return err;
