@@ -11,6 +11,9 @@
 // Memory layout
 
 enum {
+	/// 2Gbit NAND flash memory
+	Zd35x2ChipId = 0x2C24,
+
 	/// unit: bytes. The actual size is 2048 + 128 (spare area), but the latter
 	/// is not used for data storage.
 	Zd35x2PageSize = 2048,
@@ -24,7 +27,6 @@ enum {
 	Zd35x2FullPageSize = Zd35x2PageSize + Zd35x2SpareMemorySizeBytes,
 	Zd35x2CacheSizeBytes = Zd35x2PageSize,
 	Zd35x2BlockSizeBytes = 64 * Zd35x2PageSize,  // unit: bytes
-	Zd35x2ChipId = 0x2C24,
 	Zd35x2PanesNumber = 2,
 	Zd35x2PaneSizeBlocks = 1024,
 	Zd35x2CapacityBlocks = Zd35x2PanesNumber * Zd35x2PaneSizeBlocks,  // 2 panes x 1024 blocks
