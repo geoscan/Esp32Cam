@@ -203,7 +203,6 @@ static inline void initImpl()
 		.max_transfer_sz = 0,  // Use default max transfer size
 		.flags = SPICOMMON_BUSFLAG_MASTER,  // Spi flags -- XXX need none?
 		.intr_flags = ESP_INTR_FLAG_LEVEL3,  // Interrupt flags  --- XXX need none?
-
 	};
 
 	{
