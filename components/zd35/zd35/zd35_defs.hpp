@@ -15,7 +15,9 @@ enum {
 	Zd35x2CacheSize = Zd35x2PageSize,
 	Zd35x2BlockSize = 64 * Zd35x2PageSize,  // unit: bytes
 	Zd35x2ChipId = 0x2C24,
-	Zd35x2BlocksNumber = 1024 * 2,  // 2 panes x 1024 blocks
+	Zd35x2PanesNumber = 2,
+	Zd35x2PaneBlocksNumber = 1024,
+	Zd35x2BlocksNumber = Zd35x2PanesNumber * Zd35x2PaneBlocksNumber,  // 2 panes x 1024 blocks
 	Zd35x2CapacityBytes = Zd35x2BlocksNumber * Zd35x2BlockSize,
 };
 
