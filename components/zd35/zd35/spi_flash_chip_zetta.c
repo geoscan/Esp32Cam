@@ -228,6 +228,7 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 		return ESP_ERR_INVALID_ARG;
 	}
 
+	ESP_LOGV(DEBUG_TAG, "%s:%s reading %d bytes from cache", LOG_PREAMBLE, __func__, length);
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
 		.miso_len = length,
