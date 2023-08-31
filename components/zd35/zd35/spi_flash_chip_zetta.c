@@ -101,6 +101,73 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 	return err;
 }
 
+// TODO: fdecl
+// TODO: description
+static inline spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
+{
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 0,
+		.miso_len = 0,
+		.address_bitlen = 24,
+		.address = page_address,
+		.mosi_data = NULL,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandPageRead,  // TODO
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Poll the device until the page is read
+	for (int i = 99; i; --i) {  // TODO magic num
+		uint8_t register_value = 0;
+		err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
+
+		if (err != ESP_OK) {
+			return err;
+		}
+
+		if (!(register_value & Zd35RegisterStatusOip)) {
+			break;
+		} else {
+			// TODO: yield
+		}
+	}
+
+	return err;
+}
+
+// TODO: fdecl
+// TODO: description
+static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer, uint32_t cache_offset,
+	uint32_t length)
+{
+	if (cache_offset >= Zd35x2CacheSize || length > Zd35x2CacheSize || cache_offset + length > Zd35x2CacheSize) {
+		return ESP_ERR_INVALID_ARG;
+	}
+
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 0,
+		.miso_len = length,
+		.address_bitlen = 24,
+		.address = cache_offset,
+		.mosi_data = NULL,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandReadFromCache,  // TODO
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	return err;
+}
+
 static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 {
 	if ((flashId & 0xFFFF) == Zd35x2ChipId) {
