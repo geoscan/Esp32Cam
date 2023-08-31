@@ -105,6 +105,8 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 // TODO: description
 static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
 {
+	static const size_t N_ATTEMPTS = 10;
+
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
 		.miso_len = 0,
@@ -117,14 +119,17 @@ static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip
 		.dummy_bitlen = 0,
 		.io_mode = 0,
 	};
+	ESP_LOGV(DEBUG_TAG, "%s:%s: issuing PAGE READ command", LOG_PREAMBLE, __func__);
 	esp_err_t err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
 
 	if (err != ESP_OK) {
 		return err;
 	}
 
+
 	// Poll the device until the page is read
-	for (int i = 99; i; --i) {  // TODO magic num
+	for (int i = 1; i < N_ATTEMPTS + 1; --i) {
+		ESP_LOGV(DEBUG_TAG, "%s:%s: waiting for the status update, attempt #=%d", LOG_PREAMBLE, __func__, i);
 		uint8_t register_value = 0;
 		err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
 
@@ -133,9 +138,15 @@ static inline esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip
 		}
 
 		if (!(register_value & Zd35RegisterStatusOip)) {
+			ESP_LOGV(DEBUG_TAG, "%s:%s: got status update, PAGE READ finished", LOG_PREAMBLE, __func__);
 			break;
 		} else {
-			// TODO: yield
+			// Busy wait
+			// TODO: yield to another task using FreeRTOS calls. The call below
+			// invokes `esp_rom_delay_us` which seems to be a busy-wait or CPU
+			// suspend, and has nothing to do with OS's "delay and yield to
+			// another task" type of calls
+			// chip->os_func->delay_us(chip->os_func_data, 1);
 		}
 	}
 
