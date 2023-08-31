@@ -70,7 +70,7 @@ static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *c
 /// \param `page_address` specifies offset of that page
 /// \pre `page_address` will have had to be subjected to boundary checks by the
 /// time the call is made, as this function performs no such checks.
-static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
+static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address);
 
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value)
