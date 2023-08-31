@@ -352,8 +352,8 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.erase_chip = spi_flash_chip_generic_erase_chip,
 	.erase_sector = spi_flash_chip_generic_erase_sector,
 	.erase_block = spi_flash_chip_generic_erase_block,
-	.sector_size = Zd35x2BlockSize,
-	.block_erase_size = Zd35x2BlockSize,
+	.sector_size = Zd35x2BlockSizeBytes,
+	.block_erase_size = Zd35x2BlockSizeBytes,
 
 	.get_chip_write_protect = spi_flash_chip_zetta_get_write_protect,
 	.set_chip_write_protect = spi_flash_chip_zetta_set_write_protect,
