@@ -114,8 +114,8 @@ static void testInitSpiProbe()
 	};
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s starting transmission", kLogPreamble, __func__);
 	const auto transmissionResult = spi_device_transmit(spiDeviceHandle, &spiTransaction);
-	Sys::Logger::write(Sys::LogLevel::Info, "%s:%s got transaction result=[0x%02x,0x%02x] result=%d", kLogPreamble, __func__, rxBuffer[0],
-		rxBuffer[1], static_cast<int>(transmissionResult));
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s got transaction result=[0x%02x,0x%02x] result=%d",
+		kLogPreamble, __func__, rxBuffer[0], rxBuffer[1], static_cast<int>(transmissionResult));
 }
 
 static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
