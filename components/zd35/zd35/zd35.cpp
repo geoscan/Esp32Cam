@@ -148,6 +148,7 @@ static bool testReadWrite(void *)
 	char buffer[Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize] = {0};
 	strcpy(buffer, "Hello");
 
+#if 0
 	// Flush the buffer into flash
 	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(0, 0,
 		reinterpret_cast<std::uint8_t *>(buffer), sizeof(buffer));
@@ -157,6 +158,7 @@ static bool testReadWrite(void *)
 			kLogPreamble, __func__);
 		return false;
 	}
+#endif
 
 	for (int i = 0; i < 6; ++i) {
 		buffer[i] = 0;
@@ -164,7 +166,8 @@ static bool testReadWrite(void *)
 
 	// Read the buffer
 	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(0, 0,
-		reinterpret_cast<std::uint8_t *>(buffer), sizeof(buffer));
+		reinterpret_cast<std::uint8_t *>(buffer),
+		Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize);
 
 	if (readResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from the chip",
@@ -275,12 +278,18 @@ static inline void initImpl()
 
 void init()
 {
+#if 1
 #ifdef CONFIG_ZD35_ENABLED
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "Debug log test");
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "Verbose log test");
 #endif
 	initImpl();
+#endif
+
+#if 0
+	testInitSpiProbe();
+#endif
 
 #if 1
 	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
