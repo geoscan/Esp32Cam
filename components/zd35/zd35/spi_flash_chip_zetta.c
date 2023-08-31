@@ -357,6 +357,32 @@ static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT;
 }
 
+// TODO fdecl
+static esp_err_t spi_flash_chip_zetta_config_host_io_mode(esp_flash_t *chip, uint32_t flags)
+{
+	esp_flash_io_mode_t read_mode = chip->read_mode;
+	uint32_t address_bitlen = 0;
+	uint32_t dummy_bitlen = 0;
+	uint32_t read_command = 0;
+	(void)flags;
+
+	switch (read_mode & 0xFFFF) {
+		case SPI_FLASH_FASTRD: {
+			address_bitlen = 15;
+			dummy_bitlen = 8;
+			read_command = Zd35CommandReadFromCache;
+
+			break;
+		}
+
+		case SPI_FLASH_SLOWRD:  // XXX Sense the possibility of using other IO modes
+			return ESP_ERR_NOT_SUPPORTED;
+	}
+
+	return chip->host->driver->configure_host_io_mode(chip->host, read_command, address_bitlen, dummy_bitlen,
+		read_mode);
+}
+
 static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length)
 {
 	// Shadow the content of a NAND array into register, datasheet, p. 29
@@ -429,5 +455,5 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.sus_setup = spi_flash_chip_generic_suspend_cmd_conf,
 	.read_unique_id = spi_flash_chip_generic_read_unique_id_none,
 	.get_chip_caps = spi_flash_chip_zetta_get_caps,
-	.config_host_io_mode = spi_flash_chip_generic_config_host_io_mode,
+	.config_host_io_mode = spi_flash_chip_zetta_config_host_io_mode,
 };
