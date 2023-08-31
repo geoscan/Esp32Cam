@@ -45,6 +45,18 @@ static uint8_t get_zd35_full_lock_mask();
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value);
 
+/// \brief Performs "READ FROM CACHE" operation which is usually preceded by
+/// "PAGE READ" which stores a selected page into the memory chip's fast random
+/// access cache.
+///
+/// \param `cache_offset` is an offset position from which the cache will be
+/// read.
+/// \pre `cache_offset` Must be in a SPI-compatible format. For example, some
+/// Zetta chips stipulate the use of a "pane select" bit when accessing the
+/// cache.
+static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer, uint32_t cache_offset,
+	uint32_t length);
+
 /// \brief Will produce a SPI-compatible address accouting for pane selection
 /// bit for 2 GB versions.
 ///
@@ -203,8 +215,6 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 	return err;
 }
 
-// TODO: fdecl
-// TODO: description
 static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer, uint32_t cache_offset,
 	uint32_t length)
 {
