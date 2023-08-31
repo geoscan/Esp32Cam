@@ -65,6 +65,13 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_spi_page_address);
 
+/// \brief Performs "PAGE READ" operation which puts the selected page into the
+/// SPI device's fast random access cache for later access.
+/// \param `page_address` specifies offset of that page
+/// \pre `page_address` will have had to be subjected to boundary checks by the
+/// time the call is made, as this function performs no such checks.
+static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
+
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value)
 {
@@ -163,8 +170,6 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 	return err;
 }
 
-// TODO: fdecl
-// TODO: description
 static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
 {
 	static const size_t N_ATTEMPTS = 10;
