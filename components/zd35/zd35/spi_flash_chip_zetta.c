@@ -341,6 +341,38 @@ static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT;
 }
 
+static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint32_t address, uint32_t length)
+{
+	// Shadow the content of a NAND array into register, datasheet, p. 29
+	esp_err_t err = ESP_OK;
+	uint32_t page_address = 0;
+	uint32_t cache_offset = 0;  // Offset in the ZD35's cache
+
+	// Read the specified page into cache
+	err = spi_flash_chip_zetta_address_to_spi_page_address(chip, address, &page_address);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	err = spi_flash_chip_zetta_perform_page_read(chip, page_address);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Read the cached page from the register accounting for the offset
+	cache_offset = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &cache_offset);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	err = spi_flash_chip_zetta_perform_read_from_cache(chip, buffer, cache_offset, length);
+
+	return err;
+}
+
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
 // So we only replace these two functions.
 const spi_flash_chip_t esp_flash_chip_zetta = {
@@ -363,7 +395,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.get_protected_regions = NULL,
 	.set_protected_regions = NULL,
 
-	.read = spi_flash_chip_generic_read,
+	.read = spi_flash_chip_zetta_read,
 	.write = spi_flash_chip_generic_write,
 	.program_page = spi_flash_chip_generic_page_program,
 	.page_size = Zd35x2PageSize,
