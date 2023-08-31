@@ -368,7 +368,7 @@ static esp_err_t spi_flash_chip_zetta_config_host_io_mode(esp_flash_t *chip, uin
 
 	switch (read_mode & 0xFFFF) {
 		case SPI_FLASH_FASTRD: {
-			address_bitlen = 15;
+			address_bitlen = 16;
 			dummy_bitlen = 8;
 			read_command = Zd35CommandReadFromCache;
 
