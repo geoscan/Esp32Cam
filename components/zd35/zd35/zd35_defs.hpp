@@ -11,7 +11,7 @@
 // Memory layout
 
 enum {
-	Zd35x2PageSize = 2176,  // unit: bytes
+	Zd35x2PageSize = 2048,  // unit: bytes. The actual size is 2048 + 128 (spare area), but the latter is not used for data storage
 	Zd35x2CacheSize = Zd35x2PageSize,
 	Zd35x2BlockSize = 64 * Zd35x2PageSize,  // unit: bytes
 	Zd35x2ChipId = 0x2C24,
