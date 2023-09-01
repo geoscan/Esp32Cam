@@ -146,13 +146,14 @@ static bool testReadWrite(void *)
 		Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize);
 
 	// Initialize buffer
-	char buffer[Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize] = {0};
+	static constexpr std::size_t kBufferSize = 32;
+	char buffer[kBufferSize] = {0};
 	strcpy(buffer, "Hello");
 
-#if 0
+#if 1
 	// Flush the buffer into flash
 	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(0, 0,
-		reinterpret_cast<std::uint8_t *>(buffer), sizeof(buffer));
+		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
 
 	if (writeResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into the chip",
@@ -161,14 +162,15 @@ static bool testReadWrite(void *)
 	}
 #endif
 
+#if 1
+	// Read from the flash
 	for (int i = 0; i < 6; ++i) {
 		buffer[i] = 0;
 	}
 
 	// Read the buffer
 	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(0, 0,
-		reinterpret_cast<std::uint8_t *>(buffer),
-		Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize);
+		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
 
 	if (readResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from the chip",
@@ -179,6 +181,7 @@ static bool testReadWrite(void *)
 	buffer[sizeof(buffer) - 1] = 0;
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
 		&buffer[0]);
+#endif
 
 	return false;
 }
