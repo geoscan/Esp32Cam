@@ -47,6 +47,8 @@ enum Zd35Command {
 	Zd35CommandSetFeatures = 0x1F,
 	Zd35CommandPageRead = 0x13,  // Read page into cache
 	Zd35CommandReadFromCache = 0x03,
+	Zd35CommandProgramLoad = 0x02,
+	Zd35CommandProgramExecute = 0x10,
 };
 
 // Registers
