@@ -274,20 +274,32 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 		return ESP_ERR_INVALID_ARG;
 	}
 
-	// Make a transfer
+	// Check "Block lock" register
 	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
-		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
-
 		return err;
 	}
 
-	ESP_LOGV(DEBUG_TAG, "%s:%s: %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
+	if (register_value != BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS) {
+		*write_protect = true;
 
-	// Parse the response
-	*write_protect = block_lock_register_is_write_protected(register_value);
-	ESP_LOGV(DEBUG_TAG, "%s:%s: write_protect=%d", LOG_PREAMBLE, __func__, *write_protect);
+		return ESP_OK;
+	}
+
+	// Check "Status" register
+
+	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	if (register_value & (Zd35RegisterStatusWel)) {  // WEL stands for "write enable"
+		*write_protect = false;
+	} else {
+		*write_protect = true;
+	}
 
 	return err;
 }
