@@ -98,7 +98,8 @@ static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
 
 		if (!(register_value & Zd35RegisterStatusOip)) {
 			ESP_LOGV(DEBUG_TAG, "%s:%s: got status update, PAGE READ finished", LOG_PREAMBLE, __func__);
-			break;
+
+			return ESP_OK;
 		} else {
 			 chip->os_func->delay_us(chip->os_func_data, STATUS_REGISTER_OIP_POLL_WAIT_DURATION_MS);
 		}
