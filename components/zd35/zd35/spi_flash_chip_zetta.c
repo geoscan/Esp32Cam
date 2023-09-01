@@ -239,7 +239,7 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
 		.miso_len = length,
-		.address_bitlen = 15,  // 3 dummy bits + 1 plane select bit + 11 address bits  XXX: isn't it meant to be handled by `dummy_bits'?
+		.address_bitlen = 16,  // 3 dummy bits + 1 plane select bit + 12 address bits  XXX: isn't it meant to be handled by `dummy_bits'?
 		.address = cache_offset,
 		.mosi_data = NULL,
 		.miso_data = buffer,
