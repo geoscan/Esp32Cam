@@ -93,6 +93,7 @@ static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
 		err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
 
 		if (err != ESP_OK) {
+			ESP_LOGE(DEBUG_TAG, "%s:%s Failed to perform \"GET FEATURES\"", LOG_PREAMBLE, __func__);
 			return err;
 		}
 
@@ -286,6 +287,8 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to execute \"GET FEATURES\" for \"Block lock\"", LOG_PREAMBLE, __func__);
+
 		return err;
 	}
 
@@ -300,6 +303,7 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to execute \"GET FEATURES\" for \"Status\"", LOG_PREAMBLE, __func__);
 		return err;
 	}
 
@@ -329,7 +333,7 @@ static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool 
 	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
-		ESP_LOGI(DEBUG_TAG, "%s:%s: TEST failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
+		ESP_LOGE(DEBUG_TAG, "%s:%s: TEST failed to perform GET FEATURES for \"Block lock\"", LOG_PREAMBLE, __func__);
 
 		return err;
 	}
@@ -393,6 +397,7 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 	err = spi_flash_chip_zetta_address_to_spi_page_address(chip, address, &page_address);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to convert address=%d to page address", LOG_PREAMBLE, __func__, address);
 		return err;
 	}
 
@@ -400,6 +405,8 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 	err = spi_flash_chip_zetta_perform_page_read(chip, page_address);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to perform \"PAGE READ\" for page id=0x%02x", LOG_PREAMBLE, __func__,
+			page_address);
 		return err;
 	}
 
@@ -407,12 +414,17 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 	cache_offset = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &cache_offset);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to convert address=%d to cache offset", LOG_PREAMBLE, __func__, address);
 		return err;
 	}
 
 	ESP_LOGV(DEBUG_TAG, "%s:%s reading the cached page at offset=%d, length=%d", LOG_PREAMBLE, __func__, cache_offset,
 		length);
 	err = spi_flash_chip_generic_read(chip, buffer, cache_offset, length);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to read page cache at offset=%d", LOG_PREAMBLE, __func__, cache_offset);
+	}
 
 	return err;
 }
@@ -438,6 +450,7 @@ static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void
 	err = chip->chip_drv->wait_idle(chip, chip->chip_drv->timeout->idle_timeout);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to wait idle", LOG_PREAMBLE, __func__);
 		return err;
 	}
 
@@ -446,6 +459,8 @@ static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void
 	err = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &spi_flash_trans.address);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to convert address=%d to cache offset", LOG_PREAMBLE, __func__, address);
+
 		return err;
 	}
 
@@ -496,6 +511,9 @@ static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffe
 	err = spi_flash_chip_generic_write(chip, buffer, address, length);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG,
+			"%s:%s Failed to disable write protection and shadow NAND data into the SPI chip's registers",
+			LOG_PREAMBLE, __func__);
 		return err;
 	}
 
@@ -503,6 +521,8 @@ static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffe
 	err = spi_flash_chip_zetta_perform_program_execute(chip, address);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to perform \"PROGRAM EXECUTE\" for address=%d", LOG_PREAMBLE, __func__,
+			address);
 		return err;
 	}
 
@@ -510,11 +530,17 @@ static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffe
 	err = spi_flash_chip_zetta_poll_wait_oip(chip);
 
 	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to wait for \"Status\" register's \"OIP\" bit to be set to 0", LOG_PREAMBLE,
+			__func__);
 		return err;
 	}
 
 	// Ensure write protection is set back
 	err = spi_flash_chip_zetta_set_write_protect(chip, true);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to perform \"WRITE DISABLE\"", LOG_PREAMBLE, __func__);
+	}
 
 	return err;
 }
