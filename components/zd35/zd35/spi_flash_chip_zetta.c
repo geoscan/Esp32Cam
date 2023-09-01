@@ -291,52 +291,28 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
 {
 	static const char *register_name = "Block lock";
+	static const uint8_t BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS = Zd35registerBlockLockTb;  // All blocks are unlocked, BRWD value is ignored
 	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
 
-	// Read the current register value
-	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
+	// Unlock all blocks
+	// TODO XXX: check the register value first?
+	err = spi_flash_chip_zetta_perform_set_features(chip, Zd35AddressBlockLock, BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS);
 
-	if (err != ESP_OK) {
-		ESP_LOGE(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
-
-		return err;
-	}
-
-	ESP_LOGV(DEBUG_TAG, "%s:%s: register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
-
-	// Prepare the register value
-	if (write_protect) {
-		// Enable write protection for all panes
-		register_value |= get_zd35_full_lock_mask();  // The mask coincides w/ required bit values
-	} else {
-		// Disable write protection for all panes
-		register_value &= ~get_zd35_full_lock_mask();  // reset irrelevant registers
-		register_value |= (Zd35RegisterBlockLockBrwdMask | Zd35registerBlockLockTb);
-	}
-
-	// Write the register value
-	{
-		ESP_LOGV(DEBUG_TAG, "%s:%s: Writing register %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
-		err = spi_flash_chip_zetta_perform_set_features(chip, Zd35AddressBlockLock, register_value);
-
-		if (err != ESP_OK) {
-			ESP_LOGE(DEBUG_TAG, "%s:%s failed to set/reset write protection", LOG_PREAMBLE, __func__);
-
-			return err;
-		}
-	}
+	// Issue "WRITE ENABLE" or "WRITE DISABLE", already implemented by ESP-IDF, just making a call to the defalut implementation
+	spi_flash_chip_generic_set_write_protect(chip, write_protect);
 
 #if 1  // Additional check for debugging purposes
 	err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressBlockLock, &register_value);
 
 	if (err != ESP_OK) {
-		ESP_LOGI(DEBUG_TAG, "%s:%s: failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
+		ESP_LOGI(DEBUG_TAG, "%s:%s: TEST failed to perform GET_FEATURES", LOG_PREAMBLE, __func__);
 
 		return err;
 	}
 
-	ESP_LOGV(DEBUG_TAG, "%s:%s: register after writing %s=%d", LOG_PREAMBLE, __func__, register_name, register_value);
+	ESP_LOGV(DEBUG_TAG, "%s:%s: TEST register after writing %s=%d expected value=%d", LOG_PREAMBLE, __func__,
+		register_name, register_value, BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS);
 #endif
 
 	return err;
