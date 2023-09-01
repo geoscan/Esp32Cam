@@ -27,6 +27,10 @@
 static const char *DEBUG_TAG = "[zd35]";
 static const char *LOG_PREAMBLE = "spi_flash_chip_zetta";
 
+/// \brief Mask for "Block lock" register unlocking all blocks for writing
+/// \details All blocks are unlocked, BRWD value is ignored
+static const uint8_t BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS = Zd35registerBlockLockTb;
+
 /// Returns true if BRWD register is 0, and all blocks on all panes are
 /// write-unprotected (TB bit = 1, BPx bits = 0)
 static bool block_lock_register_is_write_protected(uint8_t block_lock_register);
@@ -291,7 +295,6 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 static esp_err_t spi_flash_chip_zetta_set_write_protect(esp_flash_t *chip, bool write_protect)
 {
 	static const char *register_name = "Block lock";
-	static const uint8_t BLOCK_LOCK_UNLOCK_WRITE_ALL_BLOCKS = Zd35registerBlockLockTb;  // All blocks are unlocked, BRWD value is ignored
 	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
 
