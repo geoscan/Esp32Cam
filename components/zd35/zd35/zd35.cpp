@@ -31,8 +31,9 @@
 
 #include "zd35.hpp"
 
-#ifdef CONFIG_ZD35_ENABLED
-extern "C" const spi_flash_chip_t *default_registered_chips[] = {
+#if CONFIG_SPI_FLASH_OVERRIDE_CHIP_DRIVER_LIST
+extern "C" const spi_flash_chip_t *default_registered_chips[];
+const spi_flash_chip_t *default_registered_chips[] = {
 	&esp_flash_chip_generic,  // Stub. The system catches "cache disabled" error when accessing "zetta" driver functions during initial bringup
 	&esp_flash_chip_generic,
 	nullptr,
