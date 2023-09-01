@@ -26,6 +26,8 @@
 
 static const char *DEBUG_TAG = "[zd35]";
 static const char *LOG_PREAMBLE = "spi_flash_chip_zetta";
+static const int STATUS_REGISTER_OIP_POLL_ATTEMPTS = 8;
+static const int STATUS_REGISTER_OIP_POLL_WAIT_DURATION_MS = 1;
 
 /// \brief Mask for "Block lock" register unlocking all blocks for writing
 /// \details All blocks are unlocked, BRWD value is ignored
@@ -75,6 +77,30 @@ static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *c
 /// \pre `page_address` will have had to be subjected to boundary checks by the
 /// time the call is made, as this function performs no such checks.
 static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address);
+
+static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
+{
+	esp_err_t err = ESP_OK;
+
+	for (int i = 1; i < STATUS_REGISTER_OIP_POLL_ATTEMPTS + 1; --i) {
+		ESP_LOGV(DEBUG_TAG, "%s:%s: waiting for the status update, attempt #=%d", LOG_PREAMBLE, __func__, i);
+		uint8_t register_value = 0;
+		err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
+
+		if (err != ESP_OK) {
+			return err;
+		}
+
+		if (!(register_value & Zd35RegisterStatusOip)) {
+			ESP_LOGV(DEBUG_TAG, "%s:%s: got status update, PAGE READ finished", LOG_PREAMBLE, __func__);
+			break;
+		} else {
+			 chip->os_func->delay_us(chip->os_func_data, STATUS_REGISTER_OIP_POLL_WAIT_DURATION_MS);
+		}
+	}
+
+	return ESP_ERR_TIMEOUT;
+}
 
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value)
@@ -197,29 +223,8 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 		return err;
 	}
 
-
 	// Poll the device until the page is read
-	for (int i = 1; i < N_ATTEMPTS + 1; --i) {
-		ESP_LOGV(DEBUG_TAG, "%s:%s: waiting for the status update, attempt #=%d", LOG_PREAMBLE, __func__, i);
-		uint8_t register_value = 0;
-		err = spi_flash_chip_zetta_perform_get_features(chip, Zd35AddressStatus, &register_value);
-
-		if (err != ESP_OK) {
-			return err;
-		}
-
-		if (!(register_value & Zd35RegisterStatusOip)) {
-			ESP_LOGV(DEBUG_TAG, "%s:%s: got status update, PAGE READ finished", LOG_PREAMBLE, __func__);
-			break;
-		} else {
-			// Busy wait
-			// TODO: yield to another task using FreeRTOS calls. The call below
-			// invokes `esp_rom_delay_us` which seems to be a busy-wait or CPU
-			// suspend, and has nothing to do with OS's "delay and yield to
-			// another task" type of calls
-			// chip->os_func->delay_us(chip->os_func_data, 1);
-		}
-	}
+	err = spi_flash_chip_zetta_poll_wait_oip(chip);
 
 	return err;
 }
