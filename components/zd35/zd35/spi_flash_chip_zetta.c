@@ -52,7 +52,9 @@ static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, ui
 	uint8_t register_value);
 static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void *buffer, uint32_t address,
 	uint32_t length);
+static esp_err_t spi_flash_chip_zetta_perform_program_execute(esp_flash_t *chip, uint32_t address);
 static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, uint32_t timeout_us);
+static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffer, uint32_t address, uint32_t length);
 
 /// \brief Performs "READ FROM CACHE" operation which is usually preceded by
 /// "PAGE READ" which stores a selected page into the memory chip's fast random
@@ -451,11 +453,69 @@ static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void
 	return err;
 }
 
+static esp_err_t spi_flash_chip_zetta_perform_program_execute(esp_flash_t *chip, uint32_t absolute_address)
+{
+	esp_err_t err = ESP_OK;
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 0,  // register address + value thereof
+		.miso_len = 0,
+		.address_bitlen = 24,
+		.address = 0,
+		.mosi_data = NULL,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandProgramExecute,
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+
+	err = spi_flash_chip_zetta_address_to_spi_page_address(chip, absolute_address, &spi_flash_trans.address);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	return err;
+}
+
 static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, uint32_t timeout_us)
 {
 	(void)timeout_us;
 
 	return spi_flash_chip_zetta_poll_wait_oip(chip);
+}
+
+static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffer, uint32_t address, uint32_t length)
+{
+	esp_err_t err = ESP_OK;
+
+	// Disable write protection, store the page in the chip's cache registers. Use the default ESP IDF implementation - it gets it right
+	err = spi_flash_chip_generic_write(chip, buffer, address, length);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Flush the SPI flash chip's buffer into the actual NAND storage.
+	err = spi_flash_chip_zetta_perform_program_execute(chip, address);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Wait until it's done
+	err = spi_flash_chip_zetta_poll_wait_oip(chip);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Ensure write protection is set back
+	err = spi_flash_chip_zetta_set_write_protect(chip, true);
+
+	return err;
 }
 
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
