@@ -52,7 +52,7 @@ static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, ui
 	uint8_t register_value);
 static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void *buffer, uint32_t address,
 	uint32_t length);
-static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, void *buffer, uint32_t page_address);
+static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, uint32_t timeout_us);
 
 /// \brief Performs "READ FROM CACHE" operation which is usually preceded by
 /// "PAGE READ" which stores a selected page into the memory chip's fast random
@@ -451,6 +451,13 @@ static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void
 	return err;
 }
 
+static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, uint32_t timeout_us)
+{
+	(void)timeout_us;
+
+	return spi_flash_chip_zetta_poll_wait_oip(chip);
+}
+
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
 // So we only replace these two functions.
 const spi_flash_chip_t esp_flash_chip_zetta = {
@@ -479,7 +486,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.page_size = Zd35x2PageSize,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
-	.wait_idle = spi_flash_chip_generic_wait_idle,
+	.wait_idle = spi_flash_chip_zetta_wait_idle,
 	.set_io_mode = spi_flash_chip_zetta_set_io_mode,
 	.get_io_mode = spi_flash_chip_zetta_get_io_mode,
 
