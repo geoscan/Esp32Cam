@@ -202,8 +202,6 @@ static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *c
 
 static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address)
 {
-	static const size_t N_ATTEMPTS = 10;
-
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
 		.mosi_len = 0,
 		.miso_len = 0,
@@ -271,7 +269,6 @@ static esp_err_t spi_flash_chip_zetta_probe(esp_flash_t *chip, uint32_t flashId)
 
 static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool *write_protect)
 {
-	static const char *register_name = "Block lock";
 	uint8_t register_value = 0;
 	esp_err_t err = ESP_OK;
 
