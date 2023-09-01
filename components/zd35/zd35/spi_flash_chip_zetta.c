@@ -413,7 +413,7 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 
 	ESP_LOGV(DEBUG_TAG, "%s:%s reading the cached page at offset=%d, length=%d", LOG_PREAMBLE, __func__, cache_offset,
 		length);
-	err = spi_flash_chip_zetta_perform_read_from_cache(chip, buffer, cache_offset, length);
+	err = spi_flash_chip_generic_read(chip, buffer, cache_offset, length);
 
 	return err;
 }
