@@ -147,12 +147,16 @@ static bool testReadWrite(void *)
 
 	// Initialize buffer
 	static constexpr std::size_t kBufferSize = 32;
+	static constexpr std::size_t blockId = 0;
+	static constexpr std::size_t blockOffset = 0;  // offset within the block
+	static constexpr const char *kTestMessage = "Wazzup?";
+	const std::size_t testMessageLength = strlen(kTestMessage);
 	char buffer[kBufferSize] = {0};
-	strcpy(buffer, "Hello");
+	strcpy(buffer, kTestMessage);
 
 #if 1
 	// Flush the buffer into flash
-	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(0, 0,
+	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(blockId, blockOffset,
 		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
 
 	if (writeResult.errorCode != Sys::ErrorCode::None) {
@@ -164,12 +168,12 @@ static bool testReadWrite(void *)
 
 #if 1
 	// Read from the flash
-	for (int i = 0; i < 6; ++i) {
+	for (int i = 0; i < testMessageLength + 1; ++i) {
 		buffer[i] = 0;
 	}
 
 	// Read the buffer
-	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(0, 0,
+	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(blockId, blockOffset,
 		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
 
 	if (readResult.errorCode != Sys::ErrorCode::None) {
