@@ -65,6 +65,7 @@ enum Zd35Register {
 	Zd35registerBlockLockBp1 = 1 << 4,
 	Zd35registerBlockLockBp0 = 1 << 3,
 	Zd35registerBlockLockTb = 1 << 2,
+	Zd35RegisterStatusWel = 1 << 1,  // WritE Enable
 	Zd35RegisterStatusOip = 1 << 0,  // Operation in progress
 };
 
