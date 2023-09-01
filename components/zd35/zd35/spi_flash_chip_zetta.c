@@ -50,6 +50,9 @@ static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip);
 static uint8_t get_zd35_full_lock_mask();
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value);
+static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void *buffer, uint32_t address,
+	uint32_t length);
+static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, void *buffer, uint32_t page_address);
 
 /// \brief Performs "READ FROM CACHE" operation which is usually preceded by
 /// "PAGE READ" which stores a selected page into the memory chip's fast random
@@ -411,6 +414,43 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 	return err;
 }
 
+static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void *buffer, uint32_t address,
+	uint32_t length)
+{
+	esp_err_t err = ESP_OK;
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = length,
+		.miso_len = 0,
+		.address_bitlen = 16,  // 3 dummy bits + 1 plane select bit + 12 address bits  XXX: isn't it meant to be handled by `dummy_bits'?
+		.address = 0,
+		.mosi_data = buffer,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandProgramLoad,
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+
+	// Wait for whatever the operation happens to take place to finish
+	err = chip->chip_drv->wait_idle(chip, chip->chip_drv->timeout->idle_timeout);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	// Issue the command
+
+	err = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &spi_flash_trans.address);
+
+	if (err != ESP_OK) {
+		return err;
+	}
+
+	err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	return err;
+}
+
 // The zetta chip can use the functions for generic chips except from set read mode and probe,
 // So we only replace these two functions.
 const spi_flash_chip_t esp_flash_chip_zetta = {
@@ -435,7 +475,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 
 	.read = spi_flash_chip_zetta_read,
 	.write = spi_flash_chip_generic_write,
-	.program_page = spi_flash_chip_generic_page_program,
+	.program_page = spi_flash_chip_zetta_program_page,
 	.page_size = Zd35x2PageSize,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
 
