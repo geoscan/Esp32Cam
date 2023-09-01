@@ -112,9 +112,9 @@ static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
 static esp_err_t spi_flash_chip_zetta_perform_set_features(esp_flash_t *chip, uint8_t register_address,
 	uint8_t register_value)
 {
-	const uint8_t mosi_buffer[] = {register_address, register_value};
+	const uint8_t mosi_buffer[] = {register_value};
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
-		.mosi_len = 2,  // register address + value thereof
+		.mosi_len = 1,  // register address + value thereof
 		.miso_len = 0,
 		.address_bitlen = 8,
 		.address = Zd35AddressBlockLock,
@@ -185,15 +185,16 @@ static inline bool block_lock_register_is_write_protected(uint8_t block_lock_reg
 	return (result != Zd35registerBlockLockTb);
 }
 
-static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *chip, uint8_t register_address, uint8_t *out_buffer)
+static inline esp_err_t spi_flash_chip_zetta_perform_get_features(esp_flash_t *chip, uint8_t register_address,
+	uint8_t *out_buffer)
 {
 	// Configure the transaction to be made
 	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
-		.mosi_len = 1,  // 1 command byte
+		.mosi_len = 0,  // 1 command byte
 		.miso_len = 1,  // 1 output byte
 		.address_bitlen = 8,
-		.address = Zd35AddressBlockLock,
-		.mosi_data = &register_address,
+		.address = register_address,
+		.mosi_data = NULL,
 		.miso_data = out_buffer,
 		.flags = 0,  // XXX
 		.command = Zd35CommandGetFeatures,
@@ -568,7 +569,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.set_protected_regions = NULL,
 
 	.read = spi_flash_chip_zetta_read,
-	.write = spi_flash_chip_generic_write,
+	.write = spi_flash_chip_zetta_write,
 	.program_page = spi_flash_chip_zetta_program_page,
 	.page_size = Zd35x2PageSize,
 	.write_encrypted = spi_flash_chip_generic_write_encrypted,
