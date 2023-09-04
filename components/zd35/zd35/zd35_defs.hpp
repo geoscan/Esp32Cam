@@ -36,6 +36,7 @@ enum Zd35x2 {
 	Zd35x2CapacityPanes = 2,
 	Zd35x2CapacityBlocks = Zd35x2CapacityPanes * Zd35x2PaneSizeBlocks,  // 2 panes x 1024 blocks
 	Zd35x2CapacityBytes = Zd35x2CapacityBlocks * Zd35x2BlockSizeBytes,
+	Zd35x2CapacityPages = Zd35x2CapacityPanes * Zd35x2PaneSizeBlocks * Zd35x2BlockSizePages,
 
 	Zd35x2FullPageSize = Zd35x2PageSize + Zd35x2SpareMemorySizeBytes,
 };
