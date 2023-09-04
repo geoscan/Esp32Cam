@@ -153,6 +153,10 @@ static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *c
 	switch (chip->chip_id) {
 		case Zd35x2ChipId: {
 			if (absolute_address > Zd35x2CapacityBytes) {
+				ESP_LOGE(DEBUG_TAG,
+					"%s:%s failed to convert address to page address, absolute_address=%d exceeds the chip's capacity=%d",
+					LOG_PREAMBLE, __func__, absolute_address, Zd35x2CapacityBytes);
+
 				return ESP_ERR_INVALID_ARG;
 			}
 
@@ -259,11 +263,17 @@ static esp_err_t spi_flash_chip_zetta_address_to_block_offset(esp_flash_t *chip,
 		case Zd35x2ChipId: {
 			// The address must, at most, specify the last block's starting position
 			if (absolute_address > Zd35x2CapacityBytes - Zd35x2BlockSizeBytes) {
+				ESP_LOGE(DEBUG_TAG,
+					"%s:%s failed to convert address to block offset, absolute_address=%d exceeds memory capacity",
+					LOG_PREAMBLE, __func__, absolute_address);
 				return ESP_ERR_INVALID_ARG;
 			}
 
 			// The address is not aligned
 			if (absolute_address % Zd35x2BlockSizeBytes != 0) {
+				ESP_LOGE(DEBUG_TAG,
+					"%s:%s failed to convert address to block offset, absolute_address=%d is not aligned to %d",
+					LOG_PREAMBLE, __func__, absolute_address, Zd35x2BlockSizeBytes);
 				return ESP_ERR_INVALID_ARG;
 			}
 
@@ -322,6 +332,9 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 {
 	if (cache_offset >= Zd35x2CacheSizeBytes || length > Zd35x2CacheSizeBytes
 			|| cache_offset + length > Zd35x2CacheSizeBytes) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s failed to read from cache, invalid cache_offset=%d", LOG_PREAMBLE, __func__,
+			cache_offset);
+
 		return ESP_ERR_INVALID_ARG;
 	}
 
@@ -363,6 +376,8 @@ static esp_err_t spi_flash_chip_zetta_get_write_protect(esp_flash_t *chip, bool 
 	esp_err_t err = ESP_OK;
 
 	if (chip == NULL || write_protect == NULL) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s failed to check write protection, wrong arguments", LOG_PREAMBLE, __func__);
+
 		return ESP_ERR_INVALID_ARG;
 	}
 
