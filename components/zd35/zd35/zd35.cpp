@@ -53,6 +53,12 @@ static void testInitSpiProbe();
 /// \pre An instance of `Sys::FlashMemory` must be registered, i.e.
 /// `initImpl()` must be called beforehand.
 static bool testReadWrite(void *);
+
+/// \brief Same as \sa `testReadWrite`, but w/ pre-erase
+/// \warning Use carefully, as flash memory chips only allow a limited number
+/// of write / erase cycles
+static bool testEraseReadWrite();
+
 static void initImpl();
 
 /// \brief Checks whether the correct verison of `esp_flash_t` has been
@@ -186,6 +192,31 @@ static bool testReadWrite(void *)
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
 		&buffer[0]);
 #endif
+
+	return false;
+}
+
+static bool testEraseReadWrite(void *)
+{
+	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s cannot run test function, because no `FlashMemory` instance is registered. Aborting", kLogPreamble,
+			__func__);
+
+		return false;
+	}
+
+	static constexpr std::size_t kEraseBlockOffset = 0;
+	Sys::Error error{};
+	error = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().eraseBlock(kEraseBlockOffset);
+
+	if (error.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s could not erase block, aborting");
+
+		return false;
+	}
+
+	testReadWrite(nullptr);
 
 	return false;
 }
