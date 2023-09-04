@@ -26,6 +26,7 @@
 #include <hal/gpio_types.h>
 #include <hal/spi_flash_types.h>
 #include <spi_flash_chip_generic.h>
+#include <array>
 #include <cstring>
 #include <memory>
 
@@ -41,6 +42,21 @@ const spi_flash_chip_t *default_registered_chips[] = {
 #endif
 
 namespace Zd35 {
+
+struct MemoryTest {
+	static constexpr std::size_t kBufferSize = 64;
+	std::array<char, kBufferSize> outputBuffer;
+	std::array<char, kBufferSize> inputBuffer;
+	std::size_t eraseBlockOffset;
+	std::size_t readWriteBlockOffset;
+	std::size_t readWriteBlockInnerOffset;
+	bool erase;
+
+	bool isSuccessful() const
+	{
+		return strcmp(inputBuffer.data(), outputBuffer.data()) == 0;
+	}
+};
 
 static constexpr const char *kLogPreamble = "zd35";
 static std::unique_ptr<Sys::FlashMemory> sFlashMemoryInstance;
@@ -138,7 +154,7 @@ static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
 	return true;
 }
 
-static bool testReadWrite(void *)
+static bool testReadWrite(void *aMemoryTest)
 {
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -151,19 +167,13 @@ static bool testReadWrite(void *)
 		"%s:%s trying write/read cycle on a memory chip writeBlockSize=%d", kLogPreamble, __func__,
 		Ut::MakeSingleton<Sys::FlashMemory>::getInstance().getFlashMemoryGeometry().writeBlockSize);
 
-	// Initialize buffer
-	static constexpr std::size_t kBufferSize = 32;
-	static constexpr std::size_t blockId = 0;
-	static constexpr std::size_t blockOffset = 0;  // offset within the block
-	static constexpr const char *kTestMessage = "Wazzup?";
-	const std::size_t testMessageLength = strlen(kTestMessage);
-	char buffer[kBufferSize] = {0};
-	strcpy(buffer, kTestMessage);
-
 #if 1
 	// Flush the buffer into flash
-	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(blockId, blockOffset,
-		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
+	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset,
+		reinterpret_cast<std::uint8_t *>(reinterpret_cast<MemoryTest *>(aMemoryTest)->outputBuffer.data()),
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->outputBuffer.size());
 
 	if (writeResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into the chip",
@@ -173,14 +183,15 @@ static bool testReadWrite(void *)
 #endif
 
 #if 1
-	// Read from the flash
-	for (int i = 0; i < testMessageLength + 1; ++i) {
-		buffer[i] = 0;
-	}
-
 	// Read the buffer
-	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(blockId, blockOffset,
-		reinterpret_cast<std::uint8_t *>(buffer), kBufferSize);
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s reading from memory page=%d offset=%d",
+		kLogPreamble, __func__, reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset);
+	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset,
+		reinterpret_cast<std::uint8_t *>(reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.data()),
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.size());
 
 	if (readResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from the chip",
@@ -188,15 +199,14 @@ static bool testReadWrite(void *)
 	}
 
 	// Ensure null-termination, and read the buffer
-	buffer[sizeof(buffer) - 1] = 0;
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
-		&buffer[0]);
+		reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.data());
 #endif
 
 	return false;
 }
 
-static bool testEraseReadWrite(void *)
+static bool testEraseReadWrite(void *aMemoryTest)
 {
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -206,17 +216,21 @@ static bool testEraseReadWrite(void *)
 		return false;
 	}
 
-	static constexpr std::size_t kEraseBlockOffset = 0;
-	Sys::Error error{};
-	error = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().eraseBlock(kEraseBlockOffset);
+	if (reinterpret_cast<MemoryTest *>(aMemoryTest)->erase) {
+		Sys::Error error{};
+		error = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().eraseBlock(
+			reinterpret_cast<MemoryTest *>(aMemoryTest)->eraseBlockOffset);
 
-	if (error.errorCode != Sys::ErrorCode::None) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s could not erase block, aborting");
+		if (error.errorCode != Sys::ErrorCode::None) {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s could not erase block, aborting");
 
-		return false;
+			return false;
+		}
+	} else {
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s TEST skipping erase", kLogPreamble, __func__);
 	}
 
-	testReadWrite(nullptr);
+	testReadWrite(aMemoryTest);
 
 	return false;
 }
@@ -315,6 +329,60 @@ static inline void initImpl()
 		kLogPreamble, __func__);
 }
 
+bool runTestCases(void *)
+{
+	static std::array<MemoryTest, 3> memoryTestCases {{
+		// Erase before performing read/write. On 2Gb devices, the erase
+		// operation will affect the first erase sector (64 pages).
+		{
+			.outputBuffer = {{"Goodbye"}},
+			.inputBuffer = {{}},
+			.eraseBlockOffset = 0,
+			.readWriteBlockOffset = 0,
+			.readWriteBlockInnerOffset = 0,
+			.erase = false,  // WARNING Please note that erase cycles damage the device
+		},
+		// Write in the second page. The page is erased, as it resides in the
+		// first erase sector.
+		{
+			.outputBuffer = {{"Hello"}},
+			.inputBuffer = {{}},
+			.eraseBlockOffset = 0,
+			.readWriteBlockOffset = 1,
+			.readWriteBlockInnerOffset = 0,
+			.erase = false,
+		},
+		// Write and read with internal offset (not in/form the beginning of
+		// the page)
+		{
+			.outputBuffer = {{"Wazzup"}},
+			.inputBuffer = {{}},
+			.eraseBlockOffset = 1,
+			.readWriteBlockOffset = 67,  // ZD35's erase blocks are 64 pages long
+			.readWriteBlockInnerOffset = 2,
+			.erase = false,
+		}
+	}};
+
+	std::size_t testCaseCounter = 0;
+
+	for (auto &testCase : memoryTestCases) {
+		testEraseReadWrite(reinterpret_cast<void *>(&testCase));
+
+		if (testCase.isSuccessful()) {
+			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s TEST passed memory test %d", kLogPreamble,
+				__func__, testCaseCounter);
+		} else {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s TEST failed memory test %d", kLogPreamble,
+				__func__, testCaseCounter);
+		}
+
+		++testCaseCounter;
+	}
+
+	return false;
+}
+
 void init()
 {
 #if 1
@@ -330,16 +398,6 @@ void init()
 	testInitSpiProbe();
 #endif
 
-#if 0
-	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
-			"%s:%s testing code requires a work queue instance to be registered", kLogPreamble, __func__);
-		assert(false);
-	}
-
-	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testReadWrite);
-#endif
-
 #if 1
 	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -347,7 +405,7 @@ void init()
 		assert(false);
 	}
 
-	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testEraseReadWrite);
+	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(runTestCases);
 #endif
 }
 
