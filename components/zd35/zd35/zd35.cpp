@@ -330,7 +330,7 @@ void init()
 	testInitSpiProbe();
 #endif
 
-#if 1
+#if 0
 	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s testing code requires a work queue instance to be registered", kLogPreamble, __func__);
@@ -338,6 +338,16 @@ void init()
 	}
 
 	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testReadWrite);
+#endif
+
+#if 1
+	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s testing code requires a work queue instance to be registered", kLogPreamble, __func__);
+		assert(false);
+	}
+
+	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testEraseReadWrite);
 #endif
 }
 
