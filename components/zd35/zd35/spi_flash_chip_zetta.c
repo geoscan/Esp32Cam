@@ -231,7 +231,7 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 		.mosi_data = NULL,
 		.miso_data = NULL,
 		.flags = 0,
-		.command = Zd35CommandPageRead,  // TODO
+		.command = Zd35CommandPageRead,
 		.dummy_bitlen = 0,
 		.io_mode = 0,
 	};
