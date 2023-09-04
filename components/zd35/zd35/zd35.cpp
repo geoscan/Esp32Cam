@@ -394,11 +394,11 @@ bool runReadWriteMemoryTestCases(void *)
 		testEraseReadWrite(reinterpret_cast<void *>(&testCase));
 
 		if (testCase.isSuccessful()) {
-			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s TEST passed memory test %d", kLogPreamble,
-				__func__, testCaseCounter);
+			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s TEST passed memory test %d/%d", kLogPreamble,
+				__func__, testCaseCounter + 1, readWriteMemoryTestCaseCases.size());
 		} else {
-			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s TEST failed memory test %d", kLogPreamble,
-				__func__, testCaseCounter);
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s TEST failed memory test %d/%d", kLogPreamble,
+				__func__, testCaseCounter + 1, readWriteMemoryTestCaseCases.size());
 		}
 
 		++testCaseCounter;
