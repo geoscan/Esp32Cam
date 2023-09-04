@@ -358,7 +358,7 @@ bool runTestCases(void *)
 			.outputBuffer = {{"Wazzup"}},
 			.inputBuffer = {{}},
 			.eraseBlockOffset = 1,
-			.readWriteBlockOffset = 67,  // ZD35's erase blocks are 64 pages long
+			.readWriteBlockOffset = 68,  // ZD35's erase blocks are 64 pages long
 			.readWriteBlockInnerOffset = 2,
 			.erase = false,
 		}
