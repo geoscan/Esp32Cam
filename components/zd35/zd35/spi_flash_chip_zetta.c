@@ -55,6 +55,7 @@ static esp_err_t spi_flash_chip_zetta_program_page(esp_flash_t *chip, const void
 static esp_err_t spi_flash_chip_zetta_perform_program_execute(esp_flash_t *chip, uint32_t address);
 static esp_err_t spi_flash_chip_zetta_wait_idle(esp_flash_t *chip, uint32_t timeout_us);
 static esp_err_t spi_flash_chip_zetta_write(esp_flash_t *chip, const void *buffer, uint32_t address, uint32_t length);
+static esp_err_t spi_flash_chip_zetta_config_host_io_mode(esp_flash_t *chip, uint32_t flags);
 
 /// \brief Performs "READ FROM CACHE" operation which is usually preceded by
 /// "PAGE READ" which stores a selected page into the memory chip's fast random
@@ -438,7 +439,6 @@ static spi_flash_caps_t spi_flash_chip_zetta_get_caps(esp_flash_t *chip)
 	return SPI_FLASH_CHIP_CAP_32MB_SUPPORT;
 }
 
-// TODO fdecl
 static esp_err_t spi_flash_chip_zetta_config_host_io_mode(esp_flash_t *chip, uint32_t flags)
 {
 	esp_flash_io_mode_t read_mode = chip->read_mode;
