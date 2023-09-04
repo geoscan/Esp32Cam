@@ -632,8 +632,8 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.reset = spi_flash_chip_generic_reset,
 	.detect_size = spi_flash_chip_generic_detect_size,
 	.erase_chip = spi_flash_chip_generic_erase_chip,  // TODO: check the implementation
-	.erase_sector = spi_flash_chip_generic_erase_sector,
-	.erase_block = spi_flash_chip_generic_erase_block,
+	.erase_sector = spi_flash_chip_zetta_erase_block,
+	.erase_block = spi_flash_chip_zetta_erase_block,
 	.sector_size = Zd35x2BlockSizeBytes,
 	.block_erase_size = Zd35x2BlockSizeBytes,
 
