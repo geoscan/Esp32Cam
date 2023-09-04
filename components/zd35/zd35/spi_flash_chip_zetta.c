@@ -76,9 +76,10 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_spi_page_address);
 
-// TODO implementation
-// TODO description
-static esp_err_t spi_flash_chip_zetta_address_to_block_offset(esp_flash_t *chip, uint32_t absolute_addres,
+/// \brief Will check whether the address has the correct alignment regarding
+/// the chip's geometry, and put the resulting erase block offset into
+/// `out_relative_address`
+static esp_err_t spi_flash_chip_zetta_address_to_block_offset(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_relative_address);
 
 /// \brief Performs "PAGE READ" operation which puts the selected page into the
@@ -244,6 +245,30 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 	err = spi_flash_chip_zetta_poll_wait_oip(chip);
 
 	return err;
+}
+
+static esp_err_t spi_flash_chip_zetta_address_to_block_offset(esp_flash_t *chip, uint32_t absolute_address,
+	uint32_t *out_relative_address)
+{
+	switch (chip->chip_id) {
+		case Zd35x2ChipId: {
+			// The address must, at most, specify the last block's starting position
+			if (absolute_address > Zd35x2CapacityBytes - Zd35x2BlockSizeBytes) {
+				return ESP_ERR_INVALID_ARG;
+			}
+
+			// The address is not aligned
+			if (absolute_address % Zd35x2BlockSizeBytes != 0) {
+				return ESP_ERR_INVALID_ARG;
+			}
+
+			*out_relative_address = absolute_address / Zd35x2BlockSizeBytes;
+
+			return ESP_OK;
+		}
+		default:
+			return ESP_ERR_NOT_SUPPORTED;
+	}
 }
 
 static esp_err_t spi_flash_chip_zetta_erase_block(esp_flash_t *chip, uint32_t start_address)
