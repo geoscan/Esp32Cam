@@ -49,6 +49,7 @@ enum Zd35Command {
 	Zd35CommandReadFromCache = 0x03,
 	Zd35CommandProgramLoad = 0x02,
 	Zd35CommandProgramExecute = 0x10,
+	Zd35CommandBlockErase = 0xD8,
 };
 
 // Registers
