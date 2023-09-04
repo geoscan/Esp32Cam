@@ -76,12 +76,23 @@ static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t
 static esp_err_t spi_flash_chip_zetta_address_to_spi_page_address(esp_flash_t *chip, uint32_t absolute_address,
 	uint32_t *out_spi_page_address);
 
+// TODO implementation
+// TODO description
+static esp_err_t spi_flash_chip_zetta_address_to_block_offset(esp_flash_t *chip, uint32_t absolute_addres,
+	uint32_t *out_relative_address);
+
 /// \brief Performs "PAGE READ" operation which puts the selected page into the
 /// SPI device's fast random access cache for later access.
 /// \param `page_address` specifies offset of that page
 /// \pre `page_address` will have had to be subjected to boundary checks by the
 /// time the call is made, as this function performs no such checks.
 static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint32_t page_address);
+
+/// \brief Performs erase operation on a block (for ZD35X2 it has the length of
+/// 64 pages).
+/// \note Since ZD35X2 makes no distinction b/w sectors and blocks, the same
+/// function is used for sector erase.
+static esp_err_t spi_flash_chip_zetta_erase_block(esp_flash_t *chip, uint32_t start_address);
 
 static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
 {
@@ -230,6 +241,47 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 	}
 
 	// Poll the device until the page is read
+	err = spi_flash_chip_zetta_poll_wait_oip(chip);
+
+	return err;
+}
+
+static esp_err_t spi_flash_chip_zetta_erase_block(esp_flash_t *chip, uint32_t start_address)
+{
+	esp_err_t err = ESP_OK;
+	// Disable on-chip write protection mechanism
+	spi_flash_chip_zetta_set_write_protect(chip, false);
+
+	// Perform erase command
+	spi_flash_trans_t spi_flash_trans = (spi_flash_trans_t) {
+		.mosi_len = 0,
+		.miso_len = 0,
+		.address_bitlen = 24,
+		.address = 0,  // TODO: convert to block offset
+		.mosi_data = NULL,
+		.miso_data = NULL,
+		.flags = 0,
+		.command = Zd35CommandBlockErase,
+		.dummy_bitlen = 0,
+		.io_mode = 0,
+	};
+	err = spi_flash_chip_zetta_address_to_block_offset(chip, start_address, &spi_flash_trans.address);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s failed to convert absolute address to block offset", LOG_PREAMBLE, __func__);
+
+		return err;
+	}
+
+	err = chip->host->driver->common_command(chip->host, &spi_flash_trans);
+
+	if (err != ESP_OK) {
+		ESP_LOGE(DEBUG_TAG, "%s:%s failed to execute \"BLOCK ERASE\"", LOG_PREAMBLE, __func__);
+
+		return err;
+	}
+
+	// Poll `OIP` bit until the operation is completed
 	err = spi_flash_chip_zetta_poll_wait_oip(chip);
 
 	return err;
@@ -554,7 +606,7 @@ const spi_flash_chip_t esp_flash_chip_zetta = {
 	.probe = spi_flash_chip_zetta_probe,
 	.reset = spi_flash_chip_generic_reset,
 	.detect_size = spi_flash_chip_generic_detect_size,
-	.erase_chip = spi_flash_chip_generic_erase_chip,
+	.erase_chip = spi_flash_chip_generic_erase_chip,  // TODO: check the implementation
 	.erase_sector = spi_flash_chip_generic_erase_sector,
 	.erase_block = spi_flash_chip_generic_erase_block,
 	.sector_size = Zd35x2BlockSizeBytes,
