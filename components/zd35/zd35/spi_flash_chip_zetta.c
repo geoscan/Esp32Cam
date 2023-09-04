@@ -283,7 +283,7 @@ static esp_err_t spi_flash_chip_zetta_erase_block(esp_flash_t *chip, uint32_t st
 		.mosi_len = 0,
 		.miso_len = 0,
 		.address_bitlen = 24,
-		.address = 0,  // TODO: convert to block offset
+		.address = 0,
 		.mosi_data = NULL,
 		.miso_data = NULL,
 		.flags = 0,
