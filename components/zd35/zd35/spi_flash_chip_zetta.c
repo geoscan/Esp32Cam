@@ -96,6 +96,10 @@ static esp_err_t spi_flash_chip_zetta_perform_page_read(esp_flash_t *chip, uint3
 /// function is used for sector erase.
 static esp_err_t spi_flash_chip_zetta_erase_block(esp_flash_t *chip, uint32_t start_address);
 
+/// \brief Busy-poll "OIP" bit of "Control" register until the operation is
+/// finished.
+static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip);
+
 static esp_err_t spi_flash_chip_zetta_poll_wait_oip(esp_flash_t *chip)
 {
 	esp_err_t err = ESP_OK;
