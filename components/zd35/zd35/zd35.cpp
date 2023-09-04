@@ -346,7 +346,7 @@ static inline void initImpl()
 
 bool runReadWriteMemoryTestCases(void *)
 {
-	static std::array<ReadWriteMemoryTestCase, 3> readWriteMemoryTestCaseCases {{
+	static std::array<ReadWriteMemoryTestCase, 4> readWriteMemoryTestCaseCases {{
 		// Erase before performing read/write. On 2Gb devices, the erase
 		// operation will affect the first erase sector (64 pages).
 		{
@@ -375,6 +375,15 @@ bool runReadWriteMemoryTestCases(void *)
 			.eraseBlockOffset = 1,
 			.readWriteBlockOffset = 67,  // ZD35's erase blocks are 64 pages long
 			.readWriteBlockInnerOffset = 2,
+			.erase = false,
+		},
+		// The last page, the last 4 bits
+		{
+			.outputBuffer = {{"Four"}},
+			.inputBuffer = {{}},
+			.eraseBlockOffset = 0,
+			.readWriteBlockOffset = Zd35x2CapacityPages,  // ZD35's erase blocks are 64 pages long
+			.readWriteBlockInnerOffset = Zd35x2PageSize - 4,
 			.erase = false,
 		}
 	}};
