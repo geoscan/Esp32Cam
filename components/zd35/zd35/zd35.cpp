@@ -398,7 +398,7 @@ void init()
 	testInitSpiProbe();
 #endif
 
-#if 1
+#if 0
 	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s testing code requires a work queue instance to be registered", kLogPreamble, __func__);
