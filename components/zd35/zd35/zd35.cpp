@@ -43,12 +43,24 @@ const spi_flash_chip_t *default_registered_chips[] = {
 
 namespace Zd35 {
 
+/// \brief Parameterizes a "erase / write / read / compare" cycle for memory
+/// testing.
 struct ReadWriteMemoryTestCase {
 	static constexpr std::size_t kBufferSize = 64;
+
+	/// Data to store in memory
 	std::array<char, kBufferSize> outputBuffer;
+
+	/// Buffer to store the data read from memory
 	std::array<char, kBufferSize> inputBuffer;
+
+	/// Number of erase block to erase
 	std::size_t eraseBlockOffset;
+
+	/// Number of page to read
 	std::size_t readWriteBlockOffset;
+
+	/// Offset within the page
 	std::size_t readWriteBlockInnerOffset;
 	bool erase;
 
@@ -74,6 +86,9 @@ static bool testReadWrite(void *);
 /// \warning Use carefully, as flash memory chips only allow a limited number
 /// of write / erase cycles
 static bool testEraseReadWrite();
+
+/// \brief Runs multiple "erase / write / read / compare" cycles.
+bool runReadWriteMemoryTestCases(void *);
 
 static void initImpl();
 
