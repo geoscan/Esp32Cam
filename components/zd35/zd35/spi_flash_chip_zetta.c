@@ -66,8 +66,8 @@ static esp_err_t spi_flash_chip_zetta_config_host_io_mode(esp_flash_t *chip, uin
 /// \pre `cache_offset` Must be in a SPI-compatible format. For example, some
 /// Zetta chips stipulate the use of a "pane select" bit when accessing the
 /// cache.
-static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer, uint32_t cache_offset,
-	uint32_t length);
+static inline esp_err_t spi_flash_chip_zetta_perform_read_from_cache(esp_flash_t *chip, void *buffer,
+	uint32_t cache_offset, uint32_t length);
 
 /// \brief Will produce a SPI-compatible address accouting for pane selection
 /// bit for 2 GB versions.
