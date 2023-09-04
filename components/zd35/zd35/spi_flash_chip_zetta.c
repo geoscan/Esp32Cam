@@ -493,7 +493,7 @@ static esp_err_t spi_flash_chip_zetta_read(esp_flash_t *chip, void *buffer, uint
 	}
 
 	// Read the cached page from the register accounting for the offset
-	cache_offset = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &cache_offset);
+	err = spi_flash_chip_zetta_address_to_cache_offset(chip, address, &cache_offset);
 
 	if (err != ESP_OK) {
 		ESP_LOGE(DEBUG_TAG, "%s:%s Failed to convert address=%d to cache offset", LOG_PREAMBLE, __func__, address);
