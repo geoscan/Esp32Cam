@@ -382,7 +382,7 @@ bool runReadWriteMemoryTestCases(void *)
 			.outputBuffer = {{"Four"}},
 			.inputBuffer = {{}},
 			.eraseBlockOffset = 0,
-			.readWriteBlockOffset = Zd35x2CapacityPages,  // ZD35's erase blocks are 64 pages long
+			.readWriteBlockOffset = Zd35x2CapacityPages - 1,  // ZD35's erase blocks are 64 pages long
 			.readWriteBlockInnerOffset = Zd35x2PageSize - 4,
 			.erase = false,
 		}
