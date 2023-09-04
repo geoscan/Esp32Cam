@@ -43,7 +43,7 @@ const spi_flash_chip_t *default_registered_chips[] = {
 
 namespace Zd35 {
 
-struct MemoryTest {
+struct ReadWriteMemoryTestCase {
 	static constexpr std::size_t kBufferSize = 64;
 	std::array<char, kBufferSize> outputBuffer;
 	std::array<char, kBufferSize> inputBuffer;
@@ -154,7 +154,7 @@ static inline bool espFlashCheckInitialized(const esp_flash_t &espFlash)
 	return true;
 }
 
-static bool testReadWrite(void *aMemoryTest)
+static bool testReadWrite(void *aReadWriteMemoryTestCase)
 {
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -170,10 +170,10 @@ static bool testReadWrite(void *aMemoryTest)
 #if 1
 	// Flush the buffer into flash
 	const auto writeResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().writeBlock(
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset,
-		reinterpret_cast<std::uint8_t *>(reinterpret_cast<MemoryTest *>(aMemoryTest)->outputBuffer.data()),
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->outputBuffer.size());
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockOffset,
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockInnerOffset,
+		reinterpret_cast<std::uint8_t *>(reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->outputBuffer.data()),
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->outputBuffer.size());
 
 	if (writeResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into the chip",
@@ -185,13 +185,13 @@ static bool testReadWrite(void *aMemoryTest)
 #if 1
 	// Read the buffer
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s reading from memory page=%d offset=%d",
-		kLogPreamble, __func__, reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset);
+		kLogPreamble, __func__, reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockOffset,
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockInnerOffset);
 	const auto readResult = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().readBlock(
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockOffset,
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->readWriteBlockInnerOffset,
-		reinterpret_cast<std::uint8_t *>(reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.data()),
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.size());
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockOffset,
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->readWriteBlockInnerOffset,
+		reinterpret_cast<std::uint8_t *>(reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->inputBuffer.data()),
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->inputBuffer.size());
 
 	if (readResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from the chip",
@@ -200,13 +200,13 @@ static bool testReadWrite(void *aMemoryTest)
 
 	// Ensure null-termination, and read the buffer
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s read buffer from flash(%s)", kLogPreamble, __func__,
-		reinterpret_cast<MemoryTest *>(aMemoryTest)->inputBuffer.data());
+		reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->inputBuffer.data());
 #endif
 
 	return false;
 }
 
-static bool testEraseReadWrite(void *aMemoryTest)
+static bool testEraseReadWrite(void *aReadWriteMemoryTestCase)
 {
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -216,10 +216,10 @@ static bool testEraseReadWrite(void *aMemoryTest)
 		return false;
 	}
 
-	if (reinterpret_cast<MemoryTest *>(aMemoryTest)->erase) {
+	if (reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->erase) {
 		Sys::Error error{};
 		error = Ut::MakeSingleton<Sys::FlashMemory>::getInstance().eraseBlock(
-			reinterpret_cast<MemoryTest *>(aMemoryTest)->eraseBlockOffset);
+			reinterpret_cast<ReadWriteMemoryTestCase *>(aReadWriteMemoryTestCase)->eraseBlockOffset);
 
 		if (error.errorCode != Sys::ErrorCode::None) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s could not erase block, aborting");
@@ -230,7 +230,7 @@ static bool testEraseReadWrite(void *aMemoryTest)
 		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s TEST skipping erase", kLogPreamble, __func__);
 	}
 
-	testReadWrite(aMemoryTest);
+	testReadWrite(aReadWriteMemoryTestCase);
 
 	return false;
 }
@@ -329,9 +329,9 @@ static inline void initImpl()
 		kLogPreamble, __func__);
 }
 
-bool runTestCases(void *)
+bool runReadWriteMemoryTestCases(void *)
 {
-	static std::array<MemoryTest, 3> memoryTestCases {{
+	static std::array<ReadWriteMemoryTestCase, 3> readWriteMemoryTestCaseCases {{
 		// Erase before performing read/write. On 2Gb devices, the erase
 		// operation will affect the first erase sector (64 pages).
 		{
@@ -358,7 +358,7 @@ bool runTestCases(void *)
 			.outputBuffer = {{"Wazzup"}},
 			.inputBuffer = {{}},
 			.eraseBlockOffset = 1,
-			.readWriteBlockOffset = 68,  // ZD35's erase blocks are 64 pages long
+			.readWriteBlockOffset = 67,  // ZD35's erase blocks are 64 pages long
 			.readWriteBlockInnerOffset = 2,
 			.erase = false,
 		}
@@ -366,7 +366,7 @@ bool runTestCases(void *)
 
 	std::size_t testCaseCounter = 0;
 
-	for (auto &testCase : memoryTestCases) {
+	for (auto &testCase : readWriteMemoryTestCaseCases) {
 		testEraseReadWrite(reinterpret_cast<void *>(&testCase));
 
 		if (testCase.isSuccessful()) {
@@ -405,7 +405,7 @@ void init()
 		assert(false);
 	}
 
-	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(runTestCases);
+	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(runReadWriteMemoryTestCases);
 #endif
 }
 
