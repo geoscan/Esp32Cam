@@ -409,12 +409,10 @@ bool runReadWriteMemoryTestCases(void *)
 
 void init()
 {
-#if 1
 #ifdef CONFIG_ZD35_ENABLED
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "Debug log test");
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "Verbose log test");
-#endif
 	initImpl();
 #endif
 
