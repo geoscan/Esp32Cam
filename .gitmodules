@@ -7,3 +7,6 @@
 [submodule "components/lib/mosse/mosse"]
 	path = components/lib/mosse/mosse
 	url = https://github.com/ESP-Tracking-port/mosse-cv.git
+[submodule "components/lib/mavlink/mavlink"]
+	path = components/lib/mavlink/mavlink
+	url = https://github.com/geoscan/MAVLink.git
