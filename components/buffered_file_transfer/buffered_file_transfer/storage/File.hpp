@@ -34,6 +34,11 @@ struct FileDescriptor {
 	{
 		identifier = 0;
 	}
+
+	inline bool isEqual(const FileDescriptor &aFileDescriptor)
+	{
+		return raw == aFileDescriptor.raw;
+	}
 };
 
 /// \brief Generalization over a file-like resource which only provides
