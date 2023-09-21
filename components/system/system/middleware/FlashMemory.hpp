@@ -28,22 +28,6 @@ struct FlashMemoryGeometry {
 	/// Number of erase blocks
 	std::uint32_t nEraseBlocks;
 
-	/// Counts the number of writeable blocks
-	inline std::uint32_t countWriteBlocks() const
-	{
-		return eraseBlockSize / writeBlockSize * nEraseBlocks;
-	}
-
-	inline bool checkWriteLengthIsMultiple(std::uint32_t aWriteLength) const
-	{
-		return aWriteLength > 0 && aWriteLength % writeBlockSize == 0;
-	}
-
-	inline bool checkEraseLengthIsMultiple(std::uint32_t aEraseLength) const
-	{
-		return aEraseLength > 0 && aEraseLength % eraseBlockSize == 0;
-	}
-
 	inline std::uint32_t convertWriteBlockOffsetIntoAddress(std::uint32_t aWriteBlockOffset) const
 	{
 		return aWriteBlockOffset * writeBlockSize;
