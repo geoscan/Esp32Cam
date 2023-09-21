@@ -1,9 +1,6 @@
 [submodule "espidf"]
 	path = espidf
 	url = https://github.com/espressif/esp-idf.git
-[submodule "components/lib/mavlink/mavlink"]
-	path = components/lib/mavlink/mavlink
-	url = ../../internal/mavlink.git
 [submodule "components/lib/rr/rr"]
 	path = components/lib/rr/rr
 	url = https://github.com/damurashov/Reciprocal-Receptacles.git
