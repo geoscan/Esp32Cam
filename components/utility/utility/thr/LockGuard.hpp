@@ -11,60 +11,31 @@
 #include <asio.hpp>
 #include <functional>
 
-//
-// STL-style RAII lock guard
-//
-
 namespace Ut {
-
-//  -----  LockGuard  -----  //
 
 template <typename MutexType>
 class LockGuard final {
 private:
-	std::reference_wrapper<MutexType> mutex;
-	bool shouldUnlock = true;
+	MutexType &mutex;
 
-	void setLock(bool stateLock)
-	{
-		if (stateLock) {
-			mutex.get().lock();
-		} else {
-			mutex.get().unlock();
-		}
-	}
 public:
 	LockGuard() = delete;
-	LockGuard(const LockGuard<MutexType> &) = delete;
-	LockGuard &operator=(const LockGuard<MutexType> &) = delete;
+	LockGuard(const LockGuard &) = delete;
+	LockGuard(LockGuard &&) = delete;
+	LockGuard &operator=(const LockGuard &) = delete;
+	LockGuard &operator=(LockGuard &&) = delete;
 
-	LockGuard(LockGuard<MutexType> &&lg) : mutex(lg.mutex) {
-		lg.shouldUnlock = false;
-	}
-
-	LockGuard &operator=(LockGuard<MutexType> &&lg)
+	LockGuard(MutexType &aMutex):
+		mutex{aMutex}
 	{
-		mutex = lg.mutex;
-		lg.shouldUnlock = false;
-		return *this;
-	}
-
-	LockGuard(MutexType &m) : mutex(std::ref(m))
-	{
-		setLock(true);
+		mutex.lock();
 	}
 
 	~LockGuard()
 	{
-		if (shouldUnlock) {
-			setLock(false);
-		}
+		mutex.unlock();
 	}
 };
-
-
-// ------------ makeLockGuard ------------ //
-
 
 template <typename MutexType>
 inline LockGuard<MutexType> makeLockGuard(MutexType &mutex)
