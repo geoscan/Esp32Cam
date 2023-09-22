@@ -45,6 +45,8 @@ struct FileDescriptor {
 /// relevant API.
 ///
 /// \warning The file is not RAII. It is up to the user to close it.
+/// \warning Using multiple instances of a file is not safe. However, having
+/// them is.
 class File final {
 public:
 	inline File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor) :
