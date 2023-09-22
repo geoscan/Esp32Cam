@@ -67,16 +67,14 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 	if (bufferFileSystem == nullptr) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s no file system has been provided, panicking!",
 			kLogPreamble, __func__);
-		Sys::panic();  // Won't get here
+		Sys::panic();
 
-		return 0;
+		return 0;  // Won't get here
 	}
 
-	static constexpr std::size_t kMaxIterations = 100;
-	std::size_t i = 0;
 	std::size_t position = 0;
 
-	for (; i < kMaxIterations && position < aBufferSize /* Last chunk */ ; ++i) {
+	while (position < aBufferSize) {
 		std::size_t nAppended = bufferFileSystem->append(bufferFileDescriptor, &aBuffer[position],
 			aBufferSize - position);
 
@@ -90,11 +88,6 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 		}
 
 		position += nAppended;
-	}
-
-	if (position < aBufferSize) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write %dB buffer", kLogPreamble, __func__,
-			aBufferSize);
 	}
 
 	return position;
