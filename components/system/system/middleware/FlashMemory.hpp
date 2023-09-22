@@ -47,7 +47,7 @@ public:
 	/// \details "Erase block" is not to be confused with "write block"
 	virtual Error eraseBlock(std::uint32_t aEraseBlockId) = 0;
 
-	inline const FlashMemoryGeometry getFlashMemoryGeometry() const
+	inline const FlashMemoryGeometry &getFlashMemoryGeometry() const
 	{
 		return flashMemoryGeometry;
 	}
