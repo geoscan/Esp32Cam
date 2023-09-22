@@ -19,15 +19,19 @@ public:
 	virtual ~TransferImplementor() = default;
 
 	/// \brief Will notify each instance that a part of the RAM buffer should
-	/// be flushed.
+	/// be flushed. DOES NOT necessarily mean end of transmission, unless
+	/// `aIsLastChunk == true`
 	/// \param `aIsLastChunk`, when true, signifies that there will be no more
-	/// chunks, and the transmission session (if one is being held) should be
-	/// gracefully ended.
+	/// chunks pertaining to the transmitted file, and the transmission session
+	/// (if one is being held) should be gracefully ended.
 	/// \param `aFile` is a `shared_ptr` encapsulation of the file with a
 	/// custom deleter deallocating the resource through making the appropriate
 	/// call to a `FileSystem` instance associated with it.
+	/// \post Implementor MUST NOT close the file. The `aFile`'s custom deleter
+	/// MUST handle resource managing if required
 	virtual void onFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk) = 0;
 
+	/// \brief Notifies all instances
 	/// \sa `onFileBufferingFinished`
 	static void notifyAllOnFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk);
 };
