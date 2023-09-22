@@ -19,6 +19,9 @@ namespace Bft {
 /// \details `aBftFile` is supposed to store a deleter which performs the
 /// cleanup. Subscribers do not participate in file management. This allows for
 /// dereliction of ownership on behalf of the notifier.
+/// \post Implementor MUST NOT close the file. The `aBftFile`'s custom deleter
+/// MUST handle resource managing, if required.
+/// \todo: MUST BE replaced by `TransferImplementor` API
 using OnFileBufferingFinished = Rr::Util::Key<void(std::shared_ptr<::Bft::File> aBftfile), typename ::Sub::MutSyncTrait,
 	std::list>;
 
