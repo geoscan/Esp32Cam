@@ -34,6 +34,14 @@ struct FlashMemoryGeometry {
 	{
 		return aEraseBlockOffset * eraseBlockSize;
 	}
+
+	inline std::uint32_t convertAddressIntoEraseBlockOffset(std::uint32_t aAddress) {
+		return aAddress / eraseBlockSize;
+	}
+
+	inline std::uint32_t convertAddressIntoWriteBlockOffset(std::uint32_t aAddress) {
+		return aAddress / writeBlockSize;
+	}
 };
 
 
