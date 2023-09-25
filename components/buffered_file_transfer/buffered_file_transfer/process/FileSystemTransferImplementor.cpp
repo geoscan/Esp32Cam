@@ -38,9 +38,11 @@ void FileSystemTransferImplementor::onFileBufferingFinished(std::shared_ptr<File
 	}
 
 	// Open file, if hasn't yet
+	constexpr const char *kTemporaryName = "";
 	if (!fileDescriptor.isValid()) {
-		fileDescriptor = fileSystem->tryOpenFileWriteBinary(const char *aFilePath,
+		fileDescriptor = fileSystem->tryOpenFileWriteBinary(kTemporaryName,
 			0 /* We don't know its size, and it should not matter */);
+			// TODO: find a way for name-to-name or file-to-name conversion
 	}
 
 	// Try to file into flash memory, chunk-by-chunk
