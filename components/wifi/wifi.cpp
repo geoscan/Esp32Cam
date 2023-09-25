@@ -21,6 +21,7 @@
 #include <lwip/err.h>
 #include <lwip/sys.h>
 #include <nvs_flash.h>
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -42,13 +43,19 @@
 	}
 
 
-wifi_config_t sStaWifiConfig;
-wifi_config_t sApWifiConfig;
+static wifi_config_t sStaWifiConfig;
+static wifi_config_t sApWifiConfig;
 esp_netif_t *sStaEspNetif = NULL;
 
 static constexpr unsigned kBitConnected = BIT0;
 static constexpr unsigned kBitDisconnected = BIT1;
 static constexpr unsigned kBitStaGotIp = BIT2;
+static constexpr const char *kLogPreamble = "wifi";
+
+/// \brief It's better to use different channels for devices residing in close
+/// proximity to e/o.
+/// \returns Pseudo-random channel number from a predefined set.
+static esp_err_t getWifiApChannel(std::uint8_t &aChannel);
 
 std::string userSsid();
 
@@ -75,6 +82,22 @@ static void decorateSsid(char const **data, unsigned *len, const char *prefix)
 
 	*data = ssid;
 	*len  = strlen((char *)ssid);
+}
+
+static esp_err_t getWifiApChannel(uint8_t &aOutChannel)
+{
+	std::array<std::uint8_t, MAC_LENGTH> mac = {0};
+	const esp_err_t error = esp_efuse_mac_get_default(mac.data());
+	constexpr std::array<int, 3> kChannelMap = {{11, 6, 1}};
+
+	if (error != ESP_OK) {
+		ESP_LOGE(Wifi::kDebugTag, "%s:%s failed to get the device's MAC address", kLogPreamble, __func__);
+	} else {
+		const std::size_t channelIndex = mac[mac.size() - 1] % kChannelMap.size();
+		aOutChannel = kChannelMap[channelIndex];
+	}
+
+	return error;
 }
 
 ///
@@ -262,7 +285,7 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 	sApWifiConfig.ap.ssid_len = 0;  // auto
 	sApWifiConfig.ap.ssid_hidden = 0;  // visible SSID
 	sApWifiConfig.ap.beacon_interval = 100;  // default
-	sApWifiConfig.ap.channel = 1;  // auto
+	sApWifiConfig.ap.channel = 0;  // auto
 	sApWifiConfig.ap.max_connection = aMaxClients;
 	sApWifiConfig.ap.authmode = (usePassword ? WIFI_AUTH_WPA_WPA2_PSK : WIFI_AUTH_OPEN);
 	strcpy((char *)&sApWifiConfig.ap.ssid, (char *)aSsid);
@@ -271,6 +294,19 @@ static void wifiConfigApConnection(const uint8_t aMaxClients, const char *aSsid,
 		strcpy((char *)&sApWifiConfig.ap.password, aPassword);
 	} else {
 		ESP_LOGI(Wifi::kDebugTag, "Creating open Wi-Fi access point");
+	}
+
+	// Generate channel number using the device's MAC
+	const esp_err_t error = getWifiApChannel(sApWifiConfig.ap.channel);
+
+	if (error != ESP_OK) {
+		static constexpr const int kDefaultChannel = 1;
+		ESP_LOGW(Wifi::kDebugTag, "%s:%s failed to assign AP channel from MAC, using default=%d", kLogPreamble,
+			__func__, kDefaultChannel);
+		sApWifiConfig.ap.channel = kDefaultChannel;
+	} else {
+		ESP_LOGI(Wifi::kDebugTag, "%s:%s Using channel=%d for Wi-Fi AP configuration", kLogPreamble, __func__,
+			sApWifiConfig.ap.channel);
 	}
 
 	ESP_ERROR_CHECK(esp_wifi_set_config((wifi_interface_t)ESP_IF_WIFI_AP, &sApWifiConfig) );
