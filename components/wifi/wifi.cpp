@@ -148,7 +148,7 @@ esp_err_t wifiConfigStaConnection(const char *targetApSsid, const char *targetAp
 	memset(&sStaWifiConfig, 0, sizeof(sStaWifiConfig));
 	sStaWifiConfig.sta.pmf_cfg.capable = true;
 	sStaWifiConfig.sta.pmf_cfg.required = false;
-	sStaWifiConfig.sta.channel = 6;
+	sStaWifiConfig.sta.channel = 0;  // Auto (channel is unknown). The driver will adjust the channel automatically
 	strcpy((char *)sStaWifiConfig.sta.password, targetApPassword);
 	strcpy((char *)sStaWifiConfig.sta.ssid, targetApSsid);
 
