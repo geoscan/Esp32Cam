@@ -49,14 +49,10 @@ struct FileDescriptor {
 /// them is.
 class File final {
 public:
-	inline File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor) :
-		fileSystem{aFileSystem},
-		fileDescriptor{aFileDescriptor}
-	{
-	}
+	File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor, const char *aFileName);
 
 	inline File():
-		File(nullptr, FileDescriptor{nullptr})
+		File{nullptr, FileDescriptor{nullptr}, ""}
 	{
 	}
 
@@ -94,6 +90,11 @@ public:
 		return fileSystem ? fileSystem->seek(fileDescriptor, 0, FileSystem::PositionCurrent) : 0;
 	}
 
+	inline std::uint32_t getFileNameHash() const
+	{
+		return fileNameHash;
+	}
+
 	/// \brief returns total file size
 	std::uint32_t getSize();
 
@@ -102,6 +103,7 @@ public:
 private:
 	FileSystem *fileSystem;
 	FileDescriptor fileDescriptor;
+	std::uint32_t fileNameHash;
 };
 
 }  // namespace Bft

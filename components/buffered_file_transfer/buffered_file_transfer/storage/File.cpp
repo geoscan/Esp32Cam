@@ -5,16 +5,21 @@
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
 //
 
-#include "utility/thr/WorkQueue.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
+#include "utility/al/Crc32.hpp"
 
 #include "File.hpp"
 
-namespace Bfl {
+namespace Bft {
 
-}  // namespace Bfl
+File::File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor, const char *aFileName) :
+   fileSystem{aFileSystem},
+   fileDescriptor{aFileDescriptor},
+   fileNameHash{static_cast<const void *>(aFileName), strlen(aFileName)}
+{
+}
 
-std::uint32_t Bft::File::getSize()
+std::uint32_t File::getSize()
 {
 	if (fileSystem) {
 		const auto currentPosition = getCurrentPosition();
@@ -32,7 +37,7 @@ std::uint32_t Bft::File::getSize()
 	}
 }
 
-void Bft::File::close()
+void File::close()
 {
 	if (fileDescriptor.isValid() && fileSystem) {
 		fileSystem->closeFile(fileDescriptor);
@@ -40,3 +45,5 @@ void Bft::File::close()
 		fileSystem = nullptr;
 	}
 }
+
+}  // namespace Bft
