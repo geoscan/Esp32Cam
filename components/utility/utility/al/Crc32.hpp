@@ -13,7 +13,6 @@
 namespace Ut {
 namespace Al {
 
-template<int kSize, int kIndex = 0, class MarkerType = void>
 struct Crc32Constexpr {
 	static constexpr std::uint32_t kCrcTable[256] = {
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -61,25 +60,19 @@ struct Crc32Constexpr {
 		0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
 	};
 
-	static constexpr std::uint32_t crc32(const std::uint8_t *str, unsigned int prevCrc = 0xFFFFFFFF)
+	static constexpr std::uint32_t calculateCrc32(const std::uint8_t *aBytes, std::size_t aBytesLength,
+		std::uint32_t aPreviousCrc = 0xFFFFFFFF, std::uint32_t aPosition = 0)
 	{
-		return Crc32Constexpr<kSize, kIndex+1>::crc32(str, (prevCrc >> 8) ^ kCrcTable[(prevCrc ^ str[kIndex]) & 0xFF] );
-	}
-};
-
-// This is the stop-recursion function
-template<int kSize, class MarkerType>
-struct Crc32Constexpr<kSize, kSize, MarkerType> {
-	static constexpr std::uint32_t crc32(const std::uint8_t *, unsigned int prevCrc  = 0xFFFFFFFF)
-	{
-		return prevCrc ^ 0xFFFFFFFF;
+		return aPosition == aBytesLength
+			? aPreviousCrc ^ 0xFFFFFFFF
+			: calculateCrc32(aBytes, aBytesLength, (aPreviousCrc >> 8) ^ kCrcTable[(aPreviousCrc ^ aBytes[aPosition]) & 0xFF], aPosition + 1);
 	}
 };
 
 struct Crc32 {
 	static std::uint32_t calculateCrc32(const void *data, std::uint32_t len)
 	{
-		return updateCrc32(0, data, len);
+		return updateCrc32(0xFFFFFFFF, data, len);
 	}
 
 	static std::uint32_t updateCrc32(uint32_t cs, const void *buffer, std::uint32_t len);
