@@ -35,7 +35,7 @@ struct FileDescriptor {
 		identifier = 0;
 	}
 
-	inline bool isEqual(const FileDescriptor &aFileDescriptor)
+	inline bool isEqual(const FileDescriptor &aFileDescriptor) const
 	{
 		return raw == aFileDescriptor.raw;
 	}
@@ -93,6 +93,11 @@ public:
 	inline std::uint32_t getFileNameHash() const
 	{
 		return fileNameHash;
+	}
+
+	inline FileDescriptor getRawFileDescriptor() const
+	{
+		return fileDescriptor;
 	}
 
 	/// \brief returns total file size

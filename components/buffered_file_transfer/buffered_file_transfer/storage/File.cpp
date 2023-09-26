@@ -15,7 +15,7 @@ namespace Bft {
 File::File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor, const char *aFileName) :
    fileSystem{aFileSystem},
    fileDescriptor{aFileDescriptor},
-   fileNameHash{static_cast<const void *>(aFileName), strlen(aFileName)}
+   fileNameHash{Ut::Al::Crc32::calculateCrc32(static_cast<const void *>(aFileName), strlen(aFileName))}
 {
 }
 
