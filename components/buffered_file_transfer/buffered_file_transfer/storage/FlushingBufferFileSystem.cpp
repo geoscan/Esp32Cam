@@ -17,7 +17,7 @@ static constexpr const char *kLogPreamble = "FlushingBufferFileSystem";
 
 FlushingBufferFileSystem::FlushingBufferFileSystem(FileSystem *aBufferFileSystem):
 	bufferFileSystem{aBufferFileSystem},
-	bufferFileDescriptor{}
+	bufferFile{}
 {
 }
 
@@ -37,7 +37,13 @@ FileDescriptor FlushingBufferFileSystem::tryOpenFileWriteBinary(const char *aFil
 	}
 
 	// Open RAM file
-	bufferFileDescriptor = bufferFileSystem->tryOpenFileWriteBinary(aFilePath, aFileSizeHint);
+	auto bufferFileDescriptor = bufferFileSystem->tryOpenFileWriteBinary(aFilePath, aFileSizeHint);
+	bufferFile = std::shared_ptr<File>{new File{bufferFileSystem, bufferFileDescriptor, aFilePath},
+		[](File *aFile) mutable
+		{
+			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s closing file", kLogPreamble, __func__);
+			aFile->close();
+		}};
 
 	if (!bufferFileDescriptor.isValid()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to open file %s in buffer file system", kLogPreamble, __func__, aFilePath);
@@ -51,40 +57,22 @@ FileDescriptor FlushingBufferFileSystem::tryOpenFileWriteBinary(const char *aFil
 std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 	std::size_t aBufferSize)
 {
-	if (!aFileDescriptor.isValid()) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s invalid file descriptor", kLogPreamble, __func__);
-
+	if (!tryAssertFileOperationValid(aFileDescriptor)) {
 		return 0;
-	}
-
-	// File system only supports 1 file opened at a time
-	if (!aFileDescriptor.isEqual(bufferFileDescriptor)) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s unknown file descriptor", kLogPreamble, __func__);
-
-		return 0;
-	}
-
-	if (bufferFileSystem == nullptr) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s no file system has been provided, panicking!",
-			kLogPreamble, __func__);
-		Sys::panic();
-
-		return 0;  // Won't get here
 	}
 
 	std::size_t position = 0;
 
 	while (position < aBufferSize) {
-		std::size_t nAppended = bufferFileSystem->append(bufferFileDescriptor, &aBuffer[position],
+		std::size_t nAppended = bufferFile->append(&aBuffer[position],
 			aBufferSize - position);
 
 		if (nAppended != aBufferSize) {
 			// Flush the accumulated content
-			TransferImplementor::notifyAllOnFileBufferingFinished(std::shared_ptr<File>(
-				new File{bufferFileSystem, bufferFileDescriptor}), false);
+			TransferImplementor::notifyAllOnFileBufferingFinished(bufferFile, false);
 
 			// Reset the cursor position
-			bufferFileSystem->seek(bufferFileDescriptor, 0 /* File beginning */);
+			bufferFile->seek(0 /* File beginning */);
 		}
 
 		position += nAppended;
@@ -96,29 +84,61 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 std::int32_t FlushingBufferFileSystem::seek(FileDescriptor aFileDescriptor, std::int32_t aOffset,
 	int aOrigin = PositionStart)
 {
-	if (bufferFileSystem == nullptr) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s no file system has been provided, panicking!",
-			kLogPreamble, __func__);
-		Sys::panic();
-
-		return FileSystem::PositionError;  // Won't get here
+	if (!tryAssertFileOperationValid(aFileDescriptor)) {
+		return FileSystem::PositionError;
 	}
 
-	return bufferFileSystem->seek(aFileDescriptor, aOffset, aOrigin);
+	if (bufferFile.get() == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s invalid file, panicking!", kLogPreamble, __func__);
+		Sys::panic();
+
+		return 0;
+	}
+
+	return bufferFile->seek(aOffset, aOrigin);
 }
 
 std::size_t FlushingBufferFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
 	std::size_t aOutBufferSize)
 {
+	if (!tryAssertFileOperationValid(aFileDescriptor)) {
+		return 0;
+	}
+
+	return bufferFile->read(aOutBuffer, aOutBufferSize);
+}
+
+bool FlushingBufferFileSystem::tryAssertFileOperationValid(FileDescriptor aFileDescriptor) const
+{
+	if (!aFileDescriptor.isValid()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s invalid file descriptor", kLogPreamble, __func__);
+
+		return false;
+	}
+
+	if (bufferFile.get() == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s invalid file, panicking!", kLogPreamble, __func__);
+		Sys::panic();
+
+		return false;
+	}
+
+	// File system only supports 1 file opened at a time
+	if (!aFileDescriptor.isEqual(bufferFile->getRawFileDescriptor())) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s unknown file descriptor", kLogPreamble, __func__);
+
+		return false;
+	}
+
 	if (bufferFileSystem == nullptr) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s no file system has been provided, panicking!",
 			kLogPreamble, __func__);
 		Sys::panic();
 
-		return 0;  // Won't get here
+		return false;
 	}
 
-	return bufferFileSystem->read(aFileDescriptor, aOutBuffer, aOutBufferSize);
+	return true;
 }
 
 }  // Bft

@@ -32,8 +32,16 @@ public:
 		std::size_t aOutBufferSize) override;
 
 private:
+	/// \brief Makes sure that all the members are properly initialized, and
+	/// the operation (append, seek, or read) may be safely performed. May
+	/// panic in the case of a fatal failure (some member has not been
+	/// initialized).
+	bool tryAssertFileOperationValid(FileDescriptor aFileDescriptor) const;
+
+private:
 	FileSystem *bufferFileSystem;
 	FileDescriptor bufferFileDescriptor;
+	std::shared_ptr<File> bufferFile;
 };
 
 }  // Bft
