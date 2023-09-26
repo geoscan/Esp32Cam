@@ -11,14 +11,30 @@
 #include "buffered_file_transfer/process/TransferImplementor.hpp"
 #include "buffered_file_transfer/storage/MemoryPartitionTable.hpp"
 #include "system/middleware/FlashMemory.hpp"
+#include "utility/cont/Buffer.hpp"
 
 namespace Bft {
 
 class FlashMemoryTransferImplementor : public TransferImplementor {
-private:
+protected:
+	/// \brief Provides context for current flushing iteration
 	struct FlushingState {
-		std::uint32_t baseAddress{0};
+		/// The beginning of a file in the flash memory. Valid across multiple
+		/// invokes to `onFileBufferingFinished`
+		std::uint32_t baseFlashMemoryAddress{0};
+
+		/// \brief Current write address. Valid across multiple invokes to
+		/// `onFileBufferingFinished`
+		std::uint32_t flashMemoryAddress{0};
+
+		/// Stage marker. Valid account multiple invokes to
+		/// `onFileBufferingFinished`
 		bool ongoing{false};
+
+		bool isFirstChunk() const
+		{
+			return baseFlashMemoryAddress == flashMemoryAddress;
+		}
 	};
 
 public:
@@ -26,9 +42,28 @@ public:
 		const MemoryPartitionTable *aMemoryParitionTable);
 	void onFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk) override;
 
+protected:
+	FlushingState &getFlushingState()
+	{
+		return flushingState;
+	}
+
+private:
+	bool shouldEraseMemoryBeforeWriting() const;
+
+	/// \brief Stage hook. Performs initiation sequence on the first chunk.
+	/// Added for taking account for memory layouts. Implementors MUST NOT
+	/// assume ownership of `aBuffer`, or `aFile`.
+	virtual void onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &aBuffer, File &aFile, bool aIsLastChunk);
+
+	/// \brief Stage hook. Added to perform memory layout-related updates.
+	/// Implementors MUST NOT assume ownership of `aBuffer`, or `aFile`.
+	virtual void onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk);
+
 private:
 	Sys::FlashMemory *flashMemory;
-	const MemoryPartitionTable *memoryParitionTable;
+	const MemoryPartitionTable *memoryPartitionTable;
+	FlushingState flushingState;
 };
 
 }  // Bft
