@@ -13,7 +13,7 @@ constexpr const uint8_t* u8PointerCast(T aArg)
 
 OHDEBUG_TEST("Utility, CRC32, constexpr identical to runtime CRC32 calculation")
 {
-	constexpr auto constexprCrc32 = Ut::Al::Crc32Constexpr::calculateCrc32<sizeof("Hello")>("Hello");
+	constexpr auto constexprCrc32 = Ut::Al::Crc32Constexpr::calculateCrc32("Hello");
 	const auto runtimeCrc32 = Ut::Al::Crc32::calculateCrc32(u8PointerCast("Hello"),
 		sizeof("Hello"));
 	OHDEBUG("Trace", "constexpr CRC32", constexprCrc32, "runtime CRC32", runtimeCrc32);
