@@ -62,11 +62,13 @@ struct Crc32Constexpr {
 
 	template <int kBytesLength, class ByteType>
 	static constexpr std::uint32_t calculateCrc32(ByteType (&aBytes)[kBytesLength],
-		std::uint32_t aPreviousCrc = 0xFFFFFFFF, std::uint32_t aPosition = 0)
+		std::uint32_t aBytesLength = kBytesLength, std::uint32_t aPreviousCrc = 0xFFFFFFFF, std::uint32_t aPosition = 0)
 	{
-		return aPosition == kBytesLength
+		return aPosition == aBytesLength
 			? aPreviousCrc
-			: calculateCrc32<kBytesLength, ByteType>(aBytes, (aPreviousCrc >> 8) ^ kCrcTable[(aPreviousCrc ^ aBytes[aPosition]) & 0xFF], aPosition + 1);
+			: calculateCrc32<kBytesLength, ByteType>(aBytes, aBytesLength,
+				(aPreviousCrc >> 8) ^ kCrcTable[(aPreviousCrc ^ aBytes[aPosition]) & 0xFF],
+				aPosition + 1);
 	}
 };
 
