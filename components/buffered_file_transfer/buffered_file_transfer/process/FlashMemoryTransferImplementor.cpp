@@ -104,6 +104,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 
 		nWrittenTotal += nRead;  // The entire read chunk is expected to be written
+		flushingState.flashMemoryAddress += nRead;
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);

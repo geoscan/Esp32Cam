@@ -54,10 +54,14 @@ private:
 	/// \brief Stage hook. Performs initiation sequence on the first chunk.
 	/// Added for taking account for memory layouts. Implementors MUST NOT
 	/// assume ownership of `aBuffer`, or `aFile`.
+	/// \pre `baseFlashMemoryAddress` and `flashMemoryAddress` are GUARANTEED
+	/// to be correctly initialized, and representative of the current state
 	virtual void onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &aBuffer, File &aFile, bool aIsLastChunk);
 
 	/// \brief Stage hook. Added to perform memory layout-related updates.
 	/// Implementors MUST NOT assume ownership of `aBuffer`, or `aFile`.
+	/// \pre `baseFlashMemoryAddress` and `flashMemoryAddress` are GUARANTEED
+	/// to be correctly initialized, and representative of the current state
 	virtual void onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk);
 
 private:
