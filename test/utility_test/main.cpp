@@ -56,7 +56,7 @@ OHDEBUG_TEST("Utility, Endianness-aware representation")
 	Ut::Cont::EndiannessAwareRepresentation<std::uint16_t, true, true> referenceForwardU16Representation{forwardU16};
 	Ut::Cont::EndiannessAwareRepresentation<std::uint16_t, true, true> referenceReversedU16Representation{reversedU16};
 	assert(std::equal(matchingU16Representation.cbeginTarget(), matchingU16Representation.cendTarget(), referenceForwardU16Representation.cbegin()));
-	assert(std::equal(invertedU16Representation.cbeginTarget(), invertedU16Representation.cendTarget(), referenceReversedU16Representation.cbegin()));
+	assert(std::equal(invertedU16Representation.cbeginTarget(), invertedU16Representation.cendTarget(), referenceForwardU16Representation.crbegin()));
 	Ut::Cont::EndiannessAwareRepresentation<std::uint64_t, true, true> matchingU64Representation{forwardU64};
 	Ut::Cont::EndiannessAwareRepresentation<std::uint64_t, true, false> invertedU64Representation{forwardU64};
 	Ut::Cont::EndiannessAwareRepresentation<std::uint64_t, true, true> referenceForwardU64Representation{forwardU64};
