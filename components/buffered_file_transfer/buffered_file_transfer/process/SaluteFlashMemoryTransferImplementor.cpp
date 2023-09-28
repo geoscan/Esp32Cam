@@ -28,8 +28,12 @@ void Bft::SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPreBuffer
 	}
 }
 
-void SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk)
+void SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlushed(File &, bool aIsLastChunk)
 {
+	if (!aIsLastChunk) {
+		return;  // Nothing to finalize
+	}
+
 	if (getFlashMemory() == nullptr) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s uninitialized `Sys::FlashMemory` instance, panicking", kLogPreamble, __func__);
