@@ -43,9 +43,14 @@ public:
 	void onFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk) override;
 
 protected:
-	FlushingState &getFlushingState()
+	const FlushingState &getFlushingState()
 	{
 		return flushingState;
+	}
+
+	Sys::FlashMemory *getFlashMemory()
+	{
+		return flashMemory;
 	}
 
 private:
