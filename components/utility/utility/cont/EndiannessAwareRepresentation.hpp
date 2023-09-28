@@ -23,16 +23,6 @@ union EndiannessAwareRepresentation {
 	NumericType nativeRepresentation;
 	std::array<std::uint8_t, sizeof(NumericType)> byteArrayRepresentation;
 
-	typename std::array<std::uint8_t, sizeof(NumericType)>::const_iterator cbeginNative() const
-	{
-		return byteArrayRepresentation.cbegin();
-	}
-
-	typename std::array<std::uint8_t, sizeof(NumericType)>::const_iterator cendNative() const
-	{
-		return byteArrayRepresentation.cend();
-	}
-
 	typename std::array<std::uint8_t, sizeof(NumericType)>::const_iterator cbegin() const
 	{
 		return byteArrayRepresentation.cbegin();
