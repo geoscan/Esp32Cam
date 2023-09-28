@@ -120,6 +120,10 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
+
+	if (aIsLastChunk) {
+		flushingState.ongoing = false;
+	}
 }
 
 bool FlashMemoryTransferImplementor::shouldEraseMemoryBeforeWriting() const
