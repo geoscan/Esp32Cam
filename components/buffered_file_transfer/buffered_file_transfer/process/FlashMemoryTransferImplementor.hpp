@@ -68,6 +68,8 @@ private:
 	/// Implementors MUST NOT assume ownership of `aBuffer`, or `aFile`.
 	/// \pre `baseFlashMemoryAddress` and `flashMemoryAddress` are GUARANTEED
 	/// to be correctly initialized, and representative of the current state
+	/// \pre `flushingState.flashMemoryAddress` is GUARANTEED to store the
+	/// accumulated offset.
 	virtual void onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk);
 
 private:
