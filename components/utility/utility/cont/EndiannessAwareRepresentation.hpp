@@ -18,7 +18,7 @@ namespace Cont {
 /// \brief Helps with converting native representation to the target one when
 /// packing bytes for transfer
 /// \pre The instance MUST reside in memory that does support unaligned access
-template <class NumericType, bool kCurrentIsLittleEndian, bool kTargetIsLittleEndian>
+template <class NumericType, bool kSourceIsLittleEndian, bool kTargetIsLittleEndian>
 union EndiannessAwareRepresentation {
 	NumericType nativeRepresentation;
 	std::array<std::uint8_t, sizeof(NumericType)> byteArrayRepresentation;
@@ -43,28 +43,28 @@ union EndiannessAwareRepresentation {
 		return byteArrayRepresentation.crend();
 	}
 
-	template <bool kFlag = (kCurrentIsLittleEndian == kTargetIsLittleEndian)>
+	template <bool kFlag = (kSourceIsLittleEndian == kTargetIsLittleEndian)>
 	typename std::enable_if<kFlag, typename std::template array<std::uint8_t, sizeof(NumericType)>::const_iterator>::type
 	cbeginTarget() const
 	{
 		return byteArrayRepresentation.cbegin();
 	}
 
-	template <bool kFlag = (kCurrentIsLittleEndian == kTargetIsLittleEndian)>
+	template <bool kFlag = (kSourceIsLittleEndian == kTargetIsLittleEndian)>
 	typename std::enable_if<kFlag, typename std::template array<std::uint8_t, sizeof(NumericType)>::const_iterator>::type
 	cendTarget() const
 	{
 		return byteArrayRepresentation.cend();
 	}
 
-	template <bool kFlag = (kCurrentIsLittleEndian == kTargetIsLittleEndian)>
+	template <bool kFlag = (kSourceIsLittleEndian == kTargetIsLittleEndian)>
 	typename std::enable_if<!kFlag, typename std::template array<std::uint8_t, sizeof(NumericType)>::const_reverse_iterator>::type
 	cbeginTarget() const
 	{
 		return byteArrayRepresentation.crbegin();
 	}
 
-	template <bool kFlag = (kCurrentIsLittleEndian == kTargetIsLittleEndian)>
+	template <bool kFlag = (kSourceIsLittleEndian == kTargetIsLittleEndian)>
 	typename std::enable_if<!kFlag, typename std::template array<std::uint8_t, sizeof(NumericType)>::const_reverse_iterator>::type
 	cendTarget() const
 	{
