@@ -26,12 +26,6 @@ struct Instances
 static Instances sInstances{};
 static constexpr const char *kLogPreamble = "TransferImplementor";
 
-TransferImplementor::TransferImplementor()
-{
-	volatile Ut::LockGuard<Sys::Mutex> lock{sInstances.mutex};
-	sInstances.instanceRegistry.add(*this);
-}
-
 void TransferImplementor::notifyAllOnFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk)
 {
 	volatile Ut::LockGuard<Sys::Mutex> lock{sInstances.mutex};
@@ -45,6 +39,19 @@ void TransferImplementor::notifyAllOnFileBufferingFinished(std::shared_ptr<File>
 			instance->onFileBufferingFinished(aFile, aIsLastChunk);
 		}
 	}
+}
+
+void TransferImplementor::subscribeInstanceForTransferUpdates(TransferImplementor *aInstance)
+{
+	volatile Ut::LockGuard<Sys::Mutex> lock{sInstances.mutex};
+
+	if (aInstance == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s attempting to register nullptr instance",
+			kLogPreamble, __func__);
+		Sys::panic();
+	}
+
+	sInstances.instanceRegistry.add(*aInstance);
 }
 
 }  // Bft

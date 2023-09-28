@@ -15,7 +15,6 @@ namespace Bft {
 
 class TransferImplementor {
 public:
-	TransferImplementor();
 	virtual ~TransferImplementor() = default;
 
 	/// \brief Will notify each instance that a part of the RAM buffer should
@@ -34,6 +33,9 @@ public:
 	/// \brief Notifies all instances
 	/// \sa `onFileBufferingFinished`
 	static void notifyAllOnFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk);
+
+protected:
+	static void subscribeInstanceForTransferUpdates(TransferImplementor *aInstance);
 };
 
 }  // Bft
