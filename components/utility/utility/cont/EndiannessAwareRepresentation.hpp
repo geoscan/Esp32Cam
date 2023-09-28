@@ -43,12 +43,12 @@ union EndiannessAwareRepresentation {
 		return byteArrayRepresentation.cend();
 	}
 
-	typename std::array<std::uint8_t, sizeof(NumericType)>::const_iterator crbegin() const
+	typename std::array<std::uint8_t, sizeof(NumericType)>::const_reverse_iterator crbegin() const
 	{
 		return byteArrayRepresentation.crbegin();
 	}
 
-	typename std::array<std::uint8_t, sizeof(NumericType)>::const_iterator crend() const
+	typename std::array<std::uint8_t, sizeof(NumericType)>::const_reverse_iterator crend() const
 	{
 		return byteArrayRepresentation.crend();
 	}
