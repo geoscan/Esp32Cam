@@ -16,7 +16,7 @@ namespace Bft {
 class FlashMemoryPartitionTable {
 public:
 	virtual ~FlashMemoryPartitionTable() = default;
-	virtual bool tryGetFlashMemoryAddressByFile(const File &aFile, std::uint32_t &aOutFlashMemoryAddress) = 0;
+	virtual bool tryGetFlashMemoryAddressByFile(const File &aFile, std::uint32_t &aOutFlashMemoryAddress) const = 0;
 };
 
 }  // Bft
