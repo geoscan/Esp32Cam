@@ -15,7 +15,7 @@ namespace Bft {
 /// Defines SPI flash memory layout for Salute drones
 class SaluteFlashMemoryPartitionTable : public FlashMemoryPartitionTable {
 public:
-	bool tryGetFlashMemoryAddressByFile(const File &aFile, std::uint32_t &aOutFlashMemoryAddress) override;
+	bool tryGetFlashMemoryAddressByFile(const File &aFile, std::uint32_t &aOutFlashMemoryAddress) const override;
 };
 
 }  // Bft

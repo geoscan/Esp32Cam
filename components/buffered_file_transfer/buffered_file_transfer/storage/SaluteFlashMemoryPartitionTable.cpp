@@ -26,11 +26,11 @@ struct MemoryPartitionTableEntry {
 };
 
 static constexpr std::array<MemoryPartitionTableEntry, 1> ksMemoryPartitionTable {{
-	{Ut::Al::Crc32Constexpr::calculateCrc32("show"), 0},
+	{Ut::Al::Crc32Constexpr::calculateCrc32("show"), 0},  // TODO change flash memory address
 }};
 
 bool SaluteFlashMemoryPartitionTable::tryGetFlashMemoryAddressByFile(const File &aFile,
-	uint32_t &aOutFlashMemoryAddress)
+	uint32_t &aOutFlashMemoryAddress) const
 {
 	for (const auto &memoryPartitionTableEntry : ksMemoryPartitionTable) {
 		if (aFile.getFileNameHash() == memoryPartitionTableEntry.fileNameHash) {
