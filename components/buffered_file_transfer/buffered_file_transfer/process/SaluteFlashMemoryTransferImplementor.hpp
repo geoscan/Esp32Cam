@@ -15,6 +15,8 @@ namespace Bft {
 /// \brief Performs memory management taking account of the memory management
 /// details specific to Salute drones
 class SaluteFlashMemoryTransferImplementor : public FlashMemoryTransferImplementor {
+public:
+	using FlashMemoryTransferImplementor::FlashMemoryTransferImplementor;
 private:
 	/// \brief Will add a 4-byte spacing in the buffer, which will later be
 	/// used for writing file size
