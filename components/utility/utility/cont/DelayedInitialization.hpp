@@ -26,8 +26,7 @@ namespace Cont {
 /// ```
 template <class T, class RawArrayType = std::size_t /* `std::size_t` to account for possible unaligned access issues */>
 struct DelayedInitialization {
-	template <class RawArrayType = T>
-	constexpr calculateRawArraySize()
+	static constexpr std::size_t calculateRawArraySize()
 	{
 		return sizeof(T) / sizeof(RawArrayType)
 			+ (/* Still not enough memory? */ sizeof(T) % sizeof(RawArrayType)? 1 : 0);
