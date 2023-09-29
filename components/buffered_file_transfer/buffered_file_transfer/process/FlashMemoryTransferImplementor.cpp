@@ -16,7 +16,7 @@ namespace Bft {
 static constexpr const char *kLogPreamble = "FlashMemoryTransferImplementor";
 
 FlashMemoryTransferImplementor::FlashMemoryTransferImplementor(Sys::FlashMemory *aFlashMemory,
-	const MemoryPartitionTable *aMemoryPartitionTable):
+	const FlashMemoryPartitionTable *aMemoryPartitionTable):
 	flashMemory{aFlashMemory},
 	memoryPartitionTable{aMemoryPartitionTable}
 {

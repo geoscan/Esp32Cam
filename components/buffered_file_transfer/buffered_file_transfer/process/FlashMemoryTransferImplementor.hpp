@@ -9,7 +9,7 @@
 #define COMPONENTS_BUFFERED_FILE_TRANSFER_BUFFERED_FILE_TRANSFER_FLASHMEMORYTRANSFERIMPLEMENTOR_HPP
 
 #include "buffered_file_transfer/process/TransferImplementor.hpp"
-#include "buffered_file_transfer/storage/MemoryPartitionTable.hpp"
+#include "buffered_file_transfer/storage/FlashMemoryPartitionTable.hpp"
 #include "system/middleware/FlashMemory.hpp"
 #include "utility/cont/Buffer.hpp"
 
@@ -39,8 +39,13 @@ protected:
 
 public:
 	FlashMemoryTransferImplementor(Sys::FlashMemory *aFlashMemory,
-		const MemoryPartitionTable *aMemoryParitionTable);
+		const FlashMemoryPartitionTable *aMemoryParitionTable);
 	void onFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk) override;
+
+	inline void setFlashMemoryInstance(Sys::FlashMemory *aFlashMemory)
+	{
+		flashMemory = aFlashMemory;
+	}
 
 protected:
 	const FlushingState &getFlushingState()
@@ -74,7 +79,7 @@ private:
 
 private:
 	Sys::FlashMemory *flashMemory;
-	const MemoryPartitionTable *memoryPartitionTable;
+	const FlashMemoryPartitionTable *memoryPartitionTable;
 	FlushingState flushingState;
 };
 
