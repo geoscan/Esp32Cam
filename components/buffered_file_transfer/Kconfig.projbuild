@@ -38,15 +38,22 @@ menu "[buffered_file_transfer]"
 		default 4 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_DEBUG
 		default 5 if BUFFERED_FILE_TRANSFER_DEBUG_LEVEL_VERBOSE
 
-	choice BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER
-		prompt "Memory provider"
+	choice BUFFERED_FILE_TRANSFER_BUFFER_FILE_SYSTEM
+		prompt "Select buffer file system implementation"
 		depends on BUFFERED_FILE_TRANSFER_ENABLE
 		default BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
 
-		config BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
-			bool "`malloc()`"
+		config BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM
+			bool "malloc()"
 			help
-				Internal RAM, without binding to any memory block in particular
+				Use malloc()-allocated continuous chunk of memory as buffer
+
+		config BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM_FLUSHING
+			bool "Flushing malloc()"
+			help
+				Same as "MALLOC_RAM", but with flushing
+				capabilities when the transferred file's size
+				exceeds that of the underlying buffer
 
 	endchoice
 endmenu
