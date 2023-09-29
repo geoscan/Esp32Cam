@@ -68,10 +68,6 @@ void init()
 	// Register an instance of `BufferedFileSystem`
 	volatile static Ut::Cont::DelayedInitialization<BufferedFileTransfer> bufferedFileTransfer{};
 	bufferedFileTransfer.initialize(*fileSystem.getInstance());
-
-	(void)fileSystem;
-	(void)bufferedFileTransfer;
-
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 }
 
