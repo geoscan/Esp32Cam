@@ -13,7 +13,6 @@
 #include "system/os/Logger.hpp"
 #include "system/os/WorkQueue.hpp"
 #include "utility/MakeSingleton.hpp"
-#include "utility/cont/DelayedInitialization.hpp"
 #include "zd35/FlashMemory.hpp"
 #include "zd35/zd35_defs.hpp"
 #include <driver/periph_ctrl.h>
@@ -73,6 +72,7 @@ struct ReadWriteMemoryTestCase {
 };
 
 static constexpr const char *kLogPreamble = "zd35";
+static std::unique_ptr<Sys::FlashMemory> sFlashMemoryInstance;
 
 /// \brief Test function: initializes the correct SPI bus, and makes an attempt
 /// to fetch ZD35 chip ID.
@@ -331,9 +331,16 @@ static inline void initImpl()
 
 
 	// Create instance, and register `Sys::FlashMemory` API as a singleton
-	static Ut::Cont::DelayedInitialization<Zd35::FlashMemory> zd35FlashMemoryDelayedInitialization{};
-	zd35FlashMemoryDelayedInitialization.initialize(espFlash);
-	Ut::MakeSingleton<Sys::FlashMemory>::setInstance(*zd35FlashMemoryDelayedInitialization.getInstance());
+	sFlashMemoryInstance = std::unique_ptr<Zd35::FlashMemory>(new Zd35::FlashMemory{espFlash});
+
+	if (sFlashMemoryInstance.get() == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s memory error: failed to create `Zd35::FlashMemory` instance", kLogPreamble, __func__);
+
+		return;
+	}
+
+	Ut::MakeSingleton<Sys::FlashMemory>::setInstance(*sFlashMemoryInstance.get());
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s successfully initialized ZD35 SPI flash memory",
 		kLogPreamble, __func__);
 }
@@ -403,15 +410,6 @@ bool runReadWriteMemoryTestCases(void *)
 
 void init()
 {
-	static bool isInitialized = false;
-
-	if (isInitialized) {
-		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s already initialized, skipping", kLogPreamble,
-			__func__);
-	}
-
-	isInitialized = true;
-
 #ifdef CONFIG_ZD35_ENABLED
 	esp_log_level_set(Zd35::debugTag(), (esp_log_level_t)CONFIG_ZD35_DEBUG_LEVEL);
 	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "Debug log test");
