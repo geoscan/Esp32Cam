@@ -3,6 +3,7 @@
 #include <OhDebug.hpp>
 
 #include <utility/al/Crc32.hpp>
+#include <utility/cont/DelayedInitialization.hpp>
 #include <utility/cont/EndiannessAwareRepresentation.hpp>
 #include <algorithm>
 #include <array>
@@ -63,6 +64,32 @@ OHDEBUG_TEST("Utility, Endianness-aware representation")
 	Ut::Cont::EndiannessAwareRepresentation<std::uint64_t, true, true> referenceReversedU64Representation{reversedU64};
 	assert(std::equal(matchingU64Representation.cbeginTarget(), matchingU64Representation.cendTarget(), referenceForwardU64Representation.cbegin()));
 	assert(std::equal(invertedU64Representation.cbeginTarget(), invertedU64Representation.cendTarget(), referenceReversedU64Representation.cbegin()));
+}
+
+OHDEBUG_TEST("Utility, DelayedInitialization")
+{
+	struct NonPod {
+		NonPod(const char *)
+		{
+		}
+	};
+
+	struct ComplicatedConstructionEntity {
+		int &refValue;
+		int value;
+		ComplicatedConstructionEntity(int aValue, int &aRefValue, int *, const NonPod &):
+			refValue{aRefValue},
+			value{aValue}
+		{
+		}
+	};
+
+	Ut::Cont::DelayedInitialization<ComplicatedConstructionEntity> complicatedConstructionEntityDelayedInitialization{};
+	int meaningOfLife = 42;
+	complicatedConstructionEntityDelayedInitialization.initialize(2, meaningOfLife, &meaningOfLife, NonPod{"Hello"});
+	assert(complicatedConstructionEntityDelayedInitialization.isInitialized());
+	assert(complicatedConstructionEntityDelayedInitialization.getInstance()->refValue == meaningOfLife);
+	assert(complicatedConstructionEntityDelayedInitialization.getInstance()->value == 2);
 }
 
 int main(void)
