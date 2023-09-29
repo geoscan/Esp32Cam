@@ -41,7 +41,7 @@ void TransferImplementor::notifyAllOnFileBufferingFinished(std::shared_ptr<File>
 	}
 }
 
-void TransferImplementor::subscribeInstanceForTransferUpdates(TransferImplementor *aInstance)
+void TransferImplementor::subscribeInstanceForBufferingUpdates(TransferImplementor *aInstance)
 {
 	volatile Ut::LockGuard<Sys::Mutex> lock{sInstances.mutex};
 

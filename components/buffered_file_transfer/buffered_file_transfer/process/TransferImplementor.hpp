@@ -33,9 +33,7 @@ public:
 	/// \brief Notifies all instances
 	/// \sa `onFileBufferingFinished`
 	static void notifyAllOnFileBufferingFinished(std::shared_ptr<File> aFile, bool aIsLastChunk);
-
-protected:
-	static void subscribeInstanceForTransferUpdates(TransferImplementor *aInstance);
+	static void subscribeInstanceForBufferingUpdates(TransferImplementor *aInstance);
 };
 
 }  // Bft
