@@ -54,6 +54,21 @@ menu "[buffered_file_transfer]"
 				Same as "MALLOC_RAM", but with flushing
 				capabilities when the transferred file's size
 				exceeds that of the underlying buffer
-
 	endchoice
+
+	menu "Enable implementors which are used for buffered file transfer"
+		depends on BUFFERED_FILE_TRANSFER_ENABLE
+
+		config BUFFERED_FILE_TRANSFER_IMPLEMENTOR_SALUTE_FLASH
+			bool "Enable Salute SPI flash memory buffered file transfer implementor"
+			help
+				If enabled, a subject area-specific instance of BFT implementor
+				will be instantiated; this instance will flush intermediate
+				results into SPI flash memory (registered system-wide) on every
+				transfer process update. This instance will be aware of SPI
+				flash memory layout, and file system markup employed by the
+				autopilot. The implied layout MUST match that of Autopilot.
+
+	endmenu
+
 endmenu
