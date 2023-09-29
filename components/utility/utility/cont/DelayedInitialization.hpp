@@ -45,6 +45,11 @@ struct DelayedInitialization {
 		return instance;
 	}
 
+	T *getInstance() volatile
+	{
+		return const_cast<T *>(instance);
+	}
+
 	bool isInitialized()
 	{
 		return instance != nullptr;
@@ -57,6 +62,12 @@ struct DelayedInitialization {
 	void initialize(Ts &&...aArgs)
 	{
 		instance = new(static_cast<void *>(&rawMemory[0])) T{std::forward<Ts>(aArgs)...};
+	}
+
+	template <class ...Ts>
+	void initialize(Ts &&...aArgs) volatile
+	{
+		instance = new(const_cast<void *>(static_cast<volatile void *>(&rawMemory[0]))) T{std::forward<Ts>(aArgs)...};
 	}
 };
 
