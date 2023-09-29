@@ -30,6 +30,7 @@ public:
 		int aOrigin) override;
 	virtual std::size_t read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
 		std::size_t aOutBufferSize) override;
+	void closeFile(FileDescriptor aFileDescriptor) override;
 
 private:
 	/// \brief Makes sure that all the members are properly initialized, and

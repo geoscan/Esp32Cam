@@ -108,6 +108,21 @@ std::size_t FlushingBufferFileSystem::read(FileDescriptor aFileDescriptor, std::
 	return bufferFile->read(aOutBuffer, aOutBufferSize);
 }
 
+void FlushingBufferFileSystem::closeFile(FileDescriptor aFileDescriptor)
+{
+	if (bufferFile.get() == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s no opened files have been found, ignoring",
+			kLogPreamble, __func__);
+
+		return;
+	}
+
+	if (bufferFile->getRawFileDescriptor().isEqual(aFileDescriptor)) {
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s closing file", kLogPreamble, __func__);
+		bufferFile->close();
+	}
+}
+
 bool FlushingBufferFileSystem::tryAssertFileOperationValid(FileDescriptor aFileDescriptor) const
 {
 	if (!aFileDescriptor.isValid()) {
