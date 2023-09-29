@@ -20,6 +20,7 @@
 #include "system/middleware/FlashMemory.hpp"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
+#include "utility/cont/DelayedInitialization.hpp"
 #include <sdkconfig.h>
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 
@@ -38,15 +39,19 @@ void init()
 #if CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM
 	static SingleBufferRamFileSystem fileSystem{};
 #elif CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM_FLUSHING
-	static SingleBufferRamFileSystem bufferFileSystem{};
-	static FlushingBufferFileSystem fileSystem{&bufferFileSystem};
+	static Ut::Cont::DelayedInitialization<SingleBufferRamFileSystem> bufferFileSystem{};
+	static Ut::Cont::DelayedInitialization<FlushingBufferFileSystem> fileSystem{};
+	bufferFileSystem.initialize();
+	fileSystem.initialize(bufferFileSystem.getInstance());
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
 
 	// Instantiate transfer implementors
 #if CONFIG_BUFFERED_FILE_TRANSFER_IMPLEMENTOR_SALUTE_FLASH
-	static const SaluteFlashMemoryPartitionTable saluteFlashMemoryPartitionTable{};
-	static SaluteFlashMemoryTransferImplementor saluteFlashMemoryTransferImplementor(
-		static_cast<Sys::FlashMemory *>(nullptr), &saluteFlashMemoryPartitionTable);
+	static Ut::Cont::DelayedInitialization<const SaluteFlashMemoryPartitionTable> saluteFlashMemoryPartitionTable{};
+	saluteFlashMemoryPartitionTable.initialize();
+	static Ut::Cont::DelayedInitialization<SaluteFlashMemoryTransferImplementor> saluteFlashMemoryTransferImplementor{};
+	saluteFlashMemoryTransferImplementor.initialize(static_cast<Sys::FlashMemory *>(nullptr),
+		saluteFlashMemoryPartitionTable.getInstance());
 
 	if (!Ut::MakeSingleton<Sys::FlashMemory>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
@@ -55,12 +60,14 @@ void init()
 		Sys::panic();
 	}
 
-	saluteFlashMemoryTransferImplementor.setFlashMemoryInstance(&Ut::MakeSingleton<Sys::FlashMemory>::getInstance());
-	TransferImplementor::subscribeInstanceForBufferingUpdates(&saluteFlashMemoryTransferImplementor);
+	saluteFlashMemoryTransferImplementor.getInstance()->setFlashMemoryInstance(
+		&Ut::MakeSingleton<Sys::FlashMemory>::getInstance());
+	TransferImplementor::subscribeInstanceForBufferingUpdates(saluteFlashMemoryTransferImplementor.getInstance());
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_IMPLEMENTOR_SALUTE_FLASH
 
 	// Register an instance of `BufferedFileSystem`
-	volatile static BufferedFileTransfer bufferedFileTransfer{fileSystem};
+	volatile static Ut::Cont::DelayedInitialization<BufferedFileTransfer> bufferedFileTransfer{};
+	bufferedFileTransfer.initialize(*fileSystem.getInstance());
 
 	(void)fileSystem;
 	(void)bufferedFileTransfer;
