@@ -30,7 +30,7 @@ private:
 
 	/// \brief Callback. The signature is compliant with HTTP file API (see
 	/// `file.h`)
-	static void onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData);
+	static int onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData);
 
 private:
 	const char *fileHttpUrl;
