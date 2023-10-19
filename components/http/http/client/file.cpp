@@ -104,6 +104,12 @@ extern "C" esp_err_t httpDownloadFileOverHttpGetByUrl(const char *aFileUrl, OnFi
 	espHttpClientConfig.user_data = static_cast<void *>(&downloadFileOverHttpContext);
 	esp_http_client_handle_t espHttpClientHandle = esp_http_client_init(&espHttpClientConfig);
 
+	if (espHttpClientHandle == nullptr) {
+		ESP_LOGE(kHttpDebugTag, "%s:%s failed to initialize HTTP client", "file", __func__);
+
+		return ESP_FAIL;
+	}
+
 	// Download file
 	const esp_err_t espErr = esp_http_client_perform(espHttpClientHandle);
 
