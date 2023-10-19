@@ -13,11 +13,7 @@
 
 namespace Bft {
 
-/// \brief Callback. The signature is compliant with HTTP file API (see
-/// `file.h`)
-static void onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData);
-
-static void onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData)
+static void HttpFetchTest::onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData)
 {
 	static_cast<HttpFetchTest *>(aUserData)->onFileChunkReceived(aChunk, aChunkSize);
 }
