@@ -8,6 +8,7 @@
 #include "http/client/file.h"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
+#include "buffered_file_transfer/process/TransferImplementor.hpp"
 
 #include "HttpFetchTest.hpp"
 
@@ -32,7 +33,14 @@ void HttpFetchTest::runTest()
 		Sys::panic();
 	}
 
-	bftFile = BufferedFileTransfer::tryOpenFileWriteBinary(bufferedFileTransferFileName);
+	bftFile = std::shared_ptr<Bft::File>{new Bft::File{BufferedFileTransfer::tryOpenFileWriteBinary(
+		bufferedFileTransferFileName)},
+		// deleter
+		[](Bft::File *aFile)
+		{
+			aFile->close();
+			delete aFile;
+		}};
 
 	if (!bftFile.isValid()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s Failed to open file %s", kLogPreamble, __func__,
@@ -46,9 +54,10 @@ void HttpFetchTest::runTest()
 void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
 {
 	if (aChunk == nullptr && aChunkSize != 0) {
-		// TODO: handle the beginning of write
+		bftFile->append(aChunk, aChunkSize);
+		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, false);
 	} else if (aChunk == nullptr && aChunkSize == 0) {
-		// TODO: finalize write
+		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, true);
 	} else if (aChunk != nullptr && aChunkSize != 0) {
 		// TODO: handle next chunk
 	} else {

@@ -9,6 +9,7 @@
 #define COMPONENTS_BUFFERED_FILE_TRANSFER_BUFFERED_FILE_TRANSFER_HTTPFETCHTEST_HPP
 
 #include "buffered_file_transfer/BufferedFileTransfer.hpp"
+#include <memory>
 
 namespace Bft {
 
@@ -24,7 +25,7 @@ public:
 	void runTest();
 
 private:
-	/// \pre `bftFile` is already opened
+	/// \pre `bftFile` is valid
 	void onFileChunkReceived(const char *aChunk, size_t aChunkSize);
 
 	/// \brief Callback. The signature is compliant with HTTP file API (see
@@ -34,7 +35,7 @@ private:
 private:
 	const char *fileHttpUrl;
 	const char *bufferedFileTransferFileName;
-	Bft::File bftFile;
+	std::shared_ptr<Bft::File> bftFile;
 };
 
 }  // Bft
