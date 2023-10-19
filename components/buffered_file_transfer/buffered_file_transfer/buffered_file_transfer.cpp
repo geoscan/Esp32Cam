@@ -45,17 +45,6 @@ static void testHttpFileFetching()
 
 void init()
 {
-	static bool isInitialized = false;
-
-	if (isInitialized) {
-		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s Already initialized, skipping", kLogPreamble,
-			__func__);
-
-		return;
-	}
-
-	isInitialized = true;
-
 #ifdef CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 	esp_log_level_set(Bft::kDebugTag, (esp_log_level_t)CONFIG_BUFFERED_FILE_TRANSFER_DEBUG_LEVEL);
 	ESP_LOGD(Bft::kDebugTag, "Debug log test");
