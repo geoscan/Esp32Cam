@@ -33,6 +33,7 @@ HttpFetchTest::HttpFetchTest(const char *aFileHttpUrl, const char *aBufferedFile
 
 void HttpFetchTest::runTest()
 {
+	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "%s:%s", kLogPreamble, __func__);
 	if (!BufferedFileTransfer::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s `BufferedFileTransfer` instance has not been initialized, panicking...", kLogPreamble, __func__);
@@ -55,11 +56,21 @@ void HttpFetchTest::runTest()
 		Sys::panic();
 	}
 
-	httpDownloadFileOverHttpGetByUrl(fileHttpUrl, onFileChunkReceivedWrapper, static_cast<void *>(this));
+	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "%s:%s starting file acquisition", kLogPreamble, __func__);
+	const auto fileGetResult = httpDownloadFileOverHttpGetByUrl(fileHttpUrl, onFileChunkReceivedWrapper,
+		static_cast<void *>(this));
+
+	if (fileGetResult != ESP_OK) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to retrieve a file", kLogPreamble,
+			__func__);
+	}
 }
 
 void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
 {
+	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s got chunk, is nullptr = %d, chunk size = %d",
+		kLogPreamble, __func__, static_cast<int>(aChunk == nullptr), static_cast<int>(aChunkSize));
+
 	if (aChunk == nullptr && aChunkSize != 0) {
 		bftFile->append(reinterpret_cast<const std::uint8_t *>(aChunk), aChunkSize);
 		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, false);
