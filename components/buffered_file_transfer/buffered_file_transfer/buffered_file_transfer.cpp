@@ -17,6 +17,7 @@
 #include "buffered_file_transfer/storage/FlushingBufferFileSystem.hpp"
 #include "buffered_file_transfer/storage/SaluteFlashMemoryPartitionTable.hpp"
 #include "buffered_file_transfer/storage/SingleBufferRamFileSystem.hpp"
+#include "buffered_file_transfer/test/HttpFetchTest.hpp"
 #include "system/middleware/FlashMemory.hpp"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
@@ -36,6 +37,10 @@ static void testHttpFileFetching();
 
 static void testHttpFileFetching()
 {
+	static constexpr const char *kFileUrl = "";
+	static constexpr const char *kBftFileName = "";
+	static HttpFetchTest httpFetchTest{kFileUrl, kBftFileName};
+	httpFetchTest.runTest();
 }
 
 void init()
@@ -84,6 +89,10 @@ void init()
 	// Register an instance of `BufferedFileSystem`
 	static volatile BufferedFileTransfer bufferedFileTransfer{fileSystem};
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
+
+#if 1
+	testHttpFileFetching();
+#endif
 }
 
 }  // namespace Bft
