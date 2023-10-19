@@ -24,7 +24,8 @@ public:
 	void runTest();
 
 private:
-	void onFileChunkReceived(const char *aChunk, size_t aChunkSize, void *aUserData);
+	/// \pre `bftFile` is already opened
+	void onFileChunkReceived(const char *aChunk, size_t aChunkSize);
 
 private:
 	const char *fileHttpUrl;

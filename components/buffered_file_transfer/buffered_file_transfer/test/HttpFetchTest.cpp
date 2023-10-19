@@ -19,7 +19,7 @@ static void onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, vo
 
 static void onFileChunkReceivedWrapper(const char *aChunk, size_t aChunkSize, void *aUserData)
 {
-	static_cast<HttpFetchTest *>(aUserData)->onFileChunkReceived(aChunk, aChunkSize, aUserData);
+	static_cast<HttpFetchTest *>(aUserData)->onFileChunkReceived(aChunk, aChunkSize);
 }
 
 HttpFetchTest::HttpFetchTest(const char *aFileHttpUrl, const char *aBufferedFileTransferFileName):
@@ -47,8 +47,18 @@ void HttpFetchTest::runTest()
 	httpDownloadFileOverHttpGetByUrl(fileHttpUrl, onFileChunkReceivedWrapper, static_cast<void *>(this));
 }
 
-void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize, void *aUserData)
+void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
 {
+	if (aChunk == nullptr && aChunkSize != 0) {
+		// TODO: handle the beginning of write
+	} else if (aChunk == nullptr && aChunkSize == 0) {
+		// TODO: finalize write
+	} else if (aChunk != nullptr && aChunkSize != 0) {
+		// TODO: handle next chunk
+	} else {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s "File" API unexpected case, ignoring",
+			kLogPreamble, __func__);
+	}
 }
 
 }  // Bft
