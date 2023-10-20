@@ -133,8 +133,9 @@ std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std
 
 	if (fseek(static_cast<FILE *>(aFileDescriptor.raw), aOffset, aOrigin) == kSuccess) {
 		const auto newPosition = ftell(static_cast<FILE *>(aFileDescriptor.raw));
-		ESP_LOGV(Bft::debugTag(), "%s:%s shifted cursor at %d", debugPreamble(), __func__,
-			static_cast<int>(newPosition));
+		ESP_LOGV(Bft::debugTag(), "%s:%s shifted cursor at %d from %s", debugPreamble(), __func__,
+			static_cast<int>(newPosition),
+			aOrigin == PositionStart ? "start" : aOrigin == PositionEnd ? "end" : "current");
 
 		return newPosition;
 	} else {
