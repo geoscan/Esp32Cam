@@ -22,6 +22,7 @@
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
 #include "utility/cont/DelayedInitialization.hpp"
+#include "wifi.h"
 #include <sdkconfig.h>
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 
@@ -37,8 +38,25 @@ static void testHttpFileFetching();
 
 static void testHttpFileFetching()
 {
-	static constexpr const char *kFileUrl = "";
-	static constexpr const char *kBftFileName = "";
+	static constexpr const char *kFileUrl = "http://192.168.43.1:8080/";
+	static constexpr const char *kBftFileName = "show";
+	static constexpr const char *kTargetWifiSsid = "testtest";
+	static constexpr const char *kTargetWifiPassword = "beginend";
+
+	// Connect to target network
+	const auto connectionResult = wifiStaConnect(kTargetWifiSsid, kTargetWifiPassword,
+		nullptr, nullptr, nullptr);  // Assign IP over DHCP
+
+	if (connectionResult != ESP_OK) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to connect to SSID %s, aborting...",
+			kLogPreamble, __func__, kTargetWifiSsid);
+
+		return;
+	}
+
+	// Run the test itself
+	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s starting file acquisition attempt", kLogPreamble,
+		__func__);
 	static HttpFetchTest httpFetchTest{kFileUrl, kBftFileName};
 	httpFetchTest.runTest();
 }
