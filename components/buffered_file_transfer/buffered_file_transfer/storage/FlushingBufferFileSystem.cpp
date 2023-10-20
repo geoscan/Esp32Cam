@@ -70,6 +70,9 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 		if (nAppended != aBufferSize) {
 			// Flush the accumulated content
 			TransferImplementor::notifyAllOnFileBufferingFinished(bufferFile, false);
+			Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
+				"%s:%s the buffer has been flushed into the memory -- resetting the cursor, and continuing",
+				kLogPreamble, __func__);
 
 			// Reset the cursor position
 			bufferFile->seek(0 /* File beginning */);
