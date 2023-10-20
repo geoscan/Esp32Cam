@@ -210,6 +210,14 @@ extern "C" esp_err_t wifiStaConnect(const char *targetApSsid, const char *target
 	}
 
 	const esp_err_t err = (eventBits & kBitConnected) ? ESP_OK : ESP_FAIL;
+
+	if (err != ESP_OK) {
+		ESP_LOGE(Wifi::kDebugTag,
+			"%s:%s failed to connect, got ip bit is set = %d, connected bit is set = %d, disconnected bit is set = %d",
+			kLogPreamble, __func__, static_cast<int>(eventBits & kBitStaGotIp),
+			static_cast<int>(eventBits & kBitConnected), static_cast<int>(eventBits & kBitDisconnected));
+	}
+
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &staHandler);
 	esp_event_handler_unregister(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &staHandler);
 	esp_event_handler_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, &staHandler);
