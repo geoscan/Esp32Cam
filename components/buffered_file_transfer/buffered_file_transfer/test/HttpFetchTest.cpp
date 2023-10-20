@@ -71,13 +71,13 @@ void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s got chunk, is nullptr = %d, chunk size = %d",
 		kLogPreamble, __func__, static_cast<int>(aChunk == nullptr), static_cast<int>(aChunkSize));
 
-	if (aChunk == nullptr && aChunkSize != 0) {
+	if (aChunk == nullptr && aChunkSize != 0) {  // Announcing file size
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s receiving file %d bytes", kLogPreamble, __func__);
+	} else if (aChunk == nullptr && aChunkSize == 0) {  // Finalizing reception
+		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, true);
+	} else if (aChunk != nullptr && aChunkSize != 0) {  // Handling new chunk
 		bftFile->append(reinterpret_cast<const std::uint8_t *>(aChunk), aChunkSize);
 		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, false);
-	} else if (aChunk == nullptr && aChunkSize == 0) {
-		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, true);
-	} else if (aChunk != nullptr && aChunkSize != 0) {
-		// TODO: handle next chunk
 	} else {
 		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s \"File\" API unexpected case, ignoring",
 			kLogPreamble, __func__);
