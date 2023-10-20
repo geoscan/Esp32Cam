@@ -43,7 +43,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		Sys::panic();
 	}
 
-	// Erase memory chunk, if starting from scratch, and erasing required
+	// Erase memory chunk, if starting from scratch, and erasing is required
 
 	if (!flushingState.ongoing) {
 		if (!memoryPartitionTable->tryGetFlashMemoryAddressByFile(*aFile.get(), flushingState.baseFlashMemoryAddress)) {
