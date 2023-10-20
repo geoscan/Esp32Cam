@@ -21,6 +21,7 @@
 #include "system/middleware/FlashMemory.hpp"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
+#include "system/os/WorkQueue.hpp"
 #include "utility/cont/DelayedInitialization.hpp"
 #include "wifi.h"
 #include <sdkconfig.h>
@@ -34,9 +35,9 @@ static constexpr const char *kLogPreamble = "buffered_file_transfer";
 /// 1. Fetch the file from a HTTP server by URL;
 /// 2. Transfer the file using BFT API. The exact configuration is hidden from
 /// the test
-static void testHttpFileFetching();
+static bool testHttpFileFetching(void *);
 
-static void testHttpFileFetching()
+static bool testHttpFileFetching(void *)
 {
 	static constexpr const char *kFileUrl = "http://192.168.43.1:8080/max_size_2Hz_0.bin";
 	static constexpr const char *kBftFileName = "show";
@@ -51,7 +52,7 @@ static void testHttpFileFetching()
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to connect to SSID %s, aborting...",
 			kLogPreamble, __func__, kTargetWifiSsid);
 
-		return;
+		return false;
 	}
 
 	// Run the test itself
@@ -59,6 +60,8 @@ static void testHttpFileFetching()
 		__func__);
 	static HttpFetchTest httpFetchTest{kFileUrl, kBftFileName};
 	httpFetchTest.runTest();
+
+	return false;
 }
 
 void init()
@@ -98,7 +101,13 @@ void init()
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 
 #if 1
-	testHttpFileFetching();
+	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s an instance of Sys::WorkQueue is needed to run a test", kLogPreamble, __func__);
+		Sys::panic();
+	}
+
+	Ut::MakeSingleton<Sys::WorkQueue>::getInstance().pushTask(testHttpFileFetching);
 #endif
 }
 
