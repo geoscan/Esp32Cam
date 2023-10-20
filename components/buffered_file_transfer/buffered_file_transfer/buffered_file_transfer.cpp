@@ -38,7 +38,7 @@ static void testHttpFileFetching();
 
 static void testHttpFileFetching()
 {
-	static constexpr const char *kFileUrl = "http://192.168.43.1:8080/";
+	static constexpr const char *kFileUrl = "http://192.168.43.1:8080/max_size_2Hz_0.bin";
 	static constexpr const char *kBftFileName = "show";
 	static constexpr const char *kTargetWifiSsid = "testtest";
 	static constexpr const char *kTargetWifiPassword = "beginend";
