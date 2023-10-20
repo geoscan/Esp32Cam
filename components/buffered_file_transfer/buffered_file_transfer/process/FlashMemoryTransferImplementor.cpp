@@ -99,8 +99,8 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		nRead = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
 
 		if (nRead == 0) {
-			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer, panicking!",
-				kLogPreamble, __func__);
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer %s panicking!",
+				kLogPreamble, __func__, aIsLastChunk ? "(last chunk)" : "");
 			Sys::panic();
 		}
 
