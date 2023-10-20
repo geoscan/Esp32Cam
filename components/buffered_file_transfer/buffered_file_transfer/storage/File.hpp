@@ -74,7 +74,7 @@ public:
 	}
 
 	/// \brief \sa `FileSystem::seek`
-	inline std::uint32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
+	inline std::int32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
 	{
 		return fileSystem ? fileSystem->seek(fileDescriptor, aOffset, aOrigin) : FileSystem::PositionError;
 	}
