@@ -46,7 +46,7 @@ void FileSystemTransferImplementor::onFileBufferingFinished(std::shared_ptr<File
 	}
 
 	// Try to file into flash memory, chunk-by-chunk
-	const std::size_t fileSize = aFile->getSize();
+	const std::size_t fileSize = aFile->getCurrentPosition();
 	static constexpr std::size_t kTemporaryBufferSize = 128;
 	aFile->seek(0);
 
