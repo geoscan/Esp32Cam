@@ -36,7 +36,7 @@ sequenceDiagram
     participant espTransferImplementor
     participant ap
 
-    note over espBuffer: `SingleBufferRamFileSystem` is \n an example of implementation
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
 
     loop Chunk-by-chunk
         user->>espWebApi: Upload a file's chunk
