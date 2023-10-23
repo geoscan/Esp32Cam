@@ -21,9 +21,13 @@ namespace Bft {
 /// for example, non-volatile memory.
 /// \warning It's only allowed to have 1 session at a time
 class FlushingBufferFileSystem : public FileSystem {
+private:
 public:
 	FlushingBufferFileSystem(FileSystem *aBufferFileSystem);
 	virtual FileDescriptor tryOpenFileWriteBinary(const char *aFilePath, std::size_t aFileSizeHint) override;
+
+	/// \brief Put the content of `aBuffer` into underlying `bufferFileSystem`
+	/// instance.
 	virtual std::size_t append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
 		std::size_t aBufferSize) override;
 	virtual std::int32_t seek(FileDescriptor aFileDescriptor, std::int32_t aOffset,
