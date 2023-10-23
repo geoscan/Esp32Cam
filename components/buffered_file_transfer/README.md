@@ -24,6 +24,29 @@ At/after each of those stages, a participant to the process will notify
 respective components over the appropriate event key (see
 "buffered_file_transfer/Sub.hpp" for the list of topics).
 
+## Transferring options
+
+### Transferring using Web API
+
+```mermaid
+sequenceDiagram
+    participant user
+    participant espWebApi
+    participant espBuffer
+    participant espTransferImplementor
+    participant ap
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    loop Chunk-by-chunk
+        user->>espWebApi: Upload a file's chunk
+        espWebApi->>espBuffer: append()
+    end
+
+    espWebApi->>transferImplementor: onFileBufferingFinished(last chunk)
+    transferImplementor->>ap: A buffered file
+```
+
 # Buffer memory (RAM)
 
 An encapsulating overhead over a RAM chunk is used, which is comprised of 2
