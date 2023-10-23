@@ -80,6 +80,9 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 		}
 
 		position += nAppended;
+		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s appended %d B of %d B", kLogPreamble, __func__,
+			position, aBufferSize);
+
 	}
 
 	return position;
