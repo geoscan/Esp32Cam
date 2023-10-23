@@ -100,9 +100,6 @@ public:
 		return fileDescriptor;
 	}
 
-	/// \brief returns total file size
-	std::uint32_t getSize();
-
 	void close();
 
 private:

@@ -19,24 +19,6 @@ File::File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor, const char *
 {
 }
 
-std::uint32_t File::getSize()
-{
-	if (fileSystem) {
-		const auto currentPosition = getCurrentPosition();
-		const auto endOffset = seek(0, FileSystem::PositionEnd);  // 0 bytes from the end
-
-		if (endOffset != FileSystem::PositionError) {
-			seek(currentPosition);
-
-			return static_cast<std::uint32_t>(endOffset);
-		} else {
-			return 0;
-		}
-	} else {
-		return 0;
-	}
-}
-
 void File::close()
 {
 	if (fileDescriptor.isValid() && fileSystem) {
