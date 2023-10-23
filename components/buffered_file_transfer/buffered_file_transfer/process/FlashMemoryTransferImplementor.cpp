@@ -118,7 +118,6 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			return;
 		}
 
-		nWrittenTotal += nRead;  // The entire read chunk is expected to be written
 		flushingState.flashMemoryAddress += nRead;
 		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
 			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
