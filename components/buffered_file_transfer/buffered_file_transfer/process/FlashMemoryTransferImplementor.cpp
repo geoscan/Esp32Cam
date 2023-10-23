@@ -69,7 +69,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	// Write file chunk-by-chunk
 	flushingState.ongoing = true;
 
-	const auto fileSize = aFile->getSize();
+	const auto fileSize = aFile->getCurrentPosition();
 	aFile->seek(0);  // Reset for reading from the beginning
 	std::size_t nWrittenTotal = 0;
 
