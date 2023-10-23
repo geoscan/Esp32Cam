@@ -101,8 +101,9 @@ sequenceDiagram
 
     ap->>espWifiApi: connect to AP using provided SSID and password
     espWifiApi->>espWifiApi: connecting
-    espWifiApi->>ap: success or failure (the latter should stop the transfer)
+    espWifiApi-->>ap: success or failure (the latter should stop the transfer)
     ap->>espHttpClientApi: acquire a file using web API
+    espHttpClientApi-->>ap: success or failure (the latter should stop the transfer)
 
     loop Chunk-by-chunk
         espHttpClientApi->>espBuffer: append()
