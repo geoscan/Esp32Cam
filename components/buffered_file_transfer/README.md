@@ -24,9 +24,9 @@ At/after each of those stages, a participant to the process will notify
 respective components over the appropriate event key (see
 "buffered_file_transfer/Sub.hpp" for the list of topics).
 
-## Transferring options
+## Transfer options
 
-### Transferring using Web API
+### Transfer using Web API
 
 ```mermaid
 sequenceDiagram
@@ -42,15 +42,28 @@ sequenceDiagram
         user->>espWebApi: Upload a file's chunk
         espWebApi->>espBuffer: append()
 
-	alt When the buffer's size has reached its capacity, it may be flushed
-		    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
-		    espTransferImplementor->>ap: A buffered file
-	end
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+
+                alt espTransferImplementor may flush the chunk using AP as a bridge, which it turn will write into Flash
+                    espTransferImplementor->>ap: A buffered file
+                else espTransferImplementor may write directly into Flash. The synchronization steps are not represented in this diagram
+                    espTransferImplementor->>flash: A buffered file
+                end
+        end
+
     end
 
     espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
-    espTransferImplementor->>ap: A buffered file
+
+    alt espTransferImplementor may flush the chunk using AP as a bridge, which it turn will write into Flash
+        espTransferImplementor->>ap: A buffered file
+    else espTransferImplementor may write directly into Flash. The synchronization steps are not represented in this diagram
+        espTransferImplementor->>flash: A buffered file
+    end
 ```
+
+### Transfer using commands from AP over MAVLink protocol
 
 # Buffer memory (RAM)
 
