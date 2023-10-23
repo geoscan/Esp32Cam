@@ -44,23 +44,42 @@ sequenceDiagram
 
         alt When the buffer's size has reached its capacity, it may be flushed
                 espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
-
-                alt espTransferImplementor may flush the chunk using AP as a bridge, which it turn will write into Flash
-                    espTransferImplementor->>ap: A buffered file
-                else espTransferImplementor may write directly into Flash. The synchronization steps are not represented in this diagram
-                    espTransferImplementor->>flash: A buffered file
-                end
+                espTransferImplementor->>ap: A buffered file
         end
 
     end
 
     espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>ap: A buffered file
+```
 
-    alt espTransferImplementor may flush the chunk using AP as a bridge, which it turn will write into Flash
-        espTransferImplementor->>ap: A buffered file
-    else espTransferImplementor may write directly into Flash. The synchronization steps are not represented in this diagram
-        espTransferImplementor->>flash: A buffered file
+### Flusing directly onto flash
+
+`espTransferImplementor` may flush the chunk using AP as a bridge, which it turn will write into Flash
+
+```mermaid
+sequenceDiagram
+    participant user
+    participant espWebApi
+    participant espBuffer
+    participant espTransferImplementor
+    participant ap
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    loop Chunk-by-chunk
+        user->>espWebApi: Upload a file's chunk
+        espWebApi->>espBuffer: append()
+
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espTransferImplementor->>flash: A buffered file
+        end
+
     end
+
+    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>flash: A buffered file
 ```
 
 ### Transfer using commands from AP over MAVLink protocol
