@@ -109,13 +109,13 @@ sequenceDiagram
         espHttpClientApi->>espBuffer: append()
 
         alt When the buffer's size has reached its capacity, it may be flushed
-                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espHttpClientApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
                 espTransferImplementor->>flash: A buffered file
         end
 
     end
 
-    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espHttpClientApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
     espTransferImplementor->>flash: A buffered file
 ```
 
