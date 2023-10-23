@@ -91,11 +91,11 @@ The transfer may also be triggered using MAVLink.
 
 ```mermaid
 sequenceDiagram
+    participant ap
+    participant espWifiApi
+    participant espHttpClientApi
     participant espBuffer
     participant espTransferImplementor
-    participant ap
-    participant espHttpClientApi
-    participant espWifiApi
 
     note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
 
