@@ -43,13 +43,13 @@ sequenceDiagram
         espWebApi->>espBuffer: append()
 
 	alt When the buffer's size has reached its capacity, it may be flushed
-		    espWebApi->>transferImplementor: onFileBufferingFinished(last chunk = false)
-		    transferImplementor->>ap: A buffered file
+		    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+		    espTransferImplementor->>ap: A buffered file
 	end
     end
 
-    espWebApi->>transferImplementor: onFileBufferingFinished(last chunk = true)
-    transferImplementor->>ap: A buffered file
+    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>ap: A buffered file
 ```
 
 # Buffer memory (RAM)
