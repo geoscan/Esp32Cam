@@ -46,7 +46,8 @@ FileDescriptor FlushingBufferFileSystem::tryOpenFileWriteBinary(const char *aFil
 		}};
 
 	if (!bufferFileDescriptor.isValid()) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to open file %s in buffer file system", kLogPreamble, __func__, aFilePath);
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to open file %s in buffer file system",
+			kLogPreamble, __func__, aFilePath);
 
 		return FileDescriptor{};
 	}
