@@ -8,10 +8,11 @@
 #ifndef UTILITY_UTILITY_ALGORITHM_HPP
 #define UTILITY_UTILITY_ALGORITHM_HPP
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <numeric>
+#include <type_traits>
 
 namespace Ut {
 namespace Al {
@@ -53,7 +54,9 @@ O scale(T val, O from, O to)
 template <typename T, typename O = T>
 O clamp(T val, T from, T to)
 {
-	assert(to - from > std::numeric_limits<float>::epsilon());
+	if (std::is_floating_point<T>::value) {
+		assert(to - from > std::numeric_limits<T>::epsilon());
+	}
 
 	return static_cast<O>(val) < static_cast<O>(from) ? static_cast<O>(from) :
 		static_cast<O>(val) > static_cast<O>(to) ? to :
