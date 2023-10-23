@@ -70,6 +70,8 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	flushingState.ongoing = true;
 
 	const auto fileSize = aFile->getCurrentPosition();
+	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s the file's current size is %d", kLogPreamble,
+		__func__, fileSize);
 	aFile->seek(0);  // Reset for reading from the beginning
 	std::size_t nWrittenTotal = 0;
 
