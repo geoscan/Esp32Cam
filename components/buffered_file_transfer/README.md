@@ -29,7 +29,7 @@ respective components over the appropriate event key (see
 The following delineates the core differences between various  viable transfer
 schemes. The diagrams are not comprehensive, as they may lack branching, or
 some significant details. Their only purpose is to highlight the core entities
-and logic behind Buffered File Transfer (BFT).
+and the logic behind Buffered File Transfer (BFT).
 
 ### Transfer using Web API
 
