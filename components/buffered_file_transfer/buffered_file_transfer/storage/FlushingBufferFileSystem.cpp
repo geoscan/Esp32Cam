@@ -123,6 +123,7 @@ void FlushingBufferFileSystem::closeFile(FileDescriptor aFileDescriptor)
 	if (bufferFile->getRawFileDescriptor().isEqual(aFileDescriptor)) {
 		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s closing file", kLogPreamble, __func__);
 		bufferFile->close();
+		bufferFile.reset();
 	}
 }
 
