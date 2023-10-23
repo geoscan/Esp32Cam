@@ -45,7 +45,6 @@ private:
 
 private:
 	FileSystem *bufferFileSystem;
-	FileDescriptor bufferFileDescriptor;
 	std::shared_ptr<File> bufferFile;
 };
 

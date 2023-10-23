@@ -24,7 +24,7 @@ FlushingBufferFileSystem::FlushingBufferFileSystem(FileSystem *aBufferFileSystem
 FileDescriptor FlushingBufferFileSystem::tryOpenFileWriteBinary(const char *aFilePath, std::size_t aFileSizeHint)
 {
 	// It's only allowed to have 1 session at a time
-	if (bufferFileDescriptor.isValid()) {
+	if (bufferFile.get() != nullptr) {
 		return FileDescriptor{};
 	}
 
@@ -39,10 +39,10 @@ FileDescriptor FlushingBufferFileSystem::tryOpenFileWriteBinary(const char *aFil
 	// Open RAM file
 	auto bufferFileDescriptor = bufferFileSystem->tryOpenFileWriteBinary(aFilePath, aFileSizeHint);
 	bufferFile = std::shared_ptr<File>{new File{bufferFileSystem, bufferFileDescriptor, aFilePath},
-		[](File *aFile) mutable
+		[this](File *aFile) mutable
 		{
 			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s closing file", kLogPreamble, __func__);
-			aFile->close();
+			closeFile(aFile->getRawFileDescriptor());
 		}};
 
 	if (!bufferFileDescriptor.isValid()) {
