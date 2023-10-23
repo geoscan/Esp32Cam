@@ -58,7 +58,7 @@ sequenceDiagram
 `espTransferImplementor` may flush the chunk using AP as a bridge, which it
 turn will write into Flash, like on the previous diagram. Or, it may flush
 directly onto flash. The exact scheme is still TBD with heavy preference for
-directly using Flash.
+using Flash without the intermediation on behalf of AP.
 
 ```mermaid
 sequenceDiagram
