@@ -106,6 +106,9 @@ std::size_t FlushingBufferFileSystem::read(FileDescriptor aFileDescriptor, std::
 	std::size_t aOutBufferSize)
 {
 	if (!tryAssertFileOperationValid(aFileDescriptor)) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s conditions to perform `read()` are not valid",
+			kLogPreamble, __func__);
+
 		return 0;
 	}
 
