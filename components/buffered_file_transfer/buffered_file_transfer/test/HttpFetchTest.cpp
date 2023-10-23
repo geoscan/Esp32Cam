@@ -72,7 +72,8 @@ void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
 		kLogPreamble, __func__, static_cast<int>(aChunk == nullptr), static_cast<int>(aChunkSize));
 
 	if (aChunk == nullptr && aChunkSize != 0) {  // Announcing file size
-		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s receiving file %d bytes", kLogPreamble, __func__);
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s receiving file %d bytes", kLogPreamble, __func__,
+			aChunkSize);
 	} else if (aChunk == nullptr && aChunkSize == 0) {  // Finalizing reception
 		TransferImplementor::notifyAllOnFileBufferingFinished(bftFile, true);
 		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s finalizing write", kLogPreamble, __func__);
