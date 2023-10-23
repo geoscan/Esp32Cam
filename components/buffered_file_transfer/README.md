@@ -26,6 +26,11 @@ respective components over the appropriate event key (see
 
 ## Transfer options
 
+The following delieates the core differences between various  viable transfer
+schemes. The diagrams are not comprehensive, as they may lack branching, or
+some significant details. Their only purposes is to highlight the core entities
+and logic behind Buffered File Transfer (BFT).
+
 ### Transfer using Web API
 
 ```mermaid
