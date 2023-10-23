@@ -55,7 +55,10 @@ sequenceDiagram
 
 ### Flusing directly onto flash
 
-`espTransferImplementor` may flush the chunk using AP as a bridge, which it turn will write into Flash
+`espTransferImplementor` may flush the chunk using AP as a bridge, which it
+turn will write into Flash, like on the previous diagram. Or, it may flush
+directly onto flash. The exact scheme is still TBD with heavy preference for
+directly using Flash.
 
 ```mermaid
 sequenceDiagram
@@ -83,6 +86,37 @@ sequenceDiagram
 ```
 
 ### Transfer using commands from AP over MAVLink protocol
+
+The transfer may also be triggered using MAVLink.
+
+```mermaid
+sequenceDiagram
+    participant espBuffer
+    participant espTransferImplementor
+    participant ap
+    participant espHttpClientApi
+    participant espWifiApi
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    ap->>espWifiApi: connect to AP using provided SSID and password
+    espWifiApi->>espWifiApi: connecting
+    espWifiApi->>ap: success or failure (the latter should stop the transfer)
+    ap->>espHttpClientApi: acquire a file using web API
+
+    loop Chunk-by-chunk
+        espHttpClientApi->>espBuffer: append()
+
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espTransferImplementor->>flash: A buffered file
+        end
+
+    end
+
+    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>flash: A buffered file
+```
 
 # Buffer memory (RAM)
 
