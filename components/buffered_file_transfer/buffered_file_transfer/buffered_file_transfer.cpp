@@ -17,7 +17,7 @@
 #include "buffered_file_transfer/storage/FlushingBufferFileSystem.hpp"
 #include "buffered_file_transfer/storage/SaluteFlashMemoryPartitionTable.hpp"
 #include "buffered_file_transfer/storage/SingleBufferRamFileSystem.hpp"
-#include "buffered_file_transfer/test/HttpFetchTest.hpp"
+#include "buffered_file_transfer/test/WifiPreconnectHttpFetchTest.hpp"
 #include "system/middleware/FlashMemory.hpp"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
@@ -43,25 +43,16 @@ static bool testHttpFileFetching(void *)
 	static constexpr const char *kBftFileName = "show";
 	static constexpr const char *kTargetWifiSsid = "testtest";
 	static constexpr const char *kTargetWifiPassword = "beginend";
+	constexpr bool kResult  = false;
+	static WifiPreconnectHttpFetchTest wifiPreconnectHttpFetchTest{
+		kTargetWifiSsid,
+		kTargetWifiPassword,
+		kFileUrl,
+		kBftFileName
+	};
+	wifiPreconnectHttpFetchTest.runTest();
 
-	// Connect to target network
-	const auto connectionResult = wifiStaConnect(kTargetWifiSsid, kTargetWifiPassword,
-		nullptr, nullptr, nullptr);  // Assign IP over DHCP
-
-	if (connectionResult != ESP_OK) {
-		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to connect to SSID %s, aborting...",
-			kLogPreamble, __func__, kTargetWifiSsid);
-
-		return false;
-	}
-
-	// Run the test itself
-	Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s starting file acquisition attempt", kLogPreamble,
-		__func__);
-	static HttpFetchTest httpFetchTest{kFileUrl, kBftFileName};
-	httpFetchTest.runTest();
-
-	return false;
+	return kResult;
 }
 
 void init()
