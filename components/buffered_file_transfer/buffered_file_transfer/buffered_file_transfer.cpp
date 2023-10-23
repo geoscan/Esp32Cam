@@ -62,14 +62,6 @@ void init()
 	ESP_LOGD(Bft::kDebugTag, "Debug log test");
 	ESP_LOGV(Bft::kDebugTag, "Verbose log test");
 
-	// Initialize the buffer
-#if CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM
-	static SingleBufferRamFileSystem fileSystem{};
-#elif CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM_FLUSHING
-	static SingleBufferRamFileSystem bufferFileSystem{};
-	static FlushingBufferFileSystem fileSystem{&bufferFileSystem};
-#endif  // CONFIG_BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
-
 	// Instantiate transfer implementors
 #if CONFIG_BUFFERED_FILE_TRANSFER_IMPLEMENTOR_SALUTE_FLASH
 	static SaluteFlashMemoryPartitionTable saluteFlashMemoryPartitionTable{};
@@ -86,6 +78,14 @@ void init()
 	saluteFlashMemoryTransferImplementor.setFlashMemoryInstance(&Ut::MakeSingleton<Sys::FlashMemory>::getInstance());
 	TransferImplementor::subscribeInstanceForBufferingUpdates(&saluteFlashMemoryTransferImplementor);
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_IMPLEMENTOR_SALUTE_FLASH
+
+	// Initialize the buffer
+#if CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM
+	static SingleBufferRamFileSystem fileSystem{};
+#elif CONFIG_BUFFERED_FILE_TRANSFER_FILE_BUFFER_FILE_SYSTEM_MALLOC_RAM_FLUSHING
+	static SingleBufferRamFileSystem bufferFileSystem{};
+	static FlushingBufferFileSystem fileSystem{&bufferFileSystem};
+#endif  // CONFIG_BUFFERED_FILE_TRANSFER_MEMORY_PROVIDER_MALLOC
 
 	// Register an instance of `BufferedFileSystem`
 	static volatile BufferedFileTransfer bufferedFileTransfer{fileSystem};
