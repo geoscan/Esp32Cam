@@ -67,7 +67,7 @@ std::size_t FlushingBufferFileSystem::append(FileDescriptor aFileDescriptor, con
 		std::size_t nAppended = bufferFile->append(&aBuffer[position],
 			aBufferSize - position);
 
-		if (nAppended != aBufferSize) {
+		if (nAppended != aBufferSize) {  // We've reached the buffer's capacity
 			// Flush the accumulated content
 			TransferImplementor::notifyAllOnFileBufferingFinished(bufferFile, false);
 			Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
