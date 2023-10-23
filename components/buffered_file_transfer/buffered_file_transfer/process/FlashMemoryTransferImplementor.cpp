@@ -111,14 +111,18 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			static_cast<const std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
 
 		if (writeResult.errorCode != Sys::ErrorCode::None) {
-			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to write into flash memory (\"%s\")",
-				kLogPreamble, __func__, writeResult.description);
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+				"%s:%s failed to write into flash memory (\"%s\"), aborting", kLogPreamble, __func__,
+				writeResult.description);
 
 			return;
 		}
 
 		nWrittenTotal += nRead;  // The entire read chunk is expected to be written
 		flushingState.flashMemoryAddress += nRead;
+		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
+			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
+			nWrittenTotal, flushingState.flashMemoryAddress);
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
