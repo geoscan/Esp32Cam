@@ -20,14 +20,6 @@ constexpr std::size_t kFileHeaderOffset = 4;
 static constexpr bool kSaluteIsLittleEndian = false;
 static constexpr bool kCurrentIsLittleEndian = false;
 
-void Bft::SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &aBuffer,
-	File &aFile, bool aIsLastChunk)
-{
-	if (getFlushingState().isFirstChunk()) {
-		aBuffer.slice(kFileHeaderOffset);
-	}
-}
-
 std::tuple<std::size_t, std::size_t> SaluteFlashMemoryTransferImplementor::formatFlashMemoryPageContent(
 	uint8_t *aPageBuffer, File &aFile, bool aIsLastChunk)
 {
