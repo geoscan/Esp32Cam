@@ -59,6 +59,9 @@ void SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlush
 	// Write the file's size at the first `kFileHeaderOffset` bytes of flash page
 	Ut::Cont::EndiannessAwareRepresentation<std::uint32_t, kCurrentIsLittleEndian, kSaluteIsLittleEndian>
 		endiannessAwareFileSizeRepresentation{getFlushingState().flashMemoryAddress};
+	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(),
+		 "%s:%s Initializing file header in Salute flash memory file system, the overall file size = %d B",
+		 kLogPreamble, __func__, getFlushingState().flashMemoryAddress);
 	std::copy(endiannessAwareFileSizeRepresentation.cbeginTarget(), endiannessAwareFileSizeRepresentation.cendTarget(),
 		&flashMemoryPageBuffer[0]);
 	const auto flashMemoryWriteResult = getFlashMemory()->writeBlock(baseFlashMemoryPageOffset, 0,
