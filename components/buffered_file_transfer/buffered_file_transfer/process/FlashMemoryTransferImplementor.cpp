@@ -144,8 +144,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
 
 	if (aIsLastChunk) {
-		flushingState.ongoing = false;
-		// TODO: reset the flushing state
+		flushingState.reset();
 	}
 }
 

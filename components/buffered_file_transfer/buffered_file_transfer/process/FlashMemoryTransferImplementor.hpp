@@ -34,6 +34,12 @@ protected:
 		/// `onFileBufferingFinished`
 		bool ongoing{false};
 
+		/// \brief Will rollback to the initial state
+		void reset()
+		{
+			*this = FlushingState{};
+		}
+
 		bool isFirstChunk() const
 		{
 			return baseFlashMemoryAddress == flashMemoryAddress;
