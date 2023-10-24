@@ -55,6 +55,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 	}
 
+	// TODO: erase the entire chunk
 	if (shouldEraseMemoryBeforeWriting() && !flushingState.ongoing) {
 		auto eraseBlockOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoEraseBlockOffset(
 			flushingState.flashMemoryAddress);
