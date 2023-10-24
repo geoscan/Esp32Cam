@@ -1,162 +1,142 @@
 //
 // SingleBufferRamFileSystem.cpp
 //
-// Created on: May 22, 2023
-//     Author: Dmitry Murashov (d.murashov@geoscan.aero)
+// Created on: Oct 23, 2023
+//     Author: Dmitry Murashov (d <DOT> murashov <AT> geoscan <DOT> aero)
 //
 
-#define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_BUFFERED_FILE_TRANSFER_DEBUG_LEVEL)
-#include <esp_log.h>
-
-#include "buffered_file_transfer/buffered_file_transfer.hpp"
-#include "buffered_file_transfer/storage/File.hpp"
-#include <esp_log.h>
-#include <mutex>
-#include <stdio.h>
+#include "system/os/Logger.hpp"
+#include "utility/al/Algorithm.hpp"
+#include <algorithm>
 
 #include "SingleBufferRamFileSystem.hpp"
 
 namespace Bft {
 
-static constexpr const char *debugPreamble()
+static constexpr const char *kLogPreamble = "SingleBufferRamFileSystem";
+
+FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSizeHint)
 {
-	return "SingleBufferRamFileSystem";
-}
+	if (memoryPool != nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s only one file is supported, ignoring", kLogPreamble,
+			__func__);
 
-struct SynchronizedFileDescriptor {
-	FileDescriptor fileDescriptor;
-	std::mutex mutex;
-
-	inline SynchronizedFileDescriptor()
-	{
-		resetStateUnsafe();
+		return FileDescriptor{nullptr};
 	}
 
-	/// \brief Makes an attempt to allocate a buffer, and map it onto FS
-	bool tryAllocate(std::size_t aFileSize)
-	{
-		static constexpr const char *kWriteBinaryFileMode = "wb+";
-		std::lock_guard<std::mutex> lock{mutex};
+	if (aFileSizeHint == 0) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s invalid file size: %d", kLogPreamble,
+			__func__, aFileSizeHint);
 
-		// Ensure there is no opened file yet
-		if (nullptr != fileDescriptor.raw) {  // Only 1 file is allowed to be opened at a time
-			resetStateUnsafe();
-
-			return false;
-		}
-
-		// Allocate the buffer
-		void *buffer = malloc(aFileSize);
-
-		if (nullptr == buffer) {  // Could not allocate
-			resetStateUnsafe();
-
-			return false;
-		}
-
-		// Map the buffer into FS
-		fileDescriptor.raw = static_cast<void *>(fmemopen(buffer, aFileSize, kWriteBinaryFileMode));
-
-		if (nullptr == fileDescriptor.raw) {
-			resetStateUnsafe();
-
-			return false;
-		}
-
-		return true;
+		return FileDescriptor{nullptr};
 	}
 
-	/// \brief Closes the file, if opened
-	inline void resetStateUnsafe()
-	{
-		if (nullptr != fileDescriptor.raw) {
-			fclose(static_cast<FILE *>(fileDescriptor.raw));
-			fileDescriptor.raw = nullptr;
-		}
-	}
-};
+	memoryPool = new std::uint8_t[aFileSizeHint];
 
-static inline bool validateFileDescriptor(FileDescriptor aFileDescriptor, const char *aContext);
-
-static SynchronizedFileDescriptor sSynchronizedFileDescriptor{};
-
-static inline bool validateFileDescriptor(FileDescriptor aFileDescriptor, const char *aContext)
-{
-	if (!aFileDescriptor.isValid()) {
-		ESP_LOGE(Bft::debugTag(), "%s:%s invalid file descriptor", debugPreamble(), aContext);
-
-		return false;
+	if (memoryPool == nullptr) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to allocate %d B for file \"%s\"",
+			kLogPreamble, __func__, aFileSizeHint, aFileName);
+	} else {
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s successfully allocated %d B for file \"%s\"",
+			kLogPreamble, __func__, aFileSizeHint, aFileName);
+		memoryPoolSize = aFileSizeHint;
 	}
 
-	return true;
-}
-
-FileDescriptor SingleBufferRamFileSystem::tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize)
-{
-	if (sSynchronizedFileDescriptor.tryAllocate(aFileSize)) {
-		ESP_LOGI(Bft::debugTag(), "%s: successfully allocated %d bytes for RAM file %s", debugPreamble(), aFileSize,
-			aFileName);
-
-		return sSynchronizedFileDescriptor.fileDescriptor;
-	}
-
-	ESP_LOGE(Bft::debugTag(), "%s: failed to allocate %d bytes for RAM file %s", debugPreamble(), aFileSize,
-		aFileName);
-
-	return {nullptr};
+	return FileDescriptor{static_cast<void *>(memoryPool)};
 }
 
 void SingleBufferRamFileSystem::closeFile(FileDescriptor aFileDescriptor)
 {
-	validateFileDescriptor(aFileDescriptor, __func__);
-	ESP_LOGI(Bft::debugTag(), "%s: closing file", debugPreamble());
-	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
-	sSynchronizedFileDescriptor.resetStateUnsafe();
-}
-
-std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, const std::uint8_t *aBuffer,
-	std::size_t aBufferSize)
-{
-	validateFileDescriptor(aFileDescriptor, __func__);
-	std::lock_guard<std::mutex> lock{sSynchronizedFileDescriptor.mutex};
-	const std::size_t nWritten = fwrite(static_cast<const void *>(aBuffer), 1, aBufferSize,
-		static_cast<FILE *>(sSynchronizedFileDescriptor.fileDescriptor.raw));
-	ESP_LOGV(Bft::debugTag(), "%s:%s written %d bytes of %d", debugPreamble(), __func__, nWritten, aBufferSize);
-
-	return nWritten;
-}
-
-std::int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, std::int32_t aOffset, int aOrigin)
-{
-	validateFileDescriptor(aFileDescriptor, __func__);
-	constexpr int kSuccess = 0;
-
-	if (fseek(static_cast<FILE *>(aFileDescriptor.raw), aOffset, aOrigin) == kSuccess) {
-		const auto newPosition = ftell(static_cast<FILE *>(aFileDescriptor.raw));
-		ESP_LOGV(Bft::debugTag(), "%s:%s shifted cursor at %d from %s", debugPreamble(), __func__,
-			static_cast<int>(newPosition),
-			aOrigin == PositionStart ? "start" : aOrigin == PositionEnd ? "end" : "current");
-
-		return newPosition;
+	if (aFileDescriptor.raw == memoryPool && aFileDescriptor.isValid()) {
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s closing file: deallocating %d B",
+			kLogPreamble, __func__, memoryPoolSize);
+		delete [] memoryPool;
+		memoryPoolSize = 0;
+		memoryPoolNextWritePosition = 0;
+		memoryPoolCurrentPosition = 0;
 	} else {
-		ESP_LOGE(Bft::debugTag(), "%s:%s failed to shift cursor", debugPreamble(), __func__);
-
-		return FileSystem::PositionError;
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s unrecognized file, ignoring", kLogPreamble,
+			__func__);
 	}
 }
 
-std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, std::uint8_t *aOutBuffer,
-	std::size_t aOutBufferSize)
+std::size_t SingleBufferRamFileSystem::append(FileDescriptor aFileDescriptor, const uint8_t *aBuffer,
+	std::size_t aBufferSize)
 {
-	validateFileDescriptor(aFileDescriptor, __func__);
-	ESP_LOGV(Bft::debugTag(), "%s:%s attempting to read %d bytes", debugPreamble(), __func__, aOutBufferSize);
-	constexpr std::size_t kObjectSize = sizeof(std::uint8_t);
+	// Ensure end of write does not exceed memory pool -- clamp buffer size
+	aBufferSize = Ut::Al::clamp<std::size_t>(aBufferSize, 0, memoryPoolSize - memoryPoolCurrentPosition);
 
-	const auto nRead = fread(static_cast<void *>(aOutBuffer), kObjectSize, aOutBufferSize,
-		static_cast<FILE *>(aFileDescriptor.raw));
-	ESP_LOGV(Bft::debugTag(), "%s:%s read %d bytes of %d", debugPreamble(), __func__, nRead, aOutBufferSize);
+	// Perform write
+	std::copy_n(aBuffer, aBufferSize, memoryPool + memoryPoolCurrentPosition);
 
-	return nRead;
+	// Update current position
+	memoryPoolCurrentPosition += aBufferSize;
+
+	// Update write position
+	memoryPoolNextWritePosition = memoryPoolCurrentPosition;
+
+	return aBufferSize;
 }
 
-}  // namespace Bft
+int32_t SingleBufferRamFileSystem::seek(FileDescriptor aFileDescriptor, int32_t aOffset, int aOrigin)
+{
+	// Validate the descriptor
+	if (aFileDescriptor.raw != static_cast<void *>(memoryPool)) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s could not recognize file descriptor",
+			kLogPreamble, __func__);
+
+		return PositionError;
+	}
+
+	// Initialize `newPosition`
+	std::int32_t newPosition = 0;
+
+	switch (aOrigin) {
+		case PositionCurrent:
+			newPosition = static_cast<std::int32_t>(memoryPoolCurrentPosition);
+
+			break;
+
+		case PositionEnd:
+			newPosition = static_cast<std::int32_t>(memoryPoolNextWritePosition);
+
+			break;
+
+		default:
+			break;
+	}
+
+	newPosition += aOffset;
+	newPosition = Ut::Al::clamp<std::size_t>(newPosition, 0, static_cast<std::int32_t>(memoryPoolNextWritePosition));
+
+	// Update current position
+	const auto cachedMemoryPoolCurrentPosition = static_cast<std::int32_t>(memoryPoolCurrentPosition);  // Previous position
+	memoryPoolCurrentPosition = static_cast<std::int32_t>(newPosition);
+
+	return cachedMemoryPoolCurrentPosition;  // Previous position
+}
+
+std::size_t SingleBufferRamFileSystem::read(FileDescriptor aFileDescriptor, uint8_t *aOutBuffer,
+	std::size_t aOutBufferSize)
+{
+	// Validate the descriptor
+	if (aFileDescriptor.raw != static_cast<void *>(memoryPool)) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s could not recognize file descriptor",
+			kLogPreamble, __func__);
+
+		return 0;
+	}
+
+	// Ensure that `aOutBufferSize` does not exceed the boundaries
+	aOutBufferSize = std::min<std::size_t>(aOutBufferSize, memoryPoolNextWritePosition - memoryPoolCurrentPosition);
+
+	// Read from buffer
+	std::copy_n(memoryPool + memoryPoolCurrentPosition, aOutBufferSize, aOutBuffer);
+
+	// Advance current position
+	memoryPoolCurrentPosition += aOutBufferSize;
+
+	return aOutBufferSize;
+}
+
+}  // Bft
