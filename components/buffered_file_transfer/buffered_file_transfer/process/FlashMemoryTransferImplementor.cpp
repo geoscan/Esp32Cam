@@ -76,9 +76,11 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	const auto pageSize = flashMemory->getFlashMemoryGeometry().writeBlockSize;
 	std::uint8_t pageBuffer[pageSize] = {0xFF};
 	std::size_t nProcessedBufferBytesTotal = 0;
-	std::size_t nProcessedBufferBytesIteration = 0;
 
-	for (;nProcessedBufferBytesTotal != bufferSize; nProcessedBufferBytesTotal += nProcessedBufferBytesIteration) {
+	for (std::size_t nProcessedBufferBytesIteration = 0;
+		nProcessedBufferBytesTotal != bufferSize;
+		nProcessedBufferBytesTotal += nProcessedBufferBytesIteration
+	) {
 		// Make sure we can write over: perform pre-erase
 		if (shouldEraseCurrentFlashMemoryBlock()) {
 			if (!tryEraseCurrentFlashMemoryBlock()) {
@@ -107,7 +109,8 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		onFileBufferingFinishedPreBufferRead(pageBufferSpan, *aFile.get(), aIsLastChunk);
 
 		// Read from buffer
-		nProcessedBufferBytesIteration = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
+		nProcessedBufferBytesIteration = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()),
+			pageBufferSpan.size());
 
 		if (nProcessedBufferBytesIteration == 0) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer %s panicking!",
