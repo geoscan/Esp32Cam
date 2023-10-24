@@ -26,8 +26,8 @@ namespace Bft {
 class SaluteFlashMemoryTransferImplementor : public FlashMemoryTransferImplementor {
 public:
 	using FlashMemoryTransferImplementor::FlashMemoryTransferImplementor;
-private:
 
+private:
 	virtual std::tuple<std::size_t, std::size_t> formatFlashMemoryPageContent(std::uint8_t *aPageBuffer, File &aFile,
 		bool aIsLastChunk) override;
 
