@@ -64,6 +64,8 @@ void HttpFetchTest::runTest()
 		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to retrieve a file", kLogPreamble,
 			__func__);
 	}
+
+	bftFile.reset();
 }
 
 void HttpFetchTest::onFileChunkReceived(const char *aChunk, size_t aChunkSize)
