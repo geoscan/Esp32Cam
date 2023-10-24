@@ -45,7 +45,7 @@ struct FlashMemoryGeometry {
 		return aAddress / writeBlockSize;
 	}
 
-	inline std::uint32_t convertAddressIntoWriteBlockInnerOffset(std::uint32_t aAddress)
+	inline std::uint32_t convertAddressIntoWriteBlockInnerOffset(std::uint32_t aAddress) const
 	{
 		return aAddress % writeBlockSize;
 	}
