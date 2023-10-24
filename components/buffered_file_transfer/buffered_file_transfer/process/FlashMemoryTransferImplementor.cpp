@@ -118,14 +118,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 
 		// Try to flush the buffer into flash memory
-		const auto writeResult = flashMemory->writeBlock(pageOffset, 0,
-			static_cast<const std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
-
-		if (writeResult.errorCode != Sys::ErrorCode::None) {
-			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
-				"%s:%s failed to write into flash memory (\"%s\"), aborting", kLogPreamble, __func__,
-				writeResult.description);
-
+		if (!tryWriteIntoCurrentFlashMemoryPage(pageBuffer)) {
 			return;
 		}
 
@@ -197,6 +190,25 @@ bool FlashMemoryTransferImplementor::tryReadCurrentFlashMemoryPageContent(uint8_
 	if (flashMemoryReadResult.errorCode != Sys::ErrorCode::None) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s failed to read from memory, skipping further handling", kLogPreamble, __func__);
+
+		return false;
+	}
+
+	return true;
+}
+
+bool FlashMemoryTransferImplementor::tryWriteIntoCurrentFlashMemoryPage(const uint8_t *aPageBuffer)
+{
+	const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
+		flushingState.flashMemoryAddress);
+	const auto pageSize = flashMemory->getFlashMemoryGeometry().writeBlockSize;
+	const auto writeResult = flashMemory->writeBlock(pageOffset, 0,
+		aPageBuffer, pageSize);
+
+	if (writeResult.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s failed to write into flash memory (\"%s\"), aborting", kLogPreamble, __func__,
+			writeResult.description);
 
 		return false;
 	}
