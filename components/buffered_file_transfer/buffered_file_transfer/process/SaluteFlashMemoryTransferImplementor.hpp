@@ -31,6 +31,9 @@ private:
 	/// used for writing file size
 	void onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &aBuffer, File &aFile, bool aIsLastChunk) override;
 
+	virtual std::tuple<std::size_t, std::size_t> formatFlashMemoryPageContent(std::uint8_t *aPageBuffer, File &aFile,
+		bool aIsLastChunk) override;
+
 	/// \brief If `aIsLastChunk == true`, will rewrite the first page modifying
 	/// its so it will contain the file's size.
 	void onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk) override;

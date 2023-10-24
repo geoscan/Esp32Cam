@@ -28,6 +28,25 @@ void Bft::SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPreBuffer
 	}
 }
 
+std::tuple<std::size_t, std::size_t> SaluteFlashMemoryTransferImplementor::formatFlashMemoryPageContent(
+	uint8_t *aPageBuffer, File &aFile, bool aIsLastChunk)
+{
+	if (getFlushingState().isFirstChunk()) {  // Reserve 4 bytes to store file size there
+		const auto pageBufferInnerOffset = kFileHeaderOffset;
+		const auto maxWriteSize = getFlashMemory()->getFlashMemoryGeometry().writeBlockSize - pageBufferInnerOffset;
+
+		if (maxWriteSize > 0) {
+			const auto nRead = aFile.read(aPageBuffer + pageBufferInnerOffset, maxWriteSize);
+
+			return {nRead + pageBufferInnerOffset, nRead};
+		} else {
+			return {0, 0};
+		}
+	} else {  // Handle as usual
+		FlashMemoryTransferImplementor::formatFlashMemoryPageContent(aPageBuffer, aFile, aIsLastChunk);
+	}
+}
+
 void SaluteFlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlushed(File &, bool aIsLastChunk)
 {
 	if (!aIsLastChunk) {
