@@ -7,6 +7,7 @@
 
 #include "buffered_file_transfer/buffered_file_transfer.hpp"
 #include "system/os/Logger.hpp"
+#include "system/os/Thread.hpp"
 #include "wifi.h"
 
 #include "WifiPreconnectHttpFetchTest.hpp"
@@ -26,10 +27,14 @@ WifiPreconnectHttpFetchTest::WifiPreconnectHttpFetchTest(const char *aWifiSsid, 
 void WifiPreconnectHttpFetchTest::runTest()
 {
 	// Connect to target network
-	constexpr std::size_t knAttempts = 3;
+	constexpr std::size_t knAttempts = 2;
 	esp_err_t connectionResult = ESP_FAIL;
+	constexpr std::size_t kDelayMs = 40;
 
-	for (std::size_t iAttempt = knAttempts; iAttempt > 0 && connectionResult != ESP_OK; --iAttempt) {
+	for (std::size_t iAttempt = knAttempts;
+		iAttempt > 0 && connectionResult != ESP_OK;
+		--iAttempt, Sys::Thread::delayMs(kDelayMs)
+	) {
 		connectionResult = wifiStaConnect(wifiSsid, wifiPassword, nullptr, nullptr, nullptr);  // Assign IP over DHCP
 	}
 
