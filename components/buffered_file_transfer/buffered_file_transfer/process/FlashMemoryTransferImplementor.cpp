@@ -80,6 +80,16 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	std::uint8_t pageBuffer[pageSize] = {0xFF};
 
 	for (std::size_t nRead = 0; nWrittenTotal != fileSize; nWrittenTotal += nRead) {
+
+		if (nWrittenTotal > fileSize) {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+				"%s:%s the length of the written chunk (%d B) has exceeded the buffer size (%d B), aborting!",
+					kLogPreamble, __func__);
+			aIsLastChunk = true;
+
+			break;
+		}
+
 		Ut::Cont::Buffer pageBufferSpan{pageBuffer, pageSize};  // Stage handlers may slice the buffer (advance the pointer to leave some space for further markup management)
 		const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
 			flushingState.flashMemoryAddress);
