@@ -229,10 +229,6 @@ bool FlashMemoryTransferImplementor::tryWriteIntoCurrentFlashMemoryPage(const ui
 	return true;
 }
 
-void FlashMemoryTransferImplementor::onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &, File &, bool)
-{
-}
-
 void FlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlushed(File &, bool)
 {
 }

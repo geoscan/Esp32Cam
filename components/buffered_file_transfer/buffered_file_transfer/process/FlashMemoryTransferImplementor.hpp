@@ -98,15 +98,6 @@ private:
 	/// size
 	bool tryWriteIntoCurrentFlashMemoryPage(const std::uint8_t *aPageBuffer);
 
-	/// \brief Stage hook. Performs initiation sequence on the first chunk.
-	/// Added for taking account for memory layouts. Implementors MUST NOT
-	/// assume ownership of `aBuffer`, or `aFile`.
-	/// \pre `baseFlashMemoryAddress` and `flashMemoryAddress` are GUARANTEED
-	/// to be correctly initialized, and representative of the current state
-	/// \pre The buffer is GUARANTEED to contain the flash memory page's
-	/// content
-	virtual void onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &aBuffer, File &aFile, bool aIsLastChunk);
-
 	/// \brief Stage hook. Added to perform memory layout-related updates.
 	/// Implementors MUST NOT assume ownership of `aBuffer`, or `aFile`.
 	/// \pre `baseFlashMemoryAddress` and `flashMemoryAddress` are GUARANTEED
