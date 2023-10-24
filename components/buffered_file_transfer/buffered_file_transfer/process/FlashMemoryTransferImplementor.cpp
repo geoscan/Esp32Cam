@@ -67,17 +67,18 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	// Write file chunk-by-chunk
 	flushingState.ongoing = true;
 
-	const auto fileSize = aFile->getCurrentPosition();
+	const auto bufferSize = aFile->getCurrentPosition();
 	Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s the file's current size is %d", kLogPreamble,
-		__func__, fileSize);
+		__func__, bufferSize);
 	aFile->seek(0);  // Reset for reading from the beginning
-	std::size_t nWrittenTotal = 0;
 
 	// convert current address into page id.
 	const auto pageSize = flashMemory->getFlashMemoryGeometry().writeBlockSize;
 	std::uint8_t pageBuffer[pageSize] = {0xFF};
+	std::size_t nProcessedBufferBytesTotal = 0;
+	std::size_t nProcessedBufferBytesIteration = 0;
 
-	for (std::size_t nRead = 0; nWrittenTotal != fileSize; nWrittenTotal += nRead) {
+	for (;nProcessedBufferBytesTotal != bufferSize; nProcessedBufferBytesTotal += nProcessedBufferBytesIteration) {
 		// Make sure we can write over: perform pre-erase
 		if (shouldEraseCurrentFlashMemoryBlock()) {
 			if (!tryEraseCurrentFlashMemoryBlock()) {
@@ -87,7 +88,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 
 		// Size validation
-		if (nWrittenTotal > fileSize) {
+		if (nProcessedBufferBytesTotal > bufferSize) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 				"%s:%s the length of the written chunk (%d B) has exceeded the buffer size (%d B), aborting!",
 					kLogPreamble, __func__);
@@ -109,9 +110,9 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		onFileBufferingFinishedPreBufferRead(pageBufferSpan, *aFile.get(), aIsLastChunk);
 
 		// Read from buffer
-		nRead = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
+		nProcessedBufferBytesIteration = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()), pageBufferSpan.size());
 
-		if (nRead == 0) {
+		if (nProcessedBufferBytesIteration == 0) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer %s panicking!",
 				kLogPreamble, __func__, aIsLastChunk ? "(last chunk)" : "");
 			Sys::panic();
@@ -125,14 +126,14 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		flushingState.flashMemoryAddress += pageSize;
 		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
 			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
-			nWrittenTotal, flushingState.flashMemoryAddress);
+			nProcessedBufferBytesTotal, flushingState.flashMemoryAddress);
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
 
 	if (aIsLastChunk) {
 		Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "%s:%s finalizing write, wrote %d B overall",
-			kLogPreamble, __func__, nWrittenTotal);
+			kLogPreamble, __func__, nProcessedBufferBytesTotal);
 		flushingState.reset();
 	}
 }
