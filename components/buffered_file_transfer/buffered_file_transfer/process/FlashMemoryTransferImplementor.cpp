@@ -99,18 +99,14 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			break;
 		}
 
-		Ut::Cont::Buffer pageBufferSpan{pageBuffer, pageSize};  // Stage handlers may slice the buffer (advance the pointer to leave some space for further markup management)
-
 		if (!tryReadCurrentFlashMemoryPageContent(pageBuffer)) {  // TODO: is pre-read necessary
 			return;
 		}
 
-		// Handle the buffer, slice if needed
-		onFileBufferingFinishedPreBufferRead(pageBufferSpan, *aFile.get(), aIsLastChunk);
-
 		// Read from buffer
-		nProcessedBufferBytesIteration = aFile->read(static_cast<std::uint8_t *>(pageBufferSpan.data()),
-			pageBufferSpan.size());
+		std::size_t nBytesWrittenIntoPage = 0;
+		std::tie(nBytesWrittenIntoPage, nProcessedBufferBytesIteration) = formatFlashMemoryPageContent(pageBuffer,
+			*aFile.get(), aIsLastChunk);
 
 		if (nProcessedBufferBytesIteration == 0) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer %s panicking!",
@@ -123,10 +119,10 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			return;
 		}
 
-		flushingState.flashMemoryAddress += pageSize;
+		flushingState.flashMemoryAddress += nBytesWrittenIntoPage;
 		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
 			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
-			nProcessedBufferBytesTotal, flushingState.flashMemoryAddress);
+			nProcessedBufferBytesIteration, nProcessedBufferBytesTotal);
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
@@ -196,6 +192,22 @@ bool FlashMemoryTransferImplementor::tryReadCurrentFlashMemoryPageContent(uint8_
 	}
 
 	return true;
+}
+
+std::tuple<std::size_t, std::size_t> FlashMemoryTransferImplementor::formatFlashMemoryPageContent(uint8_t *aPageBuffer,
+	File &aFile, bool aIsLastChunk)
+{
+	const auto pageBufferInnerOffset = getFlashMemory()->getFlashMemoryGeometry().convertAddressIntoWriteBlockInnerOffset(
+		getFlushingState().baseFlashMemoryAddress);
+	const auto maxWriteSize = getFlashMemory()->getFlashMemoryGeometry().writeBlockSize - pageBufferInnerOffset;
+
+	if (maxWriteSize > 0) {
+		const auto nProcessed = aFile.read(aPageBuffer + pageBufferInnerOffset, maxWriteSize);
+
+		return {nProcessed, nProcessed};
+	} else {
+		return {0, 0};
+	}
 }
 
 bool FlashMemoryTransferImplementor::tryWriteIntoCurrentFlashMemoryPage(const uint8_t *aPageBuffer)

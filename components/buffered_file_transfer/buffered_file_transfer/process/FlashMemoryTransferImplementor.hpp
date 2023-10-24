@@ -84,6 +84,15 @@ private:
 	/// size
 	bool tryReadCurrentFlashMemoryPageContent(std::uint8_t *aPageBuffer);
 
+	/// \brief Initializes `aPageBuffer`.
+	/// \returns tuple of 2: (1) Number of bytes written into `aPageBuffer`,
+	/// (2) number of bytes read from `aFile`
+	/// \pre FlushingState::flashMemoryAddress is GUARANTEED to point at the
+	/// next write address
+	/// \pre `getFlashMemory()` is GUARANTEED to return valid pointer
+	virtual std::tuple<std::size_t, std::size_t> formatFlashMemoryPageContent(std::uint8_t *aPageBuffer, File &aFile,
+		bool aIsLastChunk);
+
 	/// \brief Writes `aPageBuffer` into the current flash memory page
 	/// \pre Size of `aPageBuffer` MUST match the actual flash memory page
 	/// size
