@@ -142,6 +142,8 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
 
 	if (aIsLastChunk) {
+		Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "%s:%s finalizing write, wrote %d B overall",
+			kLogPreamble, __func__, nWrittenTotal);
 		flushingState.reset();
 	}
 }
@@ -180,6 +182,9 @@ bool FlashMemoryTransferImplementor::tryEraseCurrentFlashMemoryBlock()
 
 		return false;
 	} else {
+		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(), "%s:%s successfully erase flash memory block # %d",
+			kLogPreamble, __func__, eraseBlockOffset);
+
 		return true;
 	}
 
