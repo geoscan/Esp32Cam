@@ -97,18 +97,13 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 
 		Ut::Cont::Buffer pageBufferSpan{pageBuffer, pageSize};  // Stage handlers may slice the buffer (advance the pointer to leave some space for further markup management)
-		const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
-			flushingState.flashMemoryAddress);
 
-		// Read the page's content
-		const auto flashMemoryReadResult = flashMemory->readBlock(pageOffset, 0, pageBuffer, pageSize);
-
-		if (flashMemoryReadResult.errorCode != Sys::ErrorCode::None) {
-			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
-				"%s:%s failed to read from memory, skipping further handling", kLogPreamble, __func__);
-
+		if (!tryReadCurrentFlashMemoryPageContent(pageBuffer)) {
 			return;
 		}
+
+		const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
+			flushingState.flashMemoryAddress);
 
 		// Handle the buffer, slice if needed
 		onFileBufferingFinishedPreBufferRead(pageBufferSpan, *aFile.get(), aIsLastChunk);
@@ -189,6 +184,24 @@ bool FlashMemoryTransferImplementor::tryEraseCurrentFlashMemoryBlock()
 		return true;
 	}
 
+}
+
+bool FlashMemoryTransferImplementor::tryReadCurrentFlashMemoryPageContent(uint8_t *aPageBuffer)
+{
+	const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
+		flushingState.flashMemoryAddress);
+	const auto pageSize = flashMemory->getFlashMemoryGeometry().writeBlockSize;
+	constexpr std::uint32_t kInnerPageOffset = 0;
+	const auto flashMemoryReadResult = flashMemory->readBlock(pageOffset, kInnerPageOffset, aPageBuffer, pageSize);
+
+	if (flashMemoryReadResult.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
+			"%s:%s failed to read from memory, skipping further handling", kLogPreamble, __func__);
+
+		return false;
+	}
+
+	return true;
 }
 
 void FlashMemoryTransferImplementor::onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &, File &, bool)

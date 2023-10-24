@@ -79,6 +79,8 @@ private:
 	/// \returns true, if success, false otherwise
 	bool tryEraseCurrentFlashMemoryBlock();
 
+	bool tryReadCurrentFlashMemoryPageContent(std::uint8_t *aPageBuffer);
+
 	/// \brief Stage hook. Performs initiation sequence on the first chunk.
 	/// Added for taking account for memory layouts. Implementors MUST NOT
 	/// assume ownership of `aBuffer`, or `aFile`.
