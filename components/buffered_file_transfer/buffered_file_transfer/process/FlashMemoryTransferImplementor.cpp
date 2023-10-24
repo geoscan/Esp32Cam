@@ -49,10 +49,11 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		if (!memoryPartitionTable->tryGetFlashMemoryAddressByFile(*aFile.get(), flushingState.baseFlashMemoryAddress)) {
 			Sys::Logger::write(Sys::LogLevel::Warning, debugTag(),
 				"%s:%s failed to get memory address by file name, skipping", kLogPreamble, __func__);
-			flushingState.baseFlashMemoryAddress = flushingState.flashMemoryAddress;
 
 			return;
 		}
+
+		flushingState.flashMemoryAddress = flushingState.baseFlashMemoryAddress;
 	}
 
 	// Make sure we can write over: perform pre-erase
