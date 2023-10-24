@@ -129,7 +129,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			return;
 		}
 
-		flushingState.flashMemoryAddress += nRead;
+		flushingState.flashMemoryAddress += pageSize;
 		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
 			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
 			nWrittenTotal, flushingState.flashMemoryAddress);
