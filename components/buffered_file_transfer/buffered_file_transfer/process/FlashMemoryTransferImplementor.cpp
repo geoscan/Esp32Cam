@@ -103,9 +103,6 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 			return;
 		}
 
-		const auto pageOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoWriteBlockOffset(
-			flushingState.flashMemoryAddress);
-
 		// Handle the buffer, slice if needed
 		onFileBufferingFinishedPreBufferRead(pageBufferSpan, *aFile.get(), aIsLastChunk);
 
