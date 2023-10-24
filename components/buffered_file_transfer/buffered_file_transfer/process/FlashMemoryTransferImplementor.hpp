@@ -80,9 +80,13 @@ private:
 	bool tryEraseCurrentFlashMemoryBlock();
 
 	/// \brief Reads the current flash memory page's content into `aPageBuffer`
+	/// \pre Size of `aPageBuffer` MUST match the actual flash memory page
+	/// size
 	bool tryReadCurrentFlashMemoryPageContent(std::uint8_t *aPageBuffer);
 
 	/// \brief Writes `aPageBuffer` into the current flash memory page
+	/// \pre Size of `aPageBuffer` MUST match the actual flash memory page
+	/// size
 	bool tryWriteIntoCurrentFlashMemoryPage(const std::uint8_t *aPageBuffer);
 
 	/// \brief Stage hook. Performs initiation sequence on the first chunk.
