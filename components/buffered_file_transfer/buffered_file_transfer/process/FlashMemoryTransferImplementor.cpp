@@ -55,21 +55,11 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 	}
 
-	// Make sure we can write over
-	if (shouldEraseMemoryBeforeWriting()) {
-		auto eraseBlockOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoEraseBlockOffset(
-			flushingState.flashMemoryAddress);
-
-		if (!flushingState.ongoing // The process has just started
-			|| flushingState.lastErasedBlockOffset != eraseBlockOffset  // This block has not been erased yet
-		) {
-			const auto eraseResult = flashMemory->eraseBlock(eraseBlockOffset);
-			flushingState.lastErasedBlockOffset = eraseBlockOffset;
-
-			if (eraseResult.errorCode != Sys::ErrorCode::None) {
-				Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to erase memory, ignoring",  // TODO: abort the process
-					kLogPreamble, __func__);
-			}
+	// Make sure we can write over: perform pre-erase
+	if (shouldEraseCurrentFlashMemoryBlock()) {
+		if (!tryEraseCurrentFlashMemoryBlock()) {
+			Sys::Logger::write(Sys::LogLevel::Warning, debugTag(),
+				"%s:%s failed to erase current memory block, ignoring", kLogPreamble, __func__);  // TODO: critical fail?
 		}
 	}
 
@@ -87,7 +77,15 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 	std::uint8_t pageBuffer[pageSize] = {0xFF};
 
 	for (std::size_t nRead = 0; nWrittenTotal != fileSize; nWrittenTotal += nRead) {
+		// Make sure we can write over: perform pre-erase
+		if (shouldEraseCurrentFlashMemoryBlock()) {
+			if (!tryEraseCurrentFlashMemoryBlock()) {
+				Sys::Logger::write(Sys::LogLevel::Warning, debugTag(),
+					"%s:%s failed to erase current memory block, ignoring", kLogPreamble, __func__);  // TODO: critical fail?
+			}
+		}
 
+		// Size validation
 		if (nWrittenTotal > fileSize) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 				"%s:%s the length of the written chunk (%d B) has exceeded the buffer size (%d B), aborting!",
@@ -151,6 +149,40 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 bool FlashMemoryTransferImplementor::shouldEraseMemoryBeforeWriting() const
 {
 	return true;
+}
+
+bool FlashMemoryTransferImplementor::shouldEraseCurrentFlashMemoryBlock() const
+{
+	if (shouldEraseMemoryBeforeWriting()) {
+		auto eraseBlockOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoEraseBlockOffset(
+			flushingState.flashMemoryAddress);
+
+		if (!flushingState.ongoing // The process has just started
+			|| flushingState.lastErasedBlockOffset != eraseBlockOffset  // This block has not been erased yet
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool FlashMemoryTransferImplementor::tryEraseCurrentFlashMemoryBlock()
+{
+	auto eraseBlockOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoEraseBlockOffset(
+		flushingState.flashMemoryAddress);
+	const auto eraseResult = flashMemory->eraseBlock(eraseBlockOffset);
+	flushingState.lastErasedBlockOffset = eraseBlockOffset;
+
+	if (eraseResult.errorCode != Sys::ErrorCode::None) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to erase memory, ignoring",  // TODO: abort the process
+			kLogPreamble, __func__);
+
+		return false;
+	} else {
+		return true;
+	}
+
 }
 
 void FlashMemoryTransferImplementor::onFileBufferingFinishedPreBufferRead(Ut::Cont::Buffer &, File &, bool)

@@ -71,6 +71,14 @@ private:
 	/// \brief General policy: whether pre-erase should be performed
 	bool shouldEraseMemoryBeforeWriting() const;
 
+	/// \brief using `FlushingState` and `flashMemory`, checks whether
+	/// erase is needed.
+	bool shouldEraseCurrentFlashMemoryBlock() const;
+
+	/// \brief Makes an attempt to erase current flash memory block
+	/// \returns true, if success, false otherwise
+	bool tryEraseCurrentFlashMemoryBlock();
+
 	/// \brief Stage hook. Performs initiation sequence on the first chunk.
 	/// Added for taking account for memory layouts. Implementors MUST NOT
 	/// assume ownership of `aBuffer`, or `aFile`.
