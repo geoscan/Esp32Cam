@@ -98,7 +98,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 
 		Ut::Cont::Buffer pageBufferSpan{pageBuffer, pageSize};  // Stage handlers may slice the buffer (advance the pointer to leave some space for further markup management)
 
-		if (!tryReadCurrentFlashMemoryPageContent(pageBuffer)) {
+		if (!tryReadCurrentFlashMemoryPageContent(pageBuffer)) {  // TODO: is pre-read necessary
 			return;
 		}
 
