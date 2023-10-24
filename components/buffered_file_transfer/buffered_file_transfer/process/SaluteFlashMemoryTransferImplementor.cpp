@@ -43,7 +43,7 @@ std::tuple<std::size_t, std::size_t> SaluteFlashMemoryTransferImplementor::forma
 			return {0, 0};
 		}
 	} else {  // Handle as usual
-		FlashMemoryTransferImplementor::formatFlashMemoryPageContent(aPageBuffer, aFile, aIsLastChunk);
+		return FlashMemoryTransferImplementor::formatFlashMemoryPageContent(aPageBuffer, aFile, aIsLastChunk);
 	}
 }
 
