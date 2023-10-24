@@ -27,6 +27,9 @@ protected:
 		/// `onFileBufferingFinished`
 		std::uint32_t flashMemoryAddress{0};
 
+		/// \brief Prevents the same block from being erased twice.
+		std::uint32_t lastErasedBlockOffset{0};
+
 		/// Stage marker. Valid account multiple invokes to
 		/// `onFileBufferingFinished`
 		bool ongoing{false};

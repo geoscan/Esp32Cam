@@ -55,15 +55,21 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		}
 	}
 
-	// TODO: erase the entire chunk
-	if (shouldEraseMemoryBeforeWriting() && !flushingState.ongoing) {
+	// Make sure we can write over
+	if (shouldEraseMemoryBeforeWriting()) {
 		auto eraseBlockOffset = flashMemory->getFlashMemoryGeometry().convertAddressIntoEraseBlockOffset(
 			flushingState.flashMemoryAddress);
-		const auto eraseResult = flashMemory->eraseBlock(eraseBlockOffset);
 
-		if (eraseResult.errorCode != Sys::ErrorCode::None) {
-			Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to erase memory, skipping",
-				kLogPreamble, __func__);
+		if (!flushingState.ongoing // The process has just started
+			|| flushingState.lastErasedBlockOffset != eraseBlockOffset  // This block has not been erased yet
+		) {
+			const auto eraseResult = flashMemory->eraseBlock(eraseBlockOffset);
+			flushingState.lastErasedBlockOffset = eraseBlockOffset;
+
+			if (eraseResult.errorCode != Sys::ErrorCode::None) {
+				Sys::Logger::write(Sys::LogLevel::Warning, debugTag(), "%s:%s failed to erase memory, ignoring",  // TODO: abort the process
+					kLogPreamble, __func__);
+			}
 		}
 	}
 
