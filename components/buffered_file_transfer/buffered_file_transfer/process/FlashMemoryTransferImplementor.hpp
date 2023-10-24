@@ -68,6 +68,7 @@ protected:
 	}
 
 private:
+	/// \brief General policy: whether pre-erase should be performed
 	bool shouldEraseMemoryBeforeWriting() const;
 
 	/// \brief Stage hook. Performs initiation sequence on the first chunk.
