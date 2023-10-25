@@ -91,11 +91,13 @@ private:
 	/// \brief Reads the current flash memory page's content into `aPageBuffer`
 	/// \pre Size of `aPageBuffer` MUST match the actual flash memory page
 	/// size
+	/// \pre `aPageBuffer` is not nullptr
 	bool tryReadCurrentFlashMemoryPageContent(std::uint8_t *aPageBuffer);
 
 	/// \brief Writes `aPageBuffer` into the current flash memory page
 	/// \pre Size of `aPageBuffer` MUST match the actual flash memory page
 	/// size
+	/// \pre `aPageBuffer` is not nullptr
 	bool tryWriteIntoCurrentFlashMemoryPage(const std::uint8_t *aPageBuffer);
 
 	/// \brief Stage hook. Added to perform memory layout-related updates.
