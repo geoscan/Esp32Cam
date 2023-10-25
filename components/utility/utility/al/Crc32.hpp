@@ -79,6 +79,15 @@ struct Crc32 {
 	}
 
 	static std::uint32_t updateCrc32(uint32_t cs, const void *buffer, std::uint32_t len);
+
+	std::uint32_t update(const void *aBuffer, std::uint32_t aBufferLength)
+	{
+		checksum = updateCrc32(checksum, aBuffer, aBufferLength);
+
+		return checksum;
+	}
+
+	std::uint32_t checksum{0xFFFFFFFF};
 };
 
 }  // Al
