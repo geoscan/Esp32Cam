@@ -141,3 +141,8 @@ entities:
   write, close, seek;
 - A file is viewed as an array of bytes;
 
+
+## Entry points
+
+- `HttpFetch`
+- `BufferedFileTransfer`
