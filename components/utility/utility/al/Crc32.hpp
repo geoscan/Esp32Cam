@@ -93,6 +93,11 @@ struct Crc32 {
 		return checksum;
 	}
 
+	operator std::uint32_t() const
+	{
+		return checksum;
+	}
+
 	std::uint32_t checksum{getInitialCrc32Value()};
 };
 
