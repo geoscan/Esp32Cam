@@ -13,6 +13,11 @@
 namespace Ut {
 namespace Al {
 
+constexpr std::uint32_t getInitialCrc32Value()
+{
+	return 0xFFFFFFFF;
+}
+
 struct Crc32Constexpr {
 	static constexpr std::uint32_t kCrcTable[256] = {
 		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -62,7 +67,8 @@ struct Crc32Constexpr {
 
 	template <int kBytesLength, class ByteType>
 	static constexpr std::uint32_t calculateCrc32(ByteType (&aBytes)[kBytesLength],
-		std::uint32_t aBytesLength = kBytesLength, std::uint32_t aPreviousCrc = 0xFFFFFFFF, std::uint32_t aPosition = 0)
+		std::uint32_t aBytesLength = kBytesLength, std::uint32_t aPreviousCrc = getInitialCrc32Value(),
+		std::uint32_t aPosition = 0)
 	{
 		return aPosition == aBytesLength
 			? aPreviousCrc
@@ -75,7 +81,7 @@ struct Crc32Constexpr {
 struct Crc32 {
 	static std::uint32_t calculateCrc32(const void *data, std::uint32_t len)
 	{
-		return updateCrc32(0xFFFFFFFF, data, len);
+		return updateCrc32(getInitialCrc32Value(), data, len);
 	}
 
 	static std::uint32_t updateCrc32(uint32_t cs, const void *buffer, std::uint32_t len);
@@ -87,7 +93,7 @@ struct Crc32 {
 		return checksum;
 	}
 
-	std::uint32_t checksum{0xFFFFFFFF};
+	std::uint32_t checksum{getInitialCrc32Value()};
 };
 
 }  // Al
