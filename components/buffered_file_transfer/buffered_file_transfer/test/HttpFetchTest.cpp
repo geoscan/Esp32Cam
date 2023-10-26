@@ -27,7 +27,8 @@ HttpFetchTest::HttpFetchTest(const char *aFileHttpUrl, const char *aBufferedFile
 void HttpFetchTest::runTest()
 {
 	Sys::Logger::write(Sys::LogLevel::Info, debugTag(),
-		"%s:%s initializing file transfer name=\"%s\" BFT file name=\"%s\"", kLogPreamble, __func__);
+		"%s:%s initializing file transfer name=\"%s\" BFT file name=\"%s\"", kLogPreamble, __func__, fileHttpUrl,
+		bufferedFileTransferFileName);
 	fetchFile(fileHttpUrl, bufferedFileTransferFileName);
 }
 
