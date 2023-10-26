@@ -8,6 +8,7 @@
 #include "buffered_file_transfer/buffered_file_transfer.hpp"
 #include "system/os/Assert.hpp"
 #include "system/os/Logger.hpp"
+#include "utility/al/Algorithm.hpp"
 
 #include "FlashMemoryTransferImplementor.hpp"
 
@@ -108,6 +109,12 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		std::tie(nBytesWrittenIntoPage, nProcessedBufferBytesIteration) = formatFlashMemoryPageContent(pageBuffer,
 			*aFile.get(), aIsLastChunk);
 
+		if (shouldVerifyCrc32()) {
+			const auto pageBufferInnerOffset = flashMemory->getFlashMemoryGeometry()
+				.convertAddressIntoWriteBlockInnerOffset(flushingState.flashMemoryAddress);
+			updatePageBufferCrc32(pageBuffer, nBytesWrittenIntoPage);
+		}
+
 		if (nProcessedBufferBytesIteration == 0) {
 			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s failed to read from buffer %s panicking!",
 				kLogPreamble, __func__, aIsLastChunk ? "(last chunk)" : "");
@@ -123,6 +130,22 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		Sys::Logger::write(Sys::LogLevel::Verbose, debugTag(),
 			"%s:%s wrote %d B during the current flushing iteration, overall %d B", kLogPreamble, __func__,
 			nProcessedBufferBytesIteration, nProcessedBufferBytesTotal);
+	}
+
+	// Verify CRC32, call before `onFileBufferingFinishedPostChunkFlushed` so we're sure flash memory content is not changed
+	if (aIsLastChunk && shouldVerifyCrc32()) {
+		Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s starting CRC32 validation on the last chunk",
+			kLogPreamble, __func__);
+
+		updateFlashMemoryCrc32();
+
+		if (flushingState.crc32CalculationState.isMatch()) {
+			Sys::Logger::write(Sys::LogLevel::Info, debugTag(), "%s:%s CRC32 validation has succeeded", kLogPreamble,
+				__func__);
+		} else {
+			Sys::Logger::write(Sys::LogLevel::Error, debugTag(), "%s:%s CRC32 validation has failed, continuing",
+				kLogPreamble, __func__);
+		}
 	}
 
 	onFileBufferingFinishedPostChunkFlushed(*aFile.get(), aIsLastChunk);
@@ -231,6 +254,68 @@ bool FlashMemoryTransferImplementor::tryWriteIntoCurrentFlashMemoryPage(const ui
 
 void FlashMemoryTransferImplementor::onFileBufferingFinishedPostChunkFlushed(File &, bool)
 {
+}
+
+void FlashMemoryTransferImplementor::updatePageBufferCrc32(const std::uint8_t *aPageBufferChunk,
+	std::size_t aPageBufferChunkLength)
+{
+	flushingState.crc32CalculationState.bufferReadChecksum.update(aPageBufferChunk, aPageBufferChunkLength);
+}
+
+void FlashMemoryTransferImplementor::updateFlashMemoryCrc32(std::uint8_t *aPageCapacityBuffer)
+{
+	if (!flushingState.ongoing) {
+		Sys::Logger::write(Sys::LogLevel::Warning, debugTag(),
+			"%s:%s will not calculate the checksum, because the current base flash memory address cannot be reliable, "
+			"skipping", kLogPreamble, __func__);
+
+		return;
+	}
+
+	auto flashMemoryReadAddress = flushingState.baseFlashMemoryAddress;
+	const auto flashMemoryPageSize = getFlashMemory()->getFlashMemoryGeometry().writeBlockSize;
+	bool shouldDeallocateCapacityBuffer = false;  // TODO: handle deallocation
+
+	if (aPageCapacityBuffer == nullptr) {
+		shouldDeallocateCapacityBuffer = true;
+		aPageCapacityBuffer = new std::uint8_t[flashMemoryPageSize];
+	}
+
+	for (flashMemoryReadAddress = flushingState.baseFlashMemoryAddress;
+		flashMemoryReadAddress != flushingState.flashMemoryAddress;
+	) {
+		const auto bufferReadSize = Ut::Al::clamp<std::size_t>(
+			flushingState.flashMemoryAddress - flashMemoryReadAddress, 0, flashMemoryPageSize);
+		const auto readBlockId = getFlashMemory()->getFlashMemoryGeometry()
+			.convertAddressIntoWriteBlockOffset(flashMemoryReadAddress);
+		const auto readBlockInnerOffset = getFlashMemory()->getFlashMemoryGeometry()
+			.convertAddressIntoWriteBlockInnerOffset(flashMemoryReadAddress);  // Should always be zero. Keeps the code correct in the general case
+		const auto flashMemoryReadResult = getFlashMemory()->readBlock(readBlockId, readBlockInnerOffset,
+			aPageCapacityBuffer, bufferReadSize);
+		flashMemoryReadAddress += bufferReadSize;
+
+		if (flashMemoryReadResult.errorCode != Sys::ErrorCode::None) {
+			Sys::Logger::write(Sys::LogLevel::Warning, debugTag(),
+				"%s:%s failed to read from flash memory, aborting validation", kLogPreamble, __func__);
+
+			break;
+		}
+
+		flushingState.crc32CalculationState.flashMemoryReadChecksum.update(aPageCapacityBuffer, bufferReadSize);
+	}
+
+	Sys::Logger::write(Sys::LogLevel::Debug, debugTag(), "%s:%s finishing CRC32 validation, processed %d B",
+		kLogPreamble, __func__, flashMemoryReadAddress - flushingState.baseFlashMemoryAddress);
+
+
+	if (shouldDeallocateCapacityBuffer) {
+		delete [] aPageCapacityBuffer;
+	}
+}
+
+inline bool FlashMemoryTransferImplementor::Crc32CalculationState::isMatch() const
+{
+	return bufferReadChecksum.getValue() == flashMemoryReadChecksum.getValue();
 }
 
 }  // Bft

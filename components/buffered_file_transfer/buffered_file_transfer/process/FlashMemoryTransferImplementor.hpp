@@ -11,12 +11,26 @@
 #include "buffered_file_transfer/process/TransferImplementor.hpp"
 #include "buffered_file_transfer/storage/FlashMemoryPartitionTable.hpp"
 #include "system/middleware/FlashMemory.hpp"
+#include "utility/al/Crc32.hpp"
 #include "utility/cont/Buffer.hpp"
 
 namespace Bft {
 
 class FlashMemoryTransferImplementor : public TransferImplementor {
 protected:
+	/// \brief Synchronized w/ `FlushingState`. Used in content verification
+	/// \sa `updatePageBufferCrc32`
+	struct Crc32CalculationState {
+		/// \brief Checksum calculated during buffer flushing process
+		Ut::Al::Crc32 bufferReadChecksum{};
+
+		/// \brief Checksum ferified post-factum, after the entire flushing
+		/// process is finished
+		Ut::Al::Crc32 flashMemoryReadChecksum{};
+
+		bool isMatch() const;
+	};
+
 	/// \brief Provides context for current flushing iteration
 	struct FlushingState {
 		/// The beginning of a file in the flash memory. Valid across multiple
@@ -33,6 +47,8 @@ protected:
 		/// Stage marker. Valid account multiple invokes to
 		/// `onFileBufferingFinished`
 		bool ongoing{false};
+
+		Crc32CalculationState crc32CalculationState = {};
 
 		/// \brief Will rollback to the initial state
 		void reset()
@@ -107,6 +123,29 @@ private:
 	/// \pre `flushingState.flashMemoryAddress` is GUARANTEED to store the
 	/// accumulated offset.
 	virtual void onFileBufferingFinishedPostChunkFlushed(File &aFile, bool aIsLastChunk);
+
+	/// \brief Hook that is invoked right after next memory page is formatted
+	/// \param `anReadBytes` how many bytes were read from `aFile` during
+	/// `formatFlashMemoryPageContent` call
+	/// \pre GUARANTEED to be invoked right after `formatFlashMemoryPageContent(...)`
+	/// \pre FlushingState.flashMemoryAddress is GUARANTEED to retain the current
+	/// write position after `formatFlashMemoryPageContent` is invoked
+	void updatePageBufferCrc32(const std::uint8_t *aPageBufferChunk, std::size_t aPageBufferChunkLength);
+
+	/// \brief Called at the end of the flushing. Will read the entire flash
+	/// memory content, and initialize `flashMemoryReadChecksum`.
+	/// \param `aPageCapacityBuffer` is an optional buffer. Providing it will
+	/// save a couple kB of memory.
+	/// \pre `aPageCapacityBuffer` is guaranteed to exceed the capacity of a flash
+	/// memory device
+	/// \pre `flushingState.flashMemoryAddress` is guaranteed to contain the overall
+	/// number of bytes written into flash memory
+	void updateFlashMemoryCrc32(std::uint8_t *aPageCapacityBuffer = nullptr);
+
+	inline bool shouldVerifyCrc32() const
+	{
+		return true;
+	}
 
 private:
 	Sys::FlashMemory *flashMemory;
