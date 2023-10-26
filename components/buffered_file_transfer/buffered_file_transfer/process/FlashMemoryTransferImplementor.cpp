@@ -112,7 +112,7 @@ void FlashMemoryTransferImplementor::onFileBufferingFinished(std::shared_ptr<Fil
 		if (shouldVerifyCrc32()) {
 			const auto pageBufferInnerOffset = flashMemory->getFlashMemoryGeometry()
 				.convertAddressIntoWriteBlockInnerOffset(flushingState.flashMemoryAddress);
-			updatePageBufferCrc32(pageBuffer, nBytesWrittenIntoPage);
+			updatePageBufferCrc32(pageBuffer + pageBufferInnerOffset, nBytesWrittenIntoPage);
 		}
 
 		if (nProcessedBufferBytesIteration == 0) {
