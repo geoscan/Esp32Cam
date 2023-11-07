@@ -10,6 +10,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_BUFFERED_FILE_TRANSFER_DEBUG_LEVEL)
 #include <esp_log.h>
 
+// Config-dependent includes
 #ifdef CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 #include "buffered_file_transfer.hpp"
 #include "buffered_file_transfer/BufferedFileTransfer.hpp"
@@ -39,11 +40,13 @@ static bool testHttpFileFetching(void *);
 
 static bool testHttpFileFetching(void *)
 {
+	constexpr bool kResult  = false;
+
+#ifdef CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 	static constexpr const char *kFileUrl = "http://192.168.43.1:8080/max_size_2Hz_0.bin";
 	static constexpr const char *kBftFileName = "show";
 	static constexpr const char *kTargetWifiSsid = "testtest";
 	static constexpr const char *kTargetWifiPassword = "beginend";
-	constexpr bool kResult  = false;
 	static WifiPreconnectHttpFetchTest wifiPreconnectHttpFetchTest{
 		kTargetWifiSsid,
 		kTargetWifiPassword,
@@ -51,6 +54,7 @@ static bool testHttpFileFetching(void *)
 		kBftFileName
 	};
 	wifiPreconnectHttpFetchTest.runTest();
+#endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 
 	return kResult;
 }
@@ -91,7 +95,7 @@ void init()
 	static volatile BufferedFileTransfer bufferedFileTransfer{fileSystem};
 #endif  // CONFIG_BUFFERED_FILE_TRANSFER_ENABLE
 
-#if 1
+#if 0  // Test HTTP file fetching
 	if (!Ut::MakeSingleton<Sys::WorkQueue>::checkInstance()) {
 		Sys::Logger::write(Sys::LogLevel::Error, debugTag(),
 			"%s:%s an instance of Sys::WorkQueue is needed to run a test", kLogPreamble, __func__);
