@@ -17,11 +17,16 @@ extern "C" {
 
 /// \brief Gets invoked each time a chunk of a file is received.
 /// \param `aChunkSize` - size of the received chunk, 0 denotes the end of
-/// transfer
+/// transfer (only if `aChunk == 0` too)
 /// \param `aChunk` - pointer to data. NULL means the announcement of the
 /// expected file size (when the appropriate file header is received). In that
 /// case, `aChunkSize` must be read
 /// \param `aUserData` - optional argument, \sa `httpDownloadFileOverHttpGetByUrl`
+///
+/// Parameters interpretation
+/// - aChunk == 0, aChunkSize == 0  -- finalize write
+/// - aChunk == 0, aChunkSize != 0  -- announce beginning of a file
+/// - aChunk != 0, aChunkSize != 0  -- file chunk has arrived
 typedef esp_err_t (*OnFileChunkCallable)(const char *aChunk, size_t aChunkSize, void *aUserData);
 
 /// Downloads a binary file over HTTP.

@@ -34,22 +34,25 @@ struct FileDescriptor {
 	{
 		identifier = 0;
 	}
+
+	inline bool isEqual(const FileDescriptor &aFileDescriptor) const
+	{
+		return raw == aFileDescriptor.raw;
+	}
 };
 
 /// \brief Generalization over a file-like resource which only provides
 /// relevant API.
 ///
 /// \warning The file is not RAII. It is up to the user to close it.
+/// \warning Using multiple instances of a file is not safe. However, having
+/// them is.
 class File final {
 public:
-	inline File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor) :
-		fileSystem{aFileSystem},
-		fileDescriptor{aFileDescriptor}
-	{
-	}
+	File(FileSystem *aFileSystem, FileDescriptor aFileDescriptor, const char *aFileName);
 
 	inline File():
-		File(nullptr, FileDescriptor{nullptr})
+		File{nullptr, FileDescriptor{nullptr}, ""}
 	{
 	}
 
@@ -71,7 +74,7 @@ public:
 	}
 
 	/// \brief \sa `FileSystem::seek`
-	inline std::uint32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
+	inline std::int32_t seek(std::int32_t aOffset, int aOrigin = FileSystem::PositionStart)
 	{
 		return fileSystem ? fileSystem->seek(fileDescriptor, aOffset, aOrigin) : FileSystem::PositionError;
 	}
@@ -87,14 +90,22 @@ public:
 		return fileSystem ? fileSystem->seek(fileDescriptor, 0, FileSystem::PositionCurrent) : 0;
 	}
 
-	/// \brief returns total file size
-	std::uint32_t getSize();
+	inline std::uint32_t getFileNameHash() const
+	{
+		return fileNameHash;
+	}
+
+	inline FileDescriptor getRawFileDescriptor() const
+	{
+		return fileDescriptor;
+	}
 
 	void close();
 
 private:
 	FileSystem *fileSystem;
 	FileDescriptor fileDescriptor;
+	std::uint32_t fileNameHash;
 };
 
 }  // namespace Bft

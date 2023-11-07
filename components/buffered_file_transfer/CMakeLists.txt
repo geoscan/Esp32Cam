@@ -3,6 +3,8 @@ file(GLOB SOURCE_FILES
 		"buffered_file_transfer/*.cpp"
 		"buffered_file_transfer/storage/*.c"
 		"buffered_file_transfer/storage/*.cpp"
+		"buffered_file_transfer/process/*.cpp"
+		"buffered_file_transfer/test/*.cpp"
 		)
 
 idf_component_register(

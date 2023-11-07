@@ -34,24 +34,30 @@ aforementioned goal will become closer through series of incremental steps;
 
 ## Other
 
-- `wifi_uart_bridge`
-	- serves as an inter-protocol router;
-	- enables one to add runtime reduction rules to foward, for example, packages from UART to TCP;
-	- things to fix
-		- [ ] clunky API: less callbacks,
-		- [ ] complicated message delivery
-			- now
-				- get a request from an endpoint
-				- apply a reduction rule
-				- notify subscribers through callbacks
-			- what would be great
-				- get a request from an endpoing
-				- apply a reduction rule
-				- push the buffer into a working queue for notification
-				- suspend the notifier's thread
-					- unless called from the context of the working queue's thread
-				- deliver the message through notification queue
-				- check if there are any responses
-				- if there're no any, resume the notifier's thread
-				- in a nutshell
-					- just plain simple working queue
+### `wifi_uart_bridge`
+- serves as an inter-protocol router;
+- enables one to add runtime reduction rules to foward, for example, packages from UART to TCP;
+- things to fix
+    - [ ] clunky API: less callbacks,
+    - [ ] complicated message delivery
+        - now
+            - get a request from an endpoint
+            - apply a reduction rule
+            - notify subscribers through callbacks
+        - what would be great
+            - get a request from an endpoing
+            - apply a reduction rule
+            - push the buffer into a working queue for notification
+            - suspend the notifier's thread
+                - unless called from the context of the working queue's thread
+            - deliver the message through notification queue
+            - check if there are any responses
+            - if there're no any, resume the notifier's thread
+            - in a nutshell
+                - just plain simple working queue
+
+### "static" initialization sequence
+
+- There are no guarantees regarding static varaibles initialization order
+- In the current version, module initialization relies on "static" extensively
+- Should be rewritten with "Ut::Cont::DelayedInitialization"

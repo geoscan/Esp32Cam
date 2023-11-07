@@ -24,6 +24,106 @@ At/after each of those stages, a participant to the process will notify
 respective components over the appropriate event key (see
 "buffered_file_transfer/Sub.hpp" for the list of topics).
 
+## Transfer options
+
+The following delineates the core differences between various  viable transfer
+schemes. The diagrams are not comprehensive, as they may lack branching, or
+some significant details. Their only purpose is to highlight the core entities
+and the logic behind Buffered File Transfer (BFT).
+
+### Transfer using Web API
+
+```mermaid
+sequenceDiagram
+    participant user
+    participant espWebApi
+    participant espBuffer
+    participant espTransferImplementor
+    participant ap
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    loop Chunk-by-chunk
+        user->>espWebApi: Upload a file's chunk
+        espWebApi->>espBuffer: append()
+
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espTransferImplementor->>ap: A buffered file
+        end
+
+    end
+
+    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>ap: A buffered file
+```
+
+### Flusing directly onto flash
+
+`espTransferImplementor` may flush the chunk using AP as a bridge, which it
+turn will write into Flash, like on the previous diagram. Or, it may flush
+directly onto flash. The exact scheme is still TBD with heavy preference for
+using Flash without the intermediation on behalf of AP.
+
+```mermaid
+sequenceDiagram
+    participant user
+    participant espWebApi
+    participant espBuffer
+    participant espTransferImplementor
+    participant ap
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    loop Chunk-by-chunk
+        user->>espWebApi: Upload a file's chunk
+        espWebApi->>espBuffer: append()
+
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espTransferImplementor->>flash: A buffered file
+        end
+
+    end
+
+    espWebApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>flash: A buffered file
+```
+
+### Transfer using commands from AP over MAVLink protocol
+
+The transfer may also be triggered using MAVLink.
+
+```mermaid
+sequenceDiagram
+    participant ap
+    participant espWifiApi
+    participant espHttpClientApi
+    participant espBuffer
+    participant espTransferImplementor
+
+    note over espBuffer: `SingleBufferRamFileSystem` is an example of implementation
+
+    ap->>espWifiApi: connect to AP using provided SSID and password
+    espWifiApi->>espWifiApi: connecting
+    espWifiApi-->>ap: success or failure (the latter should stop the transfer)
+    ap->>espHttpClientApi: acquire a file using web API
+    espHttpClientApi-->>ap: success or failure (the latter should stop the transfer)
+
+    loop Chunk-by-chunk
+        espHttpClientApi->>espBuffer: append()
+
+        alt When the buffer's size has reached its capacity, it may be flushed
+                espHttpClientApi->>espTransferImplementor: onFileBufferingFinished(last chunk = false)
+                espTransferImplementor->>flash: A buffered file
+        end
+
+    end
+
+    espHttpClientApi->>espTransferImplementor: onFileBufferingFinished(last chunk = true)
+    espTransferImplementor->>flash: A buffered file
+```
+
 # Buffer memory (RAM)
 
 An encapsulating overhead over a RAM chunk is used, which is comprised of 2
@@ -41,3 +141,8 @@ entities:
   write, close, seek;
 - A file is viewed as an array of bytes;
 
+
+## Entry points
+
+- `HttpFetch`
+- `BufferedFileTransfer`

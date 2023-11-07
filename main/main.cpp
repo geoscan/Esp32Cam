@@ -22,6 +22,7 @@
 #include "wifi.h"
 #include "wifi_uart_bridge/wifi_uart_bridge.hpp"
 #include "wq/wq.hpp"
+#include "zd35/zd35.hpp"
 #include <asio.hpp>
 #include <esp_event.h>
 #include <esp_timer.h>
@@ -51,5 +52,7 @@ extern "C" int app_main(void)
 	Uart::start();
 	Trk::init();
 	Bft::init();
+	Zd35::init();
+
 	return 0;
 }

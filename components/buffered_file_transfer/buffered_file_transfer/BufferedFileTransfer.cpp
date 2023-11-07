@@ -17,7 +17,7 @@ File BufferedFileTransfer::tryOpenFileWriteBinary(const char *aFileName, std::si
 		fileDescriptor = fileSystem->tryOpenFileWriteBinary(aFileName, aFileSize);
 	}
 
-	return {fileSystem, fileDescriptor};
+	return {fileSystem, fileDescriptor, aFileName};
 }
 
 }  // namespace Bft

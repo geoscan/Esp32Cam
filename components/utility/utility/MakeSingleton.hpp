@@ -12,7 +12,10 @@
 
 namespace Ut {
 
-template <class T>
+/// \brief Implements the "Singleton" architectural approach
+/// \tparam `kStaticInstanceUniqueIdentifier` is as compile-time marker that is
+/// used to differentiate between various instances of the same kind.
+template <class T, int kStaticInstanceUniqueIdentifier = 0>
 class MakeSingleton {
 private:
 	static T *instance;
@@ -53,8 +56,8 @@ public:
 	}
 };
 
-template <class T>
-T *MakeSingleton<T>::instance = nullptr;
+template <class T, int kStaticInstanceUniqueIdentifier>
+T *MakeSingleton<T, kStaticInstanceUniqueIdentifier>::instance = nullptr;
 
 }  // namespace Ut
 

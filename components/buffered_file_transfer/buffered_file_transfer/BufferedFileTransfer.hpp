@@ -26,6 +26,8 @@ public:
 	/// has been provided with
 	/// \param `aFileSize`. Depending on the file system in use, it may or may
 	/// not be used.
+	/// \post the returned `File` instance is not a RAII object, so the API's
+	/// user MUST handle resource deallocation. \sa `TransferImplementor`
 	File tryOpenFileWriteBinary(const char *aFileName, std::size_t aFileSize);
 
 private:
