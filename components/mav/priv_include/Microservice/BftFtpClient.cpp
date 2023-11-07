@@ -8,7 +8,7 @@
 #define LOG_LOCAL_LEVEL ((esp_log_level_t)CONFIG_MAV_DEBUG_LEVEL)
 #include <esp_log.h>
 
-#include "FtpClient.hpp"
+#include "BftFtpClient.hpp"
 #include "Globals.hpp"
 #include "Helper/FileTransferProtocol.hpp"
 #include "Microservice/Ftp/Types.hpp"
@@ -45,10 +45,10 @@ static inline bool workqueuePushNotify(typename Key::template Arg<0> aPayload)
 static constexpr std::chrono::milliseconds kRequestResendTimeout{300};
 static constexpr std::size_t knMaxAttempts = 10;
 
-FtpClient::FtpClient():
+BftFtpClient::BftFtpClient():
 	Ut::Sys::HrTimer{ESP_TIMER_TASK, "MavFtpClient"},
 	subscriptionPackage{
-		{&FtpClient::onFileBufferingFinished, this}  // onFileBufferingFinished
+		{&BftFtpClient::onFileBufferingFinished, this}  // onFileBufferingFinished
 	}
 {
 }
@@ -82,12 +82,12 @@ static void logIncomingMessage(const mavlink_file_transfer_protocol_t &aMavlinkF
 		static_cast<int>(static_cast<const Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().data[0]));
 }
 
-FtpClient::~FtpClient()
+BftFtpClient::~BftFtpClient()
 {
 	subscriptionPackage.onFileBufferingFinished.setEnabled(false);
 }
 
-Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
+Microservice::Ret BftFtpClient::process(mavlink_message_t &aMessage, Microservice::OnResponseSignature aOnResponse)
 {
 	// Perform initial filtering-out by message and target system identifiers
 
@@ -132,7 +132,7 @@ Microservice::Ret FtpClient::process(mavlink_message_t &aMessage, Microservice::
 	return Ret::Ignored;
 }
 
-void FtpClient::onHrTimer()
+void BftFtpClient::onHrTimer()
 {
 	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
@@ -188,7 +188,7 @@ void FtpClient::onHrTimer()
 	startOnce(kRequestResendTimeout);
 }
 
-void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
+void BftFtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 {
 	std::lock_guard<std::mutex> lock{requestRepeat.mutex};
 
@@ -208,7 +208,7 @@ void FtpClient::onFileBufferingFinished(std::shared_ptr<::Bft::File> aBftFile)
 	}
 }
 
-inline void FtpClient::resendSessionOpenRequest()
+inline void BftFtpClient::resendSessionOpenRequest()
 {
 	DelayedSendAsyncCtx delayedSendAsyncCtx{
 		Globals::getSysId(),
@@ -218,7 +218,7 @@ inline void FtpClient::resendSessionOpenRequest()
 	notify(delayedSendAsyncCtx);
 }
 
-inline void FtpClient::resendFileTransferRequest()
+inline void BftFtpClient::resendFileTransferRequest()
 {
 	// Re-adjust the file's current position pointer
 	ESP_LOGV(Mav::kDebugTag, "%s:%s resetting file position =%d", debugPreamble(), __func__,
@@ -233,7 +233,7 @@ inline void FtpClient::resendFileTransferRequest()
 	notify(delayedSendAsyncCtx);
 }
 
-inline void FtpClient::resendSessionCloseRequest()
+inline void BftFtpClient::resendSessionCloseRequest()
 {
 	DelayedSendAsyncCtx delayedSendAsyncCtx{
 		Globals::getSysId(),
@@ -243,7 +243,7 @@ inline void FtpClient::resendSessionCloseRequest()
 	notify(delayedSendAsyncCtx);
 }
 
-inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
+inline Microservice::Ret BftFtpClient::processMavlinkMessageCreatingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 
@@ -297,7 +297,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageCreatingSession(mavlink
 	return Ret::NoResponse;
 }
 
-inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
+inline Microservice::Ret BftFtpClient::processMavlinkMessageTransferring(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
@@ -369,7 +369,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageTransferring(mavlink_me
 	return Ret::Ignored;
 }
 
-inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
+inline Microservice::Ret BftFtpClient::processMavlinkMessageClosingSession(mavlink_message_t &aMavlinkMessage,
 	mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol, Microservice::OnResponseSignature aOnResponse)
 {
 	switch (static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().req_opcode) {
@@ -421,7 +421,7 @@ inline Microservice::Ret FtpClient::processMavlinkMessageClosingSession(mavlink_
 	return Ret::Ignored;
 }
 
-void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
+void BftFtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 {
 	(void)aMavlinkMessage;
 	// TODO: change me
@@ -472,7 +472,7 @@ void FtpClient::initializeMavlinkMessage(mavlink_message_t &aMavlinkMessage)
 	}
 }
 
-inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
+inline bool BftFtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_protocol_t &aMavlinkFileTransferProtocol)
 {
 	const auto sessionId = static_cast<Hlpr::FileTransferProtocol &>(aMavlinkFileTransferProtocol).getPayload().session;
 
@@ -485,7 +485,7 @@ inline bool FtpClient::validateIncomingMessageSessionId(mavlink_file_transfer_pr
 	return true;
 }
 
-inline void FtpClient::logTransferProgress()
+inline void BftFtpClient::logTransferProgress()
 {
 	switch (requestRepeat.state) {
 		case RequestRepeat::StateTransferring:
@@ -497,14 +497,14 @@ inline void FtpClient::logTransferProgress()
 	};
 }
 
-inline FtpClient::RequestRepeat::RequestRepeat():
+inline BftFtpClient::RequestRepeat::RequestRepeat():
 	stateCommon{0, {}, 0},
 	mutex{},
 	state{StateIdle}
 {
 }
 
-inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRepeat::State aState)
+inline const char *BftFtpClient::RequestRepeat::stateAsString(BftFtpClient::RequestRepeat::State aState)
 {
 	static constexpr const char *kStateNameMapping[] = {
 		"Idle",
@@ -515,18 +515,18 @@ inline const char *FtpClient::RequestRepeat::stateAsString(FtpClient::RequestRep
 	return kStateNameMapping[aState];
 }
 
-inline const char *FtpClient::RequestRepeat::getCurrentStateAsString()
+inline const char *BftFtpClient::RequestRepeat::getCurrentStateAsString()
 {
 	return stateAsString(state);
 }
 
-inline void FtpClient::RequestRepeat::handleIdleTransition()
+inline void BftFtpClient::RequestRepeat::handleIdleTransition()
 {
 	stateCommon.bftFile.reset();  // Reset ownership, the `shared_ptr`'s deleter will handle the rest
 	state = RequestRepeat::StateIdle;
 }
 
-inline void FtpClient::RequestRepeat::handleTransferringTransition(std::size_t aMavlinkFtpSessionId)
+inline void BftFtpClient::RequestRepeat::handleTransferringTransition(std::size_t aMavlinkFtpSessionId)
 {
 	handleTransitionCommon();
 	constexpr std::int32_t kInitialOffset = 0;
@@ -538,14 +538,14 @@ inline void FtpClient::RequestRepeat::handleTransferringTransition(std::size_t a
 	state = RequestRepeat::StateTransferring;
 }
 
-inline void FtpClient::RequestRepeat::handleCreatingSessionTransition(const std::shared_ptr<Bft::File> &aFile)
+inline void BftFtpClient::RequestRepeat::handleCreatingSessionTransition(const std::shared_ptr<Bft::File> &aFile)
 {
 	handleTransitionCommon();
 	stateCommon.bftFile = aFile;
 	state = RequestRepeat::StateCreatingSession;
 }
 
-inline void FtpClient::RequestRepeat::handleClosingSessionTransition()
+inline void BftFtpClient::RequestRepeat::handleClosingSessionTransition()
 {
 	handleTransitionCommon();
 	stateCommon.bftFile.reset();
@@ -553,35 +553,35 @@ inline void FtpClient::RequestRepeat::handleClosingSessionTransition()
 	stateClosingSession = {stateTransferring.mavlinkFtpSessionId};
 }
 
-inline void FtpClient::RequestRepeat::handleTransitionCommon()
+inline void BftFtpClient::RequestRepeat::handleTransitionCommon()
 {
 	stateCommon.iAttempt = 0;
 }
 
-inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCommon()
+inline void BftFtpClient::RequestRepeat::handleSuccessfulAttemptCommon()
 {
 	stateCommon.iAttempt = 0;
 	++stateCommon.messageSequenceNumber;
 }
 
-inline void FtpClient::RequestRepeat::handleSuccessfulAttemptTransferring()
+inline void BftFtpClient::RequestRepeat::handleSuccessfulAttemptTransferring()
 {
 	handleSuccessfulAttemptCommon();
 	stateTransferring.fileOffset = stateCommon.bftFile->getCurrentPosition();
 	ESP_LOGV(Mav::kDebugTag, "%s:%s Updated fileOffset=%d", debugPreamble(), __func__, stateTransferring.fileOffset);
 }
 
-inline void FtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
+inline void BftFtpClient::RequestRepeat::handleSuccessfulAttemptCreatingSession()
 {
 	handleSuccessfulAttemptCommon();
 }
 
-inline void FtpClient::RequestRepeat::handleFailedAttemptCommon()
+inline void BftFtpClient::RequestRepeat::handleFailedAttemptCommon()
 {
 	++stateCommon.iAttempt;
 }
 
-inline bool FtpClient::RequestRepeat::stateTransferringIsEof()
+inline bool BftFtpClient::RequestRepeat::stateTransferringIsEof()
 {
 	return stateTransferring.fileOffset == stateTransferring.fileSize;
 }

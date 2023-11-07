@@ -1,5 +1,5 @@
 //
-// FtpClient.hpp
+// BftFtpClient.hpp
 //
 // Created on: May 23, 2023
 //     Author: Dmitry Murashov (d.murashov@geoscan.aero)
@@ -21,7 +21,7 @@ namespace Mic {
 
 /// \brief Implements client side of MAVLink File Transfer Protocol for
 /// flashing file into AP's FS.
-class FtpClient final : public Microservice, public DelayedSend, public Ut::Sys::HrTimer,
+class BftFtpClient final : public Microservice, public DelayedSend, public Ut::Sys::HrTimer,
 	public DelayedMavlinkMessageInitialization {
 private:
 	struct SubscriptionPackage {
@@ -96,8 +96,8 @@ private:
 	};
 
 public:
-	FtpClient();
-	~FtpClient();
+	BftFtpClient();
+	~BftFtpClient();
 	Ret process(mavlink_message_t &aMessage, OnResponseSignature aOnResponse) override;
 
 	/// \brief Re-sends a message depending on the current state.

@@ -16,8 +16,8 @@
 #include "Microservice.hpp"
 #include "Microservice/Aggregate.hpp"
 #include "Microservice/ApVer.hpp"
+#include "Microservice/BftFtpClient.hpp"
 #include "Microservice/BufferedFileTransfer.hpp"
-#include "Microservice/FtpClient.hpp"
 #include "sub/Rout.hpp"
 #include "sub/Subscription.hpp"
 #include "wifi_uart_bridge/Receiver.hpp"
@@ -52,7 +52,7 @@ private:
 private:
 
 	Unmarshalling unmarshalling;
-	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::FtpClient,
+	Mav::Mic::Aggregate<Mic::Wifi, Mic::GsNetwork, Mic::Camera, Mic::ApVer, Mic::Tracking, Mic::BftFtpClient,
 		Mic::BufferedFileTransfer> micAggregate;
 
 	struct {
