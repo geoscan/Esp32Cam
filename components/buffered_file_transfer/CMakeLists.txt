@@ -13,6 +13,7 @@ idf_component_register(
 	REQUIRES
 		esp_common
 		http
+		system
 	PRIV_REQUIRES
 		wifi_uart_bridge
 		wq
